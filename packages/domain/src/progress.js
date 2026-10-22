@@ -1,0 +1,72 @@
+/**
+ * Progress over the subject trail. `progress` maps lesson ids (and "<unit>-trophy")
+ * to the best stars earned (1–3). Units come from the catalogue with their lesson ids.
+ */
+
+/** @typedef {{ id: string, title: string, status: "ready" | "draft" | "planned", lessonIds: string[] }} TrailUnit */
+/** @typedef {Record<string, number>} Progress */
+
+export const trophyId = (/** @type {string} */ unitId) => `${unitId}-trophy`;
+
+/**
+ * @param {TrailUnit} unit
+ * @param {Progress} progress
+ */
+export function unitProgress(unit, progress) {
+  const done = unit.lessonIds.filter((id) => progress[id] > 0).length;
+  const total = unit.lessonIds.length;
+  const trophy = progress[trophyId(unit.id)] > 0;
+  return { done, total, lessonsDone: done === total, trophy, complete: done === total && trophy };
+}
+
+/**
+ * A unit is open when it has content and it's the first unit, or the one before it is finished.
+ * @param {TrailUnit[]} units
+ * @param {number} index
+ * @param {Progress} progress
+ */
+export function unitOpen(units, index, progress) {
+  const u = units[index];
+  if (!u || u.status === "planned") return false;
+  if (index === 0) return true;
+  const prev = unitProgress(units[index - 1], progress);
+  return prev.complete || prev.lessonsDone;
+}
+
+/**
+ * Lessons done out of all lessons in a subject (trophies not counted).
+ * @param {TrailUnit[]} units
+ * @param {Progress} progress
+ */
+export function subjectProgress(units, progress) {
+  let done = 0;
+  let total = 0;
+  for (const u of units) {
+    const p = unitProgress(u, progress);
+    done += p.done;
+    total += p.total;
+  }
+  return { done, total, pct: total ? done / total : 0 };
+}
+
+/**
+ * The unit a learner should work on next: the first open unit that isn't complete,
+ * else the last open unit.
+ * @param {TrailUnit[]} units
+ * @param {Progress} progress
+ */
+export function currentUnit(units, progress) {
+  let last = null;
+  for (let i = 0; i < units.length; i++) {
+    if (!unitOpen(units, i, progress)) continue;
+    last = units[i];
+    if (!unitProgress(units[i], progress).complete) return units[i];
+  }
+  return last;
+}
+
+/**
+ * Stars across all progress entries.
+ * @param {Progress} progress
+ */
+export const totalStars = (progress) => Object.values(progress).reduce((a, b) => a + (b > 0 ? b : 0), 0);

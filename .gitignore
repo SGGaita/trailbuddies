@@ -12,3 +12,10 @@ Thumbs.db
 prototype/tests/shots/
 prototype/tests/*.png
 *.log
+.turbo/
+coverage/
+playwright-report/
+test-results/
+apps/web/e2e/screenshots/
+.venv/
+*.db

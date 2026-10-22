@@ -1,0 +1,27 @@
+{
+  "$id": "https://trailbuddies.africa/schema/asset-manifest.json",
+  "title": "Asset manifest: every image and audio file with its source, licence and review status",
+  "type": "object",
+  "required": ["schema", "assets"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "assets/1" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "path", "source", "license", "review_status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.json#/$defs/id" },
+          "kind": { "enum": ["image", "audio"] },
+          "path": { "type": "string" },
+          "source": { "enum": ["licensed", "ai-assisted", "commissioned", "recorded", "tts"] },
+          "license": { "type": "string", "minLength": 2 },
+          "review_status": { "enum": ["draft", "reviewed", "approved"] },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

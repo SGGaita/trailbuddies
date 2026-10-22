@@ -1,0 +1,34 @@
+{
+  "name": "@trailbuddies/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@emotion/cache": "11.14.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
+    "@mui/material": "9.5.0",
+    "@mui/material-nextjs": "9.5.0",
+    "@trailbuddies/content": "workspace:*",
+    "@trailbuddies/domain": "workspace:*",
+    "@trailbuddies/i18n": "workspace:*",
+    "@trailbuddies/sync": "workspace:*",
+    "@trailbuddies/tokens": "workspace:*",
+    "next": "16.4.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@trailbuddies/sync",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Progress events, outbox and derived state shared by web and mobile.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+  }
+}

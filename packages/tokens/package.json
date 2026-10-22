@@ -1,0 +1,15 @@
+{
+  "name": "@trailbuddies/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design tokens: colours, type, spacing, radii and breakpoints shared by web (MUI) and mobile (React Native Paper).",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+  }
+}

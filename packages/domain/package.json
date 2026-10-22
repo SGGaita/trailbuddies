@@ -1,0 +1,15 @@
+{
+  "name": "@trailbuddies/domain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure learning logic: age bands, progress, trail layout, (later) lesson generation, mastery, rewards and badge rules.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@trailbuddies/content",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Built-in content packs: subject catalogue and unit JSON.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+    "validate": "node scripts/validate.js"
+  },
+  "dependencies": {
+    "@trailbuddies/content-schema": "workspace:*"
+  }
+}

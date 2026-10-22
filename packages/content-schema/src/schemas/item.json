@@ -1,0 +1,28 @@
+{
+  "$id": "https://trailbuddies.africa/schema/item.json",
+  "title": "Item (a card a child learns: a word, number, picture or sound)",
+  "type": "object",
+  "required": ["id", "label"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.json#/$defs/id" },
+    "label": { "$ref": "common.json#/$defs/text" },
+    "say": {
+      "$ref": "common.json#/$defs/text",
+      "description": "What the voice says, if different from the label"
+    },
+    "emoji": {
+      "type": "string",
+      "maxLength": 16,
+      "description": "Placeholder picture until illustrated art is approved"
+    },
+    "image": { "type": "string", "description": "Asset id from the unit's asset manifest" },
+    "audio": { "type": "string", "description": "Asset id of a recorded word" },
+    "number": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+    "letter": { "type": "string", "maxLength": 3 },
+    "colour": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "shape": { "type": "string" },
+    "tags": { "type": "array", "items": { "$ref": "common.json#/$defs/id" }, "uniqueItems": true },
+    "fact": { "$ref": "common.json#/$defs/text" }
+  }
+}

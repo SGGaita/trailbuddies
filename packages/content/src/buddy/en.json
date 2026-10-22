@@ -1,0 +1,14 @@
+{
+  "schema": "buddy-script/1",
+  "buddy": "all",
+  "lang": "en",
+  "events": {
+    "greet.first": ["Hi {name}! Let's start our trail together!", "Hello {name}! I'm so happy to meet you!"],
+    "greet.back": ["Hi {name}! Welcome back!", "Hello again, {name}! Ready to explore?"],
+    "map.pick": ["Where shall we go today?", "Pick a place to explore!"],
+    "trail.start": ["Tap the big stone to start!", "Your next lesson is waiting!"],
+    "trail.locked": ["Finish the trophy to open this one!"],
+    "trail.planned": ["This part of the trail is coming soon!"],
+    "profile.pick": ["Who's playing today? Tap your picture!"]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$id": "https://trailbuddies.africa/schema/badge.json",
+  "title": "Badge (built-in or custom) with its achievement rule",
+  "type": "object",
+  "required": ["id", "name", "how", "rule"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.json#/$defs/id" },
+    "name": { "$ref": "common.json#/$defs/text" },
+    "how": { "$ref": "common.json#/$defs/text" },
+    "category": {
+      "enum": ["learning", "mastery", "effort", "consistency", "exploration", "creator", "hidden", "custom"]
+    },
+    "reward": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "real": { "$ref": "common.json#/$defs/text", "description": "Real-world reward a grown-up delivers" },
+    "rule": { "$ref": "#/$defs/rule" }
+  },
+  "$defs": {
+    "rule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "units"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "complete" },
+            "units": { "type": "array", "minItems": 1, "items": { "$ref": "common.json#/$defs/id" } }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "metric", "n"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "count" },
+            "metric": { "enum": ["stars", "lessons", "perfect-lessons", "badges", "games"] },
+            "n": { "type": "integer", "minimum": 1 },
+            "subject": { "$ref": "common.json#/$defs/id" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "days"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "streak" },
+            "days": { "type": "integer", "minimum": 1, "maximum": 365 },
+            "window": { "type": "integer", "minimum": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "items"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "mastery" },
+            "items": { "type": "array", "minItems": 1, "items": { "$ref": "common.json#/$defs/id" } }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "manual" } }
+        },
+        {
+          "type": "object",
+          "required": ["type", "op", "all"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "combo" },
+            "op": { "enum": ["and", "or"] },
+            "all": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/rule" } }
+          }
+        }
+      ]
+    }
+  }
+}
