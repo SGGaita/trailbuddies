@@ -1,0 +1,29 @@
+<div class="wrap">
+  <aside class="guide" aria-label="Prototype guide">
+    <div>
+      <div class="eyebrow">Interactive prototype · v0.1 · 22 Oct 2026</div>
+      <h1>Trailbuddies</h1>
+    </div>
+    <p>Four connected apps. Pick an app, then a flow, or just tap around inside the device. What you do in one app shows up in the others, and your progress is kept in this browser.</p>
+    <div class="apps" role="group" aria-label="Choose app" id="apps"></div>
+    <div class="devsw" id="devs" role="group" aria-label="Device"></div>
+    <div class="flows" id="flows"></div>
+    <div class="note" aria-live="polite">
+      <span class="sid" id="note-id"></span>
+      <b id="note-title"></b>
+      <p id="note-text"></p>
+      <div class="refs" id="note-refs"></div>
+    </div>
+    <div class="legend"><i></i>Dashed buttons are prototype controls that stand in for real-world events.</div>
+    <div class="ctrls">
+      <button type="button" class="ctrl" id="c-voice" aria-pressed="true">Voice on</button>
+      <button type="button" class="ctrl" id="c-offline" aria-pressed="false">Go offline</button>
+      <button type="button" class="ctrl" id="c-restart">Restart flow</button>
+      <button type="button" class="ctrl" id="c-reset">Reset demo data</button>
+    </div>
+  </aside>
+  <main class="stage">
+    <div class="fit" id="fit"><div class="dev tablet" id="dev"><div class="scr" id="scr"></div></div></div>
+    <div class="devcap" id="devcap"></div>
+  </main>
+</div>

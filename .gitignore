@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+build/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+prototype/tests/shots/
+prototype/tests/*.png
+*.log

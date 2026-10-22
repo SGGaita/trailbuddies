@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lesson: listen and tap</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px 40px 28px; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="C05-Trail.dc.html" aria-label="Leave lesson" style="text-decoration: none; width: 56px; height: 56px; border-radius: 50%; border: 2px solid #B9B9B3; display: flex; align-items: center; justify-content: center; color: #1E1E1C; font-size: 15px; background: #FFFFFF;">Exit</a>
+    <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px;">
+      <span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #8FB0EC;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+    </div>
+    <div style="font-size: 15px; color: #55554F;">3 of 7</div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="width: 110px; height: 110px; border-radius: 50%; background: #ECECE8; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #55554F;">[Buddy talking]</div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 20px; padding: 16px 24px; font-size: 32px; font-weight: 700;">Tap the giraffe!</div>
+    <button aria-label="Hear it again" style="width: 72px; height: 72px; border-radius: 50%; border: 3px solid #1F5FD1; background: #FFFFFF; font-size: 14px; color: #1F5FD1; font-weight: 700;">Replay</button>
+    <div style="flex-grow: 1;"></div>
+    <div style="font-size: 14px; color: #55554F; max-width: 260px;">Captions on: the buddy's words also show in the bubble.</div>
+  </div>
+  <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px;">
+    <a href="C11-Hint.dc.html" style="text-decoration: none; color: #55554F; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 3px solid #B9B9B3; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px;">[Zebra]</a>
+    <a href="C08-Match.dc.html" style="text-decoration: none; color: #55554F; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 3px solid #B9B9B3; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px;">[Giraffe]</a>
+    <a href="C11-Hint.dc.html" style="text-decoration: none; color: #55554F; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 3px solid #B9B9B3; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px;">[Lion]</a>
+    <a href="C11-Hint.dc.html" style="text-decoration: none; color: #55554F; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 3px solid #B9B9B3; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px;">[Elephant]</a>
+  </div>
+  <div style="display: flex; justify-content: space-between; font-size: 14px; color: #55554F;">
+    <span>Seedling: 2–3 pictures · Sprout: 3–4 · Explorer: 4 + written words</span>
+    <a href="C25-Trace.dc.html">More exercise types</a><span>Same frame hosts count, compare, name it, odd one out, build a word, trace, clock, true/false</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

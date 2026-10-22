@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import by code</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px; gap: 12px; font-size: 14px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P08-ParentHome.dc.html" style="font-size: 16px;">Back</a>
+    <h1 style="margin: 0; font-size: 22px;">Share codes</h1>
+  </div>
+  <div style="display: flex; border: 2px solid #B9B9B3; border-radius: 12px; overflow: hidden;"><a href="P17-ShareCodes.dc.html" style="flex: 1; text-align: center; padding: 10px; text-decoration: none; color: #1E1E1C;">Share</a><span style="flex: 1; text-align: center; padding: 10px; background: #1F5FD1; color: #FFFFFF; font-weight: 700;">Import</span></div>
+  <label for="icode" style="font-weight: 600;">Enter a code</label>
+  <input id="icode" value="SPL-W3K" style="height: 52px; border: 2px solid #1F5FD1; border-radius: 12px; padding: 0 14px; font-size: 22px; letter-spacing: 0.12em; font-family: inherit;">
+  <div style="text-align: center; border: 2px dashed #B9B9B3; border-radius: 12px; padding: 10px; color: #55554F;">Or scan a QR code</div>
+  <div style="background: #F6F6F4; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+    <b style="font-size: 16px;">Week 3 spelling</b>
+    <span style="color: #55554F;">Shared by a teacher · 10 cards · Spelling list · Sprout</span>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;">
+      <span style="aspect-ratio: 1; border-radius: 8px; background: #ECECE8;"></span><span style="aspect-ratio: 1; border-radius: 8px; background: #ECECE8;"></span><span style="aspect-ratio: 1; border-radius: 8px; background: #ECECE8;"></span><span style="aspect-ratio: 1; border-radius: 8px; background: #ECECE8;"></span><span style="aspect-ratio: 1; border-radius: 8px; background: #ECECE8;"></span>
+    </div>
+    <span style="color: #55554F;">You'll get your own copy. Later changes by the creator won't change it unless you import again.</span>
+  </div>
+  <div style="border: 2px solid #B3261E; background: #FCEEEE; border-radius: 12px; padding: 10px 12px; color: #6E1A16;">Example error: "This code is no longer available." (revoked, expired or suspended)</div>
+  <div style="flex-grow: 1;"></div>
+  <a href="P10-BuilderCards.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700;">Add to my library</a>
+  <a href="M01-Moderation.dc.html" style="text-align: center; font-size: 14px;">Report this content</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

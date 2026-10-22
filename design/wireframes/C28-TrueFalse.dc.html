@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Exercise: true or false</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px 40px 28px; gap: 22px;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="C05-Trail.dc.html" aria-label="Leave lesson" style="text-decoration: none; width: 56px; height: 56px; border-radius: 50%; border: 2px solid #B9B9B3; display: flex; align-items: center; justify-content: center; color: #1E1E1C; font-size: 15px; background: #FFFFFF;">Exit</a>
+    <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px;"><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #8FB0EC;"></span><span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span></div>
+    <div style="font-size: 15px; color: #55554F;">5 of 6</div>
+  </div>
+  <div style="flex-grow: 1; display: flex; gap: 48px; align-items: center;">
+    <div style="width: 420px; display: flex; flex-direction: column; align-items: center; gap: 18px;">
+      <div style="width: 240px; height: 240px; border-radius: 50%; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F; text-align: center;">[Buddy, cheeky face,<br>holding a bat picture]</div>
+      <div style="background: #FFFFFF; border: 3px solid #1F5FD1; border-radius: 22px; padding: 18px 24px; font-size: 32px; font-weight: 800; text-align: center;">"A bat is a bird!"</div>
+      <div style="font-size: 20px; color: #55554F;">Is Zip right?</div>
+    </div>
+    <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; height: 360px;">
+      <a href="C11-Hint.dc.html" style="text-decoration: none; color: #1E1E1C; background: #FFFFFF; border: 3px solid #B9B9B3; border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;"><span style="width: 120px; height: 120px; border-radius: 24px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Thumbs up]</span><b style="font-size: 30px;">True</b></a>
+      <a href="C12-LessonComplete.dc.html" style="text-decoration: none; color: #1E1E1C; background: #FFFFFF; border: 4px solid #1F5FD1; border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;"><span style="width: 120px; height: 120px; border-radius: 24px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Thumbs down]</span><b style="font-size: 30px;">Not true</b></a>
+    </div>
+  </div>
+  <div style="font-size: 15px; color: #55554F;">After the answer the buddy explains: "Bats fly, but they're mammals: they have fur and feed their babies milk."</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

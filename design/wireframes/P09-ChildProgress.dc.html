@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Child progress</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F6F4; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px; gap: 12px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P08-ParentHome.dc.html" style="font-size: 16px;">Back</a>
+    <h1 style="margin: 0; font-size: 22px; flex-grow: 1;">Zawadi</h1>
+    <span style="font-size: 13px; color: #55554F;">Sprout · age 6</span>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+    <b style="font-size: 15px;">Minutes per day</b>
+    <div style="height: 110px; display: flex; align-items: flex-end; gap: 10px;">
+      <span style="flex: 1; height: 40%; background: #8FB0EC; border-radius: 6px 6px 0 0;"></span>
+      <span style="flex: 1; height: 75%; background: #8FB0EC; border-radius: 6px 6px 0 0;"></span>
+      <span style="flex: 1; height: 0%; background: #8FB0EC;"></span>
+      <span style="flex: 1; height: 60%; background: #8FB0EC; border-radius: 6px 6px 0 0;"></span>
+      <span style="flex: 1; height: 100%; background: #1F5FD1; border-radius: 6px 6px 0 0;"></span>
+      <span style="flex: 1; height: 5%; background: #ECECE8;"></span>
+      <span style="flex: 1; height: 5%; background: #ECECE8;"></span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #55554F;"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+    <b style="font-size: 15px;">Subjects</b>
+    <div>Animals<div style="height: 10px; border-radius: 5px; background: #ECECE8; margin-top: 4px;"><div style="width: 30%; height: 10px; border-radius: 5px; background: #1F5FD1;"></div></div></div>
+    <div>Numbers<div style="height: 10px; border-radius: 5px; background: #ECECE8; margin-top: 4px;"><div style="width: 45%; height: 10px; border-radius: 5px; background: #1F5FD1;"></div></div></div>
+    <div style="display: flex; justify-content: space-between;"><span>Language</span><span style="color: #1F5FD1;">Level: auto · Lock</span></div>
+    <div style="height: 10px; border-radius: 5px; background: #ECECE8;"><div style="width: 20%; height: 10px; border-radius: 5px; background: #1F5FD1;"></div></div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+    <b style="font-size: 15px;">Finds tricky</b>
+    <div style="display: flex; justify-content: space-between;"><span>Rhino</span><span style="color: #55554F;">2 of 6 first try</span></div>
+    <div style="display: flex; justify-content: space-between;"><span>Number 17</span><span style="color: #55554F;">3 of 7 first try</span></div>
+    <div style="display: flex; justify-content: space-between;"><span>"sh" sound</span><span style="color: #55554F;">1 of 4 first try</span></div>
+    <div style="font-size: 13px; color: #55554F;">Tip: practise together at bath time. These come back in review lessons.</div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px; font-size: 14px;"><b>Recent lessons</b><div style="color: #55554F; margin-top: 6px;">Wild animals 7 · 2 stars · today<br>Counting 11–20 · 3 stars · yesterday</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

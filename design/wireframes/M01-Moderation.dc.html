@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moderation queue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 900px; background: #F6F6F4; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-wrap: wrap;">
+  <nav style="flex: 1 1 220px; max-width: 260px; box-sizing: border-box; background: #2B2B29; color: #FFFFFF; padding: 24px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 15px;">
+    <div style="font-size: 13px; color: #CFCFCA; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Trailbuddies · Staff only</div>
+    <a href="M01-Moderation.dc.html" style="text-decoration: none; background: #4A4A47; color: #FFFFFF; font-weight: 700; border-radius: 10px; padding: 10px 12px;">Moderation queue · 4</a>
+    <span style="color: #CFCFCA; border-radius: 10px; padding: 10px 12px;">Audit log</span>
+    <span style="color: #CFCFCA; border-radius: 10px; padding: 10px 12px;">Appeals · 1</span>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px; display: flex; flex-wrap: wrap; gap: 22px; align-content: flex-start;">
+    <h1 style="margin: 0; font-size: 28px; flex: 1 1 100%;">Moderation queue</h1>
+    <section style="flex: 1 1 340px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: #FFFFFF; border: 3px solid #1F5FD1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px;"><b>Image flagged by scanner</b><span style="color: #55554F;">Lesson "Our trip" · code TRP-2M4 · 1 day ago</span><span style="color: #B3261E; font-weight: 700;">Waiting 26 h</span></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px;"><b>Reported ×3: inappropriate image</b><span style="color: #55554F;">Lesson "Funny animals" · code FUN-88A · 5 h ago</span></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px;"><b>Reported: personal details</b><span style="color: #55554F;">Badge set "Hillside" · 2 h ago</span></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px;"><b>Face detected, creator confirmed</b><span style="color: #55554F;">Lesson "Our Pets" · code PET-4K9 · spot check</span></div>
+    </section>
+    <section style="flex: 2 1 460px; min-width: 0; background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;"><b style="font-size: 20px;">Image flagged by scanner</b><span style="color: #55554F;">Imported 14 times</span></div>
+      <div style="height: 240px; border-radius: 14px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); display: flex; align-items: center; justify-content: center; color: #55554F;">[Blurred preview, click to reveal]</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
+        <span><b>Reason:</b> possible child face + location sign</span>
+        <span><b>Creator:</b> parent account #4821 (no history)</span>
+        <span><b>Share code:</b> TRP-2M4 (active)</span>
+        <span><b>Reports:</b> 0 · scanner score 0.81</span>
+      </div>
+      <label for="mreason" style="font-weight: 600;">Reason for action (logged)</label>
+      <input id="mreason" value="Child's face visible in shared image" style="height: 44px; border: 2px solid #B9B9B3; border-radius: 10px; padding: 0 12px; font-size: 15px; font-family: inherit;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <span style="background: #B3261E; color: #FFFFFF; border-radius: 10px; padding: 10px 16px; font-weight: 700;">Hide image everywhere</span>
+        <span style="border: 2px solid #B3261E; color: #B3261E; border-radius: 10px; padding: 8px 14px; font-weight: 700;">Suspend share code</span>
+        <span style="border: 2px solid #B9B9B3; border-radius: 10px; padding: 8px 14px;">Warn creator</span>
+        <span style="border: 2px solid #2E7D32; color: #2E7D32; border-radius: 10px; padding: 8px 14px; font-weight: 700;">No action: restore</span>
+      </div>
+      <span style="font-size: 13px; color: #55554F;">The creator and reporters are emailed the outcome. Every action is written to the audit log.</span>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

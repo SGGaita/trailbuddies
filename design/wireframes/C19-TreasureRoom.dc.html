@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Treasure room</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 24px 40px 28px; gap: 18px;">
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <a href="C04-WorldMap.dc.html" style="text-decoration: none; color: #1E1E1C; border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px 16px; font-size: 17px; background: #FFFFFF;">Back to map</a>
+    <h1 style="margin: 0; font-size: 34px;">Zip's room</h1>
+    <div style="flex-grow: 1;"></div>
+    <a href="C18-Shop.dc.html" style="text-decoration: none; border: 2px solid #1F5FD1; border-radius: 12px; padding: 10px 16px; font-size: 17px;">Shop for room things</a>
+  </div>
+  <div style="flex-grow: 1; display: flex; gap: 24px;">
+    <div style="flex-grow: 1; position: relative; border: 2px solid #B9B9B3; border-radius: 24px; background: linear-gradient(#F1F1EE 0 65%, #E2E2DD 65% 100%); overflow: hidden;">
+      <div style="position: absolute; left: 60px; top: 50px; width: 180px; height: 130px; border: 2px dashed #8C8C86; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Window]</div>
+      <div style="position: absolute; left: 320px; top: 40px; width: 140px; height: 100px; border: 2px solid #8C8C86; background: #ECECE8; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Space poster]</div>
+      <div style="position: absolute; left: 80px; top: 300px; width: 220px; height: 140px; border: 2px solid #8C8C86; background: #ECECE8; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Bed]</div>
+      <div style="position: absolute; left: 380px; top: 260px; width: 170px; height: 200px; border-radius: 50%; border: 2px dashed #8C8C86; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Zip relaxing]</div>
+      <div style="position: absolute; left: 600px; top: 330px; width: 120px; height: 100px; border: 3px dashed #1F5FD1; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #1F5FD1; font-size: 14px; text-align: center;">empty spot: drop here</div>
+      <div style="position: absolute; left: 580px; top: 70px; width: 110px; height: 150px; border: 2px solid #8C8C86; background: #ECECE8; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Plant]</div>
+    </div>
+    <div style="width: 300px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size: 18px; font-weight: 700;">My things</div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+        <div style="height: 100px; border: 3px solid #1F5FD1; border-radius: 16px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Rug]</div>
+        <div style="height: 100px; border: 2px solid #B9B9B3; border-radius: 16px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Lamp]</div>
+        <div style="height: 100px; border: 2px solid #B9B9B3; border-radius: 16px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Pet cat]</div>
+        <div style="height: 100px; border: 2px solid #B9B9B3; border-radius: 16px; background: #ECECE8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #55554F;">[Wallpaper]</div>
+      </div>
+      <div style="font-size: 18px; font-weight: 700; margin-top: 8px;">Sticker albums</div>
+      <div style="border: 2px solid #B9B9B3; border-radius: 16px; padding: 12px; background: #FFFFFF; font-size: 15px;">Ocean album · 7 of 12<div style="height: 10px; border-radius: 5px; background: #ECECE8; margin-top: 8px;"><div style="width: 58%; height: 10px; border-radius: 5px; background: #1F5FD1;"></div></div></div>
+      <div style="font-size: 14px; color: #55554F;">Every pack shows exactly which stickers are inside. No surprises, no random draws.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

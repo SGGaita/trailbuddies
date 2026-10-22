@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Join a class</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px 24px 32px; gap: 14px; font-size: 15px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P19-FamilyMembers.dc.html" style="font-size: 16px;">Back</a>
+    <h1 style="margin: 0; font-size: 22px;">Join a class</h1>
+  </div>
+  <label for="code" style="font-weight: 600;">Class code from the teacher's letter</label>
+  <input id="code" value="1B-K7Q4" style="height: 52px; border: 2px solid #1F5FD1; border-radius: 12px; padding: 0 14px; font-size: 22px; letter-spacing: 0.1em; font-family: inherit;">
+  <div style="text-align: center; border: 2px dashed #B9B9B3; border-radius: 12px; padding: 12px; color: #55554F;">Or scan the QR code</div>
+  <div style="background: #F6F6F4; border: 2px solid #D6D6D1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+    <b>Class 1B · Ms Priya</b>
+    <span style="color: #55554F;">Hillside Primary</span>
+  </div>
+  <div style="font-weight: 600;">Which child is in this class?</div>
+  <div style="border: 3px solid #1F5FD1; border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 10px;"><span style="width: 36px; height: 36px; border-radius: 50%; background: #ECECE8;"></span><span style="flex-grow: 1;">Zawadi</span><span style="font-size: 13px; color: #55554F;">matches "Zawadi M."</span></div>
+  <div style="border: 2px solid #D6D6D1; border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 10px;"><span style="width: 36px; height: 36px; border-radius: 50%; background: #ECECE8;"></span><span>Amani</span></div>
+  <div style="background: #F2F6FD; border-radius: 12px; padding: 12px; font-size: 14px;"><b>What the teacher will see:</b> work they assign and summary stats. Family lessons stay private unless you choose to share. You can unlink at any time.</div>
+  <div style="flex-grow: 1;"></div>
+  <a href="P19-FamilyMembers.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 16px; font-size: 18px; font-weight: 700;">Link Zawadi to Class 1B</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

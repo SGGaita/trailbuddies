@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Teacher sign-up</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 900px; background: #F6F6F4; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-wrap: wrap; gap: 40px; padding: 48px 5vw; align-items: flex-start; justify-content: center;">
+  <section style="flex: 1 1 380px; max-width: 520px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="font-size: 13px; color: #55554F; text-transform: uppercase; letter-spacing: 0.08em;">Trailbuddies for teachers</div>
+    <h1 style="margin: 0; font-size: 36px; line-height: 1.15;">Set up your class in 10 minutes</h1>
+    <div style="font-size: 17px; color: #3F3F3B;">Add students without emails, give them picture passwords, assign trails and see who needs help. Works on shared tablets, even offline.</div>
+    <div style="height: 240px; border-radius: 20px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 2px solid #D6D6D1; display: flex; align-items: center; justify-content: center; color: #55554F;">[Class dashboard preview]</div>
+  </section>
+  <section style="flex: 1 1 380px; max-width: 460px; background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box;">
+    <h2 style="margin: 0; font-size: 22px;">Create a teacher account</h2>
+    <span style="text-align: center; border: 2px solid #B9B9B3; border-radius: 12px; padding: 12px; font-weight: 600;">Continue with Google</span>
+    <label for="tem" style="font-weight: 600;">School email</label>
+    <input id="tem" value="priya@hillside.sch" style="height: 46px; border: 2px solid #B9B9B3; border-radius: 12px; padding: 0 14px; font-size: 16px; font-family: inherit;">
+    <label for="tsch" style="font-weight: 600;">School name</label>
+    <input id="tsch" value="Hillside Primary" style="height: 46px; border: 2px solid #B9B9B3; border-radius: 12px; padding: 0 14px; font-size: 16px; font-family: inherit;">
+    <div style="background: #F2F6FD; border-radius: 12px; padding: 12px; font-size: 14px;">Your school already has a Trailbuddies licence. <b>Join it</b> to get full access for your class.</div>
+    <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px;"><span style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 5px; background: #1F5FD1;"></span><span>I'm using Trailbuddies under my school's authority and agree to the teacher terms and data processing terms.</span></div>
+    <a href="T01-TeacherHome.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 12px; padding: 15px; font-size: 17px; font-weight: 700;">Create account</a>
+    <a href="P01-Welcome.dc.html" style="text-align: center; font-size: 14px;">I'm a parent instead</a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

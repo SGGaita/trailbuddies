@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Badge earned</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #2B2B29; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; position: relative;">
+  <div style="position: absolute; inset: 40px; border: 2px dashed #6B6B66; border-radius: 32px;"></div>
+  <div style="position: absolute; top: 60px; font-size: 15px; color: #CFCFCA;">[Confetti animation · reduced-motion: soft fade]</div>
+  <div style="font-size: 22px; color: #CFCFCA; letter-spacing: 0.1em; text-transform: uppercase;">New badge!</div>
+  <div style="width: 260px; height: 260px; border-radius: 50%; background: #FFFFFF; color: #1E1E1C; border: 10px solid #8FB0EC; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+    <span style="font-size: 15px; color: #55554F;">[Badge art]</span>
+    <span style="font-size: 26px; font-weight: 800;">Animal Explorer</span>
+    <span style="font-size: 15px; color: #55554F;">Bronze</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 18px;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; background: #4A4A47; border: 2px dashed #8C8C86; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #CFCFCA;">[Buddy cheering]</div>
+    <div style="background: #FFFFFF; color: #1E1E1C; border-radius: 20px; padding: 16px 22px; font-size: 24px; font-weight: 700;">You finished all the farm animals! Wow!</div>
+  </div>
+  <div style="font-size: 24px; font-weight: 700;">+25 treasures</div>
+  <div style="display: flex; gap: 16px;">
+    <a href="C20-BadgeBook.dc.html" style="text-decoration: none; border: 3px solid #FFFFFF; color: #FFFFFF; border-radius: 18px; padding: 14px 30px; font-size: 20px; font-weight: 700;">See my badges</a>
+    <a href="C05-Trail.dc.html" style="text-decoration: none; background: #FFFFFF; color: #1E1E1C; border-radius: 18px; padding: 16px 36px; font-size: 22px; font-weight: 700;">Keep going</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

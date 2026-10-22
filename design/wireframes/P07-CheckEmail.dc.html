@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Check your email</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 24px; gap: 16px; font-size: 15px;">
+  <a href="P02-SignUp.dc.html" style="font-size: 16px;">Back</a>
+  <div style="height: 150px; border-radius: 20px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 14px;">[Envelope illustration]</div>
+  <h1 style="margin: 0; font-size: 26px;">Check your email</h1>
+  <div>We sent a sign-in link to <b>grace@example.com</b>. It works for 15 minutes, on this phone or any other device.</div>
+  <a href="P03-Consent.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 15px; font-size: 17px; font-weight: 700;">Open my email app</a>
+  <div style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #55554F;">Resend in 0:42</span><a href="P02-SignUp.dc.html">Use a different email</a></div>
+  <div style="height: 2px; background: #ECECE8; margin: 6px 0;"></div>
+  <div style="font-size: 13px; color: #55554F; text-transform: uppercase; letter-spacing: 0.06em;">If the link has expired</div>
+  <div style="border: 2px solid #B26A00; background: #FFF4E5; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; color: #5C3700;">
+    <b>This link has expired or was already used</b>
+    <span>No problem. We'll send a fresh one.</span>
+    <span style="align-self: flex-start; background: #1F5FD1; color: #FFFFFF; border-radius: 10px; padding: 10px 14px; font-weight: 700;">Send a new link</span>
+  </div>
+  <div style="font-size: 13px; color: #55554F;">Didn't get it? Check spam, or ask for help in the help centre.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

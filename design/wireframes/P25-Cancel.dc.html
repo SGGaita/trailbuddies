@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cancel subscription</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px; gap: 12px; font-size: 14px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P18-Settings.dc.html" style="font-size: 16px;">Back</a>
+    <h1 style="margin: 0; font-size: 22px;">Manage plan</h1>
+  </div>
+  <div style="background: #F6F6F4; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px;"><b>Family · yearly</b><br><span style="color: #55554F;">Renews [DATE]</span></div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; text-align: center;"><span style="border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px;">Switch to monthly</span><span style="border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px;">Update payment</span></div>
+  <div style="font-weight: 700; font-size: 15px; margin-top: 6px;">If you cancel</div>
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="border: 2px solid #D6D6D1; border-radius: 12px; padding: 10px 12px;">Full access continues until <b>[DATE]</b>.</div>
+    <div style="border: 2px solid #D6D6D1; border-radius: 12px; padding: 10px 12px;">Then you move to Free. <b>Nothing is deleted</b>: progress, stars, badges and treasures stay.</div>
+    <div style="border: 2px solid #D6D6D1; border-radius: 12px; padding: 10px 12px;">Custom lessons over the Free limit become read-only until you upgrade again.</div>
+    <div style="border: 2px solid #D6D6D1; border-radius: 12px; padding: 10px 12px;">Learners beyond 1 can still sign in, but only see Free content.</div>
+  </div>
+  <div style="font-weight: 600;">Why are you leaving? (optional)</div>
+  <div style="display: flex; flex-wrap: wrap; gap: 6px;"><span style="border: 2px solid #B9B9B3; border-radius: 999px; padding: 6px 10px;">Too expensive</span><span style="border: 2px solid #B9B9B3; border-radius: 999px; padding: 6px 10px;">Not using it</span><span style="border: 2px solid #B9B9B3; border-radius: 999px; padding: 6px 10px;">Missing content</span><span style="border: 2px solid #B9B9B3; border-radius: 999px; padding: 6px 10px;">Other</span></div>
+  <div style="flex-grow: 1;"></div>
+  <a href="P18-Settings.dc.html" style="text-decoration: none; text-align: center; border: 2px solid #B3261E; color: #B3261E; border-radius: 14px; padding: 15px; font-size: 17px; font-weight: 700;">Cancel subscription</a>
+  <a href="P18-Settings.dc.html" style="text-align: center; font-size: 15px;">Keep my plan</a>
+  <div style="font-size: 12px; color: #55554F; text-align: center;">Bought in the Android app? Cancel in Google Play; we'll link you there.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

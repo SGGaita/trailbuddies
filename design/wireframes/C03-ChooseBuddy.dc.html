@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meet the buddies</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 32px 48px; gap: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="margin: 0; font-size: 40px;">Meet the buddies!</h1>
+    <button aria-label="Hear it again" style="width: 64px; height: 64px; border-radius: 50%; border: 2px solid #B9B9B3; background: #FFFFFF; font-size: 13px; color: #1E1E1C;">Replay</button>
+  </div>
+  <div style="font-size: 20px; color: #55554F;">Tap a buddy to say hello. Pick the one you like best.</div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; flex-grow: 1;">
+    <div style="background: #FFFFFF; border: 3px solid #1F5FD1; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <div style="width: 100%; flex-grow: 1; border-radius: 20px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px); border: 2px solid #B9B9B3; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 15px;">[Zip the Robot, waving]</div>
+      <div style="font-size: 28px; font-weight: 700;">Zip</div>
+      <div style="font-size: 15px; color: #55554F; text-align: center;">"Beep! I love counting!"</div>
+      <a href="C04-WorldMap.dc.html" style="text-decoration: none; background: #1F5FD1; color: #FFFFFF; border-radius: 16px; padding: 14px 28px; font-size: 22px; font-weight: 700;">Pick me!</a>
+    </div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <div style="width: 100%; flex-grow: 1; border-radius: 20px; background: #F4F4F1; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 15px;">[Tumi the Owl]</div>
+      <div style="font-size: 28px; font-weight: 700;">Tumi</div>
+      <div style="font-size: 15px; color: #55554F;">Coming soon</div>
+      <div style="border: 2px solid #B9B9B3; color: #55554F; border-radius: 16px; padding: 12px 24px; font-size: 18px;">Soon</div>
+    </div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <div style="width: 100%; flex-grow: 1; border-radius: 20px; background: #F4F4F1; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 15px;">[Juma the Elephant]</div>
+      <div style="font-size: 28px; font-weight: 700;">Juma</div>
+      <div style="font-size: 15px; color: #55554F;">Coming soon</div>
+      <div style="border: 2px solid #B9B9B3; color: #55554F; border-radius: 16px; padding: 12px 24px; font-size: 18px;">Soon</div>
+    </div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <div style="width: 100%; flex-grow: 1; border-radius: 20px; background: #F4F4F1; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 15px;">[Kiki the Turtle]</div>
+      <div style="font-size: 28px; font-weight: 700;">Kiki</div>
+      <div style="font-size: 15px; color: #55554F;">Coming soon</div>
+      <div style="border: 2px solid #B9B9B3; color: #55554F; border-radius: 16px; padding: 12px 24px; font-size: 18px;">Soon</div>
+    </div>
+  </div>
+  <div style="font-size: 14px; color: #55554F;">MVP: one buddy live, three shown as coming soon. Launch: all four selectable; outfits stay with each buddy.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

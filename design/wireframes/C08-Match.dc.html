@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lesson: match pairs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px 40px 28px; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="C05-Trail.dc.html" aria-label="Leave lesson" style="text-decoration: none; width: 56px; height: 56px; border-radius: 50%; border: 2px solid #B9B9B3; display: flex; align-items: center; justify-content: center; color: #1E1E1C; font-size: 15px; background: #FFFFFF;">Exit</a>
+    <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px;">
+      <span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #8FB0EC;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+      <span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span>
+    </div>
+    <div style="font-size: 15px; color: #55554F;">4 of 7</div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="width: 96px; height: 96px; border-radius: 50%; background: #ECECE8; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #55554F;">[Buddy]</div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 20px; padding: 14px 22px; font-size: 28px; font-weight: 700;">Match each animal to its sound!</div>
+  </div>
+  <div style="flex-grow: 1; display: grid; grid-template-columns: 300px minmax(0, 1fr) 300px; gap: 24px; align-items: stretch;">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="flex: 1; border: 3px solid #1F5FD1; border-radius: 22px; background: #ECECE8; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 18px;">[Lion] matched</div>
+      <div style="flex: 1; border: 3px solid #B9B9B3; border-radius: 22px; background: #ECECE8; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 18px;">[Elephant]</div>
+      <div style="flex: 1; border: 3px solid #B9B9B3; border-radius: 22px; background: #ECECE8; display: flex; align-items: center; justify-content: center; color: #55554F; font-size: 18px;">[Monkey]</div>
+    </div>
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; color: #55554F; font-size: 15px; text-align: center;">
+      <div style="width: 100%; height: 4px; background: #1F5FD1; border-radius: 2px;"></div>
+      <div>Drag a picture to its partner, or tap one then the other.</div>
+      <div>Wrong pairs spring back; a hint shows after 2 misses.</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="flex: 1; border: 3px solid #1F5FD1; border-radius: 22px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 22px; font-weight: 700;">Play: "Roar"</div>
+      <div style="flex: 1; border: 3px solid #B9B9B3; border-radius: 22px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;">Play: "Ooh-ooh-aah"</div>
+      <div style="flex: 1; border: 3px solid #B9B9B3; border-radius: 22px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;">Play: "Trumpet"</div>
+    </div>
+  </div>
+  <div style="display: flex; justify-content: flex-end;">
+    <a href="C09-Sort.dc.html" style="text-decoration: none; background: #1F5FD1; color: #FFFFFF; border-radius: 16px; padding: 16px 40px; font-size: 22px; font-weight: 700;">Continue</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

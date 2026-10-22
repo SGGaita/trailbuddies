@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>First visit, offline and locked states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 28px;">
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+    <b style="font-size: 18px;">1 · First visit to the map</b>
+    <div style="flex-grow: 1; position: relative; background: #F4F4F1; border-radius: 16px;">
+      <a href="C05-Trail.dc.html" style="position: absolute; left: 30px; top: 40px; width: 170px; height: 110px; text-decoration: none; color: #1E1E1C; background: #FFFFFF; border: 4px solid #1F5FD1; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; box-shadow: 0 0 0 10px #D5E2FA;">Numbers Mountain</a>
+      <div style="position: absolute; left: 240px; top: 30px; width: 130px; height: 80px; background: #FFFFFF; border: 2px solid #DADAD5; border-radius: 18px; opacity: 0.55;"></div>
+      <div style="position: absolute; left: 260px; top: 140px; width: 130px; height: 80px; background: #FFFFFF; border: 2px solid #DADAD5; border-radius: 18px; opacity: 0.55;"></div>
+      <div style="position: absolute; left: 30px; bottom: 16px; display: flex; gap: 10px; align-items: flex-end;"><span style="width: 70px; height: 70px; border-radius: 50%; background: #ECECE8; border: 2px dashed #B9B9B3;"></span><span style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 14px; padding: 8px 12px; font-weight: 600;">Let's start here!</span></div>
+    </div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+    <b style="font-size: 18px;">2 · Offline, subject not downloaded</b>
+    <div style="flex-grow: 1; background: #F4F4F1; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; text-align: center;">
+      <span style="width: 90px; height: 90px; border-radius: 50%; background: #ECECE8; border: 2px dashed #B9B9B3;"></span>
+      <span style="font-size: 22px; font-weight: 700;">This one needs the internet. Let's play something else!</span>
+      <div style="display: flex; gap: 10px;"><a href="C05-Trail.dc.html" style="text-decoration: none; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 12px 18px; font-weight: 700;">Animal Safari</a><a href="C17-GamesCorner.dc.html" style="text-decoration: none; border: 2px solid #1F5FD1; border-radius: 14px; padding: 10px 16px; font-weight: 700;">Games</a></div>
+    </div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+    <b style="font-size: 18px;">3 · Locked unit</b>
+    <div style="flex-grow: 1; background: #F4F4F1; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 16px;">
+      <span style="width: 90px; height: 90px; border-radius: 50%; background: #FFFFFF; border: 3px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; color: #55554F;">Locked</span>
+      <span style="font-size: 20px; font-weight: 700; max-width: 300px;">Win the Farm animals trophy to open this one!</span>
+      <a href="C14-Checkpoint.dc.html" style="text-decoration: none; border: 2px solid #1F5FD1; border-radius: 14px; padding: 10px 16px; font-weight: 700;">Show me</a>
+    </div>
+  </div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+    <b style="font-size: 18px;">4 · Something went wrong in a lesson</b>
+    <div style="flex-grow: 1; background: #F4F4F1; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; text-align: center;">
+      <span style="font-size: 22px; font-weight: 700;">Oops! Let's try that again.</span>
+      <span style="font-size: 15px; color: #55554F;">Answers so far are kept. The error is reported without any child data.</span>
+      <a href="C07-ListenTap.dc.html" style="text-decoration: none; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 12px 22px; font-weight: 700;">Try again</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

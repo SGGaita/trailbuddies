@@ -1,0 +1,6522 @@
+{
+ "personas": [
+  {
+   "id": "amani",
+   "name": "Amani",
+   "age": "3",
+   "role": "Learner (Seedling, 3–4)",
+   "summary": "Can't read yet. Loves animals and tapping things. Plays on the family's budget Android tablet, usually for 10–15 minutes after nursery, with Mum nearby.",
+   "needs": "Everything spoken aloud; big targets; no failure states; lots of praise; quick wins.",
+   "frustrations": "Small buttons, text instructions, anything that takes too long to load."
+  },
+  {
+   "id": "zawadi",
+   "name": "Zawadi",
+   "age": "6",
+   "role": "Learner (Sprout, 5–6)",
+   "summary": "Amani's older sister. Learning to read and count to 100. Very motivated by collecting stickers and dressing up her buddy. Plays at home and in class.",
+   "needs": "Visible progress; rewards to save up for; feeling 'big' compared with her little brother.",
+   "frustrations": "Repeating lessons she already knows; her brother playing on her profile."
+  },
+  {
+   "id": "leo",
+   "name": "Leo",
+   "age": "8",
+   "role": "Learner (Explorer, 7–8)",
+   "summary": "Confident reader, obsessed with space and football. Likes challenges and getting things right first time.",
+   "needs": "Harder questions, real facts, a sense of mastery; less babyish feedback.",
+   "frustrations": "Being made to do easy stuff; slow celebrations that stop him moving on."
+  },
+  {
+   "id": "nia",
+   "name": "Nia",
+   "age": "11",
+   "role": "Learner (Voyager, 9–12)",
+   "summary": "Uses the app for maths practice and planets. Has her own PIN. Wants it to feel grown-up.",
+   "needs": "A cooler look, typed answers, her own goals, privacy from younger siblings.",
+   "frustrations": "Cartoonish UI, being treated like a little kid."
+  },
+  {
+   "id": "grace",
+   "name": "Grace",
+   "age": "34",
+   "role": "Parent (account owner)",
+   "summary": "Mum of Amani and Zawadi. Works full-time, uses an Android phone. Wants screen time that is actually educational and wants to add the family's own world (their farm, their grandparents) to lessons.",
+   "needs": "Fast set-up; clear progress at a glance; making a custom lesson in under 5 minutes; control of screen time.",
+   "frustrations": "Ads, upsells aimed at kids, apps that need constant supervision."
+  },
+  {
+   "id": "tom",
+   "name": "Tom",
+   "age": "41",
+   "role": "Second parent / guardian",
+   "summary": "Leo's dad. Travels for work, checks progress from his phone and likes to award badges remotely for things Leo does at home.",
+   "needs": "View progress, award a badge, approve a wish from anywhere.",
+   "frustrations": "Being locked out because only one parent set up the account."
+  },
+  {
+   "id": "priya",
+   "name": "Ms Priya",
+   "age": "29",
+   "role": "Teacher (early-years / primary)",
+   "summary": "Teaches a class of 26 five-and-six-year-olds with 8 shared tablets and a projector. Makes her own weekly spelling and topic lessons.",
+   "needs": "Quick class set-up; assigning work to groups; seeing who's stuck; reusing and sharing lessons with colleagues.",
+   "frustrations": "Kids forgetting passwords; spending lesson time on logins; tools that don't work offline when the Wi-Fi drops."
+  },
+  {
+   "id": "joseph",
+   "name": "Joseph",
+   "age": "46",
+   "role": "Adult learner",
+   "summary": "Grace's uncle. Is improving his reading and wants to learn alongside the grandchildren. Uses the 'Add me too' adult profile.",
+   "needs": "Adult look; no childish tone; private progress; start at the right level.",
+   "frustrations": "Feeling patronised; public comparisons."
+  },
+  {
+   "id": "sam",
+   "name": "Sam",
+   "age": "50",
+   "role": "School administrator",
+   "summary": "Runs a small primary school with 6 teachers. Buys the school licence and manages teacher seats.",
+   "needs": "Simple licence and seat management; data-protection paperwork; school-wide reports.",
+   "frustrations": "Per-teacher billing chaos; unclear data handling."
+  },
+  {
+   "id": "dev",
+   "name": "Steve",
+   "age": "—",
+   "role": "Developer / product owner",
+   "summary": "Builds the product solo with Claude. Needs fast feedback, safe releases and content that can be added without code changes.",
+   "needs": "Automated checks, reliable deploys, a content pipeline.",
+   "frustrations": "Manual, error-prone release steps."
+  }
+ ],
+ "milestones": [
+  {
+   "id": "MVP",
+   "title": "Phase 1 — MVP (closed web beta)",
+   "due": "2027-02-26",
+   "sprints": "S0–S7"
+  },
+  {
+   "id": "P2",
+   "title": "Phase 2 — Beta iteration + Classroom",
+   "due": "2027-04-23",
+   "sprints": "S8–S11"
+  },
+  {
+   "id": "P3",
+   "title": "Phase 3 — React Native Android app",
+   "due": "2027-07-30",
+   "sprints": "S12–S17"
+  },
+  {
+   "id": "P4",
+   "title": "Phase 4 — Breadth + public launch",
+   "due": "2027-11-05",
+   "sprints": "S18–S24"
+  },
+  {
+   "id": "P5",
+   "title": "Phase 5 — Post-launch",
+   "due": "2028-06-30",
+   "sprints": "rolling"
+  }
+ ],
+ "epics": [
+  [
+   "ONB",
+   "Onboarding & accounts"
+  ],
+  [
+   "FAM",
+   "Family & learner profiles"
+  ],
+  [
+   "BUD",
+   "Buddy tutor"
+  ],
+  [
+   "MAP",
+   "World map & learning trail"
+  ],
+  [
+   "LES",
+   "Lessons & exercises"
+  ],
+  [
+   "ADP",
+   "Adaptive learning"
+  ],
+  [
+   "GAM",
+   "Games"
+  ],
+  [
+   "RWD",
+   "Rewards: stars, treasures & shop"
+  ],
+  [
+   "BDG",
+   "Badges & achievements"
+  ],
+  [
+   "BST",
+   "Badge Studio & Wish list"
+  ],
+  [
+   "BLD",
+   "Lesson Builder & custom trails"
+  ],
+  [
+   "SHR",
+   "Sharing by code"
+  ],
+  [
+   "PAR",
+   "Parent dashboard & controls"
+  ],
+  [
+   "CLS",
+   "Classes & roster"
+  ],
+  [
+   "ASN",
+   "Assignments & class insights"
+  ],
+  [
+   "CRM",
+   "Classroom mode"
+  ],
+  [
+   "OFF",
+   "Offline & sync"
+  ],
+  [
+   "CNT",
+   "Content & subjects"
+  ],
+  [
+   "PAY",
+   "Plans & payments"
+  ],
+  [
+   "SAF",
+   "Privacy, safety & compliance"
+  ],
+  [
+   "ACC",
+   "Accessibility"
+  ],
+  [
+   "OLD",
+   "Older learners (teens & adults)"
+  ],
+  [
+   "MOB",
+   "Mobile app (React Native)"
+  ],
+  [
+   "OPS",
+   "Platform & DevOps"
+  ],
+  [
+   "SCH",
+   "School administration"
+  ],
+  [
+   "AI",
+   "AI features"
+  ],
+  [
+   "LOC",
+   "Languages & localisation"
+  ],
+  [
+   "MOD",
+   "Moderation"
+  ],
+  [
+   "HLP",
+   "Help & support"
+  ]
+ ],
+ "screens": {
+  "P01": [
+   "Welcome",
+   "Phone",
+   "P01-Welcome.dc.html"
+  ],
+  "P02": [
+   "Sign up",
+   "Phone",
+   "P02-SignUp.dc.html"
+  ],
+  "P03": [
+   "Parental consent",
+   "Phone",
+   "P03-Consent.dc.html"
+  ],
+  "P04": [
+   "Add learners",
+   "Phone",
+   "P04-AddLearners.dc.html"
+  ],
+  "P05": [
+   "Interests & starting point",
+   "Phone",
+   "P05-Interests.dc.html"
+  ],
+  "P06": [
+   "Family settings & hand-over",
+   "Phone",
+   "P06-FamilySettings.dc.html"
+  ],
+  "P08": [
+   "Parent home",
+   "Phone",
+   "P08-ParentHome.dc.html"
+  ],
+  "P09": [
+   "Child progress",
+   "Phone",
+   "P09-ChildProgress.dc.html"
+  ],
+  "P10": [
+   "Lesson Builder: cards",
+   "Phone",
+   "P10-BuilderCards.dc.html"
+  ],
+  "P11": [
+   "Lesson Builder: add card",
+   "Phone",
+   "P11-BuilderAddCard.dc.html"
+  ],
+  "P12": [
+   "Lesson Builder: template & assign",
+   "Phone",
+   "P12-BuilderTemplate.dc.html"
+  ],
+  "P14": [
+   "Badge Studio: design",
+   "Phone",
+   "P14-BadgeDesign.dc.html"
+  ],
+  "P15": [
+   "Badge Studio: rule & reward",
+   "Phone",
+   "P15-BadgeRule.dc.html"
+  ],
+  "P16": [
+   "Wishes & awards",
+   "Phone",
+   "P16-Wishes.dc.html"
+  ],
+  "P17": [
+   "Share codes",
+   "Phone",
+   "P17-ShareCodes.dc.html"
+  ],
+  "P18": [
+   "Settings, limits & privacy",
+   "Phone",
+   "P18-Settings.dc.html"
+  ],
+  "P19": [
+   "Family members",
+   "Phone",
+   "P19-FamilyMembers.dc.html"
+  ],
+  "P20": [
+   "Join a class",
+   "Phone",
+   "P20-JoinClass.dc.html"
+  ],
+  "P21": [
+   "Plans",
+   "Phone",
+   "P21-Plans.dc.html"
+  ],
+  "C01": [
+   "Who's playing?",
+   "Tablet",
+   "Main.dc.html"
+  ],
+  "C02": [
+   "Classroom picture password",
+   "Tablet",
+   "C02-PicturePassword.dc.html"
+  ],
+  "C03": [
+   "Meet the buddies",
+   "Tablet",
+   "C03-ChooseBuddy.dc.html"
+  ],
+  "C04": [
+   "World map",
+   "Tablet",
+   "C04-WorldMap.dc.html"
+  ],
+  "C05": [
+   "Subject trail",
+   "Tablet",
+   "C05-Trail.dc.html"
+  ],
+  "C07": [
+   "Lesson: listen & tap",
+   "Tablet",
+   "C07-ListenTap.dc.html"
+  ],
+  "C08": [
+   "Lesson: match pairs",
+   "Tablet",
+   "C08-Match.dc.html"
+  ],
+  "C09": [
+   "Lesson: sort into bins",
+   "Tablet",
+   "C09-Sort.dc.html"
+  ],
+  "C11": [
+   "Lesson: hint",
+   "Tablet",
+   "C11-Hint.dc.html"
+  ],
+  "C12": [
+   "Lesson complete",
+   "Tablet",
+   "C12-LessonComplete.dc.html"
+  ],
+  "C13": [
+   "Badge earned",
+   "Tablet",
+   "C13-BadgeEarned.dc.html"
+  ],
+  "C14": [
+   "Unit checkpoint",
+   "Tablet",
+   "C14-Checkpoint.dc.html"
+  ],
+  "C15": [
+   "Game: jigsaw",
+   "Tablet",
+   "C15-Jigsaw.dc.html"
+  ],
+  "C16": [
+   "Game: memory",
+   "Tablet",
+   "C16-Memory.dc.html"
+  ],
+  "C17": [
+   "Games corner",
+   "Tablet",
+   "C17-GamesCorner.dc.html"
+  ],
+  "C18": [
+   "Buddy shop",
+   "Tablet",
+   "C18-Shop.dc.html"
+  ],
+  "C19": [
+   "Treasure room",
+   "Tablet",
+   "C19-TreasureRoom.dc.html"
+  ],
+  "C20": [
+   "Badge book",
+   "Tablet",
+   "C20-BadgeBook.dc.html"
+  ],
+  "C21": [
+   "My wishes",
+   "Tablet",
+   "C21-Wishes.dc.html"
+  ],
+  "C22": [
+   "Family & class island",
+   "Tablet",
+   "C22-Island.dc.html"
+  ],
+  "C23": [
+   "Time for a break",
+   "Tablet",
+   "C23-Break.dc.html"
+  ],
+  "C24": [
+   "Grown-ups gate",
+   "Tablet",
+   "C24-Gate.dc.html"
+  ],
+  "T01": [
+   "Teacher home",
+   "Desktop",
+   "T01-TeacherHome.dc.html"
+  ],
+  "T02": [
+   "Class roster & join code",
+   "Desktop",
+   "T02-Roster.dc.html"
+  ],
+  "T03": [
+   "Assign work",
+   "Desktop",
+   "T03-Assign.dc.html"
+  ],
+  "T04": [
+   "Class progress",
+   "Desktop",
+   "T04-ClassProgress.dc.html"
+  ],
+  "T06": [
+   "Classroom mode & badge wall",
+   "Desktop",
+   "T06-ClassroomMode.dc.html"
+  ],
+  "A01": [
+   "Teen / adult home",
+   "Tablet",
+   "A01-OlderHome.dc.html"
+  ],
+  "P07": [
+   "Check your email / expired link",
+   "Phone",
+   "P07-CheckEmail.dc.html"
+  ],
+  "P13": [
+   "Custom trail builder",
+   "Phone",
+   "P13-TrailBuilder.dc.html"
+  ],
+  "P22": [
+   "Remix a built-in unit",
+   "Phone",
+   "P22-Remix.dc.html"
+  ],
+  "P23": [
+   "Import by code",
+   "Phone",
+   "P23-Import.dc.html"
+  ],
+  "P24": [
+   "Checkout",
+   "Phone",
+   "P24-Checkout.dc.html"
+  ],
+  "P25": [
+   "Cancel subscription",
+   "Phone",
+   "P25-Cancel.dc.html"
+  ],
+  "P26": [
+   "Errors, offline & storage states",
+   "Phone",
+   "P26-States.dc.html"
+  ],
+  "P28": [
+   "Record letter sounds",
+   "Phone",
+   "P28-LetterSounds.dc.html"
+  ],
+  "P29": [
+   "Language settings",
+   "Phone",
+   "P29-Languages.dc.html"
+  ],
+  "P30": [
+   "Help & support",
+   "Phone",
+   "P30-Help.dc.html"
+  ],
+  "C06": [
+   "Placement quiz",
+   "Tablet",
+   "C06-Placement.dc.html"
+  ],
+  "C10": [
+   "Review lesson",
+   "Tablet",
+   "C10-Review.dc.html"
+  ],
+  "C25": [
+   "Exercise: trace",
+   "Tablet",
+   "C25-Trace.dc.html"
+  ],
+  "C26": [
+   "Exercise: clock setter",
+   "Tablet",
+   "C26-Clock.dc.html"
+  ],
+  "C27": [
+   "Exercise: build a word",
+   "Tablet",
+   "C27-BuildWord.dc.html"
+  ],
+  "C28": [
+   "Exercise: true or false",
+   "Tablet",
+   "C28-TrueFalse.dc.html"
+  ],
+  "C29": [
+   "First visit, offline & locked states",
+   "Tablet",
+   "C29-ChildStates.dc.html"
+  ],
+  "A02": [
+   "Teen sign-in",
+   "Tablet",
+   "A02-TeenSignIn.dc.html"
+  ],
+  "T00": [
+   "Teacher sign-up",
+   "Desktop",
+   "T00-TeacherSignUp.dc.html"
+  ],
+  "T05": [
+   "Teacher Badge Studio",
+   "Desktop",
+   "T05-TeacherBadges.dc.html"
+  ],
+  "S01": [
+   "School admin: licence & teachers",
+   "Desktop",
+   "S01-SchoolAdmin.dc.html"
+  ],
+  "S02": [
+   "School reports & library",
+   "Desktop",
+   "S02-SchoolReports.dc.html"
+  ],
+  "M01": [
+   "Moderation queue",
+   "Desktop",
+   "M01-Moderation.dc.html"
+  ]
+ },
+ "stories": [
+  {
+   "id": "ONB-01",
+   "epic": "ONB",
+   "title": "Choose parent or teacher path",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to say whether I'm a parent or a teacher when I first open the app, so that I'm taken through the set-up that fits me.",
+   "want": "to say whether I'm a parent or a teacher when I first open the app",
+   "so": "I'm taken through the set-up that fits me",
+   "ac": [
+    {
+     "given": "I open Trailbuddies for the first time",
+     "when": "I see the welcome screen",
+     "then": "I can choose \"I'm a parent\" or \"I'm a teacher\" and a short animated intro of the buddies plays"
+    },
+    {
+     "given": "I chose \"I'm a parent\"",
+     "when": "I continue",
+     "then": "I'm taken to sign-up with parent wording throughout"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-02",
+   "epic": "ONB",
+   "title": "Sign up with email magic link",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to create an account with just my email and a one-time link, so that I don't have to invent and remember another password.",
+   "want": "to create an account with just my email and a one-time link",
+   "so": "I don't have to invent and remember another password",
+   "ac": [
+    {
+     "given": "I enter a valid email on sign-up",
+     "when": "I tap \"Send my link\"",
+     "then": "an email with a sign-in link valid for 15 minutes is sent and the screen tells me to check my inbox"
+    },
+    {
+     "given": "I open the link on the same or another device",
+     "when": "the link is valid",
+     "then": "I'm signed in and continue onboarding where I left off"
+    },
+    {
+     "given": "the link has expired or was already used",
+     "when": "I open it",
+     "then": "I see a friendly message and can request a new link"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P02",
+    "P07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-03",
+   "epic": "ONB",
+   "title": "Sign in with Google",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to sign up or sign in with my Google account, so that set-up takes seconds on my Android phone.",
+   "want": "to sign up or sign in with my Google account",
+   "so": "set-up takes seconds on my Android phone",
+   "ac": [
+    {
+     "given": "I'm on sign-up",
+     "when": "I choose \"Continue with Google\" and approve",
+     "then": "an account is created (or I'm signed in) using my Google email and I continue onboarding"
+    },
+    {
+     "given": "an account already exists with the same email via magic link",
+     "when": "I sign in with Google",
+     "then": "both sign-in methods are linked to the one account"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-04",
+   "epic": "ONB",
+   "title": "Sign in with Apple",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to sign in with Apple on an iPhone or iPad, so that I can use the app on Apple devices without a new password.",
+   "want": "to sign in with Apple on an iPhone or iPad",
+   "so": "I can use the app on Apple devices without a new password",
+   "ac": [
+    {
+     "given": "I'm on sign-up on iOS or Safari",
+     "when": "I choose \"Continue with Apple\"",
+     "then": "an account is created, including when I hide my email"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "P02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-05",
+   "epic": "ONB",
+   "title": "Country sets local rules and formats",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to choose my country during sign-up, so that dates, my seasons unit, currency and the privacy rules match where I live.",
+   "want": "to choose my country during sign-up",
+   "so": "dates, my seasons unit, currency and the privacy rules match where I live",
+   "ac": [
+    {
+     "given": "I select my country",
+     "when": "I finish sign-up",
+     "then": "the family's date format, 'My seasons' climate set and currency are set from the country, and the consent flow for that region is used"
+    },
+    {
+     "given": "I later change country in settings",
+     "when": "I save",
+     "then": "formats update and I'm asked to re-confirm consent if the rules differ"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P02",
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-06",
+   "epic": "ONB",
+   "title": "Give verifiable parental consent",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to read a plain-language summary of what's collected and give consent, so that I know exactly what happens to my children's data before they play.",
+   "want": "to read a plain-language summary of what's collected and give consent",
+   "so": "I know exactly what happens to my children's data before they play",
+   "ac": [
+    {
+     "given": "I reach the consent step",
+     "when": "I view it",
+     "then": "I see what is collected, why, how long it's kept and my rights, in plain language with a link to the full policy"
+    },
+    {
+     "given": "I tick consent and complete the verification step required in my region",
+     "when": "I continue",
+     "then": "a consent record with policy version, timestamp and method is stored"
+    },
+    {
+     "given": "I haven't consented",
+     "when": "I try to add a learner",
+     "then": "I can't continue until consent is given"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-07",
+   "epic": "ONB",
+   "title": "Add one or more learners",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to add each of my children with a first name or nickname, birth month and year and an avatar, so that each child gets their own trail and progress.",
+   "want": "to add each of my children with a first name or nickname, birth month and year and an avatar",
+   "so": "each child gets their own trail and progress",
+   "ac": [
+    {
+     "given": "I'm on \"Who's learning?\"",
+     "when": "I add Amani (born Mar 2023) and Zawadi (born Jun 2020)",
+     "then": "two profiles are created with age bands Seedling and Sprout set from their birth dates"
+    },
+    {
+     "given": "I enter a full name",
+     "when": "I save",
+     "then": "I'm reminded that a nickname is enough and only the first name field is stored"
+    },
+    {
+     "given": "my plan's learner limit is reached",
+     "when": "I try to add another",
+     "then": "I see the limit and an option to upgrade (behind the parent gate)"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-08",
+   "epic": "ONB",
+   "title": "Add me too (adult learner)",
+   "role": "Joseph (adult learner)",
+   "story": "As Joseph (adult learner), I want the account owner to be able to add an adult learner profile, so that I can learn alongside the children without looking childish.",
+   "want": "the account owner to be able to add an adult learner profile",
+   "so": "I can learn alongside the children without looking childish",
+   "ac": [
+    {
+     "given": "I'm on \"Who's learning?\"",
+     "when": "I choose \"Add me too\" or add an adult with birth year 18+ years ago",
+     "then": "an adult profile is created with the adult look and the study-partner buddy tone"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "P04",
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-09",
+   "epic": "ONB",
+   "title": "Choose interests and starting point",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to tap my child's favourite things and what they can already do, so that the map shows the most exciting subjects first and they skip what they know.",
+   "want": "to tap my child's favourite things and what they can already do",
+   "so": "the map shows the most exciting subjects first and they skip what they know",
+   "ac": [
+    {
+     "given": "I'm setting up Zawadi",
+     "when": "I tap Animals and Space as interests",
+     "then": "those subjects appear first on her world map"
+    },
+    {
+     "given": "I tick \"Knows her letters\"",
+     "when": "I continue",
+     "then": "Language starts at Letter sounds and earlier units show as completed with bronze stars"
+    },
+    {
+     "given": "I skip this step",
+     "when": "I continue",
+     "then": "default subject order and the age-band start are used"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-10",
+   "epic": "ONB",
+   "title": "Set family settings during onboarding",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to set a daily goal, screen-time limit and bedtime lock during set-up, so that the app respects our routine from day one.",
+   "want": "to set a daily goal, screen-time limit and bedtime lock during set-up",
+   "so": "the app respects our routine from day one",
+   "ac": [
+    {
+     "given": "I'm on family settings",
+     "when": "I set a 20-minute limit and a 7:30 pm bedtime lock",
+     "then": "these apply to every child profile and can be changed later in Settings"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P06"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-11",
+   "epic": "ONB",
+   "title": "Hand over to the child",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a clear hand-over moment at the end of set-up, so that my child can start straight away without me navigating menus.",
+   "want": "a clear hand-over moment at the end of set-up",
+   "so": "my child can start straight away without me navigating menus",
+   "ac": [
+    {
+     "given": "I finish onboarding",
+     "when": "I tap \"Hand to Amani\"",
+     "then": "the app switches to the child experience and opens Meet the buddies for Amani"
+    },
+    {
+     "given": "I have several children",
+     "when": "I tap \"Hand over\"",
+     "then": "the Who's playing? picker opens"
+    }
+   ],
+   "priority": "Must",
+   "size": "XS",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P06",
+    "C03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-12",
+   "epic": "ONB",
+   "title": "First-steps card for parents",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a short 'first steps' card after my child's first lesson, so that I discover custom lessons, badges and class linking without reading a manual.",
+   "want": "a short 'first steps' card after my child's first lesson",
+   "so": "I discover custom lessons, badges and class linking without reading a manual",
+   "ac": [
+    {
+     "given": "my child has completed their first lesson",
+     "when": "I next open the grown-up zone",
+     "then": "a dismissible card shows progress so far and links to make a lesson, make a badge and join a class"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-13",
+   "epic": "ONB",
+   "title": "Teacher sign-up",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to sign up as a teacher with my school email, so that I can create classes without setting up a family.",
+   "want": "to sign up as a teacher with my school email",
+   "so": "I can create classes without setting up a family",
+   "ac": [
+    {
+     "given": "I chose \"I'm a teacher\"",
+     "when": "I sign up and enter my school name",
+     "then": "a teacher account is created and I land on Teacher home with a prompt to create my first class"
+    },
+    {
+     "given": "my school has a licence and my email domain matches",
+     "when": "I sign up",
+     "then": "I'm offered to join the school's licence"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "P01",
+    "T01",
+    "T00"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ONB-14",
+   "epic": "ONB",
+   "title": "Sign out and session handling",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want sessions to stay signed in on my devices until I sign out, so that I'm not asked to sign in every day but stay in control.",
+   "want": "sessions to stay signed in on my devices until I sign out",
+   "so": "I'm not asked to sign in every day but stay in control",
+   "ac": [
+    {
+     "given": "I'm signed in",
+     "when": "I return within 60 days",
+     "then": "I remain signed in using a refresh token"
+    },
+    {
+     "given": "I choose \"Sign out of all devices\"",
+     "when": "I confirm",
+     "then": "all refresh tokens are revoked and other devices return to the welcome screen"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-01",
+   "epic": "FAM",
+   "title": "Who's playing? profile picker",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to tap my own avatar to start, so that I play on my own trail, not my brother's.",
+   "want": "to tap my own avatar to start",
+   "so": "I play on my own trail, not my brother's",
+   "ac": [
+    {
+     "given": "the family has two or more learners",
+     "when": "the child app opens",
+     "then": "each learner's avatar and name is shown as a large button and a small 'Grown-ups' button sits in the corner"
+    },
+    {
+     "given": "I tap my avatar",
+     "when": "my profile has no picture password",
+     "then": "my world map opens"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-02",
+   "epic": "FAM",
+   "title": "Optional profile picture password",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to protect my profile with three pictures, so that my little brother can't spend my treasures.",
+   "want": "to protect my profile with three pictures",
+   "so": "my little brother can't spend my treasures",
+   "ac": [
+    {
+     "given": "a parent enabled a picture password for me",
+     "when": "I tap my avatar",
+     "then": "I'm asked to tap my 3 pictures in order"
+    },
+    {
+     "given": "I get it wrong 3 times",
+     "when": "I keep trying",
+     "then": "a hint shows the first picture and the parent can reset it from the grown-up zone"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "C02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-03",
+   "epic": "FAM",
+   "title": "Edit or remove a learner",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to change a learner's nickname, avatar or birth date, or remove them, so that profiles stay accurate.",
+   "want": "to change a learner's nickname, avatar or birth date, or remove them",
+   "so": "profiles stay accurate",
+   "ac": [
+    {
+     "given": "I edit Amani's birth date",
+     "when": "I save",
+     "then": "his age band and look are recalculated; progress is kept"
+    },
+    {
+     "given": "I remove a learner",
+     "when": "I confirm twice",
+     "then": "the profile and its progress are deleted after a 7-day undo window"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-04",
+   "epic": "FAM",
+   "title": "Automatic band move on birthday",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to 'grow up' in the app around my birthday, so that it keeps feeling right for my age.",
+   "want": "to 'grow up' in the app around my birthday",
+   "so": "it keeps feeling right for my age",
+   "ac": [
+    {
+     "given": "my birth month passes and I now fall in a new age stage",
+     "when": "I next open the app",
+     "then": "my buddy celebrates my birthday, the look and starting band for new subjects update, and existing progress is kept"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-05",
+   "epic": "FAM",
+   "title": "Invite a second parent",
+   "role": "Tom (second parent)",
+   "story": "As Tom (second parent), I want to be invited by email with equal access, so that I can follow and reward Leo from my own phone.",
+   "want": "to be invited by email with equal access",
+   "so": "I can follow and reward Leo from my own phone",
+   "ac": [
+    {
+     "given": "Grace invites tom@example.com as a parent",
+     "when": "Tom accepts the invite",
+     "then": "Tom has full access to the family's learners, lessons and settings, and the invite is logged"
+    },
+    {
+     "given": "an invite isn't accepted in 7 days",
+     "when": "Tom opens it",
+     "then": "it has expired and Grace can resend"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P19"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-06",
+   "epic": "FAM",
+   "title": "View-only carer role",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to invite a grandparent or carer who can only see progress, so that family can cheer the kids on without changing settings.",
+   "want": "to invite a grandparent or carer who can only see progress",
+   "so": "family can cheer the kids on without changing settings",
+   "ac": [
+    {
+     "given": "I invite Grandma as 'View progress'",
+     "when": "she signs in",
+     "then": "she sees progress and badges but can't edit learners, lessons, settings or purchases"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P19"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-07",
+   "epic": "FAM",
+   "title": "Switch learner from inside the child app",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to switch the active learner quickly, so that siblings can take turns on one tablet.",
+   "want": "to switch the active learner quickly",
+   "so": "siblings can take turns on one tablet",
+   "ac": [
+    {
+     "given": "a child is on their map",
+     "when": "they tap the avatar in the corner",
+     "then": "the Who's playing? picker opens without passing the parent gate"
+    }
+   ],
+   "priority": "Must",
+   "size": "XS",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C04",
+    "C01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "FAM-08",
+   "epic": "FAM",
+   "title": "Family can use several devices",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to sign in on my phone, the home tablet and a laptop, so that my children can play anywhere and progress follows them.",
+   "want": "to sign in on my phone, the home tablet and a laptop",
+   "so": "my children can play anywhere and progress follows them",
+   "ac": [
+    {
+     "given": "I sign in on a second device",
+     "when": "the device syncs",
+     "then": "all learners, custom lessons and progress appear"
+    },
+    {
+     "given": "the plan allows a limited number of active devices",
+     "when": "I sign in on one more",
+     "then": "I can sign out an old device from Settings"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-01",
+   "epic": "BUD",
+   "title": "Choose a buddy",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want to meet the buddies and pick the one I like, so that I have a friend who helps me learn.",
+   "want": "to meet the buddies and pick the one I like",
+   "so": "I have a friend who helps me learn",
+   "ac": [
+    {
+     "given": "I'm a new learner",
+     "when": "Meet the buddies opens",
+     "then": "each buddy waves and introduces itself in its own voice when tapped"
+    },
+    {
+     "given": "I tap \"Pick me!\" on Zip",
+     "when": "I confirm",
+     "then": "Zip becomes my buddy and appears on my map"
+    },
+    {
+     "given": "only one buddy is available (MVP)",
+     "when": "I view the screen",
+     "then": "other buddies show as 'coming soon' and can't be selected"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-02",
+   "epic": "BUD",
+   "title": "Change buddy later",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to swap to a different buddy, so that I can try another friend.",
+   "want": "to swap to a different buddy",
+   "so": "I can try another friend",
+   "ac": [
+    {
+     "given": "I'm on my map",
+     "when": "I open my buddy's menu and choose 'Change buddy'",
+     "then": "Meet the buddies opens; my outfits stay with each buddy and my progress is unchanged"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-03",
+   "epic": "BUD",
+   "title": "Buddy greets me by name",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want my buddy to say hello using my name, so that it feels like my own friend.",
+   "want": "my buddy to say hello using my name",
+   "so": "it feels like my own friend",
+   "ac": [
+    {
+     "given": "I open my map",
+     "when": "it's my first visit today",
+     "then": "the buddy greets me by name (parent recording if one exists, otherwise the voice pack or device voice) and mentions what we did last time"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-04",
+   "epic": "BUD",
+   "title": "Buddy introduces new concepts",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want my buddy to show and say each new thing before asking me, so that I'm never asked something I haven't seen.",
+   "want": "my buddy to show and say each new thing before asking me",
+   "so": "I'm never asked something I haven't seen",
+   "ac": [
+    {
+     "given": "a lesson contains an item I haven't seen",
+     "when": "the item first appears",
+     "then": "the buddy shows the picture, says the word and one fun fact before any question about it"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-05",
+   "epic": "BUD",
+   "title": "Hint ladder on wrong answers",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want gentle hints when I get something wrong, so that I never feel I've failed.",
+   "want": "gentle hints when I get something wrong",
+   "so": "I never feel I've failed",
+   "ac": [
+    {
+     "given": "I tap a wrong answer",
+     "when": "it's my first miss on this question",
+     "then": "there's no buzzer; the buddy repeats the question kindly"
+    },
+    {
+     "given": "it's my second miss",
+     "when": "the question resets",
+     "then": "one wrong option disappears and the buddy points towards the right area"
+    },
+    {
+     "given": "it's my third miss",
+     "when": "the hint plays",
+     "then": "the buddy shows and says the answer, I tap it to continue, and the item is scheduled for review"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-06",
+   "epic": "BUD",
+   "title": "Varied celebrations",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want the buddy's praise to change and not slow me down, so that it stays fun and doesn't get annoying.",
+   "want": "the buddy's praise to change and not slow me down",
+   "so": "it stays fun and doesn't get annoying",
+   "ac": [
+    {
+     "given": "I answer correctly",
+     "when": "the buddy reacts",
+     "then": "a reaction is chosen that wasn't used in my last answer, and I can tap to continue before it finishes"
+    },
+    {
+     "given": "I'm Explorer band or older",
+     "when": "I answer several in a row",
+     "then": "celebrations are shorter"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C07",
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-07",
+   "epic": "BUD",
+   "title": "Effort-based encouragement",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want my buddy to notice when I kept trying, so that I feel proud even after a tricky lesson.",
+   "want": "my buddy to notice when I kept trying",
+   "so": "I feel proud even after a tricky lesson",
+   "ac": [
+    {
+     "given": "I finish a lesson with 3+ hints used",
+     "when": "the end screen shows",
+     "then": "the buddy praises effort (e.g. 'You kept going!') rather than the score"
+    }
+   ],
+   "priority": "Should",
+   "size": "XS",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-08",
+   "epic": "BUD",
+   "title": "Buddy script table",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want buddy lines to come from a script table keyed by event, buddy and language, so that writers can add lines without code changes.",
+   "want": "buddy lines to come from a script table keyed by event, buddy and language",
+   "so": "writers can add lines without code changes",
+   "ac": [
+    {
+     "given": "a new line is added to the script table for event 'lesson_perfect'",
+     "when": "content is rebuilt",
+     "then": "the line can be chosen at runtime without app code changes"
+    },
+    {
+     "given": "an event has no line for the chosen buddy",
+     "when": "it fires",
+     "then": "a generic fallback line is used and a warning is logged in development"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "BUD-09",
+   "epic": "BUD",
+   "title": "Buddy wears shop items",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want my buddy to wear the outfit I bought everywhere, so that my buddy feels like mine.",
+   "want": "my buddy to wear the outfit I bought everywhere",
+   "so": "my buddy feels like mine",
+   "ac": [
+    {
+     "given": "I equip a hat in the shop",
+     "when": "I return to the map or a lesson",
+     "then": "the buddy is shown wearing the hat"
+    },
+    {
+     "given": "I play on another device",
+     "when": "it syncs",
+     "then": "the same outfit is shown"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C18",
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-10",
+   "epic": "BUD",
+   "title": "Buddy grows up with the learner",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want my buddy to look and talk more grown-up as I get older, so that the app doesn't feel babyish.",
+   "want": "my buddy to look and talk more grown-up as I get older",
+   "so": "the app doesn't feel babyish",
+   "ac": [
+    {
+     "given": "my age stage is 8–12",
+     "when": "I use the app",
+     "then": "the buddy uses its 'coach' art set and tone"
+    },
+    {
+     "given": "I'm a teen or adult",
+     "when": "I open settings",
+     "then": "I can switch the buddy to 'quiet' so it only appears when I ask"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BUD-11",
+   "epic": "BUD",
+   "title": "Three more buddies at launch",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a choice of four buddies, so that I can pick the one that matches me.",
+   "want": "a choice of four buddies",
+   "so": "I can pick the one that matches me",
+   "ac": [
+    {
+     "given": "the launch release is installed",
+     "when": "I open Meet the buddies",
+     "then": "four buddies, each with its own voice, animations and script, are available"
+    }
+   ],
+   "priority": "Must",
+   "size": "L",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-01",
+   "epic": "MAP",
+   "title": "World map of subjects",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want a map where every subject is a place I can tap, so that I can choose what to learn by exploring.",
+   "want": "a map where every subject is a place I can tap",
+   "so": "I can choose what to learn by exploring",
+   "ac": [
+    {
+     "given": "I'm on my world map",
+     "when": "it loads",
+     "then": "each available subject appears as an illustrated place with its name spoken when tapped once"
+    },
+    {
+     "given": "my parent picked interests",
+     "when": "the map loads",
+     "then": "those subjects are placed nearest the start"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-02",
+   "epic": "MAP",
+   "title": "Winding subject trail",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a winding path of stepping stones for each subject, so that I can see where I am and what comes next.",
+   "want": "a winding path of stepping stones for each subject",
+   "so": "I can see where I am and what comes next",
+   "ac": [
+    {
+     "given": "I tap Animals on the map",
+     "when": "the trail opens",
+     "then": "units appear as stage banners and lessons as numbered stones along one continuous path, scrolled to my next lesson"
+    },
+    {
+     "given": "a lesson is completed",
+     "when": "I return to the trail",
+     "then": "its stone shows 1–3 stars and the next stone glows"
+    }
+   ],
+   "priority": "Must",
+   "size": "L",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-03",
+   "epic": "MAP",
+   "title": "Locked and unlocked units",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want later units to unlock when I pass the checkpoint, so that I build up step by step.",
+   "want": "later units to unlock when I pass the checkpoint",
+   "so": "I build up step by step",
+   "ac": [
+    {
+     "given": "I haven't passed the Farm animals checkpoint",
+     "when": "I tap a Wild animals stone",
+     "then": "the buddy says it unlocks after the trophy and points to it"
+    },
+    {
+     "given": "I pass the checkpoint",
+     "when": "I return to the trail",
+     "then": "the next unit's stones unlock with an animation"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C05",
+    "C14",
+    "C29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-04",
+   "epic": "MAP",
+   "title": "Cross-subject signposts",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want a signpost when a unit needs something from another subject, so that I know where to go first.",
+   "want": "a signpost when a unit needs something from another subject",
+   "so": "I know where to go first",
+   "ac": [
+    {
+     "given": "Time → Reading the clock needs Numbers → Counting by 5s",
+     "when": "I tap the locked unit",
+     "then": "a signpost says 'Visit Numbers Mountain first!' and tapping it opens that unit"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S18",
+   "screens": [
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-05",
+   "epic": "MAP",
+   "title": "Trail performance on budget tablets",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want the trail to scroll smoothly on a budget Android tablet, so that children don't experience lag.",
+   "want": "the trail to scroll smoothly on a budget Android tablet",
+   "so": "children don't experience lag",
+   "ac": [
+    {
+     "given": "a subject has 100+ stones",
+     "when": "the trail is scrolled on the reference tablet",
+     "then": "scrolling holds ~60 fps and only stones near the viewport are mounted"
+    },
+    {
+     "given": "any stone is tapped",
+     "when": "it's measured",
+     "then": "its touch target is at least 48 px"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-06",
+   "epic": "MAP",
+   "title": "Family & Class Island",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a special island on my map for lessons my family and teacher made, so that I can find them easily.",
+   "want": "a special island on my map for lessons my family and teacher made",
+   "so": "I can find them easily",
+   "ac": [
+    {
+     "given": "my parent assigned me a custom lesson",
+     "when": "I open my map",
+     "then": "Family Island appears with a glowing marker for the new lesson"
+    },
+    {
+     "given": "my teacher assigned work",
+     "when": "I open my map",
+     "then": "a 'From your teacher' signpost appears on Class Island with due work first"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "C22",
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-07",
+   "epic": "MAP",
+   "title": "Review stones inserted automatically",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want review lessons to appear on my trail when I need practice, so that I don't forget things.",
+   "want": "review lessons to appear on my trail when I need practice",
+   "so": "I don't forget things",
+   "ac": [
+    {
+     "given": "some items are due for review",
+     "when": "I open the trail",
+     "then": "a review stone (different shape) appears before my next new lesson"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C05",
+    "C10"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-08",
+   "epic": "MAP",
+   "title": "Regions for higher bands",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want each subject place to grow new regions as I level up, so that the trail keeps going.",
+   "want": "each subject place to grow new regions as I level up",
+   "so": "the trail keeps going",
+   "ac": [
+    {
+     "given": "I reach Voyager units in Numbers",
+     "when": "I open the map",
+     "then": "Numbers Mountain shows a new 'summit' region with Voyager units"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-01",
+   "epic": "LES",
+   "title": "Lesson runner",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want a short lesson of 5–8 quick activities with a progress bar, so that I finish before I get bored.",
+   "want": "a short lesson of 5–8 quick activities with a progress bar",
+   "so": "I finish before I get bored",
+   "ac": [
+    {
+     "given": "I tap a lesson stone",
+     "when": "the lesson starts",
+     "then": "a progress bar shows activities left, and each activity renders the exercise type from the lesson spec"
+    },
+    {
+     "given": "I tap the exit button",
+     "when": "I confirm with the buddy",
+     "then": "I return to the trail and partial progress is saved for answered items"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-02",
+   "epic": "LES",
+   "title": "Exercise: listen & tap",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want to hear a word and tap the matching picture, so that I learn without reading.",
+   "want": "to hear a word and tap the matching picture",
+   "so": "I learn without reading",
+   "ac": [
+    {
+     "given": "the exercise starts",
+     "when": "the prompt plays",
+     "then": "2–4 pictures show depending on band and the prompt can be replayed with a speaker button"
+    },
+    {
+     "given": "I tap the right picture",
+     "when": "it's checked",
+     "then": "it's marked correct with sound and the buddy reacts"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-03",
+   "epic": "LES",
+   "title": "Exercise: match pairs",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to match pictures with words or sounds by dragging or tapping, so that I connect what I see and hear.",
+   "want": "to match pictures with words or sounds by dragging or tapping",
+   "so": "I connect what I see and hear",
+   "ac": [
+    {
+     "given": "3–5 pairs are shown",
+     "when": "I drag or tap-tap a picture to its partner",
+     "then": "a correct pair locks together; a wrong pair springs back with a hint after 2 misses"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-04",
+   "epic": "LES",
+   "title": "Exercise: count",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want to count objects and tap the number, so that I practise counting.",
+   "want": "to count objects and tap the number",
+   "so": "I practise counting",
+   "ac": [
+    {
+     "given": "objects are shown",
+     "when": "I tap each object",
+     "then": "it is highlighted and counted aloud; then I tap the matching numeral"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-05",
+   "epic": "LES",
+   "title": "Exercise: name it",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to see a picture and choose its name, so that I practise recognising words.",
+   "want": "to see a picture and choose its name",
+   "so": "I practise recognising words",
+   "ac": [
+    {
+     "given": "I'm a reader (Explorer)",
+     "when": "the exercise shows",
+     "then": "options are written words; for non-readers the options are spoken on tap"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-06",
+   "epic": "LES",
+   "title": "Exercise: compare",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to choose which group has more, fewer or the same, so that I understand comparing.",
+   "want": "to choose which group has more, fewer or the same",
+   "so": "I understand comparing",
+   "ac": [
+    {
+     "given": "two groups are shown",
+     "when": "I tap the bigger group",
+     "then": "it's checked and the buddy explains by counting both"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-07",
+   "epic": "LES",
+   "title": "Exercise: sequence",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to put 3–5 cards in order, so that I learn routines, life cycles and order.",
+   "want": "to put 3–5 cards in order",
+   "so": "I learn routines, life cycles and order",
+   "ac": [
+    {
+     "given": "cards are shuffled",
+     "when": "I drag them into slots",
+     "then": "the order is checked when the last slot is filled and wrong cards wiggle"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-08",
+   "epic": "LES",
+   "title": "Exercise: sort into bins",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to drag items into 2–4 labelled baskets, so that I learn categories like land, water and air.",
+   "want": "to drag items into 2–4 labelled baskets",
+   "so": "I learn categories like land, water and air",
+   "ac": [
+    {
+     "given": "items and labelled bins are shown",
+     "when": "I drop an item in a bin",
+     "then": "a correct drop stays; a wrong drop bounces back with the bin's label spoken"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C09"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-09",
+   "epic": "LES",
+   "title": "Exercise: odd one out",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to spot the item that doesn't belong, so that I think about categories.",
+   "want": "to spot the item that doesn't belong",
+   "so": "I think about categories",
+   "ac": [
+    {
+     "given": "4 items are shown",
+     "when": "I tap the odd one",
+     "then": "the buddy explains why it doesn't belong"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-10",
+   "epic": "LES",
+   "title": "Exercise: case-match",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to match capital and small letters, so that I learn both forms.",
+   "want": "to match capital and small letters",
+   "so": "I learn both forms",
+   "ac": [
+    {
+     "given": "letter tiles are shown",
+     "when": "I match A to a",
+     "then": "the pair locks and the letter sound plays"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-11",
+   "epic": "LES",
+   "title": "Exercise: build a word",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to drag letter tiles to spell a word, so that I practise spelling.",
+   "want": "to drag letter tiles to spell a word",
+   "so": "I practise spelling",
+   "ac": [
+    {
+     "given": "a picture and empty slots are shown",
+     "when": "I drag letters into slots",
+     "then": "each letter's sound plays and the word is read when complete"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S3",
+   "screens": [
+    "C07",
+    "C27"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-12",
+   "epic": "LES",
+   "title": "Exercise: trace",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to trace letters, numbers and shapes with my finger, so that I learn to write them.",
+   "want": "to trace letters, numbers and shapes with my finger",
+   "so": "I learn to write them",
+   "ac": [
+    {
+     "given": "a letter outline with start dot and arrow is shown",
+     "when": "I trace",
+     "then": "strokes within tolerance in the right order complete the letter; off-path strokes show a gentle retry"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P4",
+   "sprint": "S18",
+   "screens": [
+    "C07",
+    "C25"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-13",
+   "epic": "LES",
+   "title": "Exercise: clock setter",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to drag clock hands to show a time, so that I learn to read clocks.",
+   "want": "to drag clock hands to show a time",
+   "so": "I learn to read clocks",
+   "ac": [
+    {
+     "given": "a target time is said and shown",
+     "when": "I drag the hands",
+     "then": "the minute hand snaps to 5-minute steps and the answer is checked when I tap Done"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S18",
+   "screens": [
+    "C07",
+    "C26"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-14",
+   "epic": "LES",
+   "title": "Exercise: true or false",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to judge whether the buddy's claim is true, so that I think critically.",
+   "want": "to judge whether the buddy's claim is true",
+   "so": "I think critically",
+   "ac": [
+    {
+     "given": "the buddy says 'A bat is a bird'",
+     "when": "I tap thumbs down",
+     "then": "it's correct and the buddy gives the reason"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S18",
+   "screens": [
+    "C07",
+    "C28"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-15",
+   "epic": "LES",
+   "title": "Older-band exercise types",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want typed answers, labelling diagrams, read-and-answer and multi-step problems, so that lessons challenge me.",
+   "want": "typed answers, labelling diagrams, read-and-answer and multi-step problems",
+   "so": "lessons challenge me",
+   "ac": [
+    {
+     "given": "I'm in a Voyager unit",
+     "when": "an exercise asks for a typed number",
+     "then": "a numeric keypad appears and answers are checked with forgiving matching"
+    },
+    {
+     "given": "a diagram exercise appears",
+     "when": "I drag labels onto the diagram",
+     "then": "each label snaps to its target zone and is checked"
+    }
+   ],
+   "priority": "Should",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-16",
+   "epic": "LES",
+   "title": "Lesson complete screen",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a finish screen with my stars and treasures, so that I know how I did and feel rewarded.",
+   "want": "a finish screen with my stars and treasures",
+   "so": "I know how I did and feel rewarded",
+   "ac": [
+    {
+     "given": "I finish the last activity",
+     "when": "the end screen shows",
+     "then": "1–3 stars based on first-try accuracy, treasures earned, and buttons for 'Next lesson' and 'Back to trail'"
+    },
+    {
+     "given": "I earned a badge in the lesson",
+     "when": "the end screen finishes",
+     "then": "the badge celebration plays next"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-17",
+   "epic": "LES",
+   "title": "Everything is spoken for non-readers",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want every instruction to be spoken, so that I can use the app before I can read.",
+   "want": "every instruction to be spoken",
+   "so": "I can use the app before I can read",
+   "ac": [
+    {
+     "given": "I'm Seedling or Sprout band",
+     "when": "any screen shows an instruction",
+     "then": "it's spoken automatically and a speaker button replays it"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-18",
+   "epic": "LES",
+   "title": "Recorded audio overrides device voice",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want my own recordings to replace the device voice where I made them, so that my child hears a familiar voice.",
+   "want": "my own recordings to replace the device voice where I made them",
+   "so": "my child hears a familiar voice",
+   "ac": [
+    {
+     "given": "I recorded the word 'Daisy' on a custom card",
+     "when": "the card is spoken",
+     "then": "my recording plays instead of the voice pack or device voice"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ADP-01",
+   "epic": "ADP",
+   "title": "Difficulty adjusts automatically",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want lessons to get harder when I'm doing well and easier when I'm struggling, so that I'm always challenged but not stuck.",
+   "want": "lessons to get harder when I'm doing well and easier when I'm struggling",
+   "so": "I'm always challenged but not stuck",
+   "ac": [
+    {
+     "given": "I get 3 stars in two consecutive lessons in a subject",
+     "when": "the next lesson is generated",
+     "then": "difficulty within my band increases (more options, fewer hints)"
+    },
+    {
+     "given": "I get 1 star in two consecutive lessons",
+     "when": "the next lesson is generated",
+     "then": "difficulty decreases"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "ADP-02",
+   "epic": "ADP",
+   "title": "Parent can lock the level",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to lock a child's difficulty in a subject, so that I can stop it moving if I know better.",
+   "want": "to lock a child's difficulty in a subject",
+   "so": "I can stop it moving if I know better",
+   "ac": [
+    {
+     "given": "I set Numbers to 'Locked: easier' for Amani",
+     "when": "lessons are generated",
+     "then": "difficulty no longer adjusts in Numbers for Amani"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P09"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ADP-03",
+   "epic": "ADP",
+   "title": "Item mastery tracking",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a mastery score per child per item, so that weak items can be reviewed and shown to parents.",
+   "want": "a mastery score per child per item",
+   "so": "weak items can be reviewed and shown to parents",
+   "ac": [
+    {
+     "given": "an item is answered",
+     "when": "the event is processed",
+     "then": "seen and first-try-correct counts update and mastery is recalculated in the shared domain package"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "ADP-04",
+   "epic": "ADP",
+   "title": "Spaced review",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want things I found hard to come back later, so that I remember them.",
+   "want": "things I found hard to come back later",
+   "so": "I remember them",
+   "ac": [
+    {
+     "given": "an item's mastery is below threshold",
+     "when": "time passes",
+     "then": "the item is scheduled for review at 1, 3, 7 and 14 days and included in a review lesson"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C05",
+    "C10"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ADP-05",
+   "epic": "ADP",
+   "title": "Placement quiz",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want a quick quiz to skip what I already know, so that I don't waste time on easy lessons.",
+   "want": "a quick quiz to skip what I already know",
+   "so": "I don't waste time on easy lessons",
+   "ac": [
+    {
+     "given": "I open a subject for the first time",
+     "when": "I choose 'Show what you know'",
+     "then": "a 2-minute adaptive quiz runs and units I pass are marked complete with bronze stars"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "C05",
+    "C06"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ADP-06",
+   "epic": "ADP",
+   "title": "Different band per subject",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to be at a higher level in subjects I'm strong in, so that each subject fits me.",
+   "want": "to be at a higher level in subjects I'm strong in",
+   "so": "each subject fits me",
+   "ac": [
+    {
+     "given": "Leo placed into Voyager in Planets",
+     "when": "he opens Time",
+     "then": "Time still starts at his age band"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S20",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "ADP-07",
+   "epic": "ADP",
+   "title": "Legendary replay",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to replay finished units at a harder setting, so that I can earn more and stay challenged.",
+   "want": "to replay finished units at a harder setting",
+   "so": "I can earn more and stay challenged",
+   "ac": [
+    {
+     "given": "I've completed a unit",
+     "when": "I tap its banner and choose 'Legendary'",
+     "then": "the unit replays at the next band's settings and awards bonus treasures"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S20",
+   "screens": [
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-01",
+   "epic": "GAM",
+   "title": "Jigsaw puzzle from any picture",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want to do a jigsaw of a picture, so that I have fun and practise problem-solving.",
+   "want": "to do a jigsaw of a picture",
+   "so": "I have fun and practise problem-solving",
+   "ac": [
+    {
+     "given": "a jigsaw opens",
+     "when": "my band is Seedling",
+     "then": "the picture splits into 4 pieces with a faint outline to guide placement"
+    },
+    {
+     "given": "I'm Sprout or Explorer",
+     "when": "it opens",
+     "then": "9 or 16 pieces are used"
+    },
+    {
+     "given": "I place the last piece",
+     "when": "it snaps in",
+     "then": "the full picture is shown, named aloud, and treasures are awarded"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C15"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-02",
+   "epic": "GAM",
+   "title": "Jigsaw from a parent's photo",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to turn one of my photos into a jigsaw, so that my child can puzzle over our own dog or grandparents.",
+   "want": "to turn one of my photos into a jigsaw",
+   "so": "my child can puzzle over our own dog or grandparents",
+   "ac": [
+    {
+     "given": "I use the 'Picture puzzle' template with my photo",
+     "when": "my child opens it",
+     "then": "the jigsaw uses my photo and after completion asks the question I set (e.g. 'Who is this?')"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "C15",
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-03",
+   "epic": "GAM",
+   "title": "Memory flip",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to flip cards and find matching pairs, so that I practise memory with things I've learnt.",
+   "want": "to flip cards and find matching pairs",
+   "so": "I practise memory with things I've learnt",
+   "ac": [
+    {
+     "given": "a memory game starts with items from a completed unit",
+     "when": "I flip two cards",
+     "then": "a match stays face up with the word spoken; a non-match flips back after 1 second"
+    },
+    {
+     "given": "I'm Seedling",
+     "when": "the game starts",
+     "then": "6 cards are used; Sprout 8; Explorer 12"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C16"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-04",
+   "epic": "GAM",
+   "title": "Games corner",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want a place to choose any unlocked game, so that I can play with what I've learnt.",
+   "want": "a place to choose any unlocked game",
+   "so": "I can play with what I've learnt",
+   "ac": [
+    {
+     "given": "I open Games corner",
+     "when": "it loads",
+     "then": "unlocked games show with the topic they'll use; locked games show what unlocks them"
+    },
+    {
+     "given": "I start a game",
+     "when": "I choose a topic I've completed",
+     "then": "the game uses that topic's items"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-05",
+   "epic": "GAM",
+   "title": "Games use any item set",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want every game to accept any item set (built-in or custom), so that new content works in games without code changes.",
+   "want": "every game to accept any item set (built-in or custom)",
+   "so": "new content works in games without code changes",
+   "ac": [
+    {
+     "given": "a custom lesson with 6 cards exists",
+     "when": "the memory game is launched with it",
+     "then": "the game runs using those cards' images and audio"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "GAM-06",
+   "epic": "GAM",
+   "title": "Sorting race",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want items to fall and me to drag them into the right basket, so that sorting feels exciting.",
+   "want": "items to fall and me to drag them into the right basket",
+   "so": "sorting feels exciting",
+   "ac": [
+    {
+     "given": "the game starts",
+     "when": "items fall slowly",
+     "then": "speed increases gently with correct sorts and never ends the game on mistakes"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S19",
+   "screens": [
+    "C17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-07",
+   "epic": "GAM",
+   "title": "Maze to the answer",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to guide my buddy through a maze to the right answer, so that practice feels like play.",
+   "want": "to guide my buddy through a maze to the right answer",
+   "so": "practice feels like play",
+   "ac": [
+    {
+     "given": "a maze with three answer exits shows",
+     "when": "I trace a path to an exit",
+     "then": "the buddy walks it and reacts to the answer chosen"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S19",
+   "screens": [
+    "C17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-08",
+   "epic": "GAM",
+   "title": "Subject games pack",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want subject-specific games (planet line-up, what to wear, colour mixer, tangram, timeline ladder, feed the animal), so that each subject has a signature game.",
+   "want": "subject-specific games (planet line-up, what to wear, colour mixer, tangram, timeline ladder, feed the animal)",
+   "so": "each subject has a signature game",
+   "ac": [
+    {
+     "given": "I've completed the relevant unit",
+     "when": "I open Games corner",
+     "then": "the subject's signature game is available"
+    }
+   ],
+   "priority": "Should",
+   "size": "XL",
+   "milestone": "P4",
+   "sprint": "S19",
+   "screens": [
+    "C17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "GAM-09",
+   "epic": "GAM",
+   "title": "Quiz show",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want a 10-question quiz show hosted by my buddy across units I've finished, so that I can test myself.",
+   "want": "a 10-question quiz show hosted by my buddy across units I've finished",
+   "so": "I can test myself",
+   "ac": [
+    {
+     "given": "I've completed 3+ units",
+     "when": "I start Quiz show",
+     "then": "10 mixed questions are drawn from my completed units and I get a final score with a personal best"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S19",
+   "screens": [
+    "C17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-01",
+   "epic": "RWD",
+   "title": "Earn stars per lesson",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to earn 1–3 stars for each lesson, so that I can see how well I did.",
+   "want": "to earn 1–3 stars for each lesson",
+   "so": "I can see how well I did",
+   "ac": [
+    {
+     "given": "I finish a lesson",
+     "when": "my first-try accuracy is ≥90%",
+     "then": "I get 3 stars"
+    },
+    {
+     "given": "accuracy is 60–89%",
+     "when": "I finish",
+     "then": "I get 2 stars; below 60% I still get 1 star"
+    },
+    {
+     "given": "I replay and do better",
+     "when": "I finish",
+     "then": "the stone keeps my best stars"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-02",
+   "epic": "RWD",
+   "title": "Stars never decrease",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want stars to be a record of learning that's never spent, so that my progress never goes backwards.",
+   "want": "stars to be a record of learning that's never spent",
+   "so": "my progress never goes backwards",
+   "ac": [
+    {
+     "given": "I buy something in the shop",
+     "when": "the purchase completes",
+     "then": "my star total is unchanged and only treasures are deducted"
+    }
+   ],
+   "priority": "Must",
+   "size": "XS",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-03",
+   "epic": "RWD",
+   "title": "Earn treasures",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to earn treasures for lessons, daily goals, perfect lessons, badges and games, so that I can save up for things.",
+   "want": "to earn treasures for lessons, daily goals, perfect lessons, badges and games",
+   "so": "I can save up for things",
+   "ac": [
+    {
+     "given": "I complete a lesson",
+     "when": "rewards are calculated",
+     "then": "treasures are added according to the economy config and a count-up animation plays"
+    },
+    {
+     "given": "I've hit today's earning cap",
+     "when": "I complete another lesson",
+     "then": "stars are still awarded but treasures are not, without telling me I'm capped"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-04",
+   "epic": "RWD",
+   "title": "Wallet from transactions",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want the treasure balance to be computed from an append-only transaction log, so that balances never desync across devices.",
+   "want": "the treasure balance to be computed from an append-only transaction log",
+   "so": "balances never desync across devices",
+   "ac": [
+    {
+     "given": "treasures were earned on two devices offline",
+     "when": "both sync",
+     "then": "the balance equals the sum of all transactions"
+    },
+    {
+     "given": "a spend would take the server balance below zero after merge",
+     "when": "sync runs",
+     "then": "the spend is reversed, the item returned to the shop and the child sees a gentle message"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "RWD-05",
+   "epic": "RWD",
+   "title": "Buddy shop",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to spend treasures on outfits for my buddy, so that I can make my buddy look the way I like.",
+   "want": "to spend treasures on outfits for my buddy",
+   "so": "I can make my buddy look the way I like",
+   "ac": [
+    {
+     "given": "I open the shop",
+     "when": "it loads",
+     "then": "items show price, a 'try on' preview and whether I can afford them"
+    },
+    {
+     "given": "I tap Buy on an item I can afford",
+     "when": "I confirm",
+     "then": "treasures are deducted, the item goes to my wardrobe and the buddy wears it"
+    },
+    {
+     "given": "I can't afford it",
+     "when": "I tap it",
+     "then": "the buddy says how many more treasures I need and offers to add it to my wishes"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-06",
+   "epic": "RWD",
+   "title": "Treasure room",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to decorate my buddy's room with furniture, wallpaper and pets, so that I have a cosy place that's mine.",
+   "want": "to decorate my buddy's room with furniture, wallpaper and pets",
+   "so": "I have a cosy place that's mine",
+   "ac": [
+    {
+     "given": "I own room items",
+     "when": "I open the treasure room",
+     "then": "I can drag items to placement spots, and the layout saves and syncs"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C19"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-07",
+   "epic": "RWD",
+   "title": "Sticker albums with no randomness",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to buy sticker packs that show exactly what's inside, so that I know what I'm getting.",
+   "want": "to buy sticker packs that show exactly what's inside",
+   "so": "I know what I'm getting",
+   "ac": [
+    {
+     "given": "I view a sticker pack",
+     "when": "I open its details",
+     "then": "every sticker in the pack is shown before I buy; there are no random draws"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C19"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-08",
+   "epic": "RWD",
+   "title": "Daily goal and gentle streak",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a daily goal and a streak that doesn't punish me for missing a day, so that I want to come back without feeling bad.",
+   "want": "a daily goal and a streak that doesn't punish me for missing a day",
+   "so": "I want to come back without feeling bad",
+   "ac": [
+    {
+     "given": "my daily goal is 2 lessons",
+     "when": "I finish my second lesson",
+     "then": "today fills in on the week strip and the buddy cheers"
+    },
+    {
+     "given": "I miss a day",
+     "when": "I return",
+     "then": "up to 2 rest days a week are used automatically and nothing I've earned is lost"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C04",
+    "C12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "RWD-09",
+   "epic": "RWD",
+   "title": "Economy config is tunable",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want earning amounts, caps and prices to live in one config, so that I can balance the economy without code changes.",
+   "want": "earning amounts, caps and prices to live in one config",
+   "so": "I can balance the economy without code changes",
+   "ac": [
+    {
+     "given": "I change the treasures per perfect lesson in the config",
+     "when": "content is released",
+     "then": "new lessons award the new amount on all clients"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "RWD-10",
+   "epic": "RWD",
+   "title": "Game unlocks and trail decorations",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want to spend treasures on extra game themes and trail decorations, so that there's more to save up for.",
+   "want": "to spend treasures on extra game themes and trail decorations",
+   "so": "there's more to save up for",
+   "ac": [
+    {
+     "given": "I buy a 'space' theme for memory",
+     "when": "I start memory",
+     "then": "I can pick the space card backs"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-01",
+   "epic": "BDG",
+   "title": "Badge rule engine",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want badge rules evaluated on the device after every lesson and game, so that badges appear instantly, even offline.",
+   "want": "badge rules evaluated on the device after every lesson and game",
+   "so": "badges appear instantly, even offline",
+   "ac": [
+    {
+     "given": "a badge rule 'complete 10 three-star lessons' exists",
+     "when": "the 10th 3-star lesson completes offline",
+     "then": "the badge is awarded immediately and an award event is queued for sync"
+    },
+    {
+     "given": "the same badge was already awarded on another device",
+     "when": "sync merges",
+     "then": "the learner has the badge once"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "BDG-02",
+   "epic": "BDG",
+   "title": "15 built-in badges for the MVP",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want badges for learning milestones, mastery, effort, consistency and exploring, so that I have goals to aim for.",
+   "want": "badges for learning milestones, mastery, effort, consistency and exploring",
+   "so": "I have goals to aim for",
+   "ac": [
+    {
+     "given": "the MVP is released",
+     "when": "I open the badge book",
+     "then": "15 badges across those categories are listed, earned ones in colour and unearned ones as silhouettes with how to earn them spoken on tap"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C20"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-03",
+   "epic": "BDG",
+   "title": "Badge celebration",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want a big celebration when I earn a badge, so that I feel proud.",
+   "want": "a big celebration when I earn a badge",
+   "so": "I feel proud",
+   "ac": [
+    {
+     "given": "I earn a badge",
+     "when": "the lesson or game ends",
+     "then": "a full-screen celebration plays with the buddy's voice line, the badge flies into the badge book, and treasures count up"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S4",
+   "screens": [
+    "C13"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-04",
+   "epic": "BDG",
+   "title": "Badge tiers",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want badges with bronze, silver and gold levels, so that I can keep improving.",
+   "want": "badges with bronze, silver and gold levels",
+   "so": "I can keep improving",
+   "ac": [
+    {
+     "given": "I have bronze 'Perfect Ten'",
+     "when": "I reach 25 perfect lessons",
+     "then": "the badge upgrades to silver with a smaller celebration"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "C20",
+    "T05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-05",
+   "epic": "BDG",
+   "title": "Hidden surprise badges",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want secret badges I discover by accident, so that exploring is surprising.",
+   "want": "secret badges I discover by accident",
+   "so": "exploring is surprising",
+   "ac": [
+    {
+     "given": "a hidden badge exists",
+     "when": "I view the badge book",
+     "then": "it shows as '???' until earned, then plays a special buddy dance"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C20"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-06",
+   "epic": "BDG",
+   "title": "Weekly badge digest for parents",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a weekly summary of badges my children earned, so that I can celebrate with them.",
+   "want": "a weekly summary of badges my children earned",
+   "so": "I can celebrate with them",
+   "ac": [
+    {
+     "given": "it's Sunday evening in my time zone",
+     "when": "the digest job runs",
+     "then": "I receive an email listing each child's badges and time learnt this week, and can switch it off"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BDG-07",
+   "epic": "BDG",
+   "title": "Badges can't be taken away",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want badges I've earned to stay mine, so that I trust the rewards.",
+   "want": "badges I've earned to stay mine",
+   "so": "I trust the rewards",
+   "ac": [
+    {
+     "given": "a grown-up deletes a custom badge rule",
+     "when": "I view my badge book",
+     "then": "badges I already earned remain; a grown-up can hide a badge but not revoke it"
+    }
+   ],
+   "priority": "Must",
+   "size": "XS",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "C20"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-01",
+   "epic": "BST",
+   "title": "Design a custom badge",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to design a badge with a shape, colour, icon or my own image, and a name, so that rewards match what matters in our family.",
+   "want": "to design a badge with a shape, colour, icon or my own image, and a name",
+   "so": "rewards match what matters in our family",
+   "ac": [
+    {
+     "given": "I open Badge Studio",
+     "when": "I pick a shape, colour and icon and name it 'Garden Helper'",
+     "then": "a live preview shows the badge"
+    },
+    {
+     "given": "I upload an image",
+     "when": "it passes safety checks",
+     "then": "it's cropped into the badge shape with EXIF stripped"
+    },
+    {
+     "given": "I record a message",
+     "when": "the badge is earned",
+     "then": "my recorded message plays during the celebration"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P14"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-02",
+   "epic": "BST",
+   "title": "Set how a custom badge is earned",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to choose a rule: complete content, reach a count, streak, mastery, assignment, manual award or a combination, so that badges reward exactly the behaviour I want.",
+   "want": "to choose a rule: complete content, reach a count, streak, mastery, assignment, manual award or a combination",
+   "so": "badges reward exactly the behaviour I want",
+   "ac": [
+    {
+     "given": "I choose 'Complete content' and pick my 'Week 3 spelling' lesson",
+     "when": "I save",
+     "then": "the badge is awarded automatically when a learner completes it"
+    },
+    {
+     "given": "I choose 'Combination'",
+     "when": "I add up to 3 conditions with AND/OR",
+     "then": "the rule summary reads back in plain English before saving"
+    },
+    {
+     "given": "I choose 'Manual award'",
+     "when": "I save",
+     "then": "the badge appears in my 'Award' list for chosen learners"
+    }
+   ],
+   "priority": "Must",
+   "size": "L",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P15",
+    "T05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-03",
+   "epic": "BST",
+   "title": "Attach treasures to a custom badge",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to give treasures when a custom badge is earned, so that my child can spend the reward in the shop.",
+   "want": "to give treasures when a custom badge is earned",
+   "so": "my child can spend the reward in the shop",
+   "ac": [
+    {
+     "given": "I set 50 treasures",
+     "when": "the value is within the cap",
+     "then": "it's saved"
+    },
+    {
+     "given": "I enter more than the per-badge cap",
+     "when": "I try to save",
+     "then": "I'm told the maximum and why (to keep the economy fair)"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P15"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-04",
+   "epic": "BST",
+   "title": "Real-world reward on a badge",
+   "role": "Tom (second parent)",
+   "story": "As Tom (second parent), I want to attach a real-world reward like 'Pick Friday's movie', so that the app connects to rewards at home.",
+   "want": "to attach a real-world reward like 'Pick Friday's movie'",
+   "so": "the app connects to rewards at home",
+   "ac": [
+    {
+     "given": "I add a real-world reward to a badge",
+     "when": "Leo earns it",
+     "then": "the reward appears on Leo's wishes as 'earned' and on my 'To deliver' list"
+    },
+    {
+     "given": "I mark it delivered",
+     "when": "Leo next opens his wishes",
+     "then": "it shows as delivered with a thank-you animation"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P15",
+    "P16",
+    "C21"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-05",
+   "epic": "BST",
+   "title": "Manually award a badge remotely",
+   "role": "Tom (second parent)",
+   "story": "As Tom (second parent), I want to award a badge from my phone for something done at home, so that I can reward real-world effort while I'm away.",
+   "want": "to award a badge from my phone for something done at home",
+   "so": "I can reward real-world effort while I'm away",
+   "ac": [
+    {
+     "given": "Leo tidied his room",
+     "when": "I tap Award on 'Tidy Champion' and choose Leo",
+     "then": "Leo sees the celebration the next time he opens the app"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P16"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-06",
+   "epic": "BST",
+   "title": "Choose who can earn a badge",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to make a badge available to one child, several children or a whole class, so that rewards fit the group.",
+   "want": "to make a badge available to one child, several children or a whole class",
+   "so": "rewards fit the group",
+   "ac": [
+    {
+     "given": "I select 'Class 1B'",
+     "when": "I save the badge",
+     "then": "every enrolled learner can earn it and new joiners get it automatically"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P15",
+    "T05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-07",
+   "epic": "BST",
+   "title": "Wish list (save up for real rewards)",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to save treasures towards a reward my parent set up, like 'a story of my choice', so that I have a big goal.",
+   "want": "to save treasures towards a reward my parent set up, like 'a story of my choice'",
+   "so": "I have a big goal",
+   "ac": [
+    {
+     "given": "my parent created the wish '50 treasures = bedtime story of your choice'",
+     "when": "I open my wishes",
+     "then": "it shows progress towards 50 treasures"
+    },
+    {
+     "given": "I have enough",
+     "when": "I tap 'Ask for it'",
+     "then": "treasures are held and my parent gets an approval request"
+    },
+    {
+     "given": "my parent approves",
+     "when": "it's delivered",
+     "then": "the treasures are spent; if declined they are returned"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "C21",
+    "P16"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BST-08",
+   "epic": "BST",
+   "title": "Badge Studio safety checks",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want uploaded badge images checked like lesson uploads, so that nothing inappropriate appears to children.",
+   "want": "uploaded badge images checked like lesson uploads",
+   "so": "nothing inappropriate appears to children",
+   "ac": [
+    {
+     "given": "a badge image is uploaded",
+     "when": "it's processed",
+     "then": "EXIF is stripped, size limits apply and the automated content scan runs; flagged images are rejected with a reason"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "BLD-01",
+   "epic": "BLD",
+   "title": "Create a card with photo, word and voice",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to add a card with a photo (camera or upload), a label and my voice, so that I can teach my child about our world.",
+   "want": "to add a card with a photo (camera or upload), a label and my voice",
+   "so": "I can teach my child about our world",
+   "ac": [
+    {
+     "given": "I open 'Add card'",
+     "when": "I take a photo",
+     "then": "it's square-cropped, resized and EXIF-stripped on my device and shown immediately"
+    },
+    {
+     "given": "I hold the record button and say 'Daisy the cow'",
+     "when": "I release",
+     "then": "a clip of up to 10 seconds is saved, trimmed and playable"
+    },
+    {
+     "given": "I don't record",
+     "when": "the card is used",
+     "then": "the label is spoken by the voice pack or device voice"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-02",
+   "epic": "BLD",
+   "title": "Pick from the illustration library",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to pick a picture from the built-in illustration library, so that I can make lessons without taking photos.",
+   "want": "to pick a picture from the built-in illustration library",
+   "so": "I can make lessons without taking photos",
+   "ac": [
+    {
+     "given": "I tap 'Library' on a card",
+     "when": "I search 'giraffe'",
+     "then": "matching illustrations show and the chosen one is attached"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-03",
+   "epic": "BLD",
+   "title": "Card extras: fact, category, number",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to add a fun fact, a category tag and a number to a card, so that the buddy can say facts and the card works in sorting and counting games.",
+   "want": "to add a fun fact, a category tag and a number to a card",
+   "so": "the buddy can say facts and the card works in sorting and counting games",
+   "ac": [
+    {
+     "given": "I tag cards 'land' and 'water'",
+     "when": "I choose the 'Sort them' template",
+     "then": "the sort exercise uses those tags as bins"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-04",
+   "epic": "BLD",
+   "title": "Choose a lesson template",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to choose a template like 'Learn the names', 'Sort them' or 'Picture puzzle', so that the app builds the activities for me.",
+   "want": "to choose a template like 'Learn the names', 'Sort them' or 'Picture puzzle'",
+   "so": "the app builds the activities for me",
+   "ac": [
+    {
+     "given": "I have 6 cards",
+     "when": "I choose 'Learn the names'",
+     "then": "a lesson of explore → listen & tap → match → name it is generated"
+    },
+    {
+     "given": "a template needs something missing (e.g. Sort needs 2+ categories)",
+     "when": "I select it",
+     "then": "I'm told what to add"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-05",
+   "epic": "BLD",
+   "title": "More templates",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want templates for 'Put in order', 'Count', 'Spelling list' and 'Quiz', so that I can make any kind of practice.",
+   "want": "templates for 'Put in order', 'Count', 'Spelling list' and 'Quiz'",
+   "so": "I can make any kind of practice",
+   "ac": [
+    {
+     "given": "I choose 'Spelling list' and type 10 words",
+     "when": "I save",
+     "then": "build-a-word and blend exercises are generated, using voice-pack audio for each word"
+    },
+    {
+     "given": "I choose 'Quiz'",
+     "when": "I write a question with 3 picture answers",
+     "then": "the quiz lesson uses my questions in order"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-06",
+   "epic": "BLD",
+   "title": "Lesson settings",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to set the age band, number of activities, hint level and unlocked games, so that the lesson suits my child.",
+   "want": "to set the age band, number of activities, hint level and unlocked games",
+   "so": "the lesson suits my child",
+   "ac": [
+    {
+     "given": "I set band Seedling and 5 activities",
+     "when": "the lesson is generated",
+     "then": "it uses 2–3 options per question and 5 activities"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-07",
+   "epic": "BLD",
+   "title": "Preview as child",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to play my lesson as my child would before assigning it, so that I can check it works.",
+   "want": "to play my lesson as my child would before assigning it",
+   "so": "I can check it works",
+   "ac": [
+    {
+     "given": "I tap 'Preview as child'",
+     "when": "the preview runs",
+     "then": "the lesson plays in the child UI with a 'Preview' banner and no progress or rewards are recorded"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-08",
+   "epic": "BLD",
+   "title": "Assign a custom lesson to my children",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to choose which of my children get a lesson, so that each child gets what fits them.",
+   "want": "to choose which of my children get a lesson",
+   "so": "each child gets what fits them",
+   "ac": [
+    {
+     "given": "I assign 'Our Pets' to Amani and Zawadi",
+     "when": "they open their maps",
+     "then": "the lesson appears on Family Island for both"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P12",
+    "C22"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-09",
+   "epic": "BLD",
+   "title": "Edit and version custom lessons",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to edit a lesson after it's been played, so that I can fix mistakes without breaking progress.",
+   "want": "to edit a lesson after it's been played",
+   "so": "I can fix mistakes without breaking progress",
+   "ac": [
+    {
+     "given": "learners have progress on my lesson",
+     "when": "I add two cards",
+     "then": "existing progress is kept (stable item IDs) and the new cards appear in the next session"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P10"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-10",
+   "epic": "BLD",
+   "title": "Card and storage limits by plan",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to see how many cards I've used, so that I'm not surprised by limits.",
+   "want": "to see how many cards I've used",
+   "so": "I'm not surprised by limits",
+   "ac": [
+    {
+     "given": "I'm on Free with 48 of 50 cards used",
+     "when": "I open the builder",
+     "then": "a usage meter shows 48/50 and adding the 51st prompts an upgrade (behind the parent gate)"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "P10"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-11",
+   "epic": "BLD",
+   "title": "Custom trails",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to chain my lessons into a mini-trail with a checkpoint, so that I can make a learning journey like 'Our trip to the coast'.",
+   "want": "to chain my lessons into a mini-trail with a checkpoint",
+   "so": "I can make a learning journey like 'Our trip to the coast'",
+   "ac": [
+    {
+     "given": "I create a trail with 3 lessons and a jigsaw checkpoint",
+     "when": "my child opens Family Island",
+     "then": "the trail appears as a winding path that unlocks in order"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "C22",
+    "P13"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-12",
+   "epic": "BLD",
+   "title": "Remix a built-in unit",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to copy a built-in unit and add or remove items, so that I can add local animals to Farm animals.",
+   "want": "to copy a built-in unit and add or remove items",
+   "so": "I can add local animals to Farm animals",
+   "ac": [
+    {
+     "given": "I tap 'Remix' on Farm animals",
+     "when": "I add 'camel' and remove 'pig'",
+     "then": "a custom copy is saved in my library; the original is unchanged"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S21",
+   "screens": [
+    "P10",
+    "P22"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-13",
+   "epic": "BLD",
+   "title": "Organise my library",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to group my lessons into categories and reorder them, so that I can find things quickly.",
+   "want": "to group my lessons into categories and reorder them",
+   "so": "I can find things quickly",
+   "ac": [
+    {
+     "given": "I create a category 'Term 1'",
+     "when": "I drag lessons into it",
+     "then": "the order and grouping save and sync"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "P10"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-14",
+   "epic": "BLD",
+   "title": "Desktop Lesson Builder",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want the Lesson Builder to work well on a laptop with drag-and-drop file upload, so that I can build lessons quickly while planning.",
+   "want": "the Lesson Builder to work well on a laptop with drag-and-drop file upload",
+   "so": "I can build lessons quickly while planning",
+   "ac": [
+    {
+     "given": "I'm on a laptop",
+     "when": "I drag 10 image files onto the builder",
+     "then": "10 cards are created with labels from the file names, ready to edit"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-15",
+   "epic": "BLD",
+   "title": "Offline-first media upload",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want my photos and recordings to work immediately and upload in the background, so that I never lose a card because the Wi-Fi dropped.",
+   "want": "my photos and recordings to work immediately and upload in the background",
+   "so": "I never lose a card because the Wi-Fi dropped",
+   "ac": [
+    {
+     "given": "I'm offline",
+     "when": "I save a card with a photo",
+     "then": "the card works on this device straight away and an upload is queued"
+    },
+    {
+     "given": "I reconnect",
+     "when": "the app is in the foreground or regains connectivity",
+     "then": "queued uploads retry and the card switches to the cloud copy"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P11",
+    "P26"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SHR-01",
+   "epic": "SHR",
+   "title": "Share a lesson by code",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to create a 6-character code or QR for a lesson, trail or badge set, so that colleagues and parents can import it.",
+   "want": "to create a 6-character code or QR for a lesson, trail or badge set",
+   "so": "colleagues and parents can import it",
+   "ac": [
+    {
+     "given": "I tap Share on a lesson",
+     "when": "I confirm the safety checklist",
+     "then": "a code and QR are created and I can copy or show them"
+    },
+    {
+     "given": "I revoke a code",
+     "when": "someone enters it",
+     "then": "they're told it's no longer available; existing copies are unaffected"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SHR-02",
+   "epic": "SHR",
+   "title": "Import by code",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to enter a code and get my own copy, so that I can use lessons my child's teacher shared.",
+   "want": "to enter a code and get my own copy",
+   "so": "I can use lessons my child's teacher shared",
+   "ac": [
+    {
+     "given": "I enter a valid code",
+     "when": "I tap Import",
+     "then": "a preview shows the lesson's cards and I can add a copy to my library"
+    },
+    {
+     "given": "the creator edits the original later",
+     "when": "I look at my copy",
+     "then": "my copy is unchanged unless I re-import"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P17",
+    "P23"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SHR-03",
+   "epic": "SHR",
+   "title": "Safety checklist before sharing",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a checklist and automated face detection before a code is created, so that children's faces and personal details aren't shared.",
+   "want": "a checklist and automated face detection before a code is created",
+   "so": "children's faces and personal details aren't shared",
+   "ac": [
+    {
+     "given": "a lesson contains an image with a detected face",
+     "when": "the creator tries to share",
+     "then": "they must confirm the image isn't of a child or remove it"
+    },
+    {
+     "given": "the creator ticks 'No names or addresses'",
+     "when": "the code is created",
+     "then": "the confirmation is logged with the share"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P17"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SHR-04",
+   "epic": "SHR",
+   "title": "No child data travels in shares",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want shared content to contain only cards, media, templates and badges, so that no learner data ever leaves the family or class.",
+   "want": "shared content to contain only cards, media, templates and badges",
+   "so": "no learner data ever leaves the family or class",
+   "ac": [
+    {
+     "given": "a lesson with learner progress is shared",
+     "when": "the share package is built",
+     "then": "it contains no learner IDs, progress, names or recordings of children made via the app's progress features"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SHR-05",
+   "epic": "SHR",
+   "title": "Report shared content",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to report an imported lesson that seems inappropriate, so that unsafe content is removed.",
+   "want": "to report an imported lesson that seems inappropriate",
+   "so": "unsafe content is removed",
+   "ac": [
+    {
+     "given": "I tap 'Report' on an imported lesson",
+     "when": "I choose a reason",
+     "then": "the report goes to moderation and the code is suspended if it passes a threshold"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "P17",
+    "M01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-01",
+   "epic": "PAR",
+   "title": "Parent home dashboard",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a home screen with each child's activity this week, so that I can see at a glance how they're doing.",
+   "want": "a home screen with each child's activity this week",
+   "so": "I can see at a glance how they're doing",
+   "ac": [
+    {
+     "given": "I open the grown-up zone",
+     "when": "it loads",
+     "then": "each child shows minutes this week, lessons done, stars and their latest badge, with today's goal status"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-02",
+   "epic": "PAR",
+   "title": "Child progress detail",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to see progress per subject, weak items and recent lessons for one child, so that I know where to help.",
+   "want": "to see progress per subject, weak items and recent lessons for one child",
+   "so": "I know where to help",
+   "ac": [
+    {
+     "given": "I open Zawadi's progress",
+     "when": "it loads",
+     "then": "I see per-subject progress bars, a weekly activity chart, items she finds hard and her last 10 lessons"
+    },
+    {
+     "given": "I tap a weak item",
+     "when": "it expands",
+     "then": "I see how often it was answered correctly and a suggestion like 'Practise together'"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P09"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-03",
+   "epic": "PAR",
+   "title": "Screen-time limit and bedtime lock",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the app to stop at the daily limit and bedtime, so that screen time stays healthy.",
+   "want": "the app to stop at the daily limit and bedtime",
+   "so": "screen time stays healthy",
+   "ac": [
+    {
+     "given": "Amani has used 20 of 20 minutes",
+     "when": "the limit is reached mid-lesson",
+     "then": "the current activity finishes, then the buddy says goodbye and the break screen shows"
+    },
+    {
+     "given": "it's after bedtime",
+     "when": "Amani opens the app",
+     "then": "the buddy is asleep and only the grown-ups button works"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "C23",
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-04",
+   "epic": "PAR",
+   "title": "Break reminders",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the buddy to suggest a stretch break every N minutes, so that my child takes breaks.",
+   "want": "the buddy to suggest a stretch break every N minutes",
+   "so": "my child takes breaks",
+   "ac": [
+    {
+     "given": "break reminders are every 15 minutes",
+     "when": "15 minutes pass",
+     "then": "after the current lesson the buddy leads a 30-second stretch"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "C23"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-05",
+   "epic": "PAR",
+   "title": "Family settings",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to change daily goal, voice speed, sound and limits at any time, so that the app fits our routine.",
+   "want": "to change daily goal, voice speed, sound and limits at any time",
+   "so": "the app fits our routine",
+   "ac": [
+    {
+     "given": "I change voice speed to slow",
+     "when": "my child plays",
+     "then": "all speech uses the slower rate"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-06",
+   "epic": "PAR",
+   "title": "Parent gate",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the grown-up zone behind a gate a young child can't pass, so that my child can't change settings or buy things.",
+   "want": "the grown-up zone behind a gate a young child can't pass",
+   "so": "my child can't change settings or buy things",
+   "ac": [
+    {
+     "given": "a child taps 'Grown-ups'",
+     "when": "the gate shows",
+     "then": "a sum such as 'What is 7 × 3?' with number buttons, or 'Hold for 3 seconds' as the accessible option, must be completed"
+    },
+    {
+     "given": "any learner on the account is 8 or older",
+     "when": "I open settings",
+     "then": "I'm prompted to set a 4-digit PIN that replaces the sum"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C24"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-07",
+   "epic": "PAR",
+   "title": "Notifications for parents",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want optional notifications for badges, wishes to approve and weekly summaries, so that I don't miss moments.",
+   "want": "optional notifications for badges, wishes to approve and weekly summaries",
+   "so": "I don't miss moments",
+   "ac": [
+    {
+     "given": "Zawadi asks for a wish",
+     "when": "I have notifications on",
+     "then": "I get a push/email notification and can approve from it"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P16"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAR-08",
+   "epic": "PAR",
+   "title": "Linked teacher visibility",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to see which teacher is linked and what they can see, so that I stay in control of my child's data.",
+   "want": "to see which teacher is linked and what they can see",
+   "so": "I stay in control of my child's data",
+   "ac": [
+    {
+     "given": "Zawadi is linked to Ms Priya's class",
+     "when": "I open Family members",
+     "then": "I see the class, the teacher and the scope, and can unlink at any time"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "P19",
+    "P20"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-01",
+   "epic": "CLS",
+   "title": "Create a class",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to create a class with a name, year group and age band, so that I can organise my learners.",
+   "want": "to create a class with a name, year group and age band",
+   "so": "I can organise my learners",
+   "ac": [
+    {
+     "given": "I'm on Teacher home",
+     "when": "I create 'Class 1B, ages 5–6'",
+     "then": "the class is created with a join code and QR and appears on my home"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "T01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-02",
+   "epic": "CLS",
+   "title": "Add students to the roster",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to add students by first name or paste a list, so that set-up takes minutes.",
+   "want": "to add students by first name or paste a list",
+   "so": "set-up takes minutes",
+   "ac": [
+    {
+     "given": "I paste 26 first names",
+     "when": "I confirm",
+     "then": "26 roster entries are created with auto-assigned avatars and picture passwords"
+    },
+    {
+     "given": "two students share a name",
+     "when": "they're added",
+     "then": "I'm prompted to add an initial to tell them apart"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "T02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-03",
+   "epic": "CLS",
+   "title": "Printable join cards",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to print a card per student with the class code and QR for parents, so that parents can link their child at home.",
+   "want": "to print a card per student with the class code and QR for parents",
+   "so": "parents can link their child at home",
+   "ac": [
+    {
+     "given": "I click 'Print parent letters'",
+     "when": "the PDF is generated",
+     "then": "each page shows the child's name, the class code, a QR, and a plain-language note about what the teacher can see"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "T02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-04",
+   "epic": "CLS",
+   "title": "Parent links a child to a class",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to enter the class code and choose which child it is, so that home and school share one learning record.",
+   "want": "to enter the class code and choose which child it is",
+   "so": "home and school share one learning record",
+   "ac": [
+    {
+     "given": "I enter Zawadi's class code",
+     "when": "I select Zawadi and confirm the roster entry 'Zawadi M.'",
+     "then": "the profiles merge into one learner with combined history and the teacher sees the linked icon"
+    },
+    {
+     "given": "the code is wrong or expired",
+     "when": "I submit",
+     "then": "I see a friendly error and can retry"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "P20"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-05",
+   "epic": "CLS",
+   "title": "Scopes for teacher visibility",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the teacher to see only class-assigned work and summary stats unless I allow more, so that my child's home learning stays private.",
+   "want": "the teacher to see only class-assigned work and summary stats unless I allow more",
+   "so": "my child's home learning stays private",
+   "ac": [
+    {
+     "given": "Zawadi is linked",
+     "when": "Ms Priya opens her progress",
+     "then": "she sees assigned work and totals but not Family Island lessons"
+    },
+    {
+     "given": "I switch on 'Share all progress with teacher'",
+     "when": "she reopens it",
+     "then": "she sees all subject progress"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "P20",
+    "T04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-06",
+   "epic": "CLS",
+   "title": "Class without parent accounts",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to use the app with children whose parents haven't signed up, so that every child in my class can take part.",
+   "want": "to use the app with children whose parents haven't signed up",
+   "so": "every child in my class can take part",
+   "ac": [
+    {
+     "given": "my school has accepted the school-consent terms",
+     "when": "I add a student with no parent account",
+     "then": "the student can play in class; data is limited to what the school agreement allows"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "T02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-07",
+   "epic": "CLS",
+   "title": "Groups within a class",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to create groups like 'Readers' and 'Starters', so that I can assign different work to each group.",
+   "want": "to create groups like 'Readers' and 'Starters'",
+   "so": "I can assign different work to each group",
+   "ac": [
+    {
+     "given": "I create a group and drag 8 students into it",
+     "when": "I assign work to the group",
+     "then": "only those students receive it"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CLS-08",
+   "epic": "CLS",
+   "title": "Move students between classes and archive",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to move a student or archive a class at year end, so that my classes stay tidy.",
+   "want": "to move a student or archive a class at year end",
+   "so": "my classes stay tidy",
+   "ac": [
+    {
+     "given": "the school year ends",
+     "when": "I archive Class 1B",
+     "then": "students can still play at home with their families; class data is kept per retention policy then deleted"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "T01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-01",
+   "epic": "ASN",
+   "title": "Assign work",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to assign built-in units or my own lessons to a class, a group or individuals with an optional due date, so that everyone practises what we're learning in class.",
+   "want": "to assign built-in units or my own lessons to a class, a group or individuals with an optional due date",
+   "so": "everyone practises what we're learning in class",
+   "ac": [
+    {
+     "given": "I select Animals → Water animals and 'Group: Readers', due Friday",
+     "when": "I click Assign",
+     "then": "the unit appears on those students' Class Island with a due badge"
+    },
+    {
+     "given": "a student completes it",
+     "when": "I view the assignment",
+     "then": "their status changes to done with stars"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T03",
+    "C22"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-02",
+   "epic": "ASN",
+   "title": "Class progress heatmap",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want a grid of students × lessons coloured by stars, so that I can see who's stuck at a glance.",
+   "want": "a grid of students × lessons coloured by stars",
+   "so": "I can see who's stuck at a glance",
+   "ac": [
+    {
+     "given": "I open Class progress",
+     "when": "it loads",
+     "then": "rows are students, columns are assigned lessons, cells show 0–3 stars and red marks for items struggled with"
+    },
+    {
+     "given": "I click a cell",
+     "when": "a panel opens",
+     "then": "I see that student's answers and weak items for that lesson"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-03",
+   "epic": "ASN",
+   "title": "Struggling-items report",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want a list of the items the class finds hardest, so that I can reteach them.",
+   "want": "a list of the items the class finds hardest",
+   "so": "I can reteach them",
+   "ac": [
+    {
+     "given": "an assignment has 10+ completions",
+     "when": "I open its insights",
+     "then": "the 5 items with the lowest first-try accuracy are listed with the students struggling"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-04",
+   "epic": "ASN",
+   "title": "Export class progress",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to export progress as CSV or PDF, so that I can include it in reports to parents and the school.",
+   "want": "to export progress as CSV or PDF",
+   "so": "I can include it in reports to parents and the school",
+   "ac": [
+    {
+     "given": "I click Export → CSV",
+     "when": "the file downloads",
+     "then": "it contains student first names, assignments, stars and completion dates only"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-05",
+   "epic": "ASN",
+   "title": "Badge wall",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want a projectable wall of badges the class earned this week, so that we can celebrate together.",
+   "want": "a projectable wall of badges the class earned this week",
+   "so": "we can celebrate together",
+   "ac": [
+    {
+     "given": "I open Badge wall in full screen",
+     "when": "it loads",
+     "then": "each student's new badges this week are shown with first names only"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "T06"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ASN-06",
+   "epic": "ASN",
+   "title": "Curriculum tags",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want units tagged with curriculum objectives, so that I can find units that match what I'm teaching.",
+   "want": "units tagged with curriculum objectives",
+   "so": "I can find units that match what I'm teaching",
+   "ac": [
+    {
+     "given": "I filter by 'Counting to 20'",
+     "when": "I browse units",
+     "then": "units tagged with that objective are shown"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "T03"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CRM-01",
+   "epic": "CRM",
+   "title": "Set a tablet to classroom mode",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to set a shared tablet to my class, so that children can sign in themselves without email.",
+   "want": "to set a shared tablet to my class",
+   "so": "children can sign in themselves without email",
+   "ac": [
+    {
+     "given": "I sign in on a tablet and choose 'Use as classroom device for Class 1B'",
+     "when": "I confirm",
+     "then": "the tablet opens to the class picker; the grown-up zone needs my PIN"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "T06",
+    "C02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CRM-02",
+   "epic": "CRM",
+   "title": "Picture-password sign-in",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to tap my class, my face picture and my 3 pictures to sign in, so that I can start quickly without reading or typing.",
+   "want": "to tap my class, my face picture and my 3 pictures to sign in",
+   "so": "I can start quickly without reading or typing",
+   "ac": [
+    {
+     "given": "the tablet is in classroom mode",
+     "when": "I tap my avatar and my 3 pictures in order",
+     "then": "my map opens"
+    },
+    {
+     "given": "I forget my pictures",
+     "when": "I tap 'Ask my teacher'",
+     "then": "the teacher can show my pictures from their dashboard"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "C02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CRM-03",
+   "epic": "CRM",
+   "title": "Auto sign-out on shared devices",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want children to be signed out after a lesson or inactivity, so that the next child doesn't play on someone else's profile.",
+   "want": "children to be signed out after a lesson or inactivity",
+   "so": "the next child doesn't play on someone else's profile",
+   "ac": [
+    {
+     "given": "a child finishes a lesson or is inactive for 3 minutes",
+     "when": "the timer fires",
+     "then": "the tablet returns to the class picker"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "C02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CRM-04",
+   "epic": "CRM",
+   "title": "Projector mode",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to run a lesson on the projector for the whole class, so that I can teach a new topic together.",
+   "want": "to run a lesson on the projector for the whole class",
+   "so": "I can teach a new topic together",
+   "ac": [
+    {
+     "given": "I start a unit in projector mode",
+     "when": "it runs",
+     "then": "large visuals, buddy voice and a 'class answers' tap mode run without recording individual progress"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "T06"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CRM-05",
+   "epic": "CRM",
+   "title": "Offline classroom",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want class tablets to work when the school Wi-Fi drops, so that the lesson isn't wasted.",
+   "want": "class tablets to work when the school Wi-Fi drops",
+   "so": "the lesson isn't wasted",
+   "ac": [
+    {
+     "given": "assigned content was downloaded",
+     "when": "the Wi-Fi drops mid-lesson",
+     "then": "children continue; results sync when the connection returns"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S10",
+   "screens": [
+    "C02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-01",
+   "epic": "OFF",
+   "title": "Installable PWA",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to install the app to my tablet's home screen, so that it opens like a normal app.",
+   "want": "to install the app to my tablet's home screen",
+   "so": "it opens like a normal app",
+   "ac": [
+    {
+     "given": "I visit the site on Android Chrome",
+     "when": "I choose Install",
+     "then": "it installs with the app icon and opens full-screen"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [
+    "C01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-02",
+   "epic": "OFF",
+   "title": "Download subjects for offline",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want subjects to be downloaded so they work without internet, so that we can learn on a trip or with no data.",
+   "want": "subjects to be downloaded so they work without internet",
+   "so": "we can learn on a trip or with no data",
+   "ac": [
+    {
+     "given": "I'm on Wi-Fi",
+     "when": "the app is opened",
+     "then": "the content packs for my children's active subjects download in the background"
+    },
+    {
+     "given": "storage is low",
+     "when": "a download would exceed the quota",
+     "then": "I'm told which subjects couldn't be downloaded and can free space"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P18",
+    "P26"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-03",
+   "epic": "OFF",
+   "title": "Offline play with outbox",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to play and earn rewards with no internet, so that nothing is lost.",
+   "want": "to play and earn rewards with no internet",
+   "so": "nothing is lost",
+   "ac": [
+    {
+     "given": "the device is offline",
+     "when": "I complete lessons and buy an outfit",
+     "then": "events are written to the local outbox and my map updates immediately"
+    },
+    {
+     "given": "the device reconnects",
+     "when": "sync runs",
+     "then": "outbox events are sent in batches and acknowledged; none are duplicated"
+    }
+   ],
+   "priority": "Must",
+   "size": "L",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-04",
+   "epic": "OFF",
+   "title": "Sync across devices",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want progress on any device to appear on all others, so that my children can switch devices.",
+   "want": "progress on any device to appear on all others",
+   "so": "my children can switch devices",
+   "ac": [
+    {
+     "given": "Zawadi plays on the tablet",
+     "when": "I open my phone",
+     "then": "her new stars and badges show after sync (within a minute when online)"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-05",
+   "epic": "OFF",
+   "title": "Conflict handling for edits",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want grown-up edits to merge with last-write-wins using server timestamps, so that edits from two devices don't corrupt data.",
+   "want": "grown-up edits to merge with last-write-wins using server timestamps",
+   "so": "edits from two devices don't corrupt data",
+   "ac": [
+    {
+     "given": "a lesson is edited offline on two devices",
+     "when": "both sync",
+     "then": "the later edit wins and the earlier is kept in history for 30 days"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OFF-06",
+   "epic": "OFF",
+   "title": "App update without interrupting",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want updates not to interrupt my lesson, so that I can finish what I'm doing.",
+   "want": "updates not to interrupt my lesson",
+   "so": "I can finish what I'm doing",
+   "ac": [
+    {
+     "given": "a new version is available",
+     "when": "I'm in a lesson",
+     "then": "the update is applied the next time the app starts; grown-ups see a 'What's new' note"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "CNT-01",
+   "epic": "CNT",
+   "title": "Content schema and validation",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a JSON schema for items, units, lessons, trails, buddy scripts and badges, validated in CI, so that content can be added safely without code changes.",
+   "want": "a JSON schema for items, units, lessons, trails, buddy scripts and badges, validated in CI",
+   "so": "content can be added safely without code changes",
+   "ac": [
+    {
+     "given": "a unit JSON is missing a required field",
+     "when": "CI runs",
+     "then": "validation fails with the file and field named"
+    },
+    {
+     "given": "an asset referenced in a unit is missing",
+     "when": "CI runs",
+     "then": "validation fails"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "CNT-02",
+   "epic": "CNT",
+   "title": "Content packs and versioning",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want content built into versioned packs per subject and uploaded to storage, so that new lessons can ship without an app release.",
+   "want": "content built into versioned packs per subject and uploaded to storage",
+   "so": "new lessons can ship without an app release",
+   "ac": [
+    {
+     "given": "I run the content build for release 2027.03.1",
+     "when": "it finishes",
+     "then": "per-subject packs and a manifest are uploaded and clients fetch updated packs on next launch"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "CNT-03",
+   "epic": "CNT",
+   "title": "Asset review status",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want every asset to have a review status of draft, reviewed or approved, so that unapproved assets never reach production.",
+   "want": "every asset to have a review status of draft, reviewed or approved",
+   "so": "unapproved assets never reach production",
+   "ac": [
+    {
+     "given": "a production build includes an asset with status 'draft'",
+     "when": "CI runs",
+     "then": "the build fails listing the asset"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "CNT-04",
+   "epic": "CNT",
+   "title": "MVP subjects: Numbers, Language, Animals, Colours, Shapes",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want the first units of five subjects, so that I have lots to learn in the beta.",
+   "want": "the first units of five subjects",
+   "so": "I have lots to learn in the beta",
+   "ac": [
+    {
+     "given": "the MVP is released",
+     "when": "I open my map",
+     "then": "about 25 units across the five subjects at Seedling and Sprout are playable, each reviewed and approved"
+    }
+   ],
+   "priority": "Must",
+   "size": "XL",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "C04",
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CNT-05",
+   "epic": "CNT",
+   "title": "Launch subjects wave",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want Time, Weather & seasons, Plants, Opposites, Planets, Transport, Sports, Body, Positions, Directions & compass and Feelings, so that I can explore everything I'm curious about.",
+   "want": "Time, Weather & seasons, Plants, Opposites, Planets, Transport, Sports, Body, Positions, Directions & compass and Feelings",
+   "so": "I can explore everything I'm curious about",
+   "ac": [
+    {
+     "given": "the launch release is out",
+     "when": "I open my map",
+     "then": "16 subjects with Seedling–Explorer units are available"
+    }
+   ],
+   "priority": "Must",
+   "size": "XL",
+   "milestone": "P4",
+   "sprint": "S20",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CNT-06",
+   "epic": "CNT",
+   "title": "My seasons localisation",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the 'My seasons' unit to match our climate, so that my children learn the seasons they actually live through.",
+   "want": "the 'My seasons' unit to match our climate",
+   "so": "my children learn the seasons they actually live through",
+   "ac": [
+    {
+     "given": "my country is Kenya",
+     "when": "my child reaches 'My seasons'",
+     "then": "it teaches the long rains, short rains and dry seasons"
+    },
+    {
+     "given": "my country is the UK",
+     "when": "they reach it",
+     "then": "it teaches spring, summer, autumn and winter"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S20",
+   "screens": [
+    "C05"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CNT-07",
+   "epic": "CNT",
+   "title": "Higher-band units roll-out",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want Voyager units in Maths, Reading and Space first, so that the app grows with me.",
+   "want": "Voyager units in Maths, Reading and Space first",
+   "so": "the app grows with me",
+   "ac": [
+    {
+     "given": "Voyager content is released for a subject",
+     "when": "I'm 9–12 or placed at Voyager",
+     "then": "the units appear on my trail"
+    }
+   ],
+   "priority": "Should",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CNT-08",
+   "epic": "CNT",
+   "title": "Post-launch subjects",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want Food, Family & community, Kindness & citizenship, Money & saving, Music, Countries & cultures, Coding & logic, so that there's always something new.",
+   "want": "Food, Family & community, Kindness & citizenship, Money & saving, Music, Countries & cultures, Coding & logic",
+   "so": "there's always something new",
+   "ac": [
+    {
+     "given": "a post-launch subject wave is released",
+     "when": "I open my map",
+     "then": "the new places appear with a 'New!' flag"
+    }
+   ],
+   "priority": "Should",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "C04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "CNT-09",
+   "epic": "CNT",
+   "title": "Content tooling for writers",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a content CLI to validate units, build packs, generate asset prompt sheets and normalise audio, so that making content is fast and consistent.",
+   "want": "a content CLI to validate units, build packs, generate asset prompt sheets and normalise audio",
+   "so": "making content is fast and consistent",
+   "ac": [
+    {
+     "given": "I run 'content-cli assets:prompts animals/farm'",
+     "when": "it finishes",
+     "then": "a prompt sheet listing every item's illustration brief in the style guide is produced"
+    },
+    {
+     "given": "I run 'content-cli audio:normalise'",
+     "when": "it finishes",
+     "then": "all clips are trimmed and loudness-normalised"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S1",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "PAY-01",
+   "epic": "PAY",
+   "title": "View plans",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to compare Free, Family and Classroom plans, so that I can decide whether to upgrade.",
+   "want": "to compare Free, Family and Classroom plans",
+   "so": "I can decide whether to upgrade",
+   "ac": [
+    {
+     "given": "I open Plans behind the parent gate",
+     "when": "it loads",
+     "then": "each plan's price, learner limit, content and creator limits are shown, with my current plan marked"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "P21"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-02",
+   "epic": "PAY",
+   "title": "Subscribe on the web",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to pay for the Family plan by card on the web, so that my children get everything.",
+   "want": "to pay for the Family plan by card on the web",
+   "so": "my children get everything",
+   "ac": [
+    {
+     "given": "I choose Family yearly",
+     "when": "I complete Stripe Checkout",
+     "then": "the plan activates immediately on all devices and a receipt is emailed"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "P21",
+    "P24"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-03",
+   "epic": "PAY",
+   "title": "Subscribe in the Android app",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to subscribe through Google Play in the Android app, so that payment is simple on my phone.",
+   "want": "to subscribe through Google Play in the Android app",
+   "so": "payment is simple on my phone",
+   "ac": [
+    {
+     "given": "I'm in the Android app",
+     "when": "I choose Family monthly",
+     "then": "Google Play Billing is used, and the entitlement is verified server-side"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "P21",
+    "P24"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-04",
+   "epic": "PAY",
+   "title": "Free tier limits",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the Free plan to give real value with clear limits, so that I can try before paying.",
+   "want": "the Free plan to give real value with clear limits",
+   "so": "I can try before paying",
+   "ac": [
+    {
+     "given": "I'm on Free",
+     "when": "my child opens a locked unit",
+     "then": "the buddy says it's part of the full trail and nothing is shown to the child about prices; the parent sees upgrade info behind the gate"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "C05",
+    "P21"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-05",
+   "epic": "PAY",
+   "title": "Classroom licence",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to buy a Classroom licence for one teacher, so that my class gets full access.",
+   "want": "to buy a Classroom licence for one teacher",
+   "so": "my class gets full access",
+   "ac": [
+    {
+     "given": "I buy a Classroom licence",
+     "when": "it activates",
+     "then": "all my students get full access at school and at home while enrolled"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "T01",
+    "P24"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-06",
+   "epic": "PAY",
+   "title": "Manage and cancel subscription",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to change or cancel my plan easily, so that I'm in control.",
+   "want": "to change or cancel my plan easily",
+   "so": "I'm in control",
+   "ac": [
+    {
+     "given": "I tap Cancel",
+     "when": "I confirm",
+     "then": "the plan stays active until the period ends, then reverts to Free without deleting content (excess custom cards become read-only)"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [
+    "P21",
+    "P25"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "PAY-07",
+   "epic": "PAY",
+   "title": "No purchases from the child side",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want every purchase or price behind the parent gate, so that children can never be targeted with upsells.",
+   "want": "every purchase or price behind the parent gate",
+   "so": "children can never be targeted with upsells",
+   "ac": [
+    {
+     "given": "any screen in the child app",
+     "when": "it's audited",
+     "then": "no price, upgrade button or purchase link is reachable without passing the parent gate"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S22",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SAF-01",
+   "epic": "SAF",
+   "title": "Minimal child data",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want only a nickname, birth month and year and avatar stored about my child, so that their privacy is protected.",
+   "want": "only a nickname, birth month and year and avatar stored about my child",
+   "so": "their privacy is protected",
+   "ac": [
+    {
+     "given": "a learner profile is created",
+     "when": "it's stored",
+     "then": "no surname, email, photo of the child, location or free text is collected"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [
+    "P04"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-02",
+   "epic": "SAF",
+   "title": "Strip photo metadata",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want location and camera data removed from my photos, so that my home location is never exposed.",
+   "want": "location and camera data removed from my photos",
+   "so": "my home location is never exposed",
+   "ac": [
+    {
+     "given": "I upload a photo with GPS EXIF",
+     "when": "it's processed on the device",
+     "then": "all EXIF is removed before upload, and the server re-checks and rejects any file still carrying GPS data"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-03",
+   "epic": "SAF",
+   "title": "Export my family's data",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to download all data held about my family, so that I can see what's stored.",
+   "want": "to download all data held about my family",
+   "so": "I can see what's stored",
+   "ac": [
+    {
+     "given": "I request an export",
+     "when": "it's ready (within 24 hours)",
+     "then": "I get a download link to a ZIP with JSON and media, valid for 7 days"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-04",
+   "epic": "SAF",
+   "title": "Delete my family's data",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to delete my account and all my family's data, so that nothing is kept when we leave.",
+   "want": "to delete my account and all my family's data",
+   "so": "nothing is kept when we leave",
+   "ac": [
+    {
+     "given": "I request deletion and confirm with a sign-in link",
+     "when": "the 7-day undo window passes",
+     "then": "all personal data and media are deleted from live systems, with backups expiring within 35 days"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P18",
+    "P26"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-05",
+   "epic": "SAF",
+   "title": "Data retention jobs",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want automated retention rules (deleted lesson media after 30 days; inactive accounts after warnings), so that we meet our written retention policy.",
+   "want": "automated retention rules (deleted lesson media after 30 days; inactive accounts after warnings)",
+   "so": "we meet our written retention policy",
+   "ac": [
+    {
+     "given": "a custom lesson was deleted 30 days ago",
+     "when": "the nightly job runs",
+     "then": "its media objects are deleted from storage"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SAF-06",
+   "epic": "SAF",
+   "title": "No third-party trackers",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a CI check that blocks third-party analytics and ad SDKs, so that children are never tracked.",
+   "want": "a CI check that blocks third-party analytics and ad SDKs",
+   "so": "children are never tracked",
+   "ac": [
+    {
+     "given": "a PR adds a dependency on a known analytics/ad SDK",
+     "when": "CI runs",
+     "then": "the build fails with an explanation"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SAF-07",
+   "epic": "SAF",
+   "title": "Crash reports without child data",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want Sentry configured to scrub child data, so that debugging never exposes children.",
+   "want": "Sentry configured to scrub child data",
+   "so": "debugging never exposes children",
+   "ac": [
+    {
+     "given": "an error occurs on a lesson screen",
+     "when": "Sentry captures it",
+     "then": "learner names, media URLs and audio URLs are scrubbed before sending"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SAF-08",
+   "epic": "SAF",
+   "title": "Automated scan of shared uploads",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want uploaded images scanned for inappropriate content, so that nothing unsafe reaches children.",
+   "want": "uploaded images scanned for inappropriate content",
+   "so": "nothing unsafe reaches children",
+   "ac": [
+    {
+     "given": "an uploaded image is flagged",
+     "when": "the scan completes",
+     "then": "the image is hidden, the uploader is told why, and a review entry is created"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "M01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-09",
+   "epic": "SAF",
+   "title": "Age-appropriate privacy by learner age",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want privacy rules to fit my age (under-13, 13–17, adult), so that my data is treated correctly.",
+   "want": "privacy rules to fit my age (under-13, 13–17, adult)",
+   "so": "my data is treated correctly",
+   "ac": [
+    {
+     "given": "a learner turns 13",
+     "when": "the age rules are applied",
+     "then": "the teen settings become available according to the family's country"
+    },
+    {
+     "given": "a learner is under 13",
+     "when": "they use the app",
+     "then": "no free-text input exists outside grown-up screens"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SAF-10",
+   "epic": "SAF",
+   "title": "Privacy policy and terms",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a clear privacy policy and terms, so that I know my rights.",
+   "want": "a clear privacy policy and terms",
+   "so": "I know my rights",
+   "ac": [
+    {
+     "given": "I open Privacy in settings",
+     "when": "it loads",
+     "then": "I see a plain-language summary and the full policy, with version and date"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-01",
+   "epic": "ACC",
+   "title": "Large touch targets",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want big buttons that are easy to tap, so that I don't tap the wrong thing.",
+   "want": "big buttons that are easy to tap",
+   "so": "I don't tap the wrong thing",
+   "ac": [
+    {
+     "given": "any interactive element in the child app",
+     "when": "it's measured",
+     "then": "it is at least 48 × 48 px with 8 px spacing"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "ACC-02",
+   "epic": "ACC",
+   "title": "Reduced motion",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want a calm mode with fewer animations, so that my child doesn't get over-stimulated.",
+   "want": "a calm mode with fewer animations",
+   "so": "my child doesn't get over-stimulated",
+   "ac": [
+    {
+     "given": "reduced motion is on (device or app setting)",
+     "when": "a celebration plays",
+     "then": "it uses a short fade instead of confetti and bouncing"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-03",
+   "epic": "ACC",
+   "title": "Captions for buddy speech",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want captions for everything the buddy says, so that children with hearing loss can follow.",
+   "want": "captions for everything the buddy says",
+   "so": "children with hearing loss can follow",
+   "ac": [
+    {
+     "given": "captions are on",
+     "when": "the buddy speaks",
+     "then": "a speech bubble shows the text in sync"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S6",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-04",
+   "epic": "ACC",
+   "title": "Screen reader support in the grown-up zone",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the grown-up zone to work with TalkBack and screen readers, so that blind or low-vision parents can manage the app.",
+   "want": "the grown-up zone to work with TalkBack and screen readers",
+   "so": "blind or low-vision parents can manage the app",
+   "ac": [
+    {
+     "given": "TalkBack is on",
+     "when": "I navigate the parent home",
+     "then": "every control has a label and the focus order is logical"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-05",
+   "epic": "ACC",
+   "title": "Dyslexia-friendly font option",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want a dyslexia-friendly font for reading units, so that reading is easier for me.",
+   "want": "a dyslexia-friendly font for reading units",
+   "so": "reading is easier for me",
+   "ac": [
+    {
+     "given": "the option is on",
+     "when": "a reading exercise shows",
+     "then": "text uses the dyslexia-friendly font with increased spacing"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "P18"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-06",
+   "epic": "ACC",
+   "title": "Left-handed layouts",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want drag games to suit left-handed children, so that my hand doesn't cover the targets.",
+   "want": "drag games to suit left-handed children",
+   "so": "my hand doesn't cover the targets",
+   "ac": [
+    {
+     "given": "left-handed mode is on",
+     "when": "a sort exercise shows",
+     "then": "bins appear on the left and items on the right"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [
+    "C09"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "ACC-07",
+   "epic": "ACC",
+   "title": "Contrast and colour independence",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want text contrast of at least 4.5:1 and no information by colour alone, so that everyone can see what matters.",
+   "want": "text contrast of at least 4.5:1 and no information by colour alone",
+   "so": "everyone can see what matters",
+   "ac": [
+    {
+     "given": "axe checks run in CI",
+     "when": "a screen fails contrast",
+     "then": "the PR is flagged; before launch it blocks"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OLD-01",
+   "epic": "OLD",
+   "title": "Mature look for older learners",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want a cleaner 'explorer' theme, so that the app feels like it's for me.",
+   "want": "a cleaner 'explorer' theme",
+   "so": "the app feels like it's for me",
+   "ac": [
+    {
+     "given": "my age stage is 8–12",
+     "when": "I open the app",
+     "then": "the map and lessons use the explorer theme with optional dark mode"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OLD-02",
+   "epic": "OLD",
+   "title": "Teen sign-in",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want my own sign-in linked to my parent's account when I'm a teen, so that I can learn on my own device.",
+   "want": "my own sign-in linked to my parent's account when I'm a teen",
+   "so": "I can learn on my own device",
+   "ac": [
+    {
+     "given": "my parent enables teen sign-in for me (13+)",
+     "when": "I sign in with my own email or a family code",
+     "then": "I get my profile only, and my parent keeps oversight"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01",
+    "A02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OLD-03",
+   "epic": "OLD",
+   "title": "Self-made flashcard trails",
+   "role": "Joseph (adult learner)",
+   "story": "As Joseph (adult learner), I want to make my own flashcard trail with self-rating, so that I can study anything.",
+   "want": "to make my own flashcard trail with self-rating",
+   "so": "I can study anything",
+   "ac": [
+    {
+     "given": "I create a trail of 20 cards",
+     "when": "I study",
+     "then": "cards are rated 'knew it / almost / not yet' and scheduled with spaced repetition"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OLD-04",
+   "epic": "OLD",
+   "title": "Personal records instead of confetti",
+   "role": "Nia (Voyager)",
+   "story": "As Nia (Voyager), I want to turn off celebrations and see personal records, so that I'm not distracted.",
+   "want": "to turn off celebrations and see personal records",
+   "so": "I'm not distracted",
+   "ac": [
+    {
+     "given": "celebrations are off",
+     "when": "I finish a lesson",
+     "then": "a compact summary shows stars, accuracy and personal bests"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OLD-05",
+   "epic": "OLD",
+   "title": "Family challenges",
+   "role": "Joseph (adult learner)",
+   "story": "As Joseph (adult learner), I want a cooperative family goal, so that we learn together.",
+   "want": "a cooperative family goal",
+   "so": "we learn together",
+   "ac": [
+    {
+     "given": "Grace sets 'The family completes 30 lessons this week'",
+     "when": "any family learner completes a lesson",
+     "then": "the shared progress bar fills; the reward goes to everyone when it's reached; there is no ranking between children"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "A01",
+    "P08"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOB-01",
+   "epic": "MOB",
+   "title": "React Native CLI app scaffold in the monorepo",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want the bare React Native app in apps/mobile using shared packages, so that logic isn't duplicated.",
+   "want": "the bare React Native app in apps/mobile using shared packages",
+   "so": "logic isn't duplicated",
+   "ac": [
+    {
+     "given": "the app is built",
+     "when": "it imports packages/domain, sync and content-schema",
+     "then": "Metro resolves them and React isn't duplicated"
+    },
+    {
+     "given": "CI runs",
+     "when": "a release tag is pushed",
+     "then": "a signed AAB is built with Gradle"
+    }
+   ],
+   "priority": "Must",
+   "size": "L",
+   "milestone": "P3",
+   "sprint": "S12",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "MOB-02",
+   "epic": "MOB",
+   "title": "Native storage adapter",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want an op-sqlite storage adapter implementing the shared sync interface, so that the mobile app works offline like the web app.",
+   "want": "an op-sqlite storage adapter implementing the shared sync interface",
+   "so": "the mobile app works offline like the web app",
+   "ac": [
+    {
+     "given": "the adapter passes the shared storage-adapter test suite",
+     "when": "the app runs offline",
+     "then": "events queue and sync like on the web"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P3",
+   "sprint": "S12",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "MOB-03",
+   "epic": "MOB",
+   "title": "Child experience parity on Android",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want the Android app to have the same map, trail, lessons, games and rewards as the web app, so that I can use whichever device I have.",
+   "want": "the Android app to have the same map, trail, lessons, games and rewards as the web app",
+   "so": "I can use whichever device I have",
+   "ac": [
+    {
+     "given": "the Android app is installed",
+     "when": "I sign in",
+     "then": "my profile, trail, wallet and badges match the web app after sync"
+    }
+   ],
+   "priority": "Must",
+   "size": "XL",
+   "milestone": "P3",
+   "sprint": "S14",
+   "screens": [
+    "C04",
+    "C05",
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOB-04",
+   "epic": "MOB",
+   "title": "Native camera and microphone in the Lesson Builder",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want the Android app to use the camera and microphone natively, so that making cards is fast on my phone.",
+   "want": "the Android app to use the camera and microphone natively",
+   "so": "making cards is fast on my phone",
+   "ac": [
+    {
+     "given": "I open Add card for the first time",
+     "when": "I tap Camera",
+     "then": "the camera permission is requested at that moment (not at app launch) within the gated grown-up zone"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P3",
+   "sprint": "S16",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOB-05",
+   "epic": "MOB",
+   "title": "Play Store Families compliance",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want the Android app to meet Google Play's Families policy, so that it's approved and listed.",
+   "want": "the Android app to meet Google Play's Families policy",
+   "so": "it's approved and listed",
+   "ac": [
+    {
+     "given": "the app is submitted",
+     "when": "Play reviews it",
+     "then": "data-safety, target-audience and Families declarations are accurate and no non-certified SDKs are included"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P3",
+   "sprint": "S17",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "MOB-06",
+   "epic": "MOB",
+   "title": "Maestro E2E on Android",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want the critical flows automated on an emulator, so that releases don't regress.",
+   "want": "the critical flows automated on an emulator",
+   "so": "releases don't regress",
+   "ac": [
+    {
+     "given": "a release candidate is built",
+     "when": "Maestro runs",
+     "then": "sign-up → lesson, offline → sync and builder flows pass"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P3",
+   "sprint": "S17",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "MOB-07",
+   "epic": "MOB",
+   "title": "iOS app",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want an iPhone/iPad app, so that family members with Apple devices can use it.",
+   "want": "an iPhone/iPad app",
+   "so": "family members with Apple devices can use it",
+   "ac": [
+    {
+     "given": "the iOS build is released",
+     "when": "I install it from the App Store",
+     "then": "it has the same features as Android, using Apple In-App Purchase for subscriptions"
+    }
+   ],
+   "priority": "Should",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-01",
+   "epic": "OPS",
+   "title": "Monorepo and CI",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a pnpm + Turborepo monorepo with lint, tests and content validation on every PR, so that broken code never reaches main.",
+   "want": "a pnpm + Turborepo monorepo with lint, tests and content validation on every PR",
+   "so": "broken code never reaches main",
+   "ac": [
+    {
+     "given": "I open a PR",
+     "when": "CI runs",
+     "then": "lint, unit, component, API and content checks run and block merge on failure"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-02",
+   "epic": "OPS",
+   "title": "Preview deploys",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a preview URL for every PR, so that I can check changes on the tablet before merging.",
+   "want": "a preview URL for every PR",
+   "so": "I can check changes on the tablet before merging",
+   "ac": [
+    {
+     "given": "I open a PR touching apps/web",
+     "when": "the preview deploys",
+     "then": "the PR shows a link and Playwright smoke tests run against it"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-03",
+   "epic": "OPS",
+   "title": "API deploy to the VPS",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want API images built and deployed to the VPS with Docker Compose, so that deploys are one step.",
+   "want": "API images built and deployed to the VPS with Docker Compose",
+   "so": "deploys are one step",
+   "ac": [
+    {
+     "given": "I merge to main",
+     "when": "CI runs",
+     "then": "the image is pushed to GHCR and the staging stack pulls and restarts with a health check"
+    },
+    {
+     "given": "a tag is pushed",
+     "when": "the release job runs",
+     "then": "the database is backed up, migrations run, and production updates"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-04",
+   "epic": "OPS",
+   "title": "Backups and restore drills",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want automated database backups to R2 and a monthly restore test, so that I can recover from failure.",
+   "want": "automated database backups to R2 and a monthly restore test",
+   "so": "I can recover from failure",
+   "ac": [
+    {
+     "given": "it's 02:00",
+     "when": "the backup job runs",
+     "then": "a compressed dump is uploaded to R2 with 30-day retention"
+    },
+    {
+     "given": "the monthly drill runs",
+     "when": "a backup is restored to a scratch database",
+     "then": "row counts match and the result is logged"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-05",
+   "epic": "OPS",
+   "title": "Monitoring and alerts",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want uptime checks and error alerts, so that I hear about problems before parents do.",
+   "want": "uptime checks and error alerts",
+   "so": "I hear about problems before parents do",
+   "ac": [
+    {
+     "given": "the API health check fails twice in a row",
+     "when": "the monitor runs",
+     "then": "I get an alert by email and phone"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-06",
+   "epic": "OPS",
+   "title": "Feature flags",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want server-controlled feature flags, so that I can ship code dark and turn features on for beta families.",
+   "want": "server-controlled feature flags",
+   "so": "I can ship code dark and turn features on for beta families",
+   "ac": [
+    {
+     "given": "a flag is on for the beta cohort only",
+     "when": "a beta family opens the app",
+     "then": "the feature shows only for them"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-07",
+   "epic": "OPS",
+   "title": "First-party product analytics",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want aggregated product metrics from our own event table, so that I can measure activation and retention without third-party trackers.",
+   "want": "aggregated product metrics from our own event table",
+   "so": "I can measure activation and retention without third-party trackers",
+   "ac": [
+    {
+     "given": "the weekly metrics job runs",
+     "when": "it finishes",
+     "then": "a dashboard shows activation, weekly active learners, lessons per learner and retention, with no personal identifiers"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "OPS-08",
+   "epic": "OPS",
+   "title": "Load and security review before launch",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want a load test and security review before public launch, so that launch day is calm.",
+   "want": "a load test and security review before public launch",
+   "so": "launch day is calm",
+   "ac": [
+    {
+     "given": "the launch candidate is ready",
+     "when": "a load test of 1,000 concurrent syncs runs",
+     "then": "p95 sync latency stays under 500 ms and no errors occur"
+    },
+    {
+     "given": "the security checklist runs",
+     "when": "it completes",
+     "then": "auth, scopes, uploads and secrets handling are verified and findings fixed"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P4",
+   "sprint": "S23",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "SCH-01",
+   "epic": "SCH",
+   "title": "School licence and seats",
+   "role": "Sam (school admin)",
+   "story": "As Sam (school admin), I want to buy a school licence and assign teacher seats, so that billing is one invoice.",
+   "want": "to buy a school licence and assign teacher seats",
+   "so": "billing is one invoice",
+   "ac": [
+    {
+     "given": "I buy a 6-teacher licence",
+     "when": "I invite teachers by email",
+     "then": "each accepted teacher gets Classroom features under the school"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "S01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SCH-02",
+   "epic": "SCH",
+   "title": "School-wide reports",
+   "role": "Sam (school admin)",
+   "story": "As Sam (school admin), I want usage and progress reports across all classes, so that I can see impact.",
+   "want": "usage and progress reports across all classes",
+   "so": "I can see impact",
+   "ac": [
+    {
+     "given": "I open School reports",
+     "when": "it loads",
+     "then": "I see active learners, lessons and progress per class, without individual child details unless the teacher shares them"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "S02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SCH-03",
+   "epic": "SCH",
+   "title": "Data processing agreement",
+   "role": "Sam (school admin)",
+   "story": "As Sam (school admin), I want to accept a data processing agreement online, so that the school meets its data-protection duties.",
+   "want": "to accept a data processing agreement online",
+   "so": "the school meets its data-protection duties",
+   "ac": [
+    {
+     "given": "I open Legal in the school admin",
+     "when": "I accept the DPA",
+     "then": "acceptance is recorded with name, role, date and version and a PDF copy is emailed"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "S01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "SCH-04",
+   "epic": "SCH",
+   "title": "Shared school library",
+   "role": "Sam (school admin)",
+   "story": "As Sam (school admin), I want lessons shared across all teachers in the school, so that teachers don't duplicate work.",
+   "want": "lessons shared across all teachers in the school",
+   "so": "teachers don't duplicate work",
+   "ac": [
+    {
+     "given": "a teacher publishes a lesson to the school library",
+     "when": "another teacher opens the library",
+     "then": "they can assign it directly"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "S02"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "AI-01",
+   "epic": "AI",
+   "title": "Say-it exercises with speech recognition",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want to say the answer out loud, so that I practise speaking and reading aloud.",
+   "want": "to say the answer out loud",
+   "so": "I practise speaking and reading aloud",
+   "ac": [
+    {
+     "given": "a parent has enabled speech features",
+     "when": "a say-it exercise shows",
+     "then": "my speech is recognised (on the device where possible), checked, and no audio is stored"
+    }
+   ],
+   "priority": "Could",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "C07"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "AI-02",
+   "epic": "AI",
+   "title": "Guard-railed conversational hints",
+   "role": "Leo (Explorer)",
+   "story": "As Leo (Explorer), I want the buddy to explain things in different ways when I'm stuck, so that I understand, not just get the answer.",
+   "want": "the buddy to explain things in different ways when I'm stuck",
+   "so": "I understand, not just get the answer",
+   "ac": [
+    {
+     "given": "AI hints are enabled",
+     "when": "I'm stuck on a question",
+     "then": "the buddy gives an age-appropriate explanation limited to the current exercise; there is no free chat"
+    }
+   ],
+   "priority": "Could",
+   "size": "XL",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "C11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "AI-03",
+   "epic": "AI",
+   "title": "AI-assisted lesson builder",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want to describe a lesson and get a draft to edit, so that I can build lessons in seconds.",
+   "want": "to describe a lesson and get a draft to edit",
+   "so": "I can build lessons in seconds",
+   "ac": [
+    {
+     "given": "I type 'A 6-card lesson about African birds for 5-year-olds'",
+     "when": "I generate",
+     "then": "a draft lesson with cards from the licensed library and facts is created for me to review before anyone can play it"
+    }
+   ],
+   "priority": "Could",
+   "size": "L",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "P12"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "AI-04",
+   "epic": "AI",
+   "title": "Auto-tag uploaded photos",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want photos to be auto-tagged with suggested labels and categories, so that making sort games is quicker.",
+   "want": "photos to be auto-tagged with suggested labels and categories",
+   "so": "making sort games is quicker",
+   "ac": [
+    {
+     "given": "I upload a photo of a goat",
+     "when": "processing finishes",
+     "then": "'goat' and 'farm animal' are suggested and I can accept or change them"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "P11"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LES-19",
+   "epic": "LES",
+   "title": "Record letter sounds once for every lesson",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to record each letter and digraph sound once in a dedicated grown-ups screen, so that my child hears clean, correct phonics sounds everywhere instead of the device voice's approximations.",
+   "want": "to record each letter and digraph sound once in a dedicated grown-ups screen",
+   "so": "my child hears clean, correct phonics sounds everywhere instead of the device voice's approximations",
+   "ac": [
+    {
+     "given": "I open 'Letter sounds' in the grown-up zone",
+     "when": "the screen loads",
+     "then": "every sound (a–z and digraphs such as sh, ch, th, ee) is listed with record, play and 'use device voice' controls and a count of how many are recorded"
+    },
+    {
+     "given": "I record /sh/",
+     "when": "I play any lesson that uses /sh/ on any of the family's devices",
+     "then": "my recording plays instead of the voice pack or device voice"
+    },
+    {
+     "given": "microphone permission is denied",
+     "when": "I tap record",
+     "then": "I see how to enable it, and nothing else on the screen breaks"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P28"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LOC-01",
+   "epic": "LOC",
+   "title": "Every string ready for translation",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want all UI text, buddy lines and content words stored by key in language files, so that adding a language later needs translation work only, not code changes.",
+   "want": "all UI text, buddy lines and content words stored by key in language files",
+   "so": "adding a language later needs translation work only, not code changes",
+   "ac": [
+    {
+     "given": "a component contains a hard-coded user-facing string",
+     "when": "CI runs the i18n lint",
+     "then": "the PR fails naming the file and line"
+    },
+    {
+     "given": "a key is missing in a non-English language",
+     "when": "the app renders it",
+     "then": "the English text is shown and a warning is logged in development"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "MVP",
+   "sprint": "S0",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "LOC-02",
+   "epic": "LOC",
+   "title": "Choose the app language per learner",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to choose the language for each learner and for the grown-up zone, so that my children can learn in Kiswahili while I use English.",
+   "want": "to choose the language for each learner and for the grown-up zone",
+   "so": "my children can learn in Kiswahili while I use English",
+   "ac": [
+    {
+     "given": "Kiswahili is available",
+     "when": "I set Amani's language to Kiswahili",
+     "then": "his map, buddy voice, instructions and content words switch to Kiswahili; Zawadi stays in English"
+    },
+    {
+     "given": "a unit isn't translated yet",
+     "when": "Amani opens it",
+     "then": "it's shown with a 'Coming soon in Kiswahili' tag and can be played in English if I allow it"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "P29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "LOC-03",
+   "epic": "LOC",
+   "title": "Translated content and voice packs",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want content packs and voice packs built per language from the same unit files, so that each language ships without duplicating lesson logic.",
+   "want": "content packs and voice packs built per language from the same unit files",
+   "so": "each language ships without duplicating lesson logic",
+   "ac": [
+    {
+     "given": "a unit has Kiswahili translations and audio",
+     "when": "the content build runs",
+     "then": "a Kiswahili pack is produced and validated, and missing items are listed in the build report"
+    }
+   ],
+   "priority": "Should",
+   "size": "L",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [],
+   "notes": ""
+  },
+  {
+   "id": "LOC-04",
+   "epic": "LOC",
+   "title": "Bilingual mode",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want an option for the buddy to say each new word in two languages, so that my child learns English and Kiswahili side by side.",
+   "want": "an option for the buddy to say each new word in two languages",
+   "so": "my child learns English and Kiswahili side by side",
+   "ac": [
+    {
+     "given": "bilingual mode is on with English + Kiswahili",
+     "when": "a new item is introduced",
+     "then": "the buddy says it in the learner's language first, then the second language, and the card shows both words"
+    }
+   ],
+   "priority": "Could",
+   "size": "M",
+   "milestone": "P5",
+   "sprint": "",
+   "screens": [
+    "P29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOD-01",
+   "epic": "MOD",
+   "title": "Moderation queue",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want one queue of reported shared content and automatically flagged uploads, so that unsafe content is reviewed quickly.",
+   "want": "one queue of reported shared content and automatically flagged uploads",
+   "so": "unsafe content is reviewed quickly",
+   "ac": [
+    {
+     "given": "a parent reports an imported lesson or the scanner flags an image",
+     "when": "I open the moderation queue",
+     "then": "the item shows with its reason, report count, share code, upload date and a preview, oldest first"
+    },
+    {
+     "given": "an item has been waiting more than 24 hours",
+     "when": "the queue loads",
+     "then": "it's highlighted and I get a daily email reminder"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "M01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOD-02",
+   "epic": "MOD",
+   "title": "Moderation actions and audit log",
+   "role": "Steve (developer)",
+   "story": "As Steve (developer), I want to hide, restore, or suspend a share code, and to warn or suspend a creator account, so that I can act on reports consistently and show what was done.",
+   "want": "to hide, restore, or suspend a share code, and to warn or suspend a creator account",
+   "so": "I can act on reports consistently and show what was done",
+   "ac": [
+    {
+     "given": "I choose 'Hide image' on a flagged item",
+     "when": "I confirm with a reason",
+     "then": "the image is replaced by a placeholder for everyone who has a copy, and the action is logged with who, when and why"
+    },
+    {
+     "given": "I suspend a share code",
+     "when": "someone tries to import it",
+     "then": "they're told it's unavailable; existing copies stay but the flagged media is hidden"
+    }
+   ],
+   "priority": "Must",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "M01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MOD-03",
+   "epic": "MOD",
+   "title": "Tell people the outcome",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to hear back after I report something, and to be told if my own upload was hidden, so that I trust that reports are acted on and understand why something changed.",
+   "want": "to hear back after I report something, and to be told if my own upload was hidden",
+   "so": "I trust that reports are acted on and understand why something changed",
+   "ac": [
+    {
+     "given": "my report has been reviewed",
+     "when": "a decision is made",
+     "then": "I get an email saying it was reviewed and the general outcome, without details about other users"
+    },
+    {
+     "given": "my image was hidden",
+     "when": "the action is taken",
+     "then": "I get an email with the reason and how to appeal"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S11",
+   "screens": [
+    "M01"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "HLP-01",
+   "epic": "HLP",
+   "title": "Help centre in the grown-up zone",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want short help articles inside the app, so that I can solve common problems without emailing anyone.",
+   "want": "short help articles inside the app",
+   "so": "I can solve common problems without emailing anyone",
+   "ac": [
+    {
+     "given": "I open Help",
+     "when": "it loads",
+     "then": "I see search plus topics (getting started, lessons, rewards, privacy, billing, offline) and the articles are available offline"
+    },
+    {
+     "given": "I'm on a screen with a help topic",
+     "when": "I tap the '?' icon",
+     "then": "the matching article opens"
+    }
+   ],
+   "priority": "Should",
+   "size": "M",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P30"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "HLP-02",
+   "epic": "HLP",
+   "title": "Contact support",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to send a message to support from the app, so that I can get help with problems the articles don't solve.",
+   "want": "to send a message to support from the app",
+   "so": "I can get help with problems the articles don't solve",
+   "ac": [
+    {
+     "given": "I fill in the contact form",
+     "when": "I tick 'include device diagnostics'",
+     "then": "app version, device model and recent error codes are attached, with no child names, media or progress data"
+    },
+    {
+     "given": "I submit",
+     "when": "the message is sent",
+     "then": "I get an email confirmation with a reference number"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S8",
+   "screens": [
+    "P30"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "HLP-03",
+   "epic": "HLP",
+   "title": "Teacher getting-started guide",
+   "role": "Ms Priya (teacher)",
+   "story": "As Ms Priya (teacher), I want a short guide for setting up a class and the first week, so that I can get my class going without training.",
+   "want": "a short guide for setting up a class and the first week",
+   "so": "I can get my class going without training",
+   "ac": [
+    {
+     "given": "I've just created my first class",
+     "when": "Teacher home loads",
+     "then": "a 5-step checklist shows (add students, print parent letters, set up tablets, assign work, check progress) and ticks off as I do each"
+    }
+   ],
+   "priority": "Could",
+   "size": "S",
+   "milestone": "P2",
+   "sprint": "S9",
+   "screens": [
+    "T01",
+    "P30"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "MAP-09",
+   "epic": "MAP",
+   "title": "Friendly first visit",
+   "role": "Amani (Seedling)",
+   "story": "As Amani (Seedling), I want my first visit to the map to show me exactly where to start, so that I'm not confused by lots of places.",
+   "want": "my first visit to the map to show me exactly where to start",
+   "so": "I'm not confused by lots of places",
+   "ac": [
+    {
+     "given": "I have no progress yet",
+     "when": "my map opens",
+     "then": "only the first subject place is highlighted, the buddy points to it and says 'Let's start here!', and other places are visible but quieter"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S2",
+   "screens": [
+    "C29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "OFF-07",
+   "epic": "OFF",
+   "title": "Child-friendly offline and error states",
+   "role": "Zawadi (Sprout)",
+   "story": "As Zawadi (Sprout), I want a calm message from my buddy when something isn't available offline or goes wrong, so that I'm never shown a scary error.",
+   "want": "a calm message from my buddy when something isn't available offline or goes wrong",
+   "so": "I'm never shown a scary error",
+   "ac": [
+    {
+     "given": "a subject isn't downloaded and I'm offline",
+     "when": "I tap it",
+     "then": "the buddy says 'This one needs the internet. Let's play something else!' and offers downloaded subjects"
+    },
+    {
+     "given": "an unexpected error happens in a lesson",
+     "when": "the app recovers",
+     "then": "the buddy says 'Oops, let's try that again', my progress so far is kept, and the error is reported without child data"
+    }
+   ],
+   "priority": "Must",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S7",
+   "screens": [
+    "C29"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "BLD-16",
+   "epic": "BLD",
+   "title": "See and retry failed uploads",
+   "role": "Grace (parent)",
+   "story": "As Grace (parent), I want to see which photos or recordings haven't uploaded yet and retry them, so that I know my cards are safe.",
+   "want": "to see which photos or recordings haven't uploaded yet and retry them",
+   "so": "I know my cards are safe",
+   "ac": [
+    {
+     "given": "an upload has failed 3 times",
+     "when": "I open the Lesson Builder",
+     "then": "a banner shows '2 items waiting to upload' with a Retry button, and the cards still work on this device"
+    },
+    {
+     "given": "storage on the device is full",
+     "when": "I try to add a photo",
+     "then": "I'm told the device is full and offered to clear downloaded subjects I'm not using"
+    }
+   ],
+   "priority": "Should",
+   "size": "S",
+   "milestone": "MVP",
+   "sprint": "S5",
+   "screens": [
+    "P26"
+   ],
+   "notes": ""
+  }
+ ]
+}

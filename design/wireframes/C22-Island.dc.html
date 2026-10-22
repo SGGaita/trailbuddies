@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Family and class island</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 24px 40px 28px; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <a href="C04-WorldMap.dc.html" style="text-decoration: none; color: #1E1E1C; border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px 16px; font-size: 17px; background: #FFFFFF;">Back to map</a>
+    <h1 style="margin: 0; font-size: 34px;">Family &amp; Class Island</h1>
+  </div>
+  <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px;">
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size: 24px; font-weight: 800;">From my family</div>
+      <a href="C07-ListenTap.dc.html" style="text-decoration: none; color: #1E1E1C; border: 3px solid #1F5FD1; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 16px;"><span style="width: 90px; height: 90px; border-radius: 14px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px);"></span><span style="display: flex; flex-direction: column; gap: 4px;"><b style="font-size: 22px;">Our Pets</b><span style="font-size: 15px; color: #1F5FD1;">New from Mum · 6 cards</span></span></a>
+      <a href="C15-Jigsaw.dc.html" style="text-decoration: none; color: #1E1E1C; border: 2px solid #B9B9B3; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 16px;"><span style="width: 90px; height: 90px; border-radius: 14px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px);"></span><span style="display: flex; flex-direction: column; gap: 4px;"><b style="font-size: 22px;">Who is this? (puzzle)</b><span style="font-size: 15px; color: #55554F;">From Dad · 3 stars</span></span></a>
+      <div style="border: 2px dashed #B9B9B3; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <b style="font-size: 18px;">Trail: Our trip to the coast</b>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="width: 44px; height: 44px; border-radius: 50%; background: #1F5FD1;"></span><span style="width: 40px; height: 4px; background: #B9B9B3;"></span>
+          <span style="width: 44px; height: 44px; border-radius: 50%; border: 3px solid #1F5FD1;"></span><span style="width: 40px; height: 4px; background: #B9B9B3;"></span>
+          <span style="width: 44px; height: 44px; border-radius: 50%; border: 3px dashed #B9B9B3;"></span><span style="width: 40px; height: 4px; background: #B9B9B3;"></span>
+          <span style="width: 54px; height: 54px; border-radius: 12px; border: 3px dashed #B9B9B3;"></span>
+        </div>
+        <span style="font-size: 14px; color: #55554F;">Custom trails: launch</span>
+      </div>
+    </div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 24px; font-weight: 800;">From my teacher</div><span style="font-size: 15px; color: #55554F;">Ms Priya · Class 1B</span></div>
+      <a href="C05-Trail.dc.html" style="text-decoration: none; color: #1E1E1C; border: 3px solid #1F5FD1; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 16px;"><span style="width: 90px; height: 90px; border-radius: 14px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px);"></span><span style="display: flex; flex-direction: column; gap: 4px;"><b style="font-size: 22px;">Water animals</b><span style="font-size: 15px; color: #1F5FD1;">Due Friday · 2 of 6 done</span></span></a>
+      <a href="C07-ListenTap.dc.html" style="text-decoration: none; color: #1E1E1C; border: 2px solid #B9B9B3; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 16px;"><span style="width: 90px; height: 90px; border-radius: 14px; background: repeating-linear-gradient(45deg, #ECECE8 0 12px, #F4F4F1 12px 24px);"></span><span style="display: flex; flex-direction: column; gap: 4px;"><b style="font-size: 22px;">Week 3 spelling</b><span style="font-size: 15px; color: #55554F;">10 words · new</span></span></a>
+      <div style="font-size: 14px; color: #55554F;">Due work shows first. Class Island appears once a parent links Zawadi to the class.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

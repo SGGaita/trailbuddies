@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>School reports and library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 900px; background: #F6F6F4; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-wrap: wrap;">
+  <nav style="flex: 1 1 220px; max-width: 260px; box-sizing: border-box; background: #FFFFFF; border-right: 2px solid #D6D6D1; padding: 24px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 15px;">
+    <div style="font-size: 13px; color: #55554F; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Trailbuddies · School admin</div>
+    <a href="S01-SchoolAdmin.dc.html" style="text-decoration: none; color: #1E1E1C; border-radius: 10px; padding: 10px 12px;">Licence &amp; teachers</a>
+    <a href="S02-SchoolReports.dc.html" style="text-decoration: none; background: #F2F6FD; color: #1F5FD1; font-weight: 700; border-radius: 10px; padding: 10px 12px;">Reports &amp; library</a>
+    <a href="T01-TeacherHome.dc.html" style="text-decoration: none; color: #1E1E1C; border-radius: 10px; padding: 10px 12px;">My classes (teacher view)</a>
+  </nav>
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px; display: flex; flex-wrap: wrap; gap: 22px; align-content: flex-start;">
+    <div style="flex: 1 1 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h1 style="margin: 0; font-size: 28px;">School reports · this term</h1><span style="border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px 14px;">Export PDF</span></div>
+    <div style="flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 16px;"><span style="color: #55554F;">Active learners</span><br><b style="font-size: 28px;">131</b> <span style="color: #55554F;">of 152</span></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 16px;"><span style="color: #55554F;">Lessons completed</span><br><b style="font-size: 28px;">4,210</b></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 16px;"><span style="color: #55554F;">Parents linked</span><br><b style="font-size: 28px;">68%</b></div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 16px;"><span style="color: #55554F;">Avg minutes / week</span><br><b style="font-size: 28px;">46</b></div>
+    </div>
+    <section style="flex: 2 1 460px; min-width: 0; background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px;">
+        <thead><tr style="text-align: left; background: #F6F6F4;"><th style="padding: 12px 16px;">Class</th><th style="padding: 12px 16px;">Active</th><th style="padding: 12px 16px;">Assignments done</th><th style="padding: 12px 16px;">Top subject</th></tr></thead>
+        <tbody>
+          <tr style="border-top: 1px solid #ECECE8;"><td style="padding: 12px 16px;">Class 1B</td><td style="padding: 12px 16px;">21 / 26</td><td style="padding: 12px 16px;">82%</td><td style="padding: 12px 16px;">Animals</td></tr>
+          <tr style="border-top: 1px solid #ECECE8;"><td style="padding: 12px 16px;">Class 2A</td><td style="padding: 12px 16px;">25 / 28</td><td style="padding: 12px 16px;">74%</td><td style="padding: 12px 16px;">Numbers</td></tr>
+          <tr style="border-top: 1px solid #ECECE8;"><td style="padding: 12px 16px;">Reading group</td><td style="padding: 12px 16px;">8 / 8</td><td style="padding: 12px 16px;">95%</td><td style="padding: 12px 16px;">Language</td></tr>
+        </tbody>
+      </table>
+      <div style="padding: 10px 16px; font-size: 13px; color: #55554F;">Class-level totals only. Individual children's details stay with their teacher.</div>
+    </section>
+    <aside style="flex: 1 1 280px; background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+      <b style="font-size: 18px;">School library</b>
+      <span>Week 3 spelling · Ms Priya · used by 3 classes</span>
+      <span>Our school garden · Mr Otieno · used by 2 classes</span>
+      <span>Hillside badge set · 6 badges</span>
+      <a href="T03-Assign.dc.html">Assign from library</a>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

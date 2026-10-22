@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Badge Studio: design</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px; gap: 12px; font-size: 14px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P08-ParentHome.dc.html" style="font-size: 16px;">Cancel</a>
+    <h1 style="margin: 0; font-size: 22px; flex-grow: 1;">Badge Studio</h1>
+    <span style="color: #55554F;">1 of 2</span>
+  </div>
+  <div style="display: flex; justify-content: center; padding: 8px 0;">
+    <div style="width: 170px; height: 170px; border-radius: 50%; border: 10px solid #1F5FD1; background: #F2F6FD; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;"><span style="width: 70px; height: 70px; border-radius: 12px; background: repeating-linear-gradient(45deg, #ECECE8 0 8px, #F4F4F1 8px 16px);"></span><b style="font-size: 16px;">Garden Helper</b></div>
+  </div>
+  <label for="bname" style="font-weight: 600;">Badge name</label>
+  <input id="bname" value="Garden Helper" style="height: 44px; border: 2px solid #B9B9B3; border-radius: 12px; padding: 0 12px; font-size: 16px; font-family: inherit;">
+  <div style="font-weight: 600;">Shape</div>
+  <div style="display: flex; gap: 10px;"><span style="width: 44px; height: 44px; border-radius: 50%; border: 3px solid #1F5FD1;"></span><span style="width: 44px; height: 44px; border-radius: 10px; border: 2px solid #B9B9B3;"></span><span style="width: 44px; height: 44px; border-radius: 4px; transform: rotate(45deg) scale(0.8); border: 2px solid #B9B9B3;"></span><span style="width: 44px; height: 44px; border-radius: 50% 50% 10px 10px; border: 2px solid #B9B9B3;"></span></div>
+  <div style="font-weight: 600;">Colour</div>
+  <div style="display: flex; gap: 10px;"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1F5FD1; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 5px #1F5FD1;"></span><span style="width: 36px; height: 36px; border-radius: 50%; background: #8C8C86;"></span><span style="width: 36px; height: 36px; border-radius: 50%; background: #55554F;"></span><span style="width: 36px; height: 36px; border-radius: 50%; background: #B9B9B3;"></span></div>
+  <div style="font-weight: 600;">Picture</div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; text-align: center;"><span style="border: 2px solid #B9B9B3; border-radius: 12px; padding: 10px;">Pick an icon</span><span style="border: 2px solid #1F5FD1; border-radius: 12px; padding: 10px; font-weight: 700;">Upload my photo</span></div>
+  <div style="font-size: 12px; color: #55554F;">Photos are checked for safety and location data is removed.</div>
+  <div style="border: 2px solid #D6D6D1; border-radius: 12px; padding: 10px 12px;">Message when earned: <b>record your voice</b> (optional)</div>
+  <div style="flex-grow: 1;"></div>
+  <a href="P15-BadgeRule.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700;">Next: how is it earned?</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

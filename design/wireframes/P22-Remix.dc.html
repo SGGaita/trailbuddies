@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Remix a built-in unit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F6F4; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px; gap: 12px; font-size: 14px;">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <a href="P10-BuilderCards.dc.html" style="font-size: 16px;">Back</a>
+    <h1 style="margin: 0; font-size: 22px;">Remix: Farm animals</h1>
+  </div>
+  <div style="background: #F2F6FD; border-radius: 12px; padding: 10px 12px;">You're editing <b>your own copy</b>. The built-in unit stays the same for everyone else.</div>
+  <div style="font-weight: 700; font-size: 15px;">Cards</div>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 14px;">
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ECECE8;"><span>Cow</span><span style="color: #55554F;">Keep</span></div>
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ECECE8;"><span>Goat</span><span style="color: #55554F;">Keep</span></div>
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ECECE8; color: #8C8C86;"><span style="text-decoration: line-through;">Pig</span><span>Removed · Undo</span></div>
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ECECE8;"><span>Hen</span><span style="color: #55554F;">Keep</span></div>
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #ECECE8; background: #F2F6FD;"><span><b>Camel</b> (added from library)</span><span style="color: #1F5FD1;">New</span></div>
+    <div style="padding: 10px 12px; display: flex; justify-content: space-between; background: #F2F6FD;"><span><b>Grandpa's donkey</b> (your photo)</span><span style="color: #1F5FD1;">New</span></div>
+  </div>
+  <a href="P11-BuilderAddCard.dc.html" style="text-decoration: none; text-align: center; border: 2px dashed #1F5FD1; border-radius: 12px; padding: 10px;">+ Add a card</a>
+  <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 14px; padding: 10px 12px; display: flex; justify-content: space-between;"><span>Lessons and games</span><span style="color: #55554F;">Same as the original</span></div>
+  <div style="flex-grow: 1;"></div>
+  <a href="P12-BuilderTemplate.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700;">Save to my library</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

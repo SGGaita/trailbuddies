@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Teen sign-in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#8FB0EC}a:hover{color:#B5CCF3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #1C1D21; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #EDEDED; display: flex; align-items: center; justify-content: center; gap: 64px; padding: 48px;">
+  <div style="width: 420px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; color: #A9AAB0; letter-spacing: 0.08em; text-transform: uppercase;">Trailbuddies</div>
+    <h1 style="margin: 0; font-size: 38px; font-weight: 600;">Sign in on your own device</h1>
+    <div style="font-size: 17px; color: #C8C9CE;">For learners 13 and up whose parent turned on teen sign-in. Your parent's account still looks after privacy settings.</div>
+    <div style="height: 200px; border-radius: 18px; background: #26272C; border: 1px dashed #55565C; display: flex; align-items: center; justify-content: center; color: #A9AAB0; font-size: 14px;">[Buddy in mentor style]</div>
+  </div>
+  <div style="width: 420px; background: #26272C; border: 1px solid #3A3B41; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
+    <label for="temail" style="font-weight: 600;">Your email</label>
+    <input id="temail" value="nia@example.com" style="height: 48px; background: #1C1D21; color: #EDEDED; border: 1px solid #55565C; border-radius: 12px; padding: 0 14px; font-size: 16px; font-family: inherit;">
+    <a href="A01-OlderHome.dc.html" style="text-decoration: none; text-align: center; background: #8FB0EC; color: #1C1D21; border-radius: 12px; padding: 14px; font-size: 17px; font-weight: 700;">Send sign-in link</a>
+    <div style="display: flex; align-items: center; gap: 10px; color: #A9AAB0; font-size: 14px;"><span style="flex-grow: 1; height: 1px; background: #3A3B41;"></span>or<span style="flex-grow: 1; height: 1px; background: #3A3B41;"></span></div>
+    <label for="fcode" style="font-weight: 600;">Family code from your parent</label>
+    <input id="fcode" value="FAM-82KD" style="height: 48px; background: #1C1D21; color: #EDEDED; border: 1px solid #55565C; border-radius: 12px; padding: 0 14px; font-size: 18px; letter-spacing: 0.1em; font-family: inherit;">
+    <a href="A01-OlderHome.dc.html" style="text-decoration: none; text-align: center; border: 1px solid #8FB0EC; color: #8FB0EC; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 700;">Continue with code</a>
+    <div style="font-size: 13px; color: #A9AAB0;">Only your own profile opens. Your parent can see progress and switch teen sign-in off.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

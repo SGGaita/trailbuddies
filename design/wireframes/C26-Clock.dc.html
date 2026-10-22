@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Exercise: clock setter</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#1F5FD1}a:hover{color:#174AA3}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #FAFAF8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1E1E1C; display: flex; flex-direction: column; padding: 20px 40px 28px; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="C05-Trail.dc.html" aria-label="Leave lesson" style="text-decoration: none; width: 56px; height: 56px; border-radius: 50%; border: 2px solid #B9B9B3; display: flex; align-items: center; justify-content: center; color: #1E1E1C; font-size: 15px; background: #FFFFFF;">Exit</a>
+    <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px;"><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #1F5FD1;"></span><span style="height: 18px; border-radius: 9px; background: #8FB0EC;"></span><span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span><span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span><span style="height: 18px; border-radius: 9px; background: #ECECE8;"></span></div>
+    <div style="font-size: 15px; color: #55554F;">3 of 6</div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 18px;">
+    <div style="width: 96px; height: 96px; border-radius: 50%; background: #ECECE8; border: 2px dashed #B9B9B3; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #55554F;">[Buddy]</div>
+    <div style="background: #FFFFFF; border: 2px solid #B9B9B3; border-radius: 20px; padding: 14px 22px; font-size: 28px; font-weight: 700;">Show half past three on the clock</div>
+    <div style="border: 3px solid #1E1E1C; border-radius: 12px; padding: 8px 18px; font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums;">3:30</div>
+  </div>
+  <div style="flex-grow: 1; display: flex; gap: 40px; align-items: center; justify-content: center;">
+    <div style="width: 440px; height: 440px; border-radius: 50%; background: #FFFFFF; border: 8px solid #1E1E1C; position: relative;">
+      <span style="position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 30px; font-weight: 800;">12</span>
+      <span style="position: absolute; right: 22px; top: 50%; transform: translateY(-50%); font-size: 30px; font-weight: 800;">3</span>
+      <span style="position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 30px; font-weight: 800;">6</span>
+      <span style="position: absolute; left: 22px; top: 50%; transform: translateY(-50%); font-size: 30px; font-weight: 800;">9</span>
+      <span style="position: absolute; left: 50%; top: 50%; width: 12px; height: 170px; background: #1F5FD1; border-radius: 6px; transform-origin: 50% 0; transform: translateX(-50%) rotate(0deg);"></span>
+      <span style="position: absolute; left: 50%; top: 50%; width: 16px; height: 110px; background: #1E1E1C; border-radius: 8px; transform-origin: 50% 100%; transform: translate(-50%, -100%) rotate(105deg);"></span>
+      <span style="position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; border-radius: 50%; background: #1E1E1C; transform: translate(-50%, -50%);"></span>
+    </div>
+    <div style="width: 300px; display: flex; flex-direction: column; gap: 14px; font-size: 15px; color: #55554F;">
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px;">Drag the long blue hand (minutes) and the short hand (hours). Minutes snap to 5-minute steps.</div>
+      <div style="background: #FFFFFF; border: 2px solid #D6D6D1; border-radius: 16px; padding: 14px;">Sprout: o'clock and half past. Explorer: quarters and 5 minutes; digital ↔ analogue.</div>
+      <a href="C27-BuildWord.dc.html" style="text-decoration: none; text-align: center; background: #1F5FD1; color: #FFFFFF; border-radius: 16px; padding: 16px; font-size: 20px; font-weight: 700;">Done</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
