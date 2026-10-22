@@ -40,6 +40,7 @@ function Gate() {
   const [locked, setLocked] = useState(false);
   const [error, setError] = useState("");
   const timer = useRef(null);
+  const [hold, setHold] = useState(false);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const press = (k) => {
@@ -86,6 +87,7 @@ function Gate() {
     router.push("/start/account");
   };
 
+  if (hold) return <HoldGate onDone={unlockGate} onBack={() => setHold(false)} />;
   return (
     <Box
       component="main"
@@ -161,11 +163,123 @@ function Gate() {
         <Button type="submit" variant="contained" size="large" fullWidth disabled={locked || !input}>
           {t("gate.open")}
         </Button>
+        {!pin && (
+          <Button type="button" onClick={() => setHold(true)} sx={{ fontSize: 14 }}>
+            {t("gate.hold")}
+          </Button>
+        )}
         {pin && (
           <Button type="button" onClick={forgot} sx={{ fontSize: 14 }}>
             {t("gate.forgot")}
           </Button>
         )}
+        <Button component={Link} href="/play" type="button">
+          {t("gate.back")}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+const HOLD_MS = 3000;
+
+/**
+ * The accessible gate (concept report §4.1): press and hold for 3 seconds, for grown-ups
+ * who find the number pad hard. Works with touch, mouse, and Space or Enter.
+ */
+function HoldGate({ onDone, onBack }) {
+  const [progress, setProgress] = useState(0);
+  const run = useRef(null);
+  const start = () => {
+    if (run.current) return;
+    const t0 = performance.now();
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - t0) / HOLD_MS);
+      setProgress(p);
+      if (p >= 1) {
+        run.current = null;
+        onDone();
+      } else run.current = requestAnimationFrame(tick);
+    };
+    run.current = requestAnimationFrame(tick);
+  };
+  const cancel = () => {
+    if (run.current) cancelAnimationFrame(run.current);
+    run.current = null;
+    setProgress(0);
+  };
+  useEffect(() => () => run.current && cancelAnimationFrame(run.current), []);
+  const deg = Math.round(progress * 360);
+  return (
+    <Box
+      component="main"
+      sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", p: 2, bgcolor: "background.default" }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 420,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          p: { xs: 2, sm: 3.5 },
+          bgcolor: "background.paper",
+          border: `2px solid ${colors.line}`,
+          borderRadius: 5.5,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h5" component="h1">
+          {t("gate.title")}
+        </Typography>
+        <Typography sx={{ color: "text.secondary" }}>{t("gate.holdSub")}</Typography>
+        <Box
+          sx={{
+            p: 1,
+            borderRadius: "50%",
+            background: `conic-gradient(${colors.leaf.main} ${deg}deg, ${colors.sand} ${deg}deg)`,
+          }}
+        >
+          <Box
+            component="button"
+            type="button"
+            aria-label={t("gate.holdButton")}
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+            onPointerDown={start}
+            onPointerUp={cancel}
+            onPointerLeave={cancel}
+            onPointerCancel={cancel}
+            onContextMenu={(e) => e.preventDefault()}
+            onKeyDown={(e) =>
+              (e.key === " " || e.key === "Enter") && !e.repeat && (e.preventDefault(), start())
+            }
+            onKeyUp={(e) => (e.key === " " || e.key === "Enter") && cancel()}
+            sx={{
+              width: 168,
+              height: 168,
+              borderRadius: "50%",
+              border: 0,
+              bgcolor: colors.leaf.deep,
+              color: "#fff",
+              fontFamily: "var(--font-display)",
+              fontWeight: 800,
+              fontSize: 24,
+              cursor: "pointer",
+              touchAction: "none",
+              userSelect: "none",
+              "&:focus-visible": { outline: `4px solid ${colors.sky.main}`, outlineOffset: 4 },
+            }}
+          >
+            {t("gate.holdButton")}
+          </Box>
+        </Box>
+        <Button type="button" onClick={onBack}>
+          {t("gate.useSum")}
+        </Button>
         <Button component={Link} href="/play" type="button">
           {t("gate.back")}
         </Button>

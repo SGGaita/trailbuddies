@@ -39,11 +39,14 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await noSideScroll(page);
   await shot(page, testInfo, "2-map");
 
-  await page
+  // Zawadi is a Sprout (can't read yet): the first tap says the place's name, the second opens it.
+  const place = page
     .getByRole("link", { name: /Numbers Mountain/ })
     .filter({ visible: true })
-    .first()
-    .click();
+    .first();
+  await place.click();
+  await expect(page).toHaveURL(/\/play\/map$/);
+  await place.click();
   await expect(page).toHaveURL(/\/play\/trail\/numbers$/);
   const next = page.getByRole("button", { name: "Lesson 3", exact: true });
   await expect(next).toBeVisible();

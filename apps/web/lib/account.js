@@ -54,12 +54,13 @@ function applyMe(me) {
   const keepLocalFamily = s.family?.dirty && fam && newer(fam, s.family) === s.family;
   const family = fam
     ? keepLocalFamily
-      ? { ...s.family, consent: fam.consent, role: fam.role }
+      ? { ...s.family, consent: fam.consent, role: fam.role, learner_limit: fam.learner_limit }
       : {
           id: fam.id,
           name: fam.name,
           country: fam.country,
-          plan: fam.plan === "free" ? "Free" : fam.plan,
+          plan: fam.plan === "free" ? "Free" : fam.plan === "family" ? "Family" : fam.plan,
+          learner_limit: fam.learner_limit,
           role: fam.role,
           pin: fam.pin,
           consent: fam.consent,
@@ -104,6 +105,15 @@ export async function signedIn() {
   return r;
 }
 
+/** Sign out of every device, then this one. */
+export async function signOutEverywhere() {
+  await api.logoutAll();
+  await signOut();
+}
+
+/** A carer can view progress but never changes anything. */
+export const canEdit = (s) => s.mode !== "account" || s.family?.role !== "viewer";
+
 export async function signOut() {
   const name = dbName(get());
   try {
@@ -119,8 +129,9 @@ export async function signOut() {
 export function setupStep(s, policyVersion) {
   if (s.mode === "demo") return null;
   if (s.mode !== "account") return "/start";
-  if (!s.user) return "/start/account";
+  if (!s.user) return "/start"; // signed out (here or from another device): back to the welcome
   if (!s.family) return "/start/about";
+  if (s.family.role === "viewer") return null; // carers join a family that's already set up
   if (!s.family.consent || (policyVersion && s.family.consent.policy_version !== policyVersion))
     return "/start/consent";
   if (!s.learners.length) return "/start/learners";
@@ -130,7 +141,7 @@ export function setupStep(s, policyVersion) {
 async function pushProfiles() {
   const s = get();
   const fam = s.family;
-  if (!fam?.id || !fam.consent) return;
+  if (!fam?.id || !fam.consent || fam.role === "viewer") return;
   if (fam.dirty) {
     const body = { settings: s.settings, updated_at: fam.updated_at };
     if (fam.pin) body.pin = fam.pin;
@@ -148,8 +159,19 @@ async function pushProfiles() {
     }
     useFamily.setState((st) => ({ removed: st.removed.filter((x) => x !== id) }));
   }
-  for (const l of s.learners.filter((x) => x.dirty)) {
-    await api.putLearner(fam.id, l.id, learnerToApi(l));
+  for (const l of s.learners.filter((x) => x.dirty && !x.overLimit)) {
+    try {
+      await api.putLearner(fam.id, l.id, learnerToApi(l));
+    } catch (e) {
+      // Over the plan's learner limit (e.g. added offline): keep it on this device, flagged.
+      if (e instanceof ApiError && e.code === "plan_limit") {
+        useFamily.setState((st) => ({
+          learners: st.learners.map((x) => (x.id === l.id ? { ...x, overLimit: true } : x)),
+        }));
+        continue;
+      }
+      throw e;
+    }
     useFamily.setState((st) => ({
       learners: st.learners.map((x) =>
         x.id === l.id && x.updated_at === l.updated_at ? { ...x, dirty: false } : x,
@@ -187,7 +209,9 @@ export async function syncNow() {
   useFamily.setState({ sync: { ...get().sync, state: "syncing" } });
   try {
     await pushProfiles();
-    await syncer.syncOnce();
+    // Carers only read: their devices pull progress but never upload.
+    if (get().family?.role === "viewer") await syncer.pull();
+    else await syncer.syncOnce();
     applyMe(await api.me());
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch (e) {

@@ -1,6 +1,8 @@
 "use client";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Icon from "@/components/Icon";
 import { colors } from "@trailbuddies/tokens";
 import { speak } from "@/lib/speech";
 
@@ -17,6 +19,8 @@ const NUMBER_WORDS = ["one", "two", "three", "four", "five", "six", "seven", "ei
 const isNumber = (it) => typeof it?.number === "number";
 const words = (it) => it.say || it.label;
 const glowing = (hint) => hint.misses >= 2 || hint.revealed;
+/** Bands that can't read yet: every word on screen can be heard. */
+const NON_READERS = new Set(["seedling", "sprout"]);
 
 /** Number keys 1–9 pick the nth choice; used by the single-choice exercises. */
 function useDigits(onDigit, enabled) {
@@ -141,7 +145,7 @@ const Row = ({ children, sx }) => (
  * Shared single-answer logic: listen-tap, name-it, count options, compare and odd-one-out.
  * @param {{ step: any, hint: any, done: boolean, onTry: Function, e2e: boolean, options: Array<{ id: string, label: string, face: React.ReactNode }>, answerId: string, tileSx?: any }} p
  */
-function SingleChoice({ hint, done, onTry, e2e, options, answerId, tileSx }) {
+function SingleChoice({ hint, done, onTry, e2e, options, answerId, tileSx, below }) {
   const [shakeId, shake] = useShake();
   const [picked, setPicked] = useState(null);
   const visible = options.filter((o) => !hint.removed.includes(o.id));
@@ -167,19 +171,28 @@ function SingleChoice({ hint, done, onTry, e2e, options, answerId, tileSx }) {
   };
   return (
     <Row>
-      {options.map((o) => (
-        <Tile
-          key={o.id}
-          label={o.label}
-          state={stateOf(o)}
-          shake={shakeId === o.id}
-          onClick={() => choose(o)}
-          sx={tileSx}
-          data={e2e ? { "data-answer": o.id === answerId ? "yes" : "no" } : {}}
-        >
-          {o.face}
-        </Tile>
-      ))}
+      {options.map((o) => {
+        const tile = (
+          <Tile
+            key={o.id}
+            label={o.label}
+            state={stateOf(o)}
+            shake={shakeId === o.id}
+            onClick={() => choose(o)}
+            sx={tileSx}
+            data={e2e ? { "data-answer": o.id === answerId ? "yes" : "no" } : {}}
+          >
+            {o.face}
+          </Tile>
+        );
+        if (!below || stateOf(o) === "gone") return tile;
+        return (
+          <Box key={o.id} sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            {tile}
+            {below(o)}
+          </Box>
+        );
+      })}
     </Row>
   );
 }
@@ -207,6 +220,17 @@ export function NameIt(props) {
     return <SingleChoice {...props} options={options} answerId={step.target.id} />;
   }
   const options = step.options.map((it) => ({ id: it.id, label: words(it), face: it.label }));
+  // Non-readers hear each word on its own speaker button; readers just read (LES-05).
+  const readers = !NON_READERS.has(props.band);
+  const hear = (o) => (
+    <IconButton
+      onClick={() => speak(o.label, { band: props.band, enabled: props.voice })}
+      aria-label={`Hear ${o.label}`}
+      sx={{ width: 48, height: 48, border: `3px solid ${colors.leaf.deep}`, color: colors.leaf.deep }}
+    >
+      <Icon name="speak" size={22} />
+    </IconButton>
+  );
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2.5 }}>
       <Box aria-hidden="true" sx={{ fontSize: { xs: 84, sm: 120 }, lineHeight: 1 }}>
@@ -217,6 +241,7 @@ export function NameIt(props) {
         options={options}
         answerId={step.target.id}
         tileSx={{ fontSize: { xs: 26, sm: 34 } }}
+        below={readers ? undefined : hear}
       />
     </Box>
   );
@@ -323,33 +348,82 @@ export function OddOneOut(props) {
   return <SingleChoice {...props} options={options} answerId={step.extra.answer} />;
 }
 
-/** "Match each group to its number." Tap one on the left, then its partner on the right. */
+/**
+ * "Match each group to its number." Drag a tile onto its partner, or tap one then the
+ * other (touch, mouse or keyboard). A right pair locks; a wrong one springs back.
+ */
 export function Match({ step, hint, done, onTry, e2e }) {
   const [matched, setMatched] = useState(/** @type {string[]} */ ([]));
   const [sel, setSel] = useState(/** @type {{ side: "l" | "r", id: string } | null} */ (null));
+  const [drag, setDrag] = useState(
+    /** @type {null | { side: string, id: string, dx: number, dy: number }} */ (null),
+  );
+  const dragRef = useRef(/** @type {any} */ (null));
+  const suppressClick = useRef(false);
   const [shakeId, shake] = useShake();
   const numbers = step.items.every(isNumber);
   const nextLeft = step.items.find((i) => !matched.includes(i.id));
   // The pair that glows: the partner of what's selected, else the next unmatched pair.
   const glowId = sel ? sel.id : nextLeft?.id;
 
-  const tap = (side, id) => {
-    if (done || matched.includes(id)) return;
-    if (!sel || sel.side === side) return setSel({ side, id });
-    if (sel.id === id) {
+  /** Try pairing `id` on `side` with `otherId` from the other column. */
+  const attempt = (side, id, otherId) => {
+    setSel(null);
+    if (otherId === id) {
       const now = [...matched, id];
       setMatched(now);
-      setSel(null);
       onTry({ correct: true, finished: now.length === step.items.length, chosenId: id });
     } else {
       shake(`${side}-${id}`);
-      setSel(null);
       onTry({ correct: false, finished: false, chosenId: id, wrongIds: [] });
     }
   };
+  const tap = (side, id) => {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
+    if (done || matched.includes(id)) return;
+    if (!sel || sel.side === side) return setSel({ side, id });
+    attempt(side, id, sel.id);
+  };
+
+  const onPointerDown = (side, id) => (e) => {
+    if (done || matched.includes(id) || e.button > 0) return;
+    dragRef.current = { side, id, x0: e.clientX, y0: e.clientY, moved: false };
+    const move = (ev) => {
+      const d = dragRef.current;
+      const dx = ev.clientX - d.x0;
+      const dy = ev.clientY - d.y0;
+      if (!d.moved && Math.hypot(dx, dy) < 8) return;
+      d.moved = true;
+      setDrag({ side: d.side, id: d.id, dx, dy });
+    };
+    const up = (ev) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      const d = dragRef.current;
+      dragRef.current = null;
+      setDrag(null);
+      if (!d?.moved) return; // a plain tap: the click handler deals with it
+      suppressClick.current = true;
+      setTimeout(() => (suppressClick.current = false), 0);
+      const target = document.elementFromPoint(ev.clientX, ev.clientY)?.closest("[data-mside]");
+      if (target && target.getAttribute("data-mside") !== d.side) {
+        const tid = target.getAttribute("data-mid");
+        if (!matched.includes(tid)) attempt(target.getAttribute("data-mside"), tid, d.id);
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  };
+
   const stateOf = (side, id) => {
     if (matched.includes(id)) return "right";
-    if (sel && sel.side === side && sel.id === id) return "selected";
+    if ((sel && sel.side === side && sel.id === id) || (drag && drag.side === side && drag.id === id))
+      return "selected";
     if (glowing(hint) && id === glowId) return "glow";
     if (hint.revealed && id !== glowId) return "dim";
     return "idle";
@@ -358,25 +432,45 @@ export function Match({ step, hint, done, onTry, e2e }) {
     numbers ? <Group count={it.number} emoji={it.emoji} size={{ xs: 18, sm: 24 }} /> : it.emoji;
   const right = (it) => it.label;
   const col = (side, list, face) => (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.25, sm: 2 } }}>
-      {list.map((it) => (
-        <Tile
-          key={it.id}
-          label={side === "l" ? (numbers ? `${it.number} ${it.emoji}` : words(it)) : words(it)}
-          state={stateOf(side, it.id)}
-          shake={shakeId === `${side}-${it.id}`}
-          onClick={() => tap(side, it.id)}
-          data={e2e ? { "data-pair": it.id, "data-side": side } : {}}
-          sx={{
-            minWidth: { xs: 120, sm: 180 },
-            minHeight: { xs: 64, sm: 88, lg: 96 },
-            fontSize: numbers || side === "l" ? { xs: 32, sm: 44 } : { xs: 22, sm: 28 },
-            ...(matched.includes(it.id) ? { pointerEvents: "none" } : {}),
-          }}
-        >
-          {face(it)}
-        </Tile>
-      ))}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.5 } }}>
+      {list.map((it) => {
+        const dragging = drag && drag.side === side && drag.id === it.id;
+        return (
+          <Tile
+            key={it.id}
+            label={side === "l" ? (numbers ? `${it.number} ${it.emoji}` : words(it)) : words(it)}
+            state={stateOf(side, it.id)}
+            shake={shakeId === `${side}-${it.id}`}
+            onClick={() => tap(side, it.id)}
+            data={{
+              "data-mside": side,
+              "data-mid": it.id,
+              onPointerDown: onPointerDown(side, it.id),
+              ...(e2e ? { "data-pair": it.id, "data-side": side } : {}),
+            }}
+            sx={{
+              minWidth: { xs: 112, sm: 170 },
+              minHeight: { xs: 56, sm: 72, lg: 80 },
+              fontSize: numbers || side === "l" ? { xs: 30, sm: 40 } : { xs: 22, sm: 28 },
+              touchAction: "none",
+              userSelect: "none",
+              ...(matched.includes(it.id) ? { pointerEvents: "none" } : {}),
+              ...(dragging
+                ? {
+                    transform: `translate(${drag.dx}px, ${drag.dy}px) scale(1.05)`,
+                    transition: "none",
+                    pointerEvents: "none",
+                    zIndex: 5,
+                    position: "relative",
+                    boxShadow: "0 12px 24px rgba(38,51,34,.25)",
+                  }
+                : {}),
+            }}
+          >
+            {face(it)}
+          </Tile>
+        );
+      })}
     </Box>
   );
   return (

@@ -3,11 +3,15 @@
 // web app's sign-in, onboarding and sync can be tested at every screen size.
 
 export const POLICY = "2026-10";
+const LIMITS = { free: 1, family: 6 };
 
 export function newServer() {
   return {
     users: {},
     families: {},
+    members: [], // { family, user, role }
+    invites: {}, // token -> { id, family, email, role, accepted }
+    sessions: {}, // session id -> user id (one per signed-in device)
     learners: {},
     events: [],
     consents: {},
@@ -28,10 +32,20 @@ const json = (route, status, body) =>
 const familyOut = (srv, fam, role = "owner") => ({
   ...fam,
   role,
+  learner_limit: LIMITS[fam.plan] ?? 1,
   consent: srv.consents[fam.id] || null,
   learners: Object.values(srv.learners)
     .filter((l) => l.family_id === fam.id)
     .map(({ family_id: _f, ...l }) => l),
+});
+
+const defaultSettings = () => ({
+  goal: 2,
+  limit: 20,
+  bedtime: { on: false, start: "19:30", end: "06:30" },
+  voice: true,
+  voice_rate: 1,
+  sound: true,
 });
 
 /**
@@ -40,7 +54,21 @@ const familyOut = (srv, fam, role = "owner") => ({
  * @param {ReturnType<typeof newServer>} srv
  */
 export async function fakeApi(context, srv) {
-  let userId = null;
+  let sessionId = null;
+  const signIn = (uid) => {
+    sessionId = `S${Object.keys(srv.sessions).length + 1}-${Math.random().toString(36).slice(2)}`;
+    srv.sessions[sessionId] = uid;
+  };
+  const userFor = (email) => {
+    let u = Object.values(srv.users).find((x) => x.email === email);
+    const isNew = !u;
+    if (!u) {
+      u = { id: `U${Object.keys(srv.users).length + 1}`, email, name: "" };
+      srv.users[u.id] = u;
+    }
+    return [u, isNew];
+  };
+
   await context.route("**/api/**", async (route) => {
     if (srv.offline) return route.abort("internetdisconnected");
     const req = route.request();
@@ -48,8 +76,12 @@ export async function fakeApi(context, srv) {
     const path = url.pathname.replace(/^\/api/, "");
     const method = req.method();
     const body = req.postData() ? JSON.parse(req.postData()) : {};
+    const userId = sessionId && srv.sessions[sessionId];
     const user = userId && srv.users[userId];
-    const fam = user && Object.values(srv.families).find((f) => f.owner === userId);
+    const membership = user && srv.members.find((x) => x.user === userId);
+    const fam = membership && srv.families[membership.family];
+    const role = membership?.role;
+    const forbidViewer = () => json(route, 403, { detail: "This role can only view progress" });
 
     if (path === "/auth/config") return json(route, 200, { google: false, policy_version: POLICY });
     if (path === "/policy")
@@ -59,6 +91,9 @@ export async function fakeApi(context, srv) {
           "Your name and email, to sign you in.",
           "Each learner's first name and birth month and year.",
         ],
+        why: ["Progress chooses what each child practises next."],
+        kept: ["If nobody signs in for 24 months, we email you twice, then delete the family."],
+        rights: ["Delete a learner or the whole family at any time."],
         never: ["No ads and no tracking or analytics companies."],
         scopes: {
           progress: { label: "Save progress so it follows each child to every device", required: true },
@@ -76,23 +111,34 @@ export async function fakeApi(context, srv) {
       if (!email)
         return json(route, 400, { detail: "This link has expired or was already used. Ask for a new one." });
       delete srv.tokens[body.token];
-      let u = Object.values(srv.users).find((x) => x.email === email);
-      const isNew = !u;
-      if (!u) {
-        u = { id: `U${Object.keys(srv.users).length + 1}`, email, name: "" };
-        srv.users[u.id] = u;
-      }
-      userId = u.id;
+      const [u, isNew] = userFor(email);
+      signIn(u.id);
       return json(route, 200, { user: u, new: isNew });
     }
+    if (path === "/invites/accept" && method === "POST") {
+      const inv = srv.invites[body.token];
+      if (!inv || inv.accepted)
+        return json(route, 400, { detail: "This invitation has expired or was already used." });
+      inv.accepted = true;
+      const [u] = userFor(inv.email);
+      srv.members.push({ family: inv.family, user: u.id, role: inv.role });
+      signIn(u.id);
+      return json(route, 200, { family_id: inv.family, role: inv.role });
+    }
     if (path === "/auth/logout") {
-      userId = null;
+      delete srv.sessions[sessionId];
+      sessionId = null;
       return json(route, 200, { ok: true });
     }
     if (!user) return json(route, 401, { detail: "Not signed in" });
 
+    if (path === "/auth/logout-all") {
+      for (const [k, v] of Object.entries(srv.sessions)) if (v === userId) delete srv.sessions[k];
+      sessionId = null;
+      return json(route, 200, { ok: true });
+    }
     if (path === "/me" && method === "GET")
-      return json(route, 200, { user, families: fam ? [familyOut(srv, fam)] : [] });
+      return json(route, 200, { user, families: fam ? [familyOut(srv, fam, role)] : [] });
     if (path === "/me" && method === "PATCH") {
       user.name = body.name;
       return json(route, 200, { user });
@@ -100,26 +146,20 @@ export async function fakeApi(context, srv) {
     if (path === "/families" && method === "POST") {
       const f = {
         id: `F${Object.keys(srv.families).length + 1}`,
-        owner: userId,
         name: body.name,
         country: body.country.toUpperCase(),
-        plan: "free",
-        settings: {
-          goal: 2,
-          limit: 20,
-          bedtime: { on: false, start: "19:30", end: "06:30" },
-          voice: true,
-          voice_rate: 1,
-          sound: true,
-        },
+        plan: "family",
+        settings: defaultSettings(),
         pin: null,
         updated_at: new Date().toISOString(),
       };
       srv.families[f.id] = f;
+      srv.members.push({ family: f.id, user: userId, role: "owner" });
       return json(route, 201, familyOut(srv, f));
     }
     let m = path.match(/^\/families\/([^/]+)$/);
     if (m && method === "PATCH") {
+      if (role === "viewer") return forbidViewer();
       const f = srv.families[m[1]];
       if (Date.parse(body.updated_at) > Date.parse(f.updated_at)) {
         if (body.settings) f.settings = body.settings;
@@ -127,20 +167,52 @@ export async function fakeApi(context, srv) {
         else if (body.pin) f.pin = body.pin;
         f.updated_at = body.updated_at;
       }
-      return json(route, 200, familyOut(srv, f));
+      return json(route, 200, familyOut(srv, f, role));
     }
     m = path.match(/^\/families\/([^/]+)\/consents$/);
     if (m) {
       srv.consents[m[1]] = {
         policy_version: body.policy_version,
         scopes: body.scopes,
+        method: "checkbox",
         given_at: new Date().toISOString(),
       };
       return json(route, 201, srv.consents[m[1]]);
     }
+    m = path.match(/^\/families\/([^/]+)\/members$/);
+    if (m)
+      return json(route, 200, {
+        members: srv.members
+          .filter((x) => x.family === m[1])
+          .map((x) => ({ user_id: x.user, ...srv.users[x.user], role: x.role, you: x.user === userId })),
+        invites: Object.values(srv.invites)
+          .filter((i) => i.family === m[1] && !i.accepted)
+          .map((i) => ({ id: i.id, email: i.email, role: i.role, expires_at: "2030-01-01T00:00:00Z" })),
+      });
+    m = path.match(/^\/families\/([^/]+)\/invites$/);
+    if (m && method === "POST") {
+      if (role === "viewer") return forbidViewer();
+      const token = `invite-${Object.keys(srv.invites).length + 1}-abcdefghijklmnopqrstuvwxyz`;
+      const inv = {
+        id: Object.keys(srv.invites).length + 1,
+        family: m[1],
+        email: body.email.toLowerCase(),
+        role: body.role,
+      };
+      srv.invites[token] = inv;
+      srv.sent.push({ to: inv.email, token, kind: "invite" });
+      return json(route, 201, { id: inv.id, email: inv.email, role: inv.role });
+    }
     m = path.match(/^\/families\/([^/]+)\/learners\/([^/]+)$/);
     if (m && method === "PUT") {
+      if (role === "viewer") return forbidViewer();
       const cur = srv.learners[m[2]];
+      const count = Object.values(srv.learners).filter((l) => l.family_id === m[1]).length;
+      const limit = LIMITS[srv.families[m[1]].plan] ?? 1;
+      if (!cur && count >= limit)
+        return json(route, 402, {
+          detail: { code: "plan_limit", limit, message: `Your plan allows ${limit} learners.` },
+        });
       if (!cur || Date.parse(body.updated_at) > Date.parse(cur.updated_at))
         srv.learners[m[2]] = { id: m[2], family_id: m[1], ...body };
       const { family_id: _f, ...out } = srv.learners[m[2]];
@@ -152,6 +224,7 @@ export async function fakeApi(context, srv) {
       return json(route, 204);
     }
     if (path === "/sync/events" && method === "POST") {
+      if (role === "viewer") return forbidViewer();
       const accepted = [];
       for (const e of body.events) {
         if (!srv.events.some((x) => x.id === e.id))
@@ -172,26 +245,24 @@ export async function fakeApi(context, srv) {
 }
 
 /** A signed-up family on the server, as if set up on another device. */
-export function seedServer(srv, { pin = null } = {}) {
+export function seedServer(srv, { pin = null, plan = "family" } = {}) {
   srv.users.U1 = { id: "U1", email: "grace@example.com", name: "Grace" };
+  srv.members.push({ family: "F1", user: "U1", role: "owner" });
   srv.families.F1 = {
     id: "F1",
-    owner: "U1",
     name: "Grace's family",
     country: "KE",
-    plan: "free",
-    settings: {
-      goal: 2,
-      limit: 20,
-      bedtime: { on: false, start: "19:30", end: "06:30" },
-      voice: true,
-      voice_rate: 1,
-      sound: true,
-    },
+    plan,
+    settings: defaultSettings(),
     pin,
     updated_at: "2026-10-01T10:00:00Z",
   };
-  srv.consents.F1 = { policy_version: POLICY, scopes: { progress: true }, given_at: "2026-10-01T10:00:00Z" };
+  srv.consents.F1 = {
+    policy_version: POLICY,
+    scopes: { progress: true },
+    method: "checkbox",
+    given_at: "2026-10-01T10:00:00Z",
+  };
   srv.learners["01JB0000000000000000000001"] = {
     id: "01JB0000000000000000000001",
     family_id: "F1",

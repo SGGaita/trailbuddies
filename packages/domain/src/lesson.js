@@ -62,6 +62,15 @@ export function optionCount(config, level, available) {
   return clamp(base, 2, Math.max(2, available));
 }
 
+/**
+ * Match pairs (LES-03): 3 at level 1, 4 at level 2, 5 at level 3. Uses only items the
+ * learner has met when there are 3 or more of them; never more than the unit has.
+ */
+export function matchPairs(level, introduced, inUnit) {
+  const want = clamp(level + 2, 3, 5);
+  return Math.max(2, Math.min(want, Math.max(3, introduced), inUnit));
+}
+
 /** Target queue: every focus item first, then review items, then anything introduced. */
 function targetQueue(focus, review, pool, r) {
   const q = [...shuffle(focus, r), ...shuffle(review, r)];
@@ -114,7 +123,7 @@ export function buildExercise(cfg, ctx) {
   }
 
   if (type === "match") {
-    const pairs = clamp(optionCount(cfg, level, pool.length), 2, Math.min(4, pool.length));
+    const pairs = matchPairs(level, pool.length, all.length);
     const first = next();
     const items = shuffle([first, ...distractors(first, pool, all, pairs - 1, r)], r);
     const right = shuffle(items, r);

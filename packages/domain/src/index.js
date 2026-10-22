@@ -12,3 +12,4 @@ export * from "./gate.js";
 export * from "./pin.js";
 export * from "./placement.js";
 export * from "./rest.js";
+export * from "./names.js";

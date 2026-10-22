@@ -89,6 +89,11 @@ class Consent(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     policy_version: Mapped[str] = mapped_column(String(32))
     scopes: Mapped[dict] = mapped_column(JSON, doc='e.g. {"progress": true, "voice": false, "photos": false}')
+    method: Mapped[str] = mapped_column(
+        String(32),
+        default="checkbox",
+        doc="how consent was given: checkbox now; a verified method before a US launch",
+    )
     given_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -131,3 +136,33 @@ class Event(Base):
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     data: Mapped[dict] = mapped_column(JSON, default=dict)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class EditHistory(Base):
+    """The version an edit replaced (or an older edit that lost), kept 30 days (OFF-05)."""
+
+    __tablename__ = "edit_history"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    entity: Mapped[str] = mapped_column(String(16), doc="learner or family")
+    entity_id: Mapped[str] = mapped_column(String(26), index=True)
+    data: Mapped[dict] = mapped_column(JSON)
+    reason: Mapped[str] = mapped_column(
+        String(16), doc="replaced: a newer edit won; lost: this older edit arrived late"
+    )
+    kept_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class Invite(Base):
+    """An email invitation for a second parent (equal access) or a carer (view progress only)."""
+
+    __tablename__ = "invites"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    email: Mapped[str] = mapped_column(String(320))
+    role: Mapped[str] = mapped_column(String(16))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    invited_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

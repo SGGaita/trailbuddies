@@ -16,7 +16,10 @@ class Settings(BaseSettings):
     # The web app. Magic links and the Google callback point here; the web app proxies
     # /api/* to this API so the session cookie is first-party.
     web_url: str = "http://localhost:3000"
-    session_days: int = 30
+    session_days: int = 60
+    # Plan for new families. The closed beta gives everyone Family (6 learner profiles).
+    default_plan: str = "family"
+    invite_days: int = 7
     cookie_secure: bool = False  # True in production (HTTPS only)
     magic_link_minutes: int = 15
     magic_links_per_hour: int = 5

@@ -57,6 +57,8 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
   await page.getByRole("button", { name: "Continue" }).click();
 
   await expect(page.getByRole("heading", { name: "Before we start" })).toBeVisible();
+  for (const h of ["What we keep", "Why", "How long we keep it", "Your rights", "What we never do"])
+    await expect(page.getByRole("heading", { name: h, exact: true })).toBeVisible();
   const go = page.getByRole("button", { name: "Continue" });
   await expect(go).toBeDisabled();
   await page.getByLabel(/I'm this child's parent or legal guardian/).check();
@@ -74,7 +76,11 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
     await page.getByRole("option", { name: year, exact: true }).click();
     await page.getByRole("button", { name: "Add learner" }).click();
   };
-  await addChild("Wanjiru", "June", "2020");
+  // A full name: only the first name is kept, and the form says so.
+  await page.getByLabel("First name or nickname").fill("Wanjiru Kamau");
+  await expect(page.getByText(`We'll only keep "Wanjiru"`)).toBeVisible();
+  await addChild("Wanjiru Kamau", "June", "2020");
+  await expect(page.getByText("Wanjiru", { exact: true })).toBeVisible();
   await expect(page.getByText("Age 6 · sprout")).toBeVisible();
   await page.getByRole("button", { name: "Add me too" }).click();
   await expect(page.getByLabel("First name or nickname")).toHaveValue("Grace");
