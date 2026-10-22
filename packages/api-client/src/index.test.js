@@ -39,3 +39,9 @@ test("errors carry the status and the API's message", async () => {
   await expect(c.verify("x")).rejects.toBeInstanceOf(ApiError);
   await expect(c.verify("x")).rejects.toMatchObject({ status: 400, message: "This link has expired" });
 });
+
+test("structured errors keep their code (plan limit)", async () => {
+  const body = { detail: { code: "plan_limit", limit: 6, message: "Your plan allows 6 learners." } };
+  const c = createClient({ baseUrl: "/api", fetch: recorder(402, body).fetch });
+  await expect(c.putLearner("F", "L", {})).rejects.toMatchObject({ status: 402, code: "plan_limit", message: "Your plan allows 6 learners." });
+});

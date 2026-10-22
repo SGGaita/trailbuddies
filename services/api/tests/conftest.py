@@ -9,6 +9,7 @@ from app import models  # noqa: F401 - register tables
 from app.db import Base, get_session
 from app.main import create_app
 from app.routes import auth as auth_routes
+from app.routes import members as member_routes
 
 
 @pytest.fixture()
@@ -24,6 +25,7 @@ def outbox(monkeypatch):
     """Captures sign-in emails instead of sending them."""
     sent = []
     monkeypatch.setattr(auth_routes, "send_magic_link", lambda to, link: sent.append((to, link)))
+    monkeypatch.setattr(member_routes, "send_invite", lambda to, link, *_: sent.append((to, link)))
     return sent
 
 

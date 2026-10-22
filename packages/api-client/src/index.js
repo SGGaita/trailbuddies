@@ -4,10 +4,11 @@
  */
 
 export class ApiError extends Error {
-  /** @param {number} status @param {string} message */
-  constructor(status, message) {
+  /** @param {number} status @param {string} message @param {string} [code] */
+  constructor(status, message, code) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -29,13 +30,18 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     });
     if (!res.ok) {
       let message = `${rest.method || "GET"} ${path} failed with ${res.status}`;
+      let code;
       try {
         const body = await res.json();
         if (typeof body.detail === "string") message = body.detail;
+        else if (body.detail?.message) {
+          message = body.detail.message;
+          code = body.detail.code;
+        }
       } catch {
         /* not JSON */
       }
-      throw new ApiError(res.status, message);
+      throw new ApiError(res.status, message, code);
     }
     return res.status === 204 ? null : res.json();
   }
@@ -51,6 +57,8 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     /** @param {string} token */
     verify: (token) => post("/auth/verify", { token }),
     logout: () => post("/auth/logout"),
+    /** Sign out of every device. */
+    logoutAll: () => post("/auth/logout-all"),
     me: () => request("/me"),
     /** @param {string} name */
     updateMe: (name) => request("/me", { method: "PATCH", json: { name } }),
@@ -67,6 +75,16 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     /** @param {string} familyId @param {string} learnerId */
     deleteLearner: (familyId, learnerId) =>
       request(`${fam(familyId)}/learners/${encodeURIComponent(learnerId)}`, { method: "DELETE" }),
+    /** @param {string} id */
+    members: (id) => request(`${fam(id)}/members`),
+    /** @param {string} id @param {{ email: string, role: "parent" | "viewer" }} body */
+    invite: (id, body) => post(`${fam(id)}/invites`, body),
+    /** @param {string} id @param {number} inviteId */
+    cancelInvite: (id, inviteId) => request(`${fam(id)}/invites/${inviteId}`, { method: "DELETE" }),
+    /** @param {string} id @param {string} userId */
+    removeMember: (id, userId) => request(`${fam(id)}/members/${encodeURIComponent(userId)}`, { method: "DELETE" }),
+    /** @param {string} token */
+    acceptInvite: (token) => post("/invites/accept", { token }),
     /** @param {string} familyId @param {object[]} events */
     pushEvents: (familyId, events) => post("/sync/events", { family_id: familyId, events }),
     /** @param {string} familyId @param {number} after */

@@ -7,13 +7,13 @@ from urllib.parse import urlencode
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Response
 from fastapi.responses import RedirectResponse
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
 from ..ids import ulid
 from ..mailer import send_magic_link
-from ..models import LoginToken, User
+from ..models import LoginToken, Session, User
 from ..schemas import MagicLinkIn, MeIn, UserOut, VerifyIn
 from ..security import COOKIE, aware, current_user, end_session, hash_token, start_session
 from ..settings import get_settings
@@ -153,6 +153,15 @@ def logout(
     response: Response, db: DbSession = Depends(get_session), tb_session: str | None = Cookie(default=None)
 ):
     end_session(db, tb_session, response)
+    return {"ok": True}
+
+
+@router.post("/auth/logout-all")
+def logout_all(response: Response, user: User = Depends(current_user), db: DbSession = Depends(get_session)):
+    """Sign out of every device: all of this grown-up's sessions end."""
+    db.execute(delete(Session).where(Session.user_id == user.id))
+    db.commit()
+    response.delete_cookie(COOKIE, path="/")
     return {"ok": True}
 
 

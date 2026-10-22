@@ -19,6 +19,7 @@ import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
+import { useSpokenPrompt, useTapToHear } from "@/lib/nonReader";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 // Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
@@ -52,13 +53,17 @@ export default function WorldMap() {
   }, [ready, learner, router]);
   const subjects = subjectsWithProgress(learner?.progress || {}, learner?.placement, learner?.interests);
   const rest = useRest(learner);
+  const first = !!learner && Object.keys(learner.progress).length === 0;
+  const greeting = !learner
+    ? ""
+    : first
+      ? `Hi ${learner.name}! Let's start with Numbers!`
+      : `Hi ${learner.name}! Shall we count some more?`;
+  useSpokenPrompt(ready && !rest ? greeting : "", learner?.band);
+  const hear = useTapToHear(learner?.band);
   if (!ready || !learner) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
 
-  const first = Object.keys(learner.progress).length === 0;
-  const greeting = first
-    ? `Hi ${learner.name}! Let's start with Numbers!`
-    : `Hi ${learner.name}! Shall we count some more?`;
   const sub = (s) =>
     s.p.done
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
@@ -94,6 +99,7 @@ export default function WorldMap() {
                 key={s.id}
                 component={Link}
                 href={`/play/trail/${s.id}`}
+                onClick={hear(s.id, s.place)}
                 sx={{ ...PLACE_SX, opacity: first && s.id !== "numbers" ? 0.55 : 1 }}
               >
                 <Box sx={{ height: 22 }}>
@@ -115,7 +121,12 @@ export default function WorldMap() {
               </Box>
             );
           })}
-          <Box component={Link} href="/play/more/island" sx={PLACE_SX}>
+          <Box
+            component={Link}
+            href="/play/more/island"
+            onClick={hear("island", t("map.familyIsland"))}
+            sx={PLACE_SX}
+          >
             <Box sx={{ height: 22 }} />
             <Island kind="family" width="min(180px, 100%)" height={120} />
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
@@ -191,6 +202,7 @@ export default function WorldMap() {
             key={s.id}
             component={Link}
             href={`/play/trail/${s.id}`}
+            onClick={hear(s.id, s.place)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -226,6 +238,7 @@ export default function WorldMap() {
         <Box
           component={Link}
           href="/play/more/island"
+          onClick={hear("island", t("map.familyIsland"))}
           sx={{
             display: "flex",
             alignItems: "center",

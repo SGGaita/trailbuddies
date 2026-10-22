@@ -9,7 +9,7 @@ import Dialog from "@mui/material/Dialog";
 import Snackbar from "@mui/material/Snackbar";
 import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubject, getUnit } from "@trailbuddies/content";
+import { getSubject, getUnit, buddyLine } from "@trailbuddies/content";
 import { layoutTrail, pathData, subjectProgress, currentUnit } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
@@ -19,6 +19,7 @@ import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
+import { useSpokenPrompt } from "@/lib/nonReader";
 
 const W = 600; // virtual layout width; the trail scales to the screen
 const ITEM_PREVIEW = 8;
@@ -97,6 +98,7 @@ export default function Trail({ subjectId }) {
   }, [ready]);
 
   const rest = useRest(learner);
+  useSpokenPrompt(ready && learner && !rest ? buddyLine("trail.start") : "", learner?.band);
   if (!ready || !learner || !subject) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
 
@@ -290,7 +292,7 @@ export default function Trail({ subjectId }) {
           <Box sx={{ flex: 1 }} />
           <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
             <Buddy id={learner.buddy} outfit={learner.outfit} size={80} />
-            <Bubble small>Tap the big stone!</Bubble>
+            <Bubble small>{buddyLine("trail.start")}</Bubble>
           </Box>
         </Box>
       </Box>

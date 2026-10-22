@@ -109,6 +109,19 @@ export default function Handover() {
       <Button variant="contained" size="large" disabled={!learner.buddy} onClick={start}>
         {t("start.firstLesson", { name: learner.name })}
       </Button>
+      {children.length > 1 && (
+        <Button
+          variant="outlined"
+          size="large"
+          sx={{ borderWidth: 2 }}
+          onClick={() => {
+            useFamily.getState().setActive(null);
+            router.push("/play");
+          }}
+        >
+          {t("start.handOver")}
+        </Button>
+      )}
       <Button onClick={() => router.push("/family")}>{t("start.toGrownUps")}</Button>
     </OnboardingShell>
   );

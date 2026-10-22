@@ -76,6 +76,9 @@ export default function Consent() {
       {policy && (
         <>
           <List title={t("start.weKeep")} items={policy.collect} mark="✓" />
+          {policy.why && <List title={t("start.why")} items={policy.why} mark="•" />}
+          {policy.kept && <List title={t("start.howLong")} items={policy.kept} mark="⏱" />}
+          {policy.rights && <List title={t("start.rights")} items={policy.rights} mark="★" />}
           <List title={t("start.weNever")} items={policy.never} mark="✕" />
           <Box>
             <Typography component="h2" sx={{ fontWeight: 800, mb: 0.5 }}>

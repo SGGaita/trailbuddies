@@ -13,6 +13,7 @@ import { startLadder, answer, lessonOutcome } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
 import { speak, stop } from "@/lib/speech";
+import { playSound } from "@/lib/sounds";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Icon from "@/components/Icon";
@@ -136,14 +137,17 @@ function Player({ where, learner }) {
     const res = answer(cur, correct, { wrongOptionIds: wrongIds, chosenId });
     setLadders((l) => ({ ...l, [step.id]: res.state }));
     if (res.effect === "correct") {
+      playSound("right");
       results.current[step.id] = { firstTry: res.firstTry, misses: cur.misses };
       const praise = line("lesson.correct");
       setFeedback({ stepId: step.id, bubble: praise, mood: "cheer", done: true });
       say(praise);
     } else if (res.effect === "repeat") {
+      playSound("miss");
       setFeedback({ stepId: step.id, bubble: step.prompt, mood: "think", done: false });
       say(`${line("lesson.repeat")} ${step.say}`);
     } else if (res.effect === "eliminate" || res.effect === "reveal") {
+      playSound("miss");
       const msg = line(`lesson.${res.effect}`);
       setFeedback({ stepId: step.id, bubble: msg, mood: "think", done: false });
       say(msg);

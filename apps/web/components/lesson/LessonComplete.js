@@ -10,6 +10,7 @@ import { buddyLine, getUnit } from "@trailbuddies/content";
 import { layoutTrail } from "@trailbuddies/domain";
 import { trailUnits } from "@/lib/trail";
 import { speak } from "@/lib/speech";
+import { playSound } from "@/lib/sounds";
 import { useFamily } from "@/lib/store";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
@@ -51,6 +52,7 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
   ].filter(Boolean);
 
   useEffect(() => {
+    playSound("done");
     speak([message, ...extras].join(" "), { band: learner.band, enabled: voice });
     // Say it once when the screen opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,5 +1,14 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -12,7 +21,7 @@ import { t } from "@trailbuddies/i18n";
 import { getSubjects, getReadyUnits } from "@trailbuddies/content";
 import { DIFFICULTY_SETTINGS, describeLevel } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
-import { signOut, syncNow } from "@/lib/account";
+import { api, signOut, signOutEverywhere, syncNow } from "@/lib/account";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
@@ -35,6 +44,8 @@ function AccountSection() {
   const user = useFamily((s) => s.user);
   const sync = useFamily((s) => s.sync);
   const clear = useFamily((s) => s.clear);
+  const [confirm, setConfirm] = useState(false);
+  const [error, setError] = useState("");
   if (mode === "demo")
     return (
       <Section title={t("settings.account")} sub={t("settings.demo")}>
@@ -87,16 +98,197 @@ function AccountSection() {
           ↻
         </Button>
       </Box>
-      <Button
-        variant="outlined"
-        sx={{ borderWidth: 2 }}
-        onClick={async () => {
-          await signOut();
-          router.push("/start");
-        }}
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+        <Button
+          variant="outlined"
+          sx={{ borderWidth: 2 }}
+          onClick={async () => {
+            await signOut();
+            router.push("/start");
+          }}
+        >
+          {t("settings.signOut")}
+        </Button>
+        <Button onClick={() => setConfirm(true)}>{t("settings.signOutAll")}</Button>
+      </Box>
+      <Dialog open={confirm} onClose={() => setConfirm(false)}>
+        <DialogTitle>{t("settings.signOutAll")}?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t("settings.signOutAllSub")}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirm(false)}>{t("settings.cancel")}</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              try {
+                await signOutEverywhere();
+                router.push("/start");
+              } catch (e) {
+                setConfirm(false);
+                setError(e.message);
+              }
+            }}
+          >
+            {t("settings.confirm")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {error && (
+        <Alert severity="warning" sx={{ mt: 1.5 }}>
+          {error}
+        </Alert>
+      )}
+    </Section>
+  );
+}
+
+/** Plan and learner limit. */
+function PlanSection() {
+  const family = useFamily((s) => s.family);
+  const mode = useFamily((s) => s.mode);
+  if (mode !== "account") return null;
+  return (
+    <Section title={t("settings.plan")} sub={t("settings.planBeta")}>
+      <Typography sx={{ fontWeight: 800 }}>
+        {t("settings.planLine", { plan: family?.plan || "Family", limit: family?.learner_limit ?? 6 })}
+      </Typography>
+    </Section>
+  );
+}
+
+/** Second parent (equal access) or carer (view progress only), invited by email. */
+function GrownUpsSection() {
+  const family = useFamily((s) => s.family);
+  const mode = useFamily((s) => s.mode);
+  const [data, setData] = useState(null);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("parent");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const id = family?.id;
+  const reload = () =>
+    api
+      .members(id)
+      .then(setData)
+      .catch((e) => setError(e.message));
+  useEffect(() => {
+    if (mode !== "account" || !id) return;
+    api
+      .members(id)
+      .then(setData)
+      .catch((e) => setError(e.message));
+  }, [mode, id]);
+  if (mode !== "account" || !id) return null;
+  const manager = family.role === "owner" || family.role === "parent";
+  const invite = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      await api.invite(id, { email: email.trim(), role });
+      setEmail("");
+      await reload();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const act = async (fn) => {
+    try {
+      await fn();
+      await reload();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  return (
+    <Section title={t("settings.grownUps")} sub={t("settings.grownUpsSub")}>
+      <Box
+        component="ul"
+        sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1 }}
       >
-        {t("settings.signOut")}
-      </Button>
+        {(data?.members || []).map((m) => (
+          <Box
+            component="li"
+            key={m.user_id}
+            sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+          >
+            <Box sx={{ flex: 1, minWidth: 180 }}>
+              <Typography sx={{ fontWeight: 800 }}>
+                {m.name || m.email} {m.you && <Chip size="small" label={t("settings.you")} />}
+              </Typography>
+              <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+                {m.email} · {t(`settings.role.${m.role}`)}
+              </Typography>
+            </Box>
+            {manager && m.role !== "owner" && !m.you && (
+              <Button size="small" onClick={() => act(() => api.removeMember(id, m.user_id))}>
+                {t("settings.removeGrownUp", { name: m.name || m.email })}
+              </Button>
+            )}
+          </Box>
+        ))}
+        {(data?.invites || []).map((i) => (
+          <Box
+            component="li"
+            key={i.id}
+            sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+          >
+            <Box sx={{ flex: 1, minWidth: 180 }}>
+              <Typography sx={{ fontWeight: 800 }}>{i.email}</Typography>
+              <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+                {t("settings.invited")} · {t(`settings.role.${i.role}`)}
+              </Typography>
+            </Box>
+            {manager && (
+              <Button size="small" onClick={() => act(() => api.cancelInvite(id, i.id))}>
+                {t("settings.cancel")}
+              </Button>
+            )}
+          </Box>
+        ))}
+      </Box>
+      {error && (
+        <Alert severity="warning" sx={{ mt: 1.5 }}>
+          {error}
+        </Alert>
+      )}
+      {manager && (
+        <Box
+          component="form"
+          onSubmit={invite}
+          sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}
+          noValidate
+        >
+          <TextField
+            label={t("settings.inviteEmail")}
+            type="email"
+            size="small"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{ flex: 1, minWidth: 220 }}
+          />
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={role}
+            onChange={(_, v) => v && setRole(v)}
+            aria-label="Role"
+          >
+            <ToggleButton value="parent" sx={{ fontWeight: 800 }}>
+              {t("settings.roleParent")}
+            </ToggleButton>
+            <ToggleButton value="viewer" sx={{ fontWeight: 800 }}>
+              {t("settings.roleViewer")}
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Button type="submit" variant="contained" disabled={busy || !email.trim()}>
+            {t("settings.invite")}
+          </Button>
+        </Box>
+      )}
     </Section>
   );
 }
@@ -110,6 +302,7 @@ export default function FamilySettings() {
   const family = useFamily((s) => s.family);
   const setDifficulty = useFamily((s) => s.setDifficulty);
   const learners = useLearners();
+  const viewer = family?.role === "viewer";
   if (!ready) return <Loading />;
   const subjects = getSubjects().filter((s) => getReadyUnits(s.id).length);
 
@@ -117,12 +310,19 @@ export default function FamilySettings() {
     <FamilyShell title={t("nav.settings")} family={family} active="/family/settings" back="/family">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 760 }}>
         <AccountSection />
-        <Section title={t("start.settingsTitle")}>
-          <FamilySettingsForm />
-        </Section>
-        <Card sx={{ p: { xs: 2, sm: 3 } }}>
-          <PinSetup />
-        </Card>
+        {viewer && <Alert severity="info">{t("settings.viewerNote")}</Alert>}
+        {!viewer && (
+          <>
+            <Section title={t("start.settingsTitle")}>
+              <FamilySettingsForm />
+            </Section>
+            <Card sx={{ p: { xs: 2, sm: 3 } }}>
+              <PinSetup />
+            </Card>
+          </>
+        )}
+        <PlanSection />
+        <GrownUpsSection />
         <Section title={t("settings.difficulty")} sub={t("settings.difficultySub")}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {learners.map((l) => (
@@ -155,6 +355,7 @@ export default function FamilySettings() {
                   size="small"
                   value={l.difficulty || "auto"}
                   onChange={(_, v) => v && setDifficulty(l.id, v)}
+                  disabled={viewer}
                   aria-label={`${t("settings.difficulty")} for ${l.name}`}
                 >
                   {DIFFICULTY_SETTINGS.map((d) => (
@@ -166,14 +367,16 @@ export default function FamilySettings() {
               </Box>
             ))}
           </Box>
-          <Box sx={{ display: "flex", gap: 1, mt: 2, flexWrap: "wrap" }}>
-            <Button component={Link} href="/start/learners" variant="outlined" sx={{ borderWidth: 2 }}>
-              {t("start.addLearner")}
-            </Button>
-            <Button component={Link} href="/start/interests">
-              {t("start.interestsTitle")}
-            </Button>
-          </Box>
+          {!viewer && (
+            <Box sx={{ display: "flex", gap: 1, mt: 2, flexWrap: "wrap" }}>
+              <Button component={Link} href="/start/learners" variant="outlined" sx={{ borderWidth: 2 }}>
+                {t("start.addLearner")}
+              </Button>
+              <Button component={Link} href="/start/interests">
+                {t("start.interestsTitle")}
+              </Button>
+            </Box>
+          )}
         </Section>
       </Box>
     </FamilyShell>

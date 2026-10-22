@@ -83,3 +83,19 @@ describe("a placement start opens units", () => {
     expect(layoutTrail(units, {}).next.id).toBe("a-1");
   });
 });
+
+import { matchPairs } from "./lesson.js";
+import { firstNameOnly } from "./names.js";
+
+describe("completion rules", () => {
+  test("match shows 3–5 pairs by level, from met items when there are enough", () => {
+    expect([1, 2, 3].map((l) => matchPairs(l, 10, 10))).toEqual([3, 4, 5]);
+    expect(matchPairs(3, 3, 5)).toBe(3); // only 3 met so far: stay with those
+    expect(matchPairs(2, 1, 2)).toBe(2); // a unit with 2 items can't do more
+  });
+  test("only the first name is kept", () => {
+    expect(firstNameOnly("  Zawadi  Wanjiru Kamau ")).toEqual({ name: "Zawadi", trimmed: true });
+    expect(firstNameOnly("Zizi")).toEqual({ name: "Zizi", trimmed: false });
+    expect(firstNameOnly("   ")).toEqual({ name: "", trimmed: false });
+  });
+});

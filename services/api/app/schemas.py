@@ -113,6 +113,11 @@ class LearnerIn(Strict):
         return v
 
 
+class InviteIn(Strict):
+    email: EmailStr
+    role: Literal["parent", "viewer"] = Field(description="parent: equal access; viewer: view progress only")
+
+
 class EventIn(Strict):
     id: str = Field(min_length=26, max_length=26)
     type: EventType

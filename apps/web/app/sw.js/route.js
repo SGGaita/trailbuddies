@@ -26,6 +26,9 @@ const EXTRAS = [
   "/icons/icon-512.png",
   "/icons/icon-maskable-512.png",
   "/icons/apple-touch-icon.png",
+  "/sounds/right.wav",
+  "/sounds/miss.wav",
+  "/sounds/done.wav",
 ];
 
 function worker(BUILD_ID, PAGES, EXTRAS) {
