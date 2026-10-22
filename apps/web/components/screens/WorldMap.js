@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
+import Snackbar from "@mui/material/Snackbar";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubjects, getUnit, buddyLine } from "@trailbuddies/content";
@@ -29,6 +30,8 @@ import RestScreen, { useRest } from "@/components/RestScreen";
 import { useTapToHear, isNonReader } from "@/lib/nonReader";
 import { speak } from "@/lib/speech";
 import { readMemory, writeMemory } from "@/lib/memory";
+import { SavingGoal } from "@/components/screens/Shop";
+import { OUTFITS } from "@/lib/art";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 // Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
@@ -106,6 +109,19 @@ export default function WorldMap() {
   useEffect(() => {
     if (ready && learnerId && !rest && !noBuddy) sayGreeting();
   }, [ready, learnerId, rest, noBuddy]);
+  // OFF-03: a purchase made offline that the wallet couldn't cover was handed back. Say so
+  // gently, once per device.
+  const [dismissed, setDismissed] = useState(false);
+  const returned =
+    learner && memory && !dismissed
+      ? (learner.reversed || []).filter((r) => !(memory.returned[learner.id] || []).includes(r.id))
+      : [];
+  const dismissReturned = () => {
+    writeMemory((m) => {
+      m.returned[learner.id] = [...(m.returned[learner.id] || []), ...returned.map((r) => r.id)];
+    });
+    setDismissed(true);
+  };
   const hear = useTapToHear(learner?.band);
   if (!ready || !learner || noBuddy) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
@@ -217,6 +233,7 @@ export default function WorldMap() {
             gap: 0.75,
           }}
         >
+          <SavingCard learner={learner} />
           <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
             {COMING.map((c) => (
@@ -253,6 +270,7 @@ export default function WorldMap() {
             {greeting}
           </Bubble>
         </Box>
+        <SavingCard learner={learner} />
         {subjects.map((s) => (
           <Box
             key={s.id}
@@ -322,6 +340,42 @@ export default function WorldMap() {
           ))}
         </Box>
       </Box>
+      <Snackbar
+        open={returned.length > 0}
+        onClose={dismissReturned}
+        autoHideDuration={8000}
+        message={buddyLine(
+          "shop.returned",
+          { item: OUTFITS[returned[0]?.itemId]?.name || returned[0]?.itemId || "" },
+          0,
+          learner.buddy,
+        )}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      />
     </LearnerShell>
+  );
+}
+
+/** The saving goal from the shop, as a card that opens the shop. */
+function SavingCard({ learner }) {
+  const it = learner.wish;
+  if (!it || learner.owned.includes(it)) return null;
+  return (
+    <Box
+      component={Link}
+      href="/play/more/shop"
+      sx={{
+        display: "flex",
+        bgcolor: "background.paper",
+        border: `2px solid ${colors.line}`,
+        borderRadius: 4.5,
+        px: 1.75,
+        py: 1.25,
+        color: "text.primary",
+        textDecoration: "none",
+      }}
+    >
+      <SavingGoal learner={learner} compact />
+    </Box>
   );
 }

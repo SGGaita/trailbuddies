@@ -14,3 +14,6 @@ export * from "./placement.js";
 export * from "./rest.js";
 export * from "./names.js";
 export * from "./buddy.js";
+export * from "./streak.js";
+export * from "./badges.js";
+export * from "./games.js";

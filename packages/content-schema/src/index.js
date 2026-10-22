@@ -12,7 +12,7 @@ import addFormats from "ajv-formats";
 const here = dirname(fileURLToPath(import.meta.url));
 const load = (name) => JSON.parse(readFileSync(join(here, "schemas", name), "utf8"));
 
-/** @typedef {"unit" | "catalogue" | "badge" | "buddy-script" | "assets" | "item"} Kind */
+/** @typedef {"unit" | "catalogue" | "badge" | "buddy-script" | "assets" | "item" | "economy"} Kind */
 /** @typedef {{ valid: boolean, errors: string[] }} Result */
 
 const FILES = {
@@ -22,6 +22,7 @@ const FILES = {
   badge: "badge.json",
   "buddy-script": "buddy-script.json",
   assets: "asset-manifest.json",
+  economy: "economy.json",
 };
 
 let ajv;

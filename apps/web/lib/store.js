@@ -30,6 +30,7 @@ export const DEFAULT_SETTINGS = {
   voice: true,
   voice_rate: 1,
   sound: true,
+  treasure_cap: true,
 };
 
 const empty = () => ({
@@ -207,12 +208,20 @@ export function useLearner(id) {
   const learnerId = useFamily((s) => id ?? s.activeId);
   const learner = useFamily((s) => s.learners.find((l) => l.id === learnerId));
   const events = useFamily((s) => s.events);
-  return useMemo(() => (learner ? learnerView(learner, events) : null), [learner, events]);
+  const goal = useFamily((s) => s.settings.goal);
+  return useMemo(
+    () => (learner ? learnerView(learner, events, new Date(), { goal }) : null),
+    [learner, events, goal],
+  );
 }
 
 /** Every learner with derived state (parent dashboard). */
 export function useLearners() {
   const learners = useFamily((s) => s.learners);
   const events = useFamily((s) => s.events);
-  return useMemo(() => learners.map((l) => learnerView(l, events)), [learners, events]);
+  const goal = useFamily((s) => s.settings.goal);
+  return useMemo(
+    () => learners.map((l) => learnerView(l, events, new Date(), { goal })),
+    [learners, events, goal],
+  );
 }

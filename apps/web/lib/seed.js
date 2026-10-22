@@ -81,6 +81,8 @@ export function seedEvents(now = new Date()) {
     lesson("zawadi", day(0, 8), "counting-1-5-2", 2, 12),
     earn("zawadi", day(5, 17), 70),
     earn("zawadi", day(0, 8), 60),
+    // She bought the sun hat she wears (wallet: 130 earned − 20 = 110).
+    createEvent("treasure_spent", "zawadi", { amount: 20, itemId: "sunhat", kind: "outfit" }, day(5, 18)),
 
     // Joseph: every Counting 1–5 lesson at 3 stars; minutes 30, 25, 0, 40, 20, 15, 0
     lesson("joseph", day(6, 20), "counting-1-5-1", 3, 30),

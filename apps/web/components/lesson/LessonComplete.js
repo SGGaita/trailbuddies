@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -15,6 +15,8 @@ import { useFamily } from "@/lib/store";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import { Coin } from "@/components/Coins";
+import CountUp from "@/components/rewards/CountUp";
+import BadgeCelebration from "@/components/rewards/BadgeCelebration";
 
 /** Where "Next" goes: the next stone on the trail after this result was recorded. */
 function nextStop(subjectId, progress, start) {
@@ -35,6 +37,14 @@ function nextStop(subjectId, progress, start) {
  */
 export default function LessonComplete({ lesson, outcome, learner, goal, back }) {
   const voice = useFamily((s) => s.settings.voice);
+  // BDG-03 / LES-16: new badges celebrate after the end screen has shown for a moment.
+  const [celebrate, setCelebrate] = useState(false);
+  const hasBadges = (outcome.badges || []).length > 0;
+  useEffect(() => {
+    if (!hasBadges) return undefined;
+    const id = setTimeout(() => setCelebrate(true), 1800);
+    return () => clearTimeout(id);
+  }, [hasBadges]);
   const trophy = lesson.kind === "trophy";
   const review = lesson.kind === "review";
   const next = useMemo(
@@ -117,12 +127,14 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
         ))}
       </Bubble>
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
-        <Box
-          sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: 800, fontSize: 20 }}
-          aria-label={t("done.treasures", { n: outcome.treasures })}
-        >
-          <Coin kind="gem" value={`+${outcome.treasures}`} />
-        </Box>
+        {outcome.treasures > 0 && (
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: 800, fontSize: 20 }}
+            aria-label={t("done.treasures", { n: outcome.treasures })}
+          >
+            <Coin kind="gem" value={<CountUp value={outcome.treasures} prefix="+" />} />
+          </Box>
+        )}
         <Box
           sx={{
             display: "flex",
@@ -155,6 +167,14 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
           </Button>
         )}
       </Box>
+      {celebrate && (
+        <BadgeCelebration
+          badges={outcome.badges}
+          learner={learner}
+          voice={voice}
+          onDone={() => setCelebrate(false)}
+        />
+      )}
     </Box>
   );
 }

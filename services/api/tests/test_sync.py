@@ -61,3 +61,12 @@ def test_deleting_a_learner_deletes_their_events(client, outbox):
     client.post("/sync/events", json={"family_id": fid, "events": [ev(1)]})
     client.delete(f"/families/{fid}/learners/{LEARNER}")
     assert client.get(f"/sync/events?family_id={fid}").json()["events"] == []
+
+
+def test_game_events_sync(client, outbox):
+    fid = setup(client, outbox)
+    r = client.post(
+        "/sync/events",
+        json={"family_id": fid, "events": [ev(1, type_="game_finished", game="memory", unitId="u")]},
+    )
+    assert r.json()["accepted"] == [ev(1)["id"]]

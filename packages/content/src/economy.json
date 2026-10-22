@@ -1,0 +1,75 @@
+{
+  "schema": "economy/1",
+  "earn": {
+    "lesson": 10,
+    "perfect": 5,
+    "dailyGoal": 10,
+    "trophy": 15,
+    "game": 5,
+    "gameNewTopic": 5
+  },
+  "badge": {
+    "bronze": 10,
+    "silver": 25,
+    "gold": 50
+  },
+  "dailyCap": 100,
+  "restDaysPerWeek": 2,
+  "shop": [
+    {
+      "id": "sunhat",
+      "slot": "hat",
+      "price": 20
+    },
+    {
+      "id": "bow",
+      "slot": "neck",
+      "price": 35
+    },
+    {
+      "id": "party",
+      "slot": "hat",
+      "price": 40
+    },
+    {
+      "id": "specs",
+      "slot": "eyes",
+      "price": 45
+    },
+    {
+      "id": "cap",
+      "slot": "hat",
+      "price": 50
+    },
+    {
+      "id": "scarf",
+      "slot": "neck",
+      "price": 55
+    },
+    {
+      "id": "flower",
+      "slot": "hat",
+      "price": 60
+    },
+    {
+      "id": "shades",
+      "slot": "eyes",
+      "price": 70
+    },
+    {
+      "id": "explorer",
+      "slot": "hat",
+      "price": 80
+    },
+    {
+      "id": "astronaut",
+      "slot": "hat",
+      "price": 150
+    },
+    {
+      "id": "crown",
+      "slot": "hat",
+      "price": 250
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import tumiEn from "./buddy/en.tumi.json" with { type: "json" };
 import jumaEn from "./buddy/en.juma.json" with { type: "json" };
 import kikiEn from "./buddy/en.kiki.json" with { type: "json" };
 import builtInBadges from "./badges/built-in.json" with { type: "json" };
+import economy from "./economy.json" with { type: "json" };
 
 /** Units with full content, by id. */
 export const UNITS = {
@@ -100,3 +101,6 @@ export function buddySays(event, { buddy = null, vars = {}, last = null, r = Mat
   const pool = lines.length > 1 ? lines.filter((l) => l !== last) : lines;
   return pool[Math.floor(r() * pool.length)];
 }
+
+/** The reward economy (RWD-09): earning amounts, the daily cap, badge payouts and shop prices. */
+export { economy };

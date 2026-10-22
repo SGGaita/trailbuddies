@@ -7,7 +7,7 @@ import { ulid } from "./ulid.js";
 
 export { ulid };
 
-/** @typedef {"lesson_completed" | "item_answered" | "treasure_earned" | "treasure_spent" | "badge_awarded"} EventType */
+/** @typedef {"lesson_completed" | "item_answered" | "treasure_earned" | "treasure_spent" | "badge_awarded" | "game_finished"} EventType */
 /**
  * @typedef {object} ProgressEvent
  * @property {string} id ULID
@@ -23,6 +23,7 @@ export const EVENT_TYPES = [
   "treasure_earned",
   "treasure_spent",
   "badge_awarded",
+  "game_finished",
 ];
 
 /**
@@ -91,10 +92,20 @@ export function deriveState(events, learnerId) {
   const progress = {};
   let treasures = 0;
   const badges = new Set();
+  const paidBadges = new Set();
   /** @type {Array<{ itemId: string, firstTry: boolean, at: number }>} */
   const answers = [];
-  /** @type {Array<{ lessonId: string, unitId?: string, subjectId?: string, kind: string, stars: number, at: number, durationSec: number }>} */
+  /** @type {Array<{ lessonId: string, unitId?: string, subjectId?: string, kind: string, stars: number, hints: number, at: number, durationSec: number }>} */
   const results = [];
+  /** @type {Array<{ amount: number, reason: string, at: number }>} */
+  const earnings = [];
+  /** Items bought and kept. @type {string[]} */
+  const owned = [];
+  /** Purchases undone because the wallet would go below zero after a merge (RWD-04). */
+  const reversed = [];
+  /** @type {Array<{ game: string, unitId: string, at: number }>} */
+  const games = [];
+  // Events are processed in ULID (time) order, so every device reaches the same balance.
   const ordered = [...events].sort((a, b) => (a.id < b.id ? -1 : 1));
   for (const e of ordered) {
     if (e.learnerId !== learnerId) continue;
@@ -103,14 +114,37 @@ export function deriveState(events, learnerId) {
     if (e.type === "lesson_completed") {
       // Reviews are practice: they count for the day and for mastery, not for trail stars.
       if (d.kind !== "review") progress[d.lessonId] = Math.max(progress[d.lessonId] || 0, d.stars || 0);
-      results.push({ lessonId: d.lessonId, unitId: d.unitId, subjectId: d.subjectId, kind: d.kind || "lesson", stars: d.stars || 0, at, durationSec: d.durationSec || 0 });
+      results.push({
+        lessonId: d.lessonId,
+        unitId: d.unitId,
+        subjectId: d.subjectId,
+        kind: d.kind || "lesson",
+        stars: d.stars || 0,
+        hints: d.hints || 0,
+        at,
+        durationSec: d.durationSec || 0,
+      });
     } else if (e.type === "item_answered") answers.push({ itemId: d.itemId, firstTry: !!d.firstTry, at });
-    else if (e.type === "treasure_earned") treasures += d.amount || 0;
-    else if (e.type === "treasure_spent") treasures -= d.amount || 0;
-    else if (e.type === "badge_awarded") badges.add(d.badgeId);
+    else if (e.type === "treasure_earned") {
+      // A badge awarded on two devices offline pays out once.
+      if (d.reason === "badge" && d.badgeId) {
+        if (paidBadges.has(d.badgeId)) continue;
+        paidBadges.add(d.badgeId);
+      }
+      treasures += d.amount || 0;
+      earnings.push({ amount: d.amount || 0, reason: d.reason || "lesson", at });
+    } else if (e.type === "treasure_spent") {
+      const amount = d.amount || 0;
+      if (treasures - amount < 0) reversed.push({ id: e.id, itemId: d.itemId, amount, at });
+      else {
+        treasures -= amount;
+        if (d.itemId && !owned.includes(d.itemId)) owned.push(d.itemId);
+      }
+    } else if (e.type === "badge_awarded") badges.add(d.badgeId);
+    else if (e.type === "game_finished") games.push({ game: d.game, unitId: d.unitId, at });
   }
   const stars = Object.values(progress).reduce((a, b) => a + b, 0);
-  return { progress, stars, treasures: Math.max(0, treasures), badges: [...badges], answers, results };
+  return { progress, stars, treasures, badges: [...badges], answers, results, earnings, owned, reversed, games };
 }
 
 /**

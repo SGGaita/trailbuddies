@@ -49,7 +49,7 @@ test("answers and results come out in time order with timestamps", () => {
   ];
   const s = deriveState(evs, "z");
   expect(s.answers).toEqual([{ itemId: "one", firstTry: true, at: 1000 }, { itemId: "two", firstTry: false, at: 2000 }]);
-  expect(s.results[0]).toEqual({ lessonId: "l1", unitId: "u", subjectId: "numbers", kind: "lesson", stars: 2, at: 3000, durationSec: 120 });
+  expect(s.results[0]).toEqual({ lessonId: "l1", unitId: "u", subjectId: "numbers", kind: "lesson", stars: 2, hints: 0, at: 3000, durationSec: 120 });
 });
 
 test("activity counts today's lessons and the last 7 days of minutes", () => {
@@ -70,4 +70,35 @@ test("reviews count as results but add no trail stars", () => {
   const s = deriveState([e], "k");
   expect(s.progress).toEqual({});
   expect(s.results).toHaveLength(1);
+});
+
+describe("wallet from transactions (RWD-04)", () => {
+  const ev = (type, data, ms) => createEvent(type, "k", data, new Date(1e12 + ms));
+  test("the balance is the sum of everything earned and spent, in time order", () => {
+    const s = deriveState([ev("treasure_earned", { amount: 30 }, 1), ev("treasure_spent", { amount: 20, itemId: "sunhat" }, 2), ev("treasure_earned", { amount: 5 }, 3)], "k");
+    expect(s).toMatchObject({ treasures: 15, owned: ["sunhat"], reversed: [] });
+  });
+  test("two offline spends that overdraw: the later one is reversed and the item goes back", () => {
+    const a = ev("treasure_earned", { amount: 50 }, 1);
+    const tablet = ev("treasure_spent", { amount: 40, itemId: "party" }, 2);
+    const phone = ev("treasure_spent", { amount: 35, itemId: "bow" }, 3);
+    const s = deriveState(mergeEvents([a, phone], [a, tablet]), "k");
+    expect(s.treasures).toBe(10);
+    expect(s.owned).toEqual(["party"]);
+    expect(s.reversed.map((r) => r.itemId)).toEqual(["bow"]);
+  });
+  test("a badge awarded on two devices counts and pays once; stars never change when spending", () => {
+    const won = ev("lesson_completed", { lessonId: "l1", stars: 3 }, 0);
+    const b1 = ev("badge_awarded", { badgeId: "first-steps" }, 1);
+    const p1 = ev("treasure_earned", { amount: 10, reason: "badge", badgeId: "first-steps" }, 1);
+    const b2 = ev("badge_awarded", { badgeId: "first-steps" }, 2);
+    const p2 = ev("treasure_earned", { amount: 10, reason: "badge", badgeId: "first-steps" }, 2);
+    const s = deriveState([won, b1, p1, b2, p2, ev("treasure_spent", { amount: 5, itemId: "x" }, 4)], "k");
+    expect(s.badges).toEqual(["first-steps"]);
+    expect(s.treasures).toBe(5);
+    expect(s.stars).toBe(3);
+  });
+  test("games are recorded", () => {
+    expect(deriveState([ev("game_finished", { game: "memory", unitId: "u" }, 1)], "k").games).toHaveLength(1);
+  });
 });

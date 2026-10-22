@@ -1,9 +1,6 @@
 /** Screens that exist as placeholders in Sprint 0, with the sprint that builds them. */
 export const PLAY_MORE = {
-  games: { title: "Games corner", sprint: "Sprint 4", story: "GAM-01..09" },
-  shop: { title: "Buddy shop", sprint: "Sprint 4", story: "RWD-02, RWD-05" },
   room: { title: "Treasure room", sprint: "Phase 4 (Sprint 21)", story: "RWD-06, RWD-07" },
-  badges: { title: "My badges", sprint: "Sprint 4", story: "BDG-02, BDG-04" },
   wishes: { title: "My wishes", sprint: "Phase 2 (Sprint 11)", story: "BST-04, BST-07" },
   island: { title: "Family & Class Island", sprint: "Sprint 5", story: "MAP-06, BLD-08" },
 };

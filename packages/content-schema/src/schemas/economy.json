@@ -1,0 +1,132 @@
+{
+  "$id": "https://trailbuddies.africa/schema/economy.json",
+  "title": "Reward economy: earning, caps, badge payouts and shop prices (RWD-09)",
+  "type": "object",
+  "required": [
+    "schema",
+    "earn",
+    "badge",
+    "dailyCap",
+    "restDaysPerWeek",
+    "shop"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "economy/1"
+    },
+    "earn": {
+      "type": "object",
+      "required": [
+        "lesson",
+        "perfect",
+        "dailyGoal",
+        "trophy",
+        "game",
+        "gameNewTopic"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lesson": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "perfect": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "dailyGoal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "trophy": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "game": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "gameNewTopic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        }
+      }
+    },
+    "badge": {
+      "type": "object",
+      "required": [
+        "bronze",
+        "silver",
+        "gold"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "bronze": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "silver": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "gold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        }
+      }
+    },
+    "dailyCap": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Most treasures from lessons and games in a day (badges are extra); 0 = no cap"
+    },
+    "restDaysPerWeek": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "shop": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "slot",
+          "price"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "common.json#/$defs/id"
+          },
+          "slot": {
+            "enum": [
+              "hat",
+              "eyes",
+              "neck"
+            ]
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000
+          },
+          "band": {
+            "$ref": "common.json#/$defs/band"
+          }
+        }
+      }
+    }
+  }
+}

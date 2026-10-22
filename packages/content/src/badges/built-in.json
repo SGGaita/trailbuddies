@@ -4,31 +4,198 @@
     "name": "First Steps",
     "how": "Finish your first lesson",
     "category": "learning",
-    "reward": 15,
-    "rule": { "type": "count", "metric": "lessons", "n": 1 }
+    "tier": "bronze",
+    "icon": "👣",
+    "rule": {
+      "type": "count",
+      "metric": "lessons",
+      "n": 1
+    }
   },
   {
     "id": "counting-champ",
     "name": "Counting Champ",
-    "how": "Finish Counting 1 to 5",
+    "how": "Win the Counting 1 to 5 and 6 to 10 trophies",
     "category": "learning",
-    "reward": 20,
-    "rule": { "type": "complete", "units": ["counting-1-5"] }
+    "tier": "silver",
+    "icon": "🔢",
+    "rule": {
+      "type": "complete",
+      "units": [
+        "counting-1-5",
+        "counting-6-10"
+      ]
+    }
+  },
+  {
+    "id": "letter-explorer",
+    "name": "Letter Explorer",
+    "how": "Win the Letters A to E trophy",
+    "category": "learning",
+    "tier": "silver",
+    "icon": "🔤",
+    "rule": {
+      "type": "complete",
+      "units": [
+        "letters-a-e"
+      ]
+    }
+  },
+  {
+    "id": "animal-spotter",
+    "name": "Animal Spotter",
+    "how": "Win the Where animals live trophy",
+    "category": "learning",
+    "tier": "silver",
+    "icon": "🦁",
+    "rule": {
+      "type": "complete",
+      "units": [
+        "where-animals-live"
+      ]
+    }
+  },
+  {
+    "id": "star-collector",
+    "name": "Star Collector",
+    "how": "Collect 25 stars",
+    "category": "mastery",
+    "tier": "bronze",
+    "icon": "⭐",
+    "rule": {
+      "type": "count",
+      "metric": "stars",
+      "n": 25
+    }
   },
   {
     "id": "perfect-ten",
     "name": "Perfect Ten",
     "how": "Get 3 stars in 10 lessons",
     "category": "mastery",
-    "reward": 30,
-    "rule": { "type": "count", "metric": "perfect-lessons", "n": 10 }
+    "tier": "gold",
+    "icon": "🏅",
+    "rule": {
+      "type": "count",
+      "metric": "perfect-lessons",
+      "n": 10
+    }
+  },
+  {
+    "id": "no-hints-needed",
+    "name": "No Hints Needed",
+    "how": "Finish 3 lessons without a single hint",
+    "category": "mastery",
+    "tier": "silver",
+    "icon": "🎯",
+    "rule": {
+      "type": "count",
+      "metric": "no-hint-lessons",
+      "n": 3
+    }
+  },
+  {
+    "id": "super-memory",
+    "name": "Super Memory",
+    "how": "Master 10 things (right first time again and again)",
+    "category": "mastery",
+    "tier": "gold",
+    "icon": "🧠",
+    "rule": {
+      "type": "count",
+      "metric": "mastered-items",
+      "n": 10
+    }
+  },
+  {
+    "id": "never-give-up",
+    "name": "Never Give Up",
+    "how": "Finish a lesson after using 3 or more hints",
+    "category": "effort",
+    "tier": "bronze",
+    "icon": "💪",
+    "rule": {
+      "type": "count",
+      "metric": "kept-going-lessons",
+      "n": 1
+    }
+  },
+  {
+    "id": "comeback-kid",
+    "name": "Comeback Kid",
+    "how": "Get something right that used to be tricky",
+    "category": "effort",
+    "tier": "silver",
+    "icon": "🔁",
+    "rule": {
+      "type": "count",
+      "metric": "comebacks",
+      "n": 1
+    }
   },
   {
     "id": "week-warrior",
     "name": "Week Warrior",
     "how": "Reach your daily goal on 5 days in a week",
     "category": "consistency",
-    "reward": 25,
-    "rule": { "type": "streak", "days": 5, "window": 7 }
+    "tier": "silver",
+    "icon": "📅",
+    "rule": {
+      "type": "streak",
+      "days": 5,
+      "window": 7
+    }
+  },
+  {
+    "id": "thirty-days",
+    "name": "30-Day Explorer",
+    "how": "Reach your daily goal on 30 days",
+    "category": "consistency",
+    "tier": "gold",
+    "icon": "🌞",
+    "rule": {
+      "type": "count",
+      "metric": "goal-days",
+      "n": 30
+    }
+  },
+  {
+    "id": "world-traveller",
+    "name": "World Traveller",
+    "how": "Play a lesson in 3 different places on the map",
+    "category": "exploration",
+    "tier": "silver",
+    "icon": "🗺️",
+    "rule": {
+      "type": "count",
+      "metric": "subjects",
+      "n": 3
+    }
+  },
+  {
+    "id": "game-master",
+    "name": "Game Master",
+    "how": "Play every game in the Games corner",
+    "category": "exploration",
+    "tier": "bronze",
+    "icon": "🎮",
+    "rule": {
+      "type": "count",
+      "metric": "game-kinds",
+      "n": 2
+    }
+  },
+  {
+    "id": "puzzle-pro",
+    "name": "Puzzle Pro",
+    "how": "Finish 5 jigsaws",
+    "category": "exploration",
+    "tier": "silver",
+    "icon": "🧩",
+    "rule": {
+      "type": "count",
+      "metric": "jigsaws",
+      "n": 5
+    }
   }
 ]

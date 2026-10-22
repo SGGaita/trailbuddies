@@ -145,6 +145,15 @@ a {
 .unlock-in {
   animation: unlock 0.6s ease both;
 }
+@keyframes badgefly {
+  to {
+    transform: translate(40vw, -45vh) scale(0.15);
+    opacity: 0;
+  }
+}
+.badge-fly {
+  animation: badgefly 0.6s ease-in forwards;
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

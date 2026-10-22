@@ -11,6 +11,9 @@ import Icon from "@/components/Icon";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import { Coin } from "@/components/Coins";
 
+/** Week strip colours (RWD-08): never a "lost" state, a missed day is just plain sand. */
+const STRIP = { goal: colors.leaf.main, rest: colors.sky.soft, missed: colors.sand, today: colors.sun.soft };
+
 export const LEARNER_NAV = [
   { href: "/play/map", icon: "map", key: "nav.map", phoneOnly: true },
   { href: "/play/more/games", icon: "game", key: "nav.games" },
@@ -108,25 +111,27 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
             sx={{ display: { xs: "none", md: "flex" }, gap: 0.6, alignItems: "center", ml: 1 }}
             aria-label="This week"
           >
-            {learner.week.map((m, i) => (
+            {learner.streak.week.map((d) => (
               <Box
-                key={i}
+                key={d.day}
                 component="span"
+                role="img"
+                aria-label={`${d.day}: ${t(`streak.${d.status}`)}`}
+                data-status={d.status}
                 sx={{
-                  width: 20,
-                  height: 20,
+                  width: 22,
+                  height: 22,
                   borderRadius: 1.5,
-                  bgcolor:
-                    i === 6
-                      ? learner.today >= goal
-                        ? "success.main"
-                        : colors.sun.soft
-                      : m >= 15
-                        ? "success.main"
-                        : colors.sand,
-                  border: i === 6 ? `2px dashed ${colors.sun.deep}` : 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  bgcolor: STRIP[d.status],
+                  border: d.status === "today" ? `2px dashed ${colors.sun.deep}` : 0,
                 }}
-              />
+              >
+                {d.status === "rest" ? "💤" : ""}
+              </Box>
             ))}
             <Typography sx={{ ml: 1, fontWeight: 700, color: "text.secondary", fontSize: 15 }}>
               {t("learner.today", { done: Math.min(learner.today, goal), goal })}
@@ -134,6 +139,32 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
           </Box>
         )}
         <Box sx={{ flex: 1, display: { xs: title ? "none" : "block", sm: "block" } }} />
+        {learner.streak.days > 0 && (
+          <Box
+            aria-label={t("streak.label", { n: learner.streak.days })}
+            sx={{
+              display: { xs: title ? "none" : "flex", sm: "flex" },
+              alignItems: "center",
+              gap: 0.5,
+              px: { xs: 1, sm: 1.5 },
+              height: { xs: 34, sm: 40 },
+              borderRadius: "999px",
+              bgcolor: colors.sun.soft,
+              border: `2px solid ${colors.sun.main}`,
+              fontWeight: 800,
+              fontSize: { xs: 14, sm: 16 },
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span aria-hidden="true">☀️</span>
+            <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+              {t(learner.streak.days === 1 ? "streak.day" : "streak.days", { n: learner.streak.days })}
+            </Box>
+            <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+              {learner.streak.days}
+            </Box>
+          </Box>
+        )}
         <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1 }}>
           <Coin kind="star" value={stars} />
           <Coin kind="gem" value={learner.treasures} />

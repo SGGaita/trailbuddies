@@ -151,6 +151,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "outfit",
       "placement",
       "updated_at",
+      "wish",
     ].sort(),
   );
   await expect.poll(() => srv.families.F1.settings.goal).toBe(3);
@@ -176,8 +177,16 @@ test("a second device signs in and gets the family and its progress", async ({ p
   await page.getByRole("button", { name: "Stop the lesson" }).waitFor();
   await page.locator('[data-answer="yes"], [data-side="l"], [data-order]').first().waitFor();
   const before = srv.events.length;
+  // Answer whatever the first step is, so there is something to save.
   const tile = page.locator('[data-answer="yes"]');
+  const left = page.locator('[data-side="l"]');
   if (await tile.isVisible()) await tile.click();
+  else if (await left.first().isVisible()) {
+    const id = await left.first().getAttribute("data-pair");
+    await left.first().click();
+    await page.locator(`[data-side="r"][data-pair="${id}"]`).click();
+  } else await page.locator('[data-order="0"]').click();
+  await page.waitForTimeout(300);
   await page.getByRole("button", { name: "Stop the lesson" }).click();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
   await expect.poll(() => srv.events.length, { timeout: 10_000 }).toBeGreaterThan(before);
@@ -224,8 +233,16 @@ test("offline: progress waits on the device and is saved when back online", asyn
   const before = srv.events.length;
   await page.goto("/play/lesson/counting-1-5/2");
   await page.locator('[data-answer="yes"], [data-side="l"], [data-order]').first().waitFor();
+  // Answer whatever the first step is, so there is something to save.
   const tile = page.locator('[data-answer="yes"]');
+  const left = page.locator('[data-side="l"]');
   if (await tile.isVisible()) await tile.click();
+  else if (await left.first().isVisible()) {
+    const id = await left.first().getAttribute("data-pair");
+    await left.first().click();
+    await page.locator(`[data-side="r"][data-pair="${id}"]`).click();
+  } else await page.locator('[data-order="0"]').click();
+  await page.waitForTimeout(300);
   await page.getByRole("button", { name: "Stop the lesson" }).click();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
   await page.goto("/family/settings");
@@ -235,7 +252,7 @@ test("offline: progress waits on the device and is saved when back online", asyn
   srv.offline = false;
   await page.getByRole("button", { name: "↻" }).click();
   await expect(page.getByText("Saved to your account")).toBeVisible();
-  expect(srv.events.length).toBeGreaterThan(before);
+  await expect.poll(() => srv.events.length).toBeGreaterThan(before);
 });
 
 test("the screen-time limit rests the trail", async ({ page }, testInfo) => {

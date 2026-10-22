@@ -21,6 +21,7 @@ export const learnerToApi = (l) => ({
   interests: l.interests || [],
   placement: l.placement || {},
   difficulty: l.difficulty || "auto",
+  wish: l.wish || null,
   updated_at: l.updated_at,
 });
 export const learnerFromApi = (a) => ({
@@ -33,6 +34,7 @@ export const learnerFromApi = (a) => ({
   interests: a.interests,
   placement: a.placement,
   difficulty: a.difficulty,
+  wish: a.wish ?? null,
   updated_at: a.updated_at,
 });
 
