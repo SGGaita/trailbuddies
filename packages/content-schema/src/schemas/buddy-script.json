@@ -1,0 +1,21 @@
+{
+  "$id": "https://trailbuddies.africa/schema/buddy-script.json",
+  "title": "Buddy script table: event -> line variants, per buddy and language",
+  "type": "object",
+  "required": ["schema", "buddy", "lang", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "buddy-script/1" },
+    "buddy": { "enum": ["zip", "tumi", "juma", "kiki", "all"] },
+    "lang": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+    "events": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z]+(\\.[a-z-]+)*$" },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "$ref": "common.json#/$defs/text" }
+      }
+    }
+  }
+}

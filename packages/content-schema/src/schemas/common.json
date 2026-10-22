@@ -1,0 +1,26 @@
+{
+  "$id": "https://trailbuddies.africa/schema/common.json",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 64 },
+    "band": { "enum": ["seedling", "sprout", "explorer", "voyager", "trailblazer"] },
+    "status": { "enum": ["draft", "ready", "planned"] },
+    "text": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "exerciseType": {
+      "enum": [
+        "listen-tap",
+        "match",
+        "count",
+        "name-it",
+        "compare",
+        "sequence",
+        "sort",
+        "odd-one-out",
+        "case-match",
+        "build-word",
+        "trace",
+        "clock",
+        "true-false"
+      ]
+    }
+  }
+}

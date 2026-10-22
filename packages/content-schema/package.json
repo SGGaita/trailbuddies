@@ -1,0 +1,19 @@
+{
+  "name": "@trailbuddies/content-schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JSON Schemas for content (items, units, subjects, lessons, badges, buddy lines, asset manifests) and the validator.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

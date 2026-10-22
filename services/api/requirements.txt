@@ -1,0 +1,8 @@
+# Runtime dependencies for the Trailbuddies API and worker (pinned; update deliberately).
+fastapi==0.120.4
+uvicorn[standard]==0.38.0
+sqlalchemy==2.0.44
+alembic==1.17.1
+psycopg[binary]==3.2.12
+pydantic-settings==2.11.0
+arq==0.26.3

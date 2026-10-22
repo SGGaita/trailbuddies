@@ -1,0 +1,136 @@
+{
+  "schema": "unit/1",
+  "id": "counting-1-5",
+  "subject": "numbers",
+  "title": "Counting 1 to 5",
+  "band": "seedling",
+  "status": "ready",
+  "summary": "Say, see and tap 1 to 5; count objects one by one; answer \"how many?\"",
+  "items": [
+    {
+      "id": "one",
+      "label": "1",
+      "say": "one",
+      "number": 1,
+      "emoji": "🥭",
+      "fact": "One mango, all for you!"
+    },
+    {
+      "id": "two",
+      "label": "2",
+      "say": "two",
+      "number": 2,
+      "emoji": "🐥",
+      "fact": "Two little chicks say cheep cheep."
+    },
+    {
+      "id": "three",
+      "label": "3",
+      "say": "three",
+      "number": 3,
+      "emoji": "🎈",
+      "fact": "Three balloons float up high."
+    },
+    {
+      "id": "four",
+      "label": "4",
+      "say": "four",
+      "number": 4,
+      "emoji": "🐞",
+      "fact": "Four ladybirds on a leaf."
+    },
+    {
+      "id": "five",
+      "label": "5",
+      "say": "five",
+      "number": 5,
+      "emoji": "⭐",
+      "fact": "Five fingers on one hand. Count them!"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "counting-1-5-1",
+      "title": "Meet 1, 2 and 3",
+      "focus": ["one", "two", "three"],
+      "exercises": [
+        { "type": "listen-tap", "choices": 2 },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "match" },
+        { "type": "count" }
+      ]
+    },
+    {
+      "id": "counting-1-5-2",
+      "title": "Count to 3",
+      "focus": [],
+      "review": ["one", "two", "three"],
+      "exercises": [
+        { "type": "count" },
+        { "type": "compare" },
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "count" },
+        { "type": "match" }
+      ]
+    },
+    {
+      "id": "counting-1-5-3",
+      "title": "Meet 4 and 5",
+      "focus": ["four", "five"],
+      "review": ["three"],
+      "exercises": [
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "match" },
+        { "type": "count" }
+      ]
+    },
+    {
+      "id": "counting-1-5-4",
+      "title": "How many?",
+      "focus": [],
+      "review": ["one", "two", "three", "four", "five"],
+      "exercises": [
+        { "type": "count" },
+        { "type": "count" },
+        { "type": "name-it", "choices": 3 },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 4 }
+      ]
+    },
+    {
+      "id": "counting-1-5-5",
+      "title": "More or fewer",
+      "focus": [],
+      "review": ["two", "three", "four", "five"],
+      "exercises": [
+        { "type": "compare" },
+        { "type": "compare" },
+        { "type": "count" },
+        { "type": "compare" },
+        { "type": "odd-one-out", "choices": 3 }
+      ]
+    },
+    {
+      "id": "counting-1-5-6",
+      "title": "1 to 5 in order",
+      "focus": [],
+      "review": ["one", "two", "three", "four", "five"],
+      "exercises": [
+        { "type": "sequence", "prompt": "Put the numbers in order, starting with 1." },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 4 },
+        { "type": "sequence" },
+        { "type": "match" }
+      ]
+    }
+  ],
+  "checkpoint": { "review": 4, "game": "jigsaw" },
+  "buddy": {
+    "intro": ["Let's count! Watch my fingers.", "Numbers are everywhere. Let's find them!"],
+    "praise": ["You counted them all!", "Great counting!"],
+    "hint": ["Touch each one as you count.", "Let's count together, slowly."]
+  }
+}

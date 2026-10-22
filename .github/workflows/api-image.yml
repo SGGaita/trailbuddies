@@ -1,0 +1,50 @@
+name: API image
+
+# Builds the API image on every merge to main and pushes it to GitHub Container Registry.
+# Deploying it to the VPS is switched on once the server exists: add the repository
+# variable DEPLOY_ENABLED=true and the secrets VPS_HOST, VPS_USER and VPS_SSH_KEY.
+on:
+  push:
+    branches: [main]
+    paths: ["services/api/**", "infra/**", ".github/workflows/api-image.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: services/api
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/trailbuddies-api:latest
+            ghcr.io/${{ github.repository_owner }}/trailbuddies-api:${{ github.sha }}
+
+  deploy-staging:
+    needs: build
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ~/trailbuddies
+            git pull --ff-only
+            docker compose -f infra/docker-compose.yml --env-file infra/.env --profile prod pull api
+            docker compose -f infra/docker-compose.yml --env-file infra/.env --profile prod up -d

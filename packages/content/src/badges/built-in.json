@@ -1,0 +1,34 @@
+[
+  {
+    "id": "first-steps",
+    "name": "First Steps",
+    "how": "Finish your first lesson",
+    "category": "learning",
+    "reward": 15,
+    "rule": { "type": "count", "metric": "lessons", "n": 1 }
+  },
+  {
+    "id": "counting-champ",
+    "name": "Counting Champ",
+    "how": "Finish Counting 1 to 5",
+    "category": "learning",
+    "reward": 20,
+    "rule": { "type": "complete", "units": ["counting-1-5"] }
+  },
+  {
+    "id": "perfect-ten",
+    "name": "Perfect Ten",
+    "how": "Get 3 stars in 10 lessons",
+    "category": "mastery",
+    "reward": 30,
+    "rule": { "type": "count", "metric": "perfect-lessons", "n": 10 }
+  },
+  {
+    "id": "week-warrior",
+    "name": "Week Warrior",
+    "how": "Reach your daily goal on 5 days in a week",
+    "category": "consistency",
+    "reward": 25,
+    "rule": { "type": "streak", "days": 5, "window": 7 }
+  }
+]

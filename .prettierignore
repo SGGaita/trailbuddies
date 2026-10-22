@@ -1,0 +1,8 @@
+prototype/
+design/
+docs/
+tools/backlog/
+pnpm-lock.yaml
+.next/
+node_modules/
+services/
