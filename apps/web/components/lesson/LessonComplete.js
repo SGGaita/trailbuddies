@@ -16,8 +16,8 @@ import Bubble from "@/components/Bubble";
 import { Coin } from "@/components/Coins";
 
 /** Where "Next" goes: the next stone on the trail after this result was recorded. */
-function nextStop(subjectId, progress) {
-  const { next } = layoutTrail(trailUnits(subjectId), progress, {});
+function nextStop(subjectId, progress, start) {
+  const { next } = layoutTrail(trailUnits(subjectId), progress, { start });
   if (!next) return null;
   if (next.kind === "trophy")
     return { href: `/play/lesson/${next.unitId}/trophy`, label: t("done.trophyNext") };
@@ -37,8 +37,9 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
   const trophy = lesson.kind === "trophy";
   const review = lesson.kind === "review";
   const next = useMemo(
-    () => (review ? null : nextStop(lesson.subjectId, learner.progress)),
-    [review, lesson.subjectId, learner.progress],
+    () =>
+      review ? null : nextStop(lesson.subjectId, learner.progress, learner.placement?.[lesson.subjectId]),
+    [review, lesson.subjectId, learner.progress, learner.placement],
   );
   const today = learner.today;
   const message = trophy

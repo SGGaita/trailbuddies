@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -7,7 +8,8 @@ import Button from "@mui/material/Button";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { ageFrom, bandForAge, isAdult } from "@trailbuddies/domain";
-import { useFamily, useHydrated } from "@/lib/store";
+import { useFamily } from "@/lib/store";
+import { useSetupGuard } from "@/lib/guard";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
@@ -24,8 +26,11 @@ const BAND_NAMES = {
 
 /** C01 Who's playing? Each learner taps their own picture. */
 export default function ProfilePicker() {
-  const ready = useHydrated();
+  const ready = useSetupGuard();
   const learners = useFamily((s) => s.learners);
+  const lockGate = useFamily((s) => s.lockGate);
+  // Back with the children: the grown-up zone needs the gate again.
+  useEffect(() => lockGate(), [lockGate]);
   const setActive = useFamily((s) => s.setActive);
   const router = useRouter();
   if (!ready) return <Loading />;

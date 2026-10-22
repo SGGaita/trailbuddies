@@ -8,3 +8,7 @@ export * from "./hints.js";
 export * from "./mastery.js";
 export * from "./lesson.js";
 export * from "./outcome.js";
+export * from "./gate.js";
+export * from "./pin.js";
+export * from "./placement.js";
+export * from "./rest.js";

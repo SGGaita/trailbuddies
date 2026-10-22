@@ -11,6 +11,7 @@ const PAGES = [
   "/",
   "/play",
   "/play/map",
+  "/start",
   ...getSubjects().map((s) => `/play/trail/${s.id}`),
   ...Object.keys(PLAY_MORE).map((k) => `/play/more/${k}`),
   "/family",
@@ -81,6 +82,8 @@ function worker(BUILD_ID, PAGES, EXTRAS) {
     if (req.method !== "GET") return;
     const url = new URL(req.url);
     if (url.origin !== self.location.origin || url.pathname === "/sw.js") return;
+    // Sign-in and sync always go to the network; the app copes with being offline itself.
+    if (url.pathname.startsWith("/api/")) return;
 
     // Pages: answer from cache instantly (works offline), refresh the copy in the background.
     if (req.mode === "navigate") {

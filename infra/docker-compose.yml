@@ -1,5 +1,5 @@
 # Local stack (Docker Desktop) and, with the "prod" profile, the VPS.
-#   Local:  docker compose -f infra/docker-compose.yml --env-file infra/.env up -d db redis api worker
+#   Local:  docker compose -f infra/docker-compose.yml --env-file infra/.env up -d db redis mailpit api worker
 #   + web:  docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web up --watch
 #   VPS:    docker compose -f infra/docker-compose.yml --env-file infra/.env --profile prod up -d
 name: trailbuddies
@@ -40,6 +40,18 @@ services:
       TB_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-trailbuddies}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-trailbuddies}
       TB_REDIS_URL: redis://redis:6379/0
       TB_CORS_ORIGINS: ${TB_CORS_ORIGINS:-["http://localhost:3000"]}
+      TB_WEB_URL: ${TB_WEB_URL:-http://localhost:3000}
+      TB_COOKIE_SECURE: ${TB_COOKIE_SECURE:-false}
+      # Sign-in emails. Locally they go to Mailpit (open http://localhost:8025 to read them).
+      TB_SMTP_HOST: ${TB_SMTP_HOST:-mailpit}
+      TB_SMTP_PORT: ${TB_SMTP_PORT:-1025}
+      TB_SMTP_USER: ${TB_SMTP_USER:-}
+      TB_SMTP_PASSWORD: ${TB_SMTP_PASSWORD:-}
+      TB_SMTP_FROM: ${TB_SMTP_FROM:-Trailbuddies <hello@trailbuddies.africa>}
+      TB_SMTP_STARTTLS: ${TB_SMTP_STARTTLS:-false}
+      TB_SMTP_SSL: ${TB_SMTP_SSL:-false}
+      TB_GOOGLE_CLIENT_ID: ${TB_GOOGLE_CLIENT_ID:-}
+      TB_GOOGLE_CLIENT_SECRET: ${TB_GOOGLE_CLIENT_SECRET:-}
     depends_on:
       db: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -55,6 +67,14 @@ services:
         ]
       interval: 10s
       retries: 6
+    restart: unless-stopped
+
+  # Local inbox that catches every email the API sends (never used in production).
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
     restart: unless-stopped
 
   worker:
@@ -84,6 +104,9 @@ services:
       context: ..
       dockerfile: apps/web/Dockerfile.dev
     image: trailbuddies-web:dev
+    environment:
+      # The web app proxies /api/* to the API (same-origin session cookie).
+      TB_API_URL: http://api:8000
     ports:
       - "127.0.0.1:${WEB_PORT:-3000}:3000"
     develop:

@@ -18,6 +18,7 @@ import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
+import RestScreen, { useRest } from "@/components/RestScreen";
 
 const W = 600; // virtual layout width; the trail scales to the screen
 const ITEM_PREVIEW = 8;
@@ -82,9 +83,10 @@ export default function Trail({ subjectId }) {
   const units = useMemo(() => trailUnits(subjectId), [subjectId]);
   const progress = learner?.progress;
   const review = !!learner && learner.reviewDue(subjectId).length > 0;
+  const start = learner?.placement?.[subjectId] || null;
   const trail = useMemo(
-    () => layoutTrail(units, progress || {}, { width: W, review }),
-    [units, progress, review],
+    () => layoutTrail(units, progress || {}, { width: W, review, start }),
+    [units, progress, review, start],
   );
 
   useEffect(() => {
@@ -94,10 +96,12 @@ export default function Trail({ subjectId }) {
     if (ready && nextRef.current) nextRef.current.scrollIntoView({ block: "center" });
   }, [ready]);
 
+  const rest = useRest(learner);
   if (!ready || !learner || !subject) return <Loading />;
+  if (rest) return <RestScreen reason={rest} learner={learner} />;
 
   const sp = subjectProgress(units, learner.progress);
-  const unit = currentUnit(units, learner.progress) || units[0];
+  const unit = currentUnit(units, learner.progress, start) || units[0];
   const content = getUnit(unit.id);
 
   const open = (node) => {

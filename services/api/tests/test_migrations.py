@@ -20,7 +20,16 @@ def test_upgrade_creates_tables_and_downgrade_removes_them(tmp_path):
     cfg = alembic_config(url)
     command.upgrade(cfg, "head")
     tables = set(inspect(create_engine(url)).get_table_names())
-    assert {"users", "families", "family_members", "learners", "consents"} <= tables
+    assert {
+        "users",
+        "families",
+        "family_members",
+        "learners",
+        "consents",
+        "sessions",
+        "login_tokens",
+        "events",
+    } <= tables
     learner_cols = {c["name"] for c in inspect(create_engine(url)).get_columns("learners")}
     # Data minimisation: no surname, email, photo or location for children.
     assert learner_cols == {
@@ -31,7 +40,12 @@ def test_upgrade_creates_tables_and_downgrade_removes_them(tmp_path):
         "birth_month",
         "avatar_color",
         "buddy",
+        "outfit",
+        "interests",
+        "placement",
+        "difficulty",
         "created_at",
+        "updated_at",
     }
     command.downgrade(cfg, "base")
     assert set(inspect(create_engine(url)).get_table_names()) <= {"alembic_version"}

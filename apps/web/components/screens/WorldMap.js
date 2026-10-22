@@ -9,7 +9,7 @@ import Chip from "@mui/material/Chip";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubjects } from "@trailbuddies/content";
-import { subjectProgress, currentUnit } from "@trailbuddies/domain";
+import { subjectProgress, currentUnit, orderSubjects } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
@@ -18,6 +18,7 @@ import Island from "@/components/art/Island";
 import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
+import RestScreen, { useRest } from "@/components/RestScreen";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 // Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
@@ -32,11 +33,11 @@ const PLACE_SX = {
   minWidth: 0,
 };
 
-function subjectsWithProgress(progress) {
-  return getSubjects().map((s) => {
+function subjectsWithProgress(progress, placement = {}, interests = []) {
+  return orderSubjects(getSubjects(), interests).map((s) => {
     const units = trailUnits(s.id);
     const p = subjectProgress(units, progress);
-    return { ...s, p, next: currentUnit(units, progress) };
+    return { ...s, p, next: currentUnit(units, progress, placement[s.id]) };
   });
 }
 
@@ -49,8 +50,10 @@ export default function WorldMap() {
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
   }, [ready, learner, router]);
-  const subjects = subjectsWithProgress(learner?.progress || {});
+  const subjects = subjectsWithProgress(learner?.progress || {}, learner?.placement, learner?.interests);
+  const rest = useRest(learner);
   if (!ready || !learner) return <Loading />;
+  if (rest) return <RestScreen reason={rest} learner={learner} />;
 
   const first = Object.keys(learner.progress).length === 0;
   const greeting = first
@@ -112,11 +115,7 @@ export default function WorldMap() {
               </Box>
             );
           })}
-          <Box
-            component={Link}
-            href="/play/more/island"
-            sx={PLACE_SX}
-          >
+          <Box component={Link} href="/play/more/island" sx={PLACE_SX}>
             <Box sx={{ height: 22 }} />
             <Island kind="family" width="min(180px, 100%)" height={120} />
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>

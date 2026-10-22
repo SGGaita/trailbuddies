@@ -4,7 +4,7 @@ profiles owned by a family (concept report §4.2)."""
 
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base, Timestamped, utcnow
@@ -29,6 +29,16 @@ class Family(Timestamped, Base):
         String(2), doc="ISO 3166-1 alpha-2; sets privacy rules and 'my seasons'"
     )
     plan: Mapped[str] = mapped_column(String(32), default="free")
+    settings: Mapped[dict] = mapped_column(
+        JSON, default=dict, doc="goal, limit, bedtime, voice, voice_rate, sound (see schemas.FamilySettings)"
+    )
+    pin: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        doc="Parent-gate PIN as {salt, hash, iterations}, PBKDF2-SHA256 computed on the device. "
+        "The PIN itself never reaches the server.",
+    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     members: Mapped[list["FamilyMember"]] = relationship(
         back_populates="family", cascade="all, delete-orphan"
     )
@@ -58,6 +68,15 @@ class Learner(Timestamped, Base):
     birth_month: Mapped[int] = mapped_column(Integer)
     avatar_color: Mapped[str] = mapped_column(String(16), default="leaf")
     buddy: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    outfit: Mapped[dict] = mapped_column(JSON, default=dict)
+    interests: Mapped[list] = mapped_column(JSON, default=list, doc="subject or topic ids, e.g. ['animals']")
+    placement: Mapped[dict] = mapped_column(
+        JSON,
+        default=dict,
+        doc="starting unit per subject from the placement quiz, e.g. {'numbers': 'counting-6-10'}",
+    )
+    difficulty: Mapped[str] = mapped_column(String(8), default="auto")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     family: Mapped[Family] = relationship(back_populates="learners")
 
 
@@ -71,3 +90,44 @@ class Consent(Base):
     policy_version: Mapped[str] = mapped_column(String(32))
     scopes: Mapped[dict] = mapped_column(JSON, doc='e.g. {"progress": true, "voice": false, "photos": false}')
     given_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Session(Base):
+    """A signed-in device. The cookie holds a random token; only its SHA-256 is stored."""
+
+    __tablename__ = "sessions"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class LoginToken(Base):
+    """A single-use magic-link token (hash only), valid for a few minutes."""
+
+    __tablename__ = "login_tokens"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(320), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class Event(Base):
+    """Append-only progress events (development plan §4.3). `seq` is the server order and
+    the sync cursor; `id` is the device's ULID, so re-sending an event is harmless."""
+
+    __tablename__ = "events"
+    seq: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
+    )
+    id: Mapped[str] = mapped_column(ULID, unique=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    learner_id: Mapped[str] = mapped_column(ForeignKey("learners.id", ondelete="CASCADE"), index=True)
+    type: Mapped[str] = mapped_column(String(32))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    data: Mapped[dict] = mapped_column(JSON, default=dict)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

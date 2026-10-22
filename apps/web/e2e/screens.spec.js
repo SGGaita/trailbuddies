@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { demo, passGate } from "./helpers.js";
 
 // Every Sprint 0 screen at phone, tablet and desktop: renders, no console errors,
 // no sideways scrolling, and a screenshot for the pull request.
@@ -27,7 +28,7 @@ test.afterEach(async ({ page }) => {
 });
 
 test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
-  await page.goto("/play");
+  await demo(page);
   await expect(page.getByText("Who's playing today? Tap your picture!").first()).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "1-profiles");
@@ -62,7 +63,7 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
 });
 
 test("a new learner starts at Numbers", async ({ page }) => {
-  await page.goto("/play");
+  await demo(page);
   await page.getByRole("button", { name: /Amani/ }).click();
   await expect(
     page
@@ -73,7 +74,9 @@ test("a new learner starts at Numbers", async ({ page }) => {
 });
 
 test("parent home", async ({ page }, testInfo) => {
+  await demo(page);
   await page.goto("/family");
+  await passGate(page);
   await expect(page.getByRole("heading", { name: "Hello, Grace" })).toBeVisible();
   await expect(page.getByText("Waiting for you")).toBeVisible();
   for (const name of ["Zawadi", "Amani", "Joseph"])
@@ -90,6 +93,7 @@ test("teacher and placeholder screens", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { level: 1, name: "Good morning" })).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "6-teach");
+  await demo(page);
   await page.goto("/play/more/shop");
   await expect(page.getByRole("heading", { name: "Buddy shop" }).first()).toBeVisible();
   await noSideScroll(page);
