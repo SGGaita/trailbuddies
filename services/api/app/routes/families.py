@@ -92,6 +92,7 @@ def learner_out(lr: Learner) -> dict:
         "interests": lr.interests or [],
         "placement": lr.placement or {},
         "difficulty": lr.difficulty,
+        "wish": lr.wish,
         "updated_at": aware(lr.updated_at).isoformat(),
     }
 

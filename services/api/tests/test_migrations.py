@@ -44,6 +44,7 @@ def test_upgrade_creates_tables_and_downgrade_removes_them(tmp_path):
         "interests",
         "placement",
         "difficulty",
+        "wish",
         "created_at",
         "updated_at",
     }

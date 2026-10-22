@@ -76,6 +76,9 @@ class Learner(Timestamped, Base):
         doc="starting unit per subject from the placement quiz, e.g. {'numbers': 'counting-6-10'}",
     )
     difficulty: Mapped[str] = mapped_column(String(8), default="auto")
+    wish: Mapped[str | None] = mapped_column(
+        String(32), nullable=True, doc="shop item the learner is saving for"
+    )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     family: Mapped[Family] = relationship(back_populates="learners")
 

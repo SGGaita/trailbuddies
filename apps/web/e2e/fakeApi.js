@@ -46,6 +46,7 @@ const defaultSettings = () => ({
   voice: true,
   voice_rate: 1,
   sound: true,
+  treasure_cap: true,
 });
 
 /**
@@ -275,6 +276,7 @@ export function seedServer(srv, { pin = null, plan = "family" } = {}) {
     interests: [],
     placement: {},
     difficulty: "auto",
+    wish: null,
     updated_at: "2026-10-01T10:00:00Z",
   };
   const at = new Date(Date.now() - 3600_000).toISOString();

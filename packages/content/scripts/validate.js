@@ -46,6 +46,7 @@ for (const s of cat.subjects)
       report(catFile, [`unit "${u.id}" is ${u.status} but has no content file`]);
 
 for (const f of walk(join(root, "buddy"))) report(f, validate("buddy-script", read(f)).errors);
+report(join(root, "economy.json"), validate("economy", read(join(root, "economy.json"))).errors);
 for (const f of walk(join(root, "badges")))
   read(f).forEach((b, i) =>
     report(

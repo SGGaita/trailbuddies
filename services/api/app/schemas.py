@@ -10,7 +10,9 @@ AvatarColor = Literal["coral", "sky", "leaf", "berry", "sun", "night"]
 BuddyId = Literal["zip", "tumi", "juma", "kiki"]
 Difficulty = Literal["auto", "1", "2", "3"]
 Role = Literal["owner", "parent", "carer", "viewer"]
-EventType = Literal["lesson_completed", "item_answered", "treasure_earned", "treasure_spent", "badge_awarded"]
+EventType = Literal[
+    "lesson_completed", "item_answered", "treasure_earned", "treasure_spent", "badge_awarded", "game_finished"
+]
 
 
 class Strict(BaseModel):
@@ -48,6 +50,9 @@ class FamilySettings(Strict):
     voice: bool = True
     voice_rate: float = Field(default=1.0, ge=0.6, le=1.3)
     sound: bool = True
+    treasure_cap: bool = Field(
+        default=True, description="daily treasure cap on (100 a day by default); off = no cap"
+    )
 
 
 class Pin(Strict):
@@ -95,6 +100,7 @@ class LearnerIn(Strict):
     interests: list[str] = Field(default_factory=list, max_length=12)
     placement: dict[str, str] = Field(default_factory=dict, max_length=10)
     difficulty: Difficulty = "auto"
+    wish: str | None = Field(default=None, max_length=32, description="shop item the learner is saving for")
     updated_at: datetime
 
     @field_validator("name")

@@ -109,8 +109,8 @@ test("teacher and placeholder screens", async ({ page }, testInfo) => {
   await noSideScroll(page);
   await shot(page, testInfo, "6-teach");
   await demo(page);
-  await page.goto("/play/more/shop");
-  await expect(page.getByRole("heading", { name: "Buddy shop" }).first()).toBeVisible();
+  await page.goto("/play/more/room");
+  await expect(page.getByRole("heading", { name: "Treasure room" }).first()).toBeVisible();
   await noSideScroll(page);
 });
 

@@ -50,6 +50,27 @@ export function completionEvents(learnerId, lesson, outcome, { durationSec, now 
     ),
   );
   if (!outcome.complete) return events;
+  if (!outcome.treasures) {
+    // Over today's cap: the lesson still counts (and its stars), quietly with no treasures.
+    events.push(
+      createEvent(
+        "lesson_completed",
+        learnerId,
+        {
+          ...base,
+          kind: lesson.kind,
+          stars: outcome.stars,
+          firstTry: outcome.firstTry,
+          total: outcome.total,
+          hints: outcome.hints,
+          level: lesson.level,
+          durationSec,
+        },
+        now,
+      ),
+    );
+    return events;
+  }
   events.push(
     createEvent(
       "lesson_completed",

@@ -116,6 +116,42 @@
     ],
     "buddies.chosen": [
       "Yay! Let's go exploring, {name}!"
+    ],
+    "badge.earned": [
+      "Hooray, {name}! You earned the {badge} badge!",
+      "A new badge! {badge}! I'm so proud of you, {name}!"
+    ],
+    "shop.need-more": [
+      "Just {n} more treasures and it's yours! Shall we save for it?"
+    ],
+    "shop.bought": [
+      "You look wonderful in the {item}!",
+      "The {item} suits you!"
+    ],
+    "shop.returned": [
+      "The {item} went back to the shop for now. You can buy it again when you have enough treasures."
+    ],
+    "shop.saving": [
+      "We're saving for the {item}!"
+    ],
+    "shop.try": [
+      "Do you like it? Tap Buy if you want it!"
+    ],
+    "game.match": [
+      "{word}!"
+    ],
+    "game.done": [
+      "You did it! Well played, {name}!",
+      "Game finished! That was fun, {name}!"
+    ],
+    "game.picture": [
+      "You finished the puzzle! It's {topic}!"
+    ],
+    "games.pick": [
+      "Pick a game, then a topic you've learnt!"
+    ],
+    "games.locked": [
+      "Play a lesson in {topic} first, then you can play it here!"
     ]
   }
 }

@@ -14,9 +14,9 @@ import { starsFor, treasuresFor, keptGoing } from "./scoring.js";
 /**
  * @param {import("./lesson.js").Lesson} lesson
  * @param {Record<string, StepResult>} results by step id (question steps only)
- * @param {{ lessonsToday: number, goal: number }} day lessons finished today before this one
+ * @param {{ lessonsToday: number, goal: number, rules?: typeof import("./scoring.js").TREASURE_RULES }} day lessons finished today before this one, and the economy
  */
-export function lessonOutcome(lesson, results, { lessonsToday, goal }) {
+export function lessonOutcome(lesson, results, { lessonsToday, goal, rules }) {
   const questions = lesson.steps.filter((s) => s.type !== "intro");
   const answered = questions.filter((s) => results[s.id]);
   const firstTry = answered.filter((s) => results[s.id].firstTry).length;
@@ -25,7 +25,7 @@ export function lessonOutcome(lesson, results, { lessonsToday, goal }) {
   const stars = starsFor(firstTry, total);
   const perfect = total > 0 && firstTry === total;
   const reachedGoal = lessonsToday < goal && lessonsToday + 1 >= goal;
-  const treasures = treasuresFor({ stars, perfect, reachedGoal, kind: lesson.kind });
+  const treasures = treasuresFor({ stars, perfect, reachedGoal, kind: lesson.kind }, rules);
   /** @type {Array<{ itemId: string, firstTry: boolean, stepId: string }>} */
   const answers = answered.flatMap((s) =>
     s.itemIds.map((itemId) => ({ itemId, firstTry: results[s.id].firstTry, stepId: s.id })),

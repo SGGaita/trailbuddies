@@ -6,8 +6,13 @@ import {
   foldMastery,
   dueForReview,
   isAdult,
+  lessonsByDay,
+  streakInfo,
 } from "@trailbuddies/domain";
-import { getReadyUnits } from "@trailbuddies/content";
+import { getReadyUnits, economy } from "@trailbuddies/content";
+
+/** Earning reasons that count toward the daily cap. */
+const CAPPED = new Set(["lesson", "trophy", "review", "game"]);
 
 /**
  * Compose a learner's view from their profile and the event log: progress, treasures,
@@ -17,7 +22,7 @@ import { getReadyUnits } from "@trailbuddies/content";
  * @param {any[]} events whole family event log
  * @param {Date} [now]
  */
-export function learnerView(learner, events, now = new Date()) {
+export function learnerView(learner, events, now = new Date(), { goal = 2 } = {}) {
   const state = deriveState(events, learner.id);
   const act = activity(state.results, now);
   const mastery = foldMastery(state.answers);
@@ -37,9 +42,26 @@ export function learnerView(learner, events, now = new Date()) {
       now.getTime(),
       getReadyUnits(subjectId).flatMap((u) => u.items.map((i) => i.id)),
     );
+  const byDay = lessonsByDay(state.results);
+  const streak = streakInfo(byDay, { goal, restDays: economy.restDaysPerWeek, now });
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  // Earnings that count toward the daily cap (badges and grown-up gifts don't).
+  const earnedToday = state.earnings
+    .filter((e) => e.at >= todayStart && CAPPED.has(e.reason))
+    .reduce((n, e) => n + e.amount, 0);
+  // Only items the learner still owns are worn (a reversed purchase comes off).
+  const outfit = Object.fromEntries(
+    Object.entries(learner.outfit || {}).filter(([, id]) => state.owned.includes(id)),
+  );
   return {
     ...learner,
     ...state,
+    outfit,
+    outfitChosen: learner.outfit || {},
+    byDay,
+    streak,
+    goal,
+    earnedToday,
     mastery,
     age,
     band,

@@ -17,18 +17,27 @@ export function starsFor(firstTry, total) {
   return 1;
 }
 
-/** Treasure amounts (a tunable config; the full economy arrives in Sprint 4). */
-export const TREASURE_RULES = { lesson: 10, perfect: 5, dailyGoal: 10, trophy: 15 };
+/** Default treasure amounts; the live values come from content/economy.json (RWD-09). */
+export const TREASURE_RULES = { lesson: 10, perfect: 5, dailyGoal: 10, trophy: 15, game: 5, gameNewTopic: 5 };
 
 /**
  * @param {{ stars: number, perfect: boolean, reachedGoal: boolean, kind?: "lesson" | "trophy" | "review" }} r
  */
-export function treasuresFor({ perfect, reachedGoal, kind = "lesson" }) {
-  let n = kind === "trophy" ? TREASURE_RULES.trophy : TREASURE_RULES.lesson;
-  if (perfect) n += TREASURE_RULES.perfect;
-  if (reachedGoal) n += TREASURE_RULES.dailyGoal;
+export function treasuresFor({ perfect, reachedGoal, kind = "lesson" }, rules = TREASURE_RULES) {
+  let n = kind === "trophy" ? rules.trophy : rules.lesson;
+  if (perfect) n += rules.perfect;
+  if (reachedGoal) n += rules.dailyGoal;
   return n;
 }
+
+/**
+ * The daily earning cap (RWD-03): lessons and games stop paying once today's earnings
+ * reach the cap; stars still count and the child isn't told. 0 or null = no cap.
+ * @param {number} amount what would be earned
+ * @param {number} earnedToday already earned today (capped sources only)
+ * @param {number | null} cap
+ */
+export const capped = (amount, earnedToday, cap) => (cap ? Math.max(0, Math.min(amount, cap - earnedToday)) : amount);
 
 /** Praise effort when the child needed several hints but finished. */
 export const keptGoing = (/** @type {number} */ hintsUsed) => hintsUsed >= 3;

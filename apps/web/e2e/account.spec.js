@@ -151,6 +151,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "outfit",
       "placement",
       "updated_at",
+      "wish",
     ].sort(),
   );
   await expect.poll(() => srv.families.F1.settings.goal).toBe(3);

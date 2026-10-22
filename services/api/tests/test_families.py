@@ -97,3 +97,14 @@ def test_delete_learner(client, outbox):
 def test_policy_summary(client):
     p = client.get("/policy").json()
     assert p["version"] == POLICY and p["scopes"]["progress"]["required"] is True
+
+
+def test_saving_goal_and_cap_setting(client, outbox):
+    fam = family_with_consent(client, outbox)
+    url = f"/families/{fam['id']}/learners/{LEARNER}"
+    assert client.put(url, json=learner_body(wish="crown")).json()["wish"] == "crown"
+    assert fam["settings"]["treasure_cap"] is True
+    r = client.patch(
+        f"/families/{fam['id']}", json={"settings": {"treasure_cap": False}, "updated_at": LATER}
+    )
+    assert r.json()["settings"]["treasure_cap"] is False

@@ -8,10 +8,11 @@ import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { buddySays } from "@trailbuddies/content";
+import { buddySays, economy } from "@trailbuddies/content";
 import { startLadder, answer, lessonOutcome, celebrationFor } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
+import { payable, badgeEvents } from "@/lib/rewards";
 import { speak, stop } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import Buddy from "@/components/art/Buddy";
@@ -118,10 +119,21 @@ function Player({ where, learner }) {
   useEffect(() => stop, []);
 
   const finish = () => {
-    const o = lessonOutcome(lesson, results.current, { lessonsToday: plan.todayBefore, goal });
+    const o = lessonOutcome(lesson, results.current, {
+      lessonsToday: plan.todayBefore,
+      goal,
+      rules: economy.earn,
+    });
+    // RWD-03: treasures under the daily cap; stars always count.
+    const paid = payable(learner, o.treasures, useFamily.getState().settings);
     const durationSec = Math.max(1, Math.round((Date.now() - plan.startedAt) / 1000));
-    record(completionEvents(learner.id, lesson, o, { durationSec }));
-    setOutcome(o);
+    const events = completionEvents(learner.id, lesson, { ...o, treasures: paid }, { durationSec });
+    // BDG-01: badges are checked on the device straight after the lesson.
+    const st = useFamily.getState();
+    const profile = st.learners.find((l) => l.id === learner.id);
+    const won = badgeEvents(profile, st.events, events, { goal });
+    record([...events, ...won.events]);
+    setOutcome({ ...o, treasures: paid, badges: won.badges });
   };
 
   const advance = () => {

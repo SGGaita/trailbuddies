@@ -11,6 +11,7 @@ import Alert from "@mui/material/Alert";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { hashPin, pinProblem, needsPin, ageFrom } from "@trailbuddies/domain";
+import { economy } from "@trailbuddies/content";
 import { useFamily } from "@/lib/store";
 
 const LIMITS = [0, 10, 20, 30, 45, 60];
@@ -127,6 +128,13 @@ export function FamilySettingsForm() {
           checked={settings.sound}
           onChange={(e) => setSettings({ sound: e.target.checked })}
           slotProps={{ input: { "aria-label": t("settings.sound") } }}
+        />
+      </Row>
+      <Row title={t("settings.cap")} sub={t("settings.capSub", { n: economy.dailyCap })}>
+        <Switch
+          checked={settings.treasure_cap !== false}
+          onChange={(e) => setSettings({ treasure_cap: e.target.checked })}
+          slotProps={{ input: { "aria-label": t("settings.cap") } }}
         />
       </Row>
     </Box>

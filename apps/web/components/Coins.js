@@ -26,7 +26,7 @@ export function Gem({ size = 22 }) {
 export function Coin({ kind, value, compact = false }) {
   return (
     <span
-      aria-label={`${value} ${kind === "star" ? "stars" : "treasures"}`}
+      aria-label={typeof value === "object" ? undefined : `${value} ${kind === "star" ? "stars" : "treasures"}`}
       style={{
         display: "inline-flex",
         alignItems: "center",
