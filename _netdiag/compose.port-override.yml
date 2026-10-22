@@ -1,0 +1,6 @@
+# Throwaway local override (not part of the repo): host port 5432 is taken by the
+# native Windows PostgreSQL 17 service, so publish the container's 5432 on 5433.
+services:
+  db:
+    ports: !override
+      - "127.0.0.1:5433:5432"

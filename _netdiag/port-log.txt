@@ -1,0 +1,47 @@
+==== listeners on 5432 / 6379 / 8000 
+  TCP    0.0.0.0:5432           0.0.0.0:0              LISTENING       8400
+  TCP    127.0.0.1:6379         0.0.0.0:0              LISTENING       29724
+  TCP    [::]:5432              [::]:0                 LISTENING       8400
+==== owning processes 
+:::5432 pid=8400 postgres
+127.0.0.1:6379 pid=29724 com.docker.backend
+0.0.0.0:5432 pid=8400 postgres
+==== postgres services 
+
+Name               Status StartType
+----               ------ ---------
+postgresql-x64-17 Running Automatic
+
+
+
+==== excluded port ranges tcp 
+
+Protocol tcp Port Exclusion Ranges
+
+Start Port    End Port      
+----------    --------      
+      2869        2869      
+     28385       28385      
+     28390       28390      
+     49681       49780      
+     49881       49980      
+     50000       50059     *
+     52407       52506      
+     55528       55627      
+     55799       55898      
+     57884       57983      
+     57984       58083      
+     58137       58236      
+     60390       60489      
+     60490       60589      
+     60593       60692      
+     60786       60885      
+
+* - Administered port exclusions.
+
+==== docker ps -a trailbuddies 
+trailbuddies-worker-1  Created  
+trailbuddies-api-1  Created  
+trailbuddies-db-1  Created  
+trailbuddies-redis-1  Up 2 minutes (healthy)  127.0.0.1:6379->6379/tcp
+==== DONE 

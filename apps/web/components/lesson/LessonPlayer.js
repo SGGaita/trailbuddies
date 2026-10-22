@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
@@ -20,6 +19,7 @@ import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import { EXERCISES } from "./Exercises";
 import LessonComplete from "./LessonComplete";
+import LessonProgress from "./LessonProgress";
 
 const ADVANCE_MS = 1100;
 const line = (event, vars) => buddyLine(event, vars, Math.floor(Math.random() * 10));
@@ -93,8 +93,6 @@ function Player({ where, learner }) {
   const mood = fb?.mood ?? "happy";
   const stepDone = fb?.done ?? false;
   const hint = (step && ladders[step.id]) || startLadder();
-  const questions = lesson ? lesson.steps.filter((s) => s.type !== "intro").length : 0;
-  const answered = lesson ? lesson.steps.slice(0, index).filter((s) => s.type !== "intro").length : 0;
   const band = plan.band;
 
   const say = (text) => speak(text, { band, enabled: voice });
@@ -192,9 +190,9 @@ function Player({ where, learner }) {
           display: "flex",
           alignItems: "center",
           gap: { xs: 1.25, sm: 2 },
-          px: { xs: 1.5, sm: 3 },
-          pt: "calc(env(safe-area-inset-top, 0px) + 10px)",
-          pb: 1.25,
+          px: { xs: 1.5, sm: 3.75 },
+          pt: { xs: "calc(env(safe-area-inset-top, 0px) + 10px)", sm: "calc(env(safe-area-inset-top, 0px) + 18px)" },
+          pb: { xs: 1.25, sm: 1.75 },
         }}
       >
         <IconButton
@@ -210,31 +208,7 @@ function Player({ where, learner }) {
         >
           <Icon name="x" size={24} />
         </IconButton>
-        <LinearProgress
-          variant="determinate"
-          value={questions ? (answered / questions) * 100 : 0}
-          aria-label={t("lesson.progress", { n: Math.min(answered + 1, questions), total: questions })}
-          sx={{
-            flex: 1,
-            height: 16,
-            borderRadius: 8,
-            bgcolor: colors.sand,
-            "& .MuiLinearProgress-bar": { bgcolor: colors.leaf.main, borderRadius: 8 },
-          }}
-        />
-        <IconButton
-          onClick={() => say(step.say)}
-          aria-label={t("lesson.hear")}
-          sx={{
-            width: 52,
-            height: 52,
-            border: `3px solid ${colors.leaf.deep}`,
-            color: colors.leaf.deep,
-            bgcolor: "background.paper",
-          }}
-        >
-          <Icon name="speak" size={24} />
-        </IconButton>
+        <LessonProgress index={index} total={lesson.steps.length} />
       </Box>
 
       <Box
@@ -254,20 +228,35 @@ function Player({ where, learner }) {
         <Box
           sx={{
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             gap: { xs: 1, sm: 2 },
-            alignSelf: { xs: "stretch", sm: "center" },
+            alignSelf: "stretch",
+            minHeight: { xs: 70, sm: 120 },
           }}
         >
-          <Box sx={{ display: { xs: "block", sm: "none" } }}>
+          <Box sx={{ display: { xs: "block", sm: "none" }, flex: "none" }}>
             <Buddy id={learner.buddy} outfit={learner.outfit} mood={mood} size={72} />
           </Box>
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            <Buddy id={learner.buddy} outfit={learner.outfit} mood={mood} size={120} />
+          <Box sx={{ display: { xs: "none", sm: "block" }, flex: "none" }}>
+            <Buddy id={learner.buddy} outfit={learner.outfit} mood={mood} size={100} />
           </Box>
-          <Bubble key={bubble} sx={{ flex: { xs: 1, sm: "none" }, maxWidth: 560, mb: { xs: 1, sm: 3 } }}>
+          <Bubble key={bubble} sx={{ flex: 1, minWidth: 0, maxWidth: 680 }}>
             <span role="status">{bubble}</span>
           </Bubble>
+          <IconButton
+            onClick={() => say(step.say)}
+            aria-label={t("lesson.hear")}
+            sx={{
+              width: { xs: 48, sm: 56 },
+              height: { xs: 48, sm: 56 },
+              flex: "none",
+              border: `3px solid ${colors.leaf.deep}`,
+              color: colors.leaf.deep,
+              bgcolor: "background.paper",
+            }}
+          >
+            <Icon name="speak" size={24} />
+          </IconButton>
         </Box>
 
         <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>

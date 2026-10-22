@@ -1,0 +1,30 @@
+==== start 11:15:58.32 
+---- host nslookup pypi.org via router 
+Server:  UnKnown
+Address:  192.168.0.1
+
+Name:    pypi.org
+Addresses:  2a04:4e42:400::223
+	  2a04:4e42:600::223
+	  2a04:4e42:200::223
+	  2a04:4e42::223
+	  151.101.128.223
+
+---- host curl pypi x3 
+curl 200 5.715566s
+curl: (28) Operation timed out after 20008 milliseconds with 4134 out of 282421 bytes received
+curl 200 20.009307s
+curl: (28) Operation timed out after 20010 milliseconds with 49152 out of 282421 bytes received
+curl 200 20.011832s
+==== R1 default bridge default DNS 
+DNS pypi.org: 8/8 ok []
+pip download rc=1 92.2s ERROR: No matching distribution found for fastapi==0.120.4
+==== R2 default bridge dns 8.8.8.8 + 1.1.1.1 
+DNS pypi.org: 8/8 ok []
+pip download rc=0 93.2s 
+==== R3 user network (like compose) default DNS 
+7662e9fca37a32c7c9f4d92e37ff6de8e7e1f574e8c57e3f13cf3ad7a1245cc1
+DNS pypi.org: 8/8 ok []
+pip download rc=0 102.1s 
+tbtest
+==== DONE 11:22:52.64 

@@ -35,6 +35,7 @@ export default {
   "lesson.keepPlaying": "Keep playing",
   "lesson.stop": "Stop",
   "lesson.progress": "Question {n} of {total}",
+  "lesson.count": "{n} of {total}",
   "done.title": "Lesson done!",
   "done.trophy": "Trophy won!",
   "done.review": "Practice done!",

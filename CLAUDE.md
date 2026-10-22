@@ -18,6 +18,7 @@
 - Prototype radii: profile card 30px (7.5), lesson tile 28px (7), speech bubble 22px (5.5; small 18px), island card / dialog 22px, card or list 18px (4.5), button / icon button 16px (4), input 14px, chip and coin 999px, avatar and speak button 50%.
 - Cards are rounded rectangles, never stadiums: a radius must stay well under half the element's height.
 - Map-style screens keep the prototype's compact layout (islands in a 3 x 2 grid from the top-left, ~305px pitch), not `%` positions that spread out on wide screens.
+- Lesson screens always use the prototype header: close button (52px, 16px radius), one progress segment per step (green done, sun current, sand to come, 16px tall, 8px radius) and an "n of N" count; below it the buddy, a wide speech bubble and the speak button beside the bubble. Use `components/lesson/LessonProgress.js`, never a continuous `LinearProgress`.
 - Check every UI change against the prototype screen at 390, 1180 and 1440 px.
 
 ## Commands
