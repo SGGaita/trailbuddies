@@ -101,6 +101,50 @@ a {
 .starpop {
   animation: starpop 0.6s ease both;
 }
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+@keyframes unlock {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+.buddy-wave {
+  transform-origin: 50% 90%;
+  animation: wave 0.9s ease-in-out 2;
+}
+.buddy-point {
+  animation: nudge 0.8s ease-in-out infinite;
+}
+.unlock-in {
+  animation: unlock 0.6s ease both;
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

@@ -1,0 +1,18 @@
+{
+  "schema": "buddy-script/1",
+  "buddy": "zip",
+  "lang": "en",
+  "events": {
+    "buddy.intro": [
+      "Beep boop! I'm Zip the robot. I love numbers and gadgets!"
+    ],
+    "lesson.correct": [
+      "Beep beep! Correct!",
+      "Zip zap, that's right!",
+      "Computing... brilliant!"
+    ],
+    "greet.again": [
+      "Beep! Welcome back, {name}!"
+    ]
+  }
+}

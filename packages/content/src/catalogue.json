@@ -51,10 +51,10 @@
       "island": "language",
       "units": [
         {
-          "id": "letter-names",
-          "title": "Letter names A to Z",
-          "band": "seedling",
-          "status": "planned",
+          "id": "letters-a-e",
+          "title": "Letters A to E",
+          "band": "sprout",
+          "status": "ready",
           "lessons": 6
         },
         {
@@ -93,6 +93,13 @@
       "place": "Animal Safari",
       "island": "animals",
       "units": [
+        {
+          "id": "where-animals-live",
+          "title": "Where animals live",
+          "band": "seedling",
+          "status": "ready",
+          "lessons": 4
+        },
         {
           "id": "animal-sounds",
           "title": "Animal sounds",

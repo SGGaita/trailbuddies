@@ -65,15 +65,27 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await expect(page.getByText("This part of the trail is coming soon.")).toBeVisible();
 });
 
-test("a new learner starts at Numbers", async ({ page }) => {
+test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {
   await demo(page);
-  await page.getByRole("button", { name: /Amani/ }).click();
+  await page.getByRole("button", { name: /Amani/ }).click(); // Amani has no buddy yet
+  await expect(page).toHaveURL(/\/play\/buddies$/);
+  await expect(page.getByRole("heading", { name: "Meet the buddies" })).toBeVisible();
+  await page.getByRole("button", { name: "Say hello to Juma the elephant" }).click();
+  await expect(page.locator('[data-mood="wave"]')).toBeVisible();
+  await noSideScroll(page);
+  await shot(page, testInfo, "7-buddies");
+  await page.getByRole("button", { name: "Pick Juma" }).click();
+  await page.getByRole("button", { name: "Yes, Juma!" }).click();
+  await expect(page).toHaveURL(/\/play\/map$/);
   await expect(
     page
-      .getByText(/Let's start with Numbers/)
+      .getByText(/Hi Amani! Let's start our trail together!/)
       .filter({ visible: true })
       .first(),
   ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Juma the elephant" }).filter({ visible: true }).first(),
+  ).toHaveAttribute("data-mood", "point");
 });
 
 test("parent home", async ({ page }, testInfo) => {

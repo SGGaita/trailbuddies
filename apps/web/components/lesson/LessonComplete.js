@@ -43,9 +43,13 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
     [review, lesson.subjectId, learner.progress, learner.placement],
   );
   const today = learner.today;
+  // From the script table, in this learner's buddy's words (BUD-08).
+  const b = learner.buddy;
   const message = trophy
-    ? buddyLine("lesson.trophy", { name: learner.name })
-    : buddyLine("lesson.done", { name: learner.name }, outcome.stars);
+    ? buddyLine("lesson.trophy", { name: learner.name }, 0, b)
+    : outcome.perfect && lesson.kind === "lesson"
+      ? buddyLine("lesson.perfect", { name: learner.name }, outcome.firstTry, b)
+      : buddyLine("lesson.done", { name: learner.name }, outcome.stars, b);
   const extras = [
     outcome.reachedGoal ? buddyLine("lesson.goal") : "",
     outcome.keptGoing ? buddyLine("lesson.kept-going") : "",
@@ -53,7 +57,7 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
 
   useEffect(() => {
     playSound("done");
-    speak([message, ...extras].join(" "), { band: learner.band, enabled: voice });
+    speak([message, ...extras].join(" "), { band: learner.band, buddy: learner.buddy, enabled: voice });
     // Say it once when the screen opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

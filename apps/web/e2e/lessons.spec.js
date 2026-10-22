@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { demo, passGate } from "./helpers.js";
+import { PRAISE } from "./helpers.js";
 
 // Sprint 1: whole lessons played end to end at phone, tablet and desktop.
 // `tb_e2e` makes exercises mark answers with data attributes (never set in normal use).
@@ -154,7 +155,7 @@ test("keyboard: number keys answer; stopping keeps the answers given", async ({ 
     .locator("[data-answer]")
     .evaluateAll((els) => els.findIndex((e) => e.getAttribute("data-answer") === "yes"));
   await page.keyboard.press(String(n + 1));
-  await expect(page.getByRole("status")).toContainText(/Yes|right|Brilliant|got it|Great/);
+  await expect(page.getByRole("status")).toContainText(PRAISE);
   await page.getByRole("button", { name: "Stop the lesson" }).click();
   await expect(page.getByRole("heading", { name: "Do you want to stop?" })).toBeVisible();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
@@ -205,7 +206,7 @@ test("a practice stone appears when an item is due, and plays a review", async (
 });
 
 test("locked lessons send you back to the trail", async ({ page }) => {
-  await as(page, "Amani");
+  await as(page, "Zawadi"); // Counting 6 to 10 and its trophy are still locked for her
   await page.goto("/play/lesson/counting-6-10/1");
   await expect(page).toHaveURL(/\/play\/trail\/numbers$/);
   await page.goto("/play/lesson/counting-1-5/trophy");

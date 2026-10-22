@@ -13,3 +13,4 @@ export * from "./pin.js";
 export * from "./placement.js";
 export * from "./rest.js";
 export * from "./names.js";
+export * from "./buddy.js";

@@ -8,8 +8,8 @@ import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { buddyLine } from "@trailbuddies/content";
-import { startLadder, answer, lessonOutcome } from "@trailbuddies/domain";
+import { buddySays } from "@trailbuddies/content";
+import { startLadder, answer, lessonOutcome, celebrationFor } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
 import { speak, stop } from "@/lib/speech";
@@ -23,8 +23,8 @@ import { EXERCISES } from "./Exercises";
 import LessonComplete from "./LessonComplete";
 import LessonProgress from "./LessonProgress";
 
-const ADVANCE_MS = 1100;
-const line = (event, vars) => buddyLine(event, vars, Math.floor(Math.random() * 10));
+/** Time to hear the buddy explain an answer (compare, odd one out) before moving on. */
+const EXPLAIN_MS = 3400;
 
 /** True when e2e tests asked for answer hints in the DOM (never set in normal use). */
 function readE2E() {
@@ -82,7 +82,7 @@ function Player({ where, learner }) {
   const [ladders, setLadders] = useState(/** @type {Record<string, any>} */ ({}));
   // Feedback for the current step only; a new step starts from its own prompt.
   const [feedback, setFeedback] = useState(
-    /** @type {{ stepId: string, bubble: string, mood: "happy" | "cheer" | "think", done: boolean } | null} */ (
+    /** @type {{ stepId: string, bubble: string, mood: "happy" | "cheer" | "think", done: boolean, ms?: number } | null} */ (
       null
     ),
   );
@@ -99,13 +99,21 @@ function Player({ where, learner }) {
   const stepDone = fb?.done ?? false;
   const hint = (step && ladders[step.id]) || startLadder();
   const band = plan.band;
+  const buddy = learner.buddy;
+  const lastLine = useRef(/** @type {Record<string, string>} */ ({}));
+  /** A line for an event in this learner's buddy's words, never the same twice in a row. */
+  const line = (event, vars = {}) => {
+    const text = buddySays(event, { buddy, vars, last: lastLine.current[event] });
+    lastLine.current[event] = text;
+    return text;
+  };
 
-  const say = (text) => speak(text, { band, enabled: voice });
+  const say = (text) => speak(text, { band, buddy, enabled: voice });
 
   // Each new step: say its prompt.
   useEffect(() => {
-    if (step && !outcome) speak(step.say, { band, enabled: voice });
-  }, [step, band, voice, outcome]);
+    if (step && !outcome && step.type !== "intro") speak(step.say, { band, buddy, enabled: voice });
+  }, [step, band, buddy, voice, outcome]);
 
   useEffect(() => stop, []);
 
@@ -126,9 +134,9 @@ function Player({ where, learner }) {
   const advanceLater = useEffectEvent(() => advance());
   useEffect(() => {
     if (!stepDone || outcome) return undefined;
-    const id = setTimeout(advanceLater, ADVANCE_MS);
+    const id = setTimeout(advanceLater, fb?.ms ?? 1100);
     return () => clearTimeout(id);
-  }, [stepDone, outcome, index]);
+  }, [stepDone, outcome, index, fb?.ms]);
 
   const onTry = ({ correct, finished, chosenId, wrongIds }) => {
     if (stepDone) return;
@@ -139,9 +147,19 @@ function Player({ where, learner }) {
     if (res.effect === "correct") {
       playSound("right");
       results.current[step.id] = { firstTry: res.firstTry, misses: cur.misses };
-      const praise = line("lesson.correct");
-      setFeedback({ stepId: step.id, bubble: praise, mood: "cheer", done: true });
-      say(praise);
+      // BUD-06: varied praise; quick and silent for Explorers and up. Compare and odd one
+      // out explain the answer instead (LES-06, LES-09).
+      const cel = celebrationFor(band);
+      const explain = step.explain ? line(step.explain.event, step.explain.vars) : null;
+      const praise = explain || (cel.speak ? line("lesson.correct") : t("lesson.quickRight"));
+      setFeedback({
+        stepId: step.id,
+        bubble: praise,
+        mood: "cheer",
+        done: true,
+        ms: explain ? EXPLAIN_MS : cel.ms,
+      });
+      if (explain || cel.speak) say(praise);
     } else if (res.effect === "repeat") {
       playSound("miss");
       setFeedback({ stepId: step.id, bubble: step.prompt, mood: "think", done: false });
@@ -281,10 +299,27 @@ function Player({ where, learner }) {
             e2e={plan.e2e}
             band={band}
             voice={voice}
+            buddy={buddy}
             heard={heard}
             onHeard={(id) => setHeard((h) => (h.includes(id) ? h : [...h, id]))}
+            say={line}
           />
         </Box>
+
+        {stepDone && (
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => {
+              stop();
+              advance();
+            }}
+            autoFocus
+            sx={{ minWidth: 200, minHeight: 56, fontSize: 20 }}
+          >
+            {t("lesson.next")}
+          </Button>
+        )}
 
         {intro && (
           <Button

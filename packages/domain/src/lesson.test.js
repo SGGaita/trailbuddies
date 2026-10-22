@@ -110,7 +110,10 @@ test("number-only exercises fall back to listen-tap for word units", () => {
 test("unknown exercise types are rejected; every Sprint 1 type is buildable", () => {
   const ctx = { id: "x", next: () => unit.items[2], pool: unit.items, all: unit.items, level: 2, band: "sprout", r: rng(3) };
   expect(() => buildExercise({ type: "juggle" }, ctx)).toThrow(/Unknown exercise type/);
-  for (const t of EXERCISE_TYPES) expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe(t);
+  const numberTypes = EXERCISE_TYPES.filter((t) => !["sort", "case-match", "build-word"].includes(t));
+  for (const t of numberTypes) expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe(t);
+  // letter and category types need letters or groups; with numbers they fall back to listen-tap
+  for (const t of ["sort", "case-match", "build-word"]) expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe("listen-tap");
 });
 
 test("trophy mixes the unit's exercise types across all items", () => {

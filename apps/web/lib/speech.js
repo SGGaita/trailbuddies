@@ -26,6 +26,17 @@ if (canSpeak()) {
 /** The family's voice-speed setting (slow 0.8, normal 1, fast 1.15). */
 const voiceScale = () => useFamily.getState().settings?.voice_rate || 1;
 
+/**
+ * Each buddy's own voice until recorded voice packs exist (BUD-01): device voice with
+ * its own pitch and speed. Zip the robot is quick and high, Juma the elephant slow and low.
+ */
+export const BUDDY_VOICES = {
+  zip: { pitch: 1.45, rate: 1.08 },
+  tumi: { pitch: 0.95, rate: 0.92 },
+  juma: { pitch: 0.7, rate: 0.88 },
+  kiki: { pitch: 1.2, rate: 0.85 },
+};
+
 /** Speaking rate per band: slower for the youngest learners. */
 export const RATE = { seedling: 0.8, sprout: 0.85, explorer: 0.95, voyager: 1, trailblazer: 1 };
 
@@ -57,9 +68,9 @@ export function stop() {
  * Say a line. A new call cancels the previous one. `done` runs when it finishes
  * (or after a time-out, because some browsers never fire `onend`).
  * @param {string} text
- * @param {{ rate?: number, band?: string, clip?: string, done?: () => void, enabled?: boolean }} [opts]
+ * @param {{ rate?: number, band?: string, buddy?: string | null, clip?: string, done?: () => void, enabled?: boolean }} [opts]
  */
-export function speak(text, { rate, band, clip, done, enabled = true } = {}) {
+export function speak(text, { rate, band, buddy, clip, done, enabled = true } = {}) {
   stop();
   const my = token;
   let finished = false;
@@ -75,8 +86,9 @@ export function speak(text, { rate, band, clip, done, enabled = true } = {}) {
     try {
       const u = new SpeechSynthesisUtterance(text);
       if (voice) u.voice = voice;
-      u.rate = Math.min(2, (rate ?? RATE[band] ?? 0.9) * voiceScale());
-      u.pitch = 1.1;
+      const bv = (buddy && BUDDY_VOICES[buddy]) || { pitch: 1.1, rate: 1 };
+      u.rate = Math.min(2, (rate ?? RATE[band] ?? 0.9) * bv.rate * voiceScale());
+      u.pitch = bv.pitch;
       u.onend = finish;
       u.onerror = finish;
       speechSynthesis.speak(u);

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -8,8 +8,15 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubjects } from "@trailbuddies/content";
-import { subjectProgress, currentUnit, orderSubjects } from "@trailbuddies/domain";
+import { getSubjects, getUnit, buddyLine } from "@trailbuddies/content";
+import {
+  subjectProgress,
+  currentUnit,
+  orderSubjects,
+  layoutTrail,
+  greetingFor,
+  dayKey,
+} from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
@@ -19,7 +26,9 @@ import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
-import { useSpokenPrompt, useTapToHear } from "@/lib/nonReader";
+import { useTapToHear, isNonReader } from "@/lib/nonReader";
+import { speak } from "@/lib/speech";
+import { readMemory, writeMemory } from "@/lib/memory";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 // Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
@@ -42,26 +51,63 @@ function subjectsWithProgress(progress, placement = {}, interests = []) {
   });
 }
 
+/**
+ * The greeting's event and values: the last lesson played and what's next on its trail.
+ * @param {any} learner learnerView
+ * @param {string | null} greetedOn
+ */
+function greetingOf(learner, greetedOn) {
+  const last = [...learner.results].reverse().find((r) => r.kind !== "review");
+  let lastTitle = null;
+  let nextTitle = null;
+  if (last) {
+    const unit = getUnit(last.unitId);
+    lastTitle =
+      last.kind === "trophy"
+        ? `the ${unit?.title || ""} trophy`
+        : unit?.lessons.find((l) => l.id === last.lessonId)?.title || null;
+    const { next } = layoutTrail(trailUnits(last.subjectId), learner.progress, {
+      start: learner.placement?.[last.subjectId],
+    });
+    if (next)
+      nextTitle =
+        next.kind === "trophy" ? "the trophy" : getUnit(next.unitId)?.lessons[next.n - 1]?.title || null;
+  }
+  return greetingFor({ name: learner.name, lastTitle, nextTitle, greetedOn });
+}
+
 /** C04 World map: islands on tablet and web, a card list on phone. */
 export default function WorldMap() {
   const ready = useHydrated();
   const learner = useLearner();
   const goal = useFamily((s) => s.settings.goal);
   const router = useRouter();
+  const noBuddy = ready && learner && !learner.buddy;
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
-  }, [ready, learner, router]);
+    else if (noBuddy) router.replace("/play/buddies"); // new learners meet the buddies first
+  }, [ready, learner, noBuddy, router]);
+  const voice = useFamily((s) => s.settings.voice);
+  const [memory] = useState(() => (typeof window === "undefined" ? null : readMemory()));
   const subjects = subjectsWithProgress(learner?.progress || {}, learner?.placement, learner?.interests);
   const rest = useRest(learner);
   const first = !!learner && Object.keys(learner.progress).length === 0;
-  const greeting = !learner
-    ? ""
-    : first
-      ? `Hi ${learner.name}! Let's start with Numbers!`
-      : `Hi ${learner.name}! Shall we count some more?`;
-  useSpokenPrompt(ready && !rest ? greeting : "", learner?.band);
+  const greet = learner ? greetingOf(learner, memory?.greeted[learner.id] ?? null) : null;
+  const greeting = greet ? buddyLine(greet.event, greet.vars, 0, learner.buddy) : "";
+  // BUD-03: the first visit of the day is spoken for everyone; after that, for non-readers.
+  const sayGreeting = useEffectEvent(() => {
+    if (greet.firstToday || isNonReader(learner.band))
+      speak(greeting, { band: learner.band, buddy: learner.buddy, enabled: voice });
+    writeMemory((m) => {
+      m.greeted[learner.id] = dayKey();
+    });
+  });
+  const learnerId = learner?.id;
+  useEffect(() => {
+    if (ready && learnerId && !rest && !noBuddy) sayGreeting();
+  }, [ready, learnerId, rest, noBuddy]);
   const hear = useTapToHear(learner?.band);
-  if (!ready || !learner) return <Loading />;
+  if (!ready || !learner || noBuddy) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
 
   const sub = (s) =>
@@ -147,7 +193,12 @@ export default function WorldMap() {
             gap: 1.5,
           }}
         >
-          <Buddy id={learner.buddy} outfit={learner.outfit} size={112} />
+          <Buddy
+            id={learner.buddy}
+            outfit={learner.outfit}
+            size={112}
+            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+          />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 5 }}>
             <Bubble small sx={{ maxWidth: 360 }}>
               {greeting}
@@ -192,7 +243,12 @@ export default function WorldMap() {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
-          <Buddy id={learner.buddy} outfit={learner.outfit} size={72} />
+          <Buddy
+            id={learner.buddy}
+            outfit={learner.outfit}
+            size={72}
+            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+          />
           <Bubble small sx={{ mb: 2.5 }}>
             {greeting}
           </Bubble>

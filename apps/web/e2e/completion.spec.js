@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { newServer, fakeApi, seedServer } from "./fakeApi.js";
 import { shot, noSideScroll, watchErrors, demo, passGate } from "./helpers.js";
+import { PRAISE } from "./helpers.js";
 
 // Sprint 1-2 completion: invites and carers, sign out everywhere, plan limits, the
 // hold-to-open gate, drag-to-match, and sound files.
@@ -155,7 +156,7 @@ test("match pairs can be dragged as well as tapped", async ({ page }) => {
     await page.locator(`[data-side="l"][data-pair="${other}"]`).click();
     await page.locator(`[data-side="r"][data-pair="${other}"]`).click();
   }
-  await expect(page.getByRole("status")).toContainText(/Yes|right|Brilliant|got it|Great/);
+  await expect(page.getByRole("status")).toContainText(PRAISE);
 });
 
 test("sound files are served (and cached for offline)", async ({ request }) => {
