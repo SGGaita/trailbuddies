@@ -12,6 +12,14 @@
 - Content is data: units are JSON validated against `packages/content-schema`.
 - Every screen works on every device its app supports (development plan §3.4): learner tablet/phone/web, parent phone/tablet/web, teacher web/tablet. The prototype in `prototype/` is the reference for layout and behaviour.
 
+## Shapes and corners (match the prototype)
+
+- The MUI theme keeps `shape.borderRadius: 4`. A numeric `borderRadius` in `sx` is multiplied by it, so write the prototype's px value divided by 4 (or a px string). Never raise the theme base: at 18 every card turned into a pill.
+- Prototype radii: profile card 30px (7.5), lesson tile 28px (7), speech bubble 22px (5.5; small 18px), island card / dialog 22px, card or list 18px (4.5), button / icon button 16px (4), input 14px, chip and coin 999px, avatar and speak button 50%.
+- Cards are rounded rectangles, never stadiums: a radius must stay well under half the element's height.
+- Map-style screens keep the prototype's compact layout (islands in a 3 x 2 grid from the top-left, ~305px pitch), not `%` positions that spread out on wide screens.
+- Check every UI change against the prototype screen at 390, 1180 and 1440 px.
+
 ## Commands
 
 - `pnpm install` · `pnpm dev` (web on :3000) · `pnpm lint` · `pnpm test` · `pnpm content:validate`

@@ -26,7 +26,9 @@ const theme = createTheme({
     error: { main: colors.bad.main },
     sand: { main: colors.sand },
   },
-  shape: { borderRadius: radii.md },
+  // Keep MUI's 4px base: numeric sx radii are multiplied by this (borderRadius: 7.5 -> 30px).
+  // A larger base turns cards into pills. See CLAUDE.md "Shapes and corners".
+  shape: { borderRadius: 4 },
   typography: {
     fontFamily: body,
     fontWeightBold: 800,
@@ -48,6 +50,10 @@ const theme = createTheme({
       styleOverrides: { root: { borderRadius: radii.md, borderColor: colors.line } },
     },
     MuiChip: { styleOverrides: { root: { fontWeight: 800 } } },
+    MuiDialog: { styleOverrides: { paper: { borderRadius: radii.lg } } },
+    MuiOutlinedInput: { styleOverrides: { root: { borderRadius: 14 } } },
+    MuiSnackbarContent: { styleOverrides: { root: { borderRadius: 14 } } },
+    MuiToggleButtonGroup: { styleOverrides: { root: { borderRadius: 14 } } },
   },
 });
 

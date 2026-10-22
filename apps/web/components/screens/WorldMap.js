@@ -20,8 +20,17 @@ import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
-// Island positions on the tablet/web map, as % of the map area: [left, top].
-const SPOTS = { numbers: [4, 4], language: [36, 4], colours: [68, 4], animals: [4, 50], shapes: [36, 50] };
+// Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
+// so islands stay together on wide screens instead of spreading across the window.
+const PLACE_SX = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 0.5,
+  textDecoration: "none",
+  color: "text.primary",
+  minWidth: 0,
+};
 
 function subjectsWithProgress(progress) {
   return getSubjects().map((s) => {
@@ -65,70 +74,58 @@ export default function WorldMap() {
           background: `radial-gradient(circle at 20% 30%, #fdf3d3 0 18%, transparent 19%), radial-gradient(circle at 80% 70%, #f6e7bd 0 16%, transparent 17%), ${colors.sand}`,
         }}
       >
-        {subjects.map((s) => {
-          const [left, top] = SPOTS[s.id];
-          return (
-            <Box
-              key={s.id}
-              component={Link}
-              href={`/play/trail/${s.id}`}
-              sx={{
-                position: "absolute",
-                left: `${left}%`,
-                top: `${top}%`,
-                width: "28%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 0.5,
-                textDecoration: "none",
-                color: "text.primary",
-                opacity: first && s.id !== "numbers" ? 0.55 : 1,
-              }}
-            >
-              <Box sx={{ height: 22 }}>
-                {first && s.id === "numbers" ? (
-                  <Chip size="small" label="Start here!" color="primary" />
-                ) : (learner.interests || []).includes(s.id) ? (
-                  <Chip size="small" label="Favourite" color="secondary" />
-                ) : null}
-              </Box>
-              <Island kind={s.island} width="min(180px, 100%)" height={120} />
-              <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
-                {s.place}
-              </Typography>
-              <Typography
-                sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary", textAlign: "center" }}
-              >
-                {sub(s)}
-              </Typography>
-            </Box>
-          );
-        })}
         <Box
-          component={Link}
-          href="/play/more/island"
           sx={{
-            position: "absolute",
-            left: "68%",
-            top: "50%",
-            width: "28%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0.5,
-            textDecoration: "none",
-            color: "text.primary",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 260px))",
+            columnGap: { sm: 2, md: 5.5 },
+            rowGap: 2.5,
+            px: { sm: 2, md: 5 },
+            pt: 2.25,
+            pb: 22,
           }}
         >
-          <Box sx={{ height: 22 }} />
-          <Island kind="family" width="min(180px, 100%)" height={120} />
-          <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
-            {t("map.familyIsland")}
-          </Typography>
-          <Typography sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary" }}>
-            {t("map.familyIslandSub")}
-          </Typography>
+          {subjects.map((s) => {
+            return (
+              <Box
+                key={s.id}
+                component={Link}
+                href={`/play/trail/${s.id}`}
+                sx={{ ...PLACE_SX, opacity: first && s.id !== "numbers" ? 0.55 : 1 }}
+              >
+                <Box sx={{ height: 22 }}>
+                  {first && s.id === "numbers" ? (
+                    <Chip size="small" label="Start here!" color="primary" />
+                  ) : (learner.interests || []).includes(s.id) ? (
+                    <Chip size="small" label="Favourite" color="secondary" />
+                  ) : null}
+                </Box>
+                <Island kind={s.island} width="min(180px, 100%)" height={120} />
+                <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
+                  {s.place}
+                </Typography>
+                <Typography
+                  sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary", textAlign: "center" }}
+                >
+                  {sub(s)}
+                </Typography>
+              </Box>
+            );
+          })}
+          <Box
+            component={Link}
+            href="/play/more/island"
+            sx={PLACE_SX}
+          >
+            <Box sx={{ height: 22 }} />
+            <Island kind="family" width="min(180px, 100%)" height={120} />
+            <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
+              {t("map.familyIsland")}
+            </Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary" }}>
+              {t("map.familyIslandSub")}
+            </Typography>
+          </Box>
         </Box>
         <Box
           sx={{
