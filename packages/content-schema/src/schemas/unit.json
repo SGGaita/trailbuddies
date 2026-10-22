@@ -2,42 +2,87 @@
   "$id": "https://trailbuddies.africa/schema/unit.json",
   "title": "Unit (a stage on a subject trail: items, lessons and a checkpoint)",
   "type": "object",
-  "required": ["schema", "id", "subject", "title", "band", "status", "items", "lessons", "checkpoint"],
+  "required": [
+    "schema",
+    "id",
+    "subject",
+    "title",
+    "band",
+    "status",
+    "items",
+    "lessons",
+    "checkpoint"
+  ],
   "additionalProperties": false,
   "properties": {
-    "schema": { "const": "unit/1" },
-    "id": { "$ref": "common.json#/$defs/id" },
-    "subject": { "$ref": "common.json#/$defs/id" },
-    "title": { "$ref": "common.json#/$defs/text" },
-    "band": { "$ref": "common.json#/$defs/band" },
-    "status": { "$ref": "common.json#/$defs/status" },
-    "summary": { "$ref": "common.json#/$defs/text" },
+    "schema": {
+      "const": "unit/1"
+    },
+    "id": {
+      "$ref": "common.json#/$defs/id"
+    },
+    "subject": {
+      "$ref": "common.json#/$defs/id"
+    },
+    "title": {
+      "$ref": "common.json#/$defs/text"
+    },
+    "band": {
+      "$ref": "common.json#/$defs/band"
+    },
+    "status": {
+      "$ref": "common.json#/$defs/status"
+    },
+    "summary": {
+      "$ref": "common.json#/$defs/text"
+    },
     "requires": {
       "type": "array",
-      "items": { "$ref": "common.json#/$defs/id" },
+      "items": {
+        "$ref": "common.json#/$defs/id"
+      },
       "description": "Unit ids that must be finished first (any subject)"
     },
-    "items": { "type": "array", "minItems": 3, "items": { "$ref": "item.json" } },
+    "items": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "$ref": "item.json"
+      }
+    },
     "lessons": {
       "type": "array",
       "minItems": 1,
       "maxItems": 8,
       "items": {
         "type": "object",
-        "required": ["id", "title", "focus", "exercises"],
+        "required": [
+          "id",
+          "title",
+          "focus",
+          "exercises"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "$ref": "common.json#/$defs/id" },
-          "title": { "$ref": "common.json#/$defs/text" },
+          "id": {
+            "$ref": "common.json#/$defs/id"
+          },
+          "title": {
+            "$ref": "common.json#/$defs/text"
+          },
           "focus": {
             "type": "array",
             "minItems": 0,
-            "items": { "$ref": "common.json#/$defs/id" },
+            "items": {
+              "$ref": "common.json#/$defs/id"
+            },
             "description": "New items introduced in this lesson"
           },
           "review": {
             "type": "array",
-            "items": { "$ref": "common.json#/$defs/id" },
+            "items": {
+              "$ref": "common.json#/$defs/id"
+            },
             "description": "Earlier items mixed back in"
           },
           "exercises": {
@@ -46,12 +91,22 @@
             "maxItems": 8,
             "items": {
               "type": "object",
-              "required": ["type"],
+              "required": [
+                "type"
+              ],
               "additionalProperties": false,
               "properties": {
-                "type": { "$ref": "common.json#/$defs/exerciseType" },
-                "prompt": { "$ref": "common.json#/$defs/text" },
-                "choices": { "type": "integer", "minimum": 2, "maximum": 6 }
+                "type": {
+                  "$ref": "common.json#/$defs/exerciseType"
+                },
+                "prompt": {
+                  "$ref": "common.json#/$defs/text"
+                },
+                "choices": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 6
+                }
               }
             }
           }
@@ -60,17 +115,66 @@
     },
     "checkpoint": {
       "type": "object",
-      "required": ["review", "game"],
+      "required": [
+        "review",
+        "game"
+      ],
       "additionalProperties": false,
       "properties": {
-        "review": { "type": "integer", "minimum": 2, "maximum": 8 },
-        "game": { "enum": ["jigsaw", "memory", "sorting-race", "quiz-show", "maze"] }
+        "review": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 8
+        },
+        "game": {
+          "enum": [
+            "jigsaw",
+            "memory",
+            "sorting-race",
+            "quiz-show",
+            "maze"
+          ]
+        }
       }
     },
     "buddy": {
       "type": "object",
       "description": "Unit-specific buddy lines by event",
-      "additionalProperties": { "type": "array", "items": { "$ref": "common.json#/$defs/text" } }
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "common.json#/$defs/text"
+        }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "description": "Categories for sort and odd-one-out; an item belongs to a group when its tags include the group id",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "common.json#/$defs/id"
+          },
+          "label": {
+            "$ref": "common.json#/$defs/text"
+          },
+          "say": {
+            "$ref": "common.json#/$defs/text"
+          },
+          "emoji": {
+            "type": "string",
+            "maxLength": 16
+          }
+        }
+      }
     }
   }
 }

@@ -1,0 +1,220 @@
+{
+  "schema": "unit/1",
+  "id": "where-animals-live",
+  "subject": "animals",
+  "title": "Where animals live",
+  "band": "seedling",
+  "status": "ready",
+  "summary": "Animals that live on the land, in the water and in the air.",
+  "groups": [
+    {
+      "id": "land",
+      "label": "Land",
+      "say": "on the land",
+      "emoji": "🌳"
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "say": "in the water",
+      "emoji": "🌊"
+    },
+    {
+      "id": "air",
+      "label": "Air",
+      "say": "in the air",
+      "emoji": "☁️"
+    }
+  ],
+  "items": [
+    {
+      "id": "dog",
+      "label": "dog",
+      "emoji": "🐕",
+      "fact": "A dog can run fast.",
+      "tags": [
+        "land"
+      ]
+    },
+    {
+      "id": "cow",
+      "label": "cow",
+      "emoji": "🐄",
+      "fact": "A cow says moo.",
+      "tags": [
+        "land"
+      ]
+    },
+    {
+      "id": "lion",
+      "label": "lion",
+      "emoji": "🦁",
+      "fact": "A lion has a big mane.",
+      "tags": [
+        "land"
+      ]
+    },
+    {
+      "id": "fish",
+      "label": "fish",
+      "emoji": "🐟",
+      "fact": "A fish breathes under water.",
+      "tags": [
+        "water"
+      ]
+    },
+    {
+      "id": "whale",
+      "label": "whale",
+      "emoji": "🐋",
+      "fact": "A whale is very, very big.",
+      "tags": [
+        "water"
+      ]
+    },
+    {
+      "id": "octopus",
+      "label": "octopus",
+      "emoji": "🐙",
+      "fact": "An octopus has eight arms.",
+      "tags": [
+        "water"
+      ]
+    },
+    {
+      "id": "bird",
+      "label": "bird",
+      "emoji": "🐦",
+      "fact": "A bird has feathers.",
+      "tags": [
+        "air"
+      ]
+    },
+    {
+      "id": "bee2",
+      "label": "bee",
+      "emoji": "🐝",
+      "fact": "A bee buzzes from flower to flower.",
+      "tags": [
+        "air"
+      ]
+    },
+    {
+      "id": "bat",
+      "label": "bat",
+      "emoji": "🦇",
+      "fact": "A bat flies at night.",
+      "tags": [
+        "air"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "where-animals-live-1",
+      "title": "On the land",
+      "focus": [
+        "dog",
+        "cow",
+        "lion"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "name-it"
+        },
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "where-animals-live-2",
+      "title": "In the water",
+      "focus": [
+        "fish",
+        "whale",
+        "octopus"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "name-it"
+        },
+        {
+          "type": "sort"
+        }
+      ]
+    },
+    {
+      "id": "where-animals-live-3",
+      "title": "In the air",
+      "focus": [
+        "bird",
+        "bee2",
+        "bat"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out"
+        },
+        {
+          "type": "sort"
+        }
+      ]
+    },
+    {
+      "id": "where-animals-live-4",
+      "title": "Where do they live?",
+      "focus": [],
+      "review": [
+        "dog",
+        "cow",
+        "lion",
+        "fish",
+        "whale",
+        "octopus",
+        "bird",
+        "bee2",
+        "bat"
+      ],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out"
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 6,
+    "game": "sorting-race"
+  }
+}

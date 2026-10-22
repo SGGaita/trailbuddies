@@ -11,6 +11,7 @@ const PAGES = [
   "/",
   "/play",
   "/play/map",
+  "/play/buddies",
   "/start",
   ...getSubjects().map((s) => `/play/trail/${s.id}`),
   ...Object.keys(PLAY_MORE).map((k) => `/play/more/${k}`),

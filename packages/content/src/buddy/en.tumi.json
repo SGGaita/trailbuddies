@@ -1,0 +1,18 @@
+{
+  "schema": "buddy-script/1",
+  "buddy": "tumi",
+  "lang": "en",
+  "events": {
+    "buddy.intro": [
+      "Hoo hoo! I'm Tumi the owl. I know lots of words and stories."
+    ],
+    "lesson.correct": [
+      "Hoo! Wise choice!",
+      "That's right, clever owl friend!",
+      "Splendid!"
+    ],
+    "greet.again": [
+      "Hoo hoo, hello again, {name}!"
+    ]
+  }
+}

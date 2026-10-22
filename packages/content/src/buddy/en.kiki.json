@@ -1,0 +1,18 @@
+{
+  "schema": "buddy-script/1",
+  "buddy": "kiki",
+  "lang": "en",
+  "events": {
+    "buddy.intro": [
+      "Hi! I'm Kiki the turtle. Slow and steady, we'll get there!"
+    ],
+    "lesson.correct": [
+      "Steady and right!",
+      "Lovely, well done!",
+      "Yes! One step at a time."
+    ],
+    "greet.again": [
+      "Hello, {name}! Ready for a calm adventure?"
+    ]
+  }
+}

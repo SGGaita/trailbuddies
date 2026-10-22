@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getReadyUnits } from "@trailbuddies/content";
+import { getReadyUnits, buddyLine } from "@trailbuddies/content";
 import { ageFrom, isAdult } from "@trailbuddies/domain";
 import { useFamily } from "@/lib/store";
 import { useSetupGuard } from "@/lib/guard";
@@ -32,7 +32,7 @@ export default function Handover() {
 
   const pick = (b) => {
     updateLearner(learner.id, { buddy: b });
-    speak(`Hi ${learner.name}! I'm ${BUDDIES[b].name}!`, { enabled: voice });
+    speak(buddyLine("buddy.intro", {}, 0, b), { band: learner.band, buddy: b, enabled: voice });
   };
   const start = () => {
     setActive(learner.id);

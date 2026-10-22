@@ -37,9 +37,17 @@ import { choicesFor } from "./difficulty.js";
  * @property {Step[]} steps
  */
 
-export const EXERCISE_TYPES = ["listen-tap", "name-it", "count", "match", "compare", "sequence", "odd-one-out"];
-const NUMBER_ONLY = new Set(["count", "compare", "sequence", "odd-one-out"]);
+export const EXERCISE_TYPES = ["listen-tap", "name-it", "count", "match", "compare", "sequence", "odd-one-out", "sort", "case-match", "build-word"];
+const NUMBER_ONLY = new Set(["count", "compare", "sequence"]);
 const isNumber = (/** @type {Item} */ it) => typeof it.number === "number";
+const isLetter = (/** @type {Item} */ it) => typeof it.letter === "string" && !(it.tags || []).includes("word");
+const isWord = (/** @type {Item} */ it) => (it.tags || []).includes("word");
+/** Items of the same kind (letters with letters, words with words) so choices make sense. */
+const kindOf = (/** @type {Item} */ it) => (isWord(it) ? "word" : isLetter(it) ? "letter" : "other");
+const sameKind = (list, it) => list.filter((x) => kindOf(x) === kindOf(it));
+/** @typedef {{ id: string, label: string, say?: string, emoji?: string }} Group */
+const groupOf = (/** @type {Item} */ it, /** @type {Group[]} */ groups) =>
+  groups.find((g) => (it.tags || []).includes(g.id));
 const words = (/** @type {Item} */ it) => it.say || it.label;
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
@@ -95,16 +103,33 @@ function distractors(target, pool, all, n, r, same = (a, b) => a.id === b.id) {
  * @returns {Step}
  */
 export function buildExercise(cfg, ctx) {
-  const { id, next, pool, all, level, band, r } = ctx;
+  const { id, next, pool, all, level, band, r, groups = [] } = ctx;
   const numbers = pool.filter(isNumber);
+  const letters = pool.filter(isLetter);
+  const wordItems = pool.filter(isWord);
+  const grouped = pool.filter((i) => groupOf(i, groups));
+  const groupIds = [...new Set(grouped.map((i) => groupOf(i, groups).id))];
+  /** The next target that fits, or any item of that kind. */
+  const nextOf = (pred, list) => {
+    for (let i = 0; i < 8; i++) {
+      const t = next();
+      if (t && pred(t)) return t;
+    }
+    return pick(list, r);
+  };
   let type = cfg.type;
   if (NUMBER_ONLY.has(type) && numbers.length < 2) type = "listen-tap";
+  if (type === "odd-one-out" && numbers.length < 2 && groupIds.length < 2) type = "listen-tap";
+  if (type === "case-match" && letters.length < 2) type = "listen-tap";
+  if (type === "build-word" && !wordItems.length) type = "listen-tap";
+  if (type === "sort" && groupIds.length < 2) type = "listen-tap";
   if (type === "match" && pool.length < 2) type = "listen-tap";
 
   if (type === "listen-tap" || type === "name-it") {
     const target = next();
-    const n = optionCount(cfg, level, pool.length);
-    const options = shuffle([target, ...distractors(target, pool, all, n - 1, r)], r);
+    const kin = sameKind(pool, target);
+    const n = optionCount(cfg, level, kin.length);
+    const options = shuffle([target, ...distractors(target, kin, sameKind(all, target), n - 1, r)], r);
     if (type === "listen-tap") {
       return { id, type, prompt: cfg.prompt || `Tap ${target.label}!`, say: `Tap ${words(target)}!`, target, options, itemIds: [target.id] };
     }
@@ -123,9 +148,10 @@ export function buildExercise(cfg, ctx) {
   }
 
   if (type === "match") {
-    const pairs = matchPairs(level, pool.length, all.length);
     const first = next();
-    const items = shuffle([first, ...distractors(first, pool, all, pairs - 1, r)], r);
+    const kin = sameKind(pool, first);
+    const pairs = matchPairs(level, kin.length, sameKind(all, first).length);
+    const items = shuffle([first, ...distractors(first, kin, sameKind(all, first), pairs - 1, r)], r);
     const right = shuffle(items, r);
     const prompt = isNumber(first) ? "Match each group to its number." : "Match each picture to its name.";
     return { id, type, prompt: cfg.prompt || prompt, say: prompt, items, options: right, itemIds: items.map((i) => i.id) };
@@ -136,10 +162,16 @@ export function buildExercise(cfg, ctx) {
     const a2 = isNumber(a) ? a : pick(numbers, r);
     const b = pick(numbers.filter((i) => i.number !== a2.number), r);
     const ask = band === "seedling" || r() < 0.5 ? "more" : "fewer";
-    const groups = shuffle([a2, b], r);
+    const shown = shuffle([a2, b], r);
     const target = ask === "more" ? (a2.number > b.number ? a2 : b) : a2.number < b.number ? a2 : b;
     const emoji = pick(all.filter((i) => i.emoji), r)?.emoji || "⭐";
-    return { id, type, prompt: cfg.prompt || `Which has ${ask}?`, say: `Which group has ${ask}?`, target, options: groups, itemIds: [a2.id, b.id], extra: { ask, emoji } };
+    const [big, small] = a2.number > b.number ? [a2.number, b.number] : [b.number, a2.number];
+    // LES-06: after a right answer the buddy counts both groups.
+    const explain = {
+      event: ask === "more" ? "lesson.explain-compare" : "lesson.explain-compare-fewer",
+      vars: { a: shown[0].number, b: shown[1].number, big, small },
+    };
+    return { id, type, prompt: cfg.prompt || `Which has ${ask}?`, say: `Which group has ${ask}?`, target, options: shown, itemIds: [a2.id, b.id], extra: { ask, emoji }, explain };
   }
 
   if (type === "sequence") {
@@ -147,6 +179,30 @@ export function buildExercise(cfg, ctx) {
     const chosen = shuffle(numbers, r).slice(0, k).sort((x, y) => x.number - y.number);
     const say = cfg.prompt || "Put the numbers in order, starting with the smallest.";
     return { id, type, prompt: say, say, items: chosen, options: shuffle(chosen, r), itemIds: chosen.map((i) => i.id) };
+  }
+
+  if (type === "odd-one-out" && numbers.length < 2) {
+    // Categories (LES-09): 2-3 from one group and one from another; the buddy says why.
+    const target = nextOf((i) => groupOf(i, groups), grouped);
+    const base = groupOf(target, groups);
+    const sameCount = level >= 2 ? 3 : 2;
+    const inBase = all.filter((i) => groupOf(i, groups)?.id === base.id);
+    const same = [target, ...shuffle(inBase.filter((i) => i.id !== target.id), r)].slice(0, sameCount);
+    const others = all.filter((i) => { const g = groupOf(i, groups); return g && g.id !== base.id; });
+    const odd = pick(others, r);
+    const oddGroup = groupOf(odd, groups);
+    const options = shuffle([...same, odd], r);
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || "Which one is different?",
+      say: "Which one is different?",
+      target: odd,
+      options,
+      itemIds: [...same.map((i) => i.id), odd.id],
+      extra: { mode: "category", answer: odd.id },
+      explain: { event: "lesson.explain-odd", vars: { odd: words(odd), where: oddGroup.say || oddGroup.label, others: base.say || base.label } },
+    };
   }
 
   if (type === "odd-one-out") {
@@ -166,7 +222,58 @@ export function buildExercise(cfg, ctx) {
       options: [],
       itemIds: [base.id, odd.id],
       extra: { groups: shuffle([...groups, oddGroup], r), answer: "odd" },
+      explain: { event: "lesson.explain-odd-number", vars: { same: base.number, odd: odd.number } },
     };
+  }
+
+  if (type === "case-match") {
+    // LES-10: capital on the left, small letter on the right.
+    const first = nextOf(isLetter, letters);
+    const pairs = matchPairs(level, letters.length, all.filter(isLetter).length);
+    const items = shuffle([first, ...distractors(first, letters, all.filter(isLetter), pairs - 1, r)], r);
+    const prompt = "Match the big and small letters.";
+    return { id, type, prompt: cfg.prompt || prompt, say: prompt, items, options: shuffle(items, r), itemIds: items.map((i) => i.id) };
+  }
+
+  if (type === "build-word") {
+    // LES-11: the word's letters plus 0-2 spare letters by level.
+    const target = nextOf(isWord, wordItems);
+    const unitLetters = all.filter(isLetter);
+    const tileFor = (ch, i) => {
+      const it = unitLetters.find((l) => l.letter === ch);
+      return { id: `${target.id}-${i}`, letter: ch, label: ch, say: it ? words(it) : ch };
+    };
+    const slots = [...target.label.toLowerCase()].map(tileFor);
+    const spare = shuffle(unitLetters.filter((l) => !target.label.includes(l.letter)), r)
+      .slice(0, clamp(level - 1, 0, 2))
+      .map((l, i) => ({ id: `${target.id}-x${i}`, letter: l.letter, label: l.letter, say: words(l) }));
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || "Spell the word for this picture.",
+      say: `Let's spell ${words(target)}!`,
+      target,
+      items: slots,
+      options: shuffle([...slots, ...spare], r),
+      itemIds: [target.id],
+      // The word is read out when it's complete.
+      explain: { event: "lesson.word-done", vars: { word: words(target) } },
+    };
+  }
+
+  if (type === "sort") {
+    // LES-08: drop each item in the right basket; 2 baskets at level 1, up to 4 above.
+    const binCount = clamp(level + 1, 2, Math.min(4, groupIds.length));
+    const first = nextOf((i) => groupOf(i, groups), grouped);
+    const binIds = [groupOf(first, groups).id, ...shuffle(groupIds.filter((g) => g !== groupOf(first, groups).id), r)].slice(0, binCount);
+    const bins = groups.filter((g) => binIds.includes(g.id));
+    const candidates = grouped.filter((i) => binIds.includes(groupOf(i, groups).id));
+    const total = clamp(level + 3, binCount * 1 + 1, Math.min(6, candidates.length));
+    const oneEach = binIds.map((b) => (b === groupOf(first, groups).id ? first : pick(candidates.filter((i) => groupOf(i, groups).id === b), r)));
+    const rest = shuffle(candidates.filter((i) => !oneEach.includes(i)), r).slice(0, Math.max(0, total - oneEach.length));
+    const items = shuffle([...oneEach, ...rest], r).map((i) => ({ ...i, bin: groupOf(i, groups).id }));
+    const prompt = "Put each one where it belongs.";
+    return { id, type, prompt: cfg.prompt || prompt, say: prompt, bins, items, itemIds: items.map((i) => i.id) };
   }
 
   throw new Error(`Unknown exercise type: ${cfg.type}`);
@@ -198,7 +305,9 @@ export function buildLesson(unit, index, { level, band, r }) {
   const next = targetQueue(focus, review, pool, r);
   const steps = [];
   if (focus.length) steps.push(introStep(cfg.id, focus));
-  cfg.exercises.forEach((ex, i) => steps.push(buildExercise(ex, { id: `${cfg.id}-ex${i + 1}`, next, pool, all: unit.items, level, band, r })));
+  cfg.exercises.forEach((ex, i) =>
+    steps.push(buildExercise(ex, { id: `${cfg.id}-ex${i + 1}`, next, pool, all: unit.items, level, band, r, groups: unit.groups })),
+  );
   return { id: cfg.id, unitId: unit.id, subjectId: unit.subject, kind: "lesson", title: cfg.title, level, steps };
 }
 
@@ -214,7 +323,7 @@ export function buildTrophy(unit, { level, band, r, length = 6 }) {
   const pool = unit.items;
   const next = targetQueue([], [], pool, r);
   const id = `${unit.id}-trophy`;
-  const steps = Array.from({ length }, (_, i) => buildExercise({ type: order[i % order.length] }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r }));
+  const steps = Array.from({ length }, (_, i) => buildExercise({ type: order[i % order.length] }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups }));
   return { id, unitId: unit.id, subjectId: unit.subject, kind: "trophy", title: `${unit.title} trophy`, level, steps };
 }
 
@@ -235,7 +344,7 @@ export function buildReview(units, itemIds, { level, band, r, max = 5 }) {
   const next = () => queue.shift() || pick(due, r);
   const types = ["listen-tap", "count", "listen-tap", "name-it", "count"];
   const id = `${unit.subject}-review`;
-  const steps = due.map((it, i) => buildExercise({ type: isNumber(it) ? types[i % types.length] : "listen-tap" }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r }));
+  const steps = due.map((it, i) => buildExercise({ type: isNumber(it) ? types[i % types.length] : "listen-tap" }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups }));
   return { id, unitId: unit.id, subjectId: unit.subject, kind: "review", title: "Review", level, steps };
 }
 

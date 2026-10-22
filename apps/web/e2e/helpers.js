@@ -47,3 +47,7 @@ export async function passGate(page, pin) {
   await page.getByRole("button", { name: "Open" }).click();
   await expect(page.getByRole("heading", { name: "Grown-ups only" })).toHaveCount(0);
 }
+
+/** Any praise line, in any buddy's words (packages/content/src/buddy/*.json). */
+export const PRAISE =
+  /right|Correct|rilliant|Yes|got it|Great|Wise|Splendid|done|Steady|Lovely|Trumpet|step at a time/i;

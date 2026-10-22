@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,11 +9,13 @@ import Dialog from "@mui/material/Dialog";
 import Snackbar from "@mui/material/Snackbar";
 import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubject, getUnit, buddyLine } from "@trailbuddies/content";
-import { layoutTrail, pathData, subjectProgress, currentUnit } from "@trailbuddies/domain";
+import { getSubject, getUnit, buddyLine, buddySays } from "@trailbuddies/content";
+import { layoutTrail, pathData, subjectProgress, currentUnit, newlyOpened } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import { speak } from "@/lib/speech";
+import { playSound } from "@/lib/sounds";
+import { readMemory, writeMemory } from "@/lib/memory";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
@@ -79,6 +81,11 @@ export default function Trail({ subjectId }) {
   const nextRef = useRef(null);
   const [lesson, setLesson] = useState(null);
   const [toast, setToast] = useState("");
+  // The trophy a locked stone is waiting for (MAP-03): the buddy points at it.
+  const [pointAt, setPointAt] = useState(/** @type {string | null} */ (null));
+  const trophyRefs = useRef(/** @type {Record<string, HTMLElement | null>} */ ({}));
+  // Which units were open when this learner last saw the trail (read once at mount).
+  const [memory] = useState(() => (typeof window === "undefined" ? null : readMemory()));
 
   const subject = getSubject(subjectId);
   const units = useMemo(() => trailUnits(subjectId), [subjectId]);
@@ -97,6 +104,29 @@ export default function Trail({ subjectId }) {
     if (ready && nextRef.current) nextRef.current.scrollIntoView({ block: "center" });
   }, [ready]);
 
+  const memKey = learner ? `${learner.id}:${subjectId}` : "";
+  const openUnits = trail.nodes.filter((n) => n.kind === "banner" && n.state === "open").map((n) => n.unitId);
+  const fresh = learner && memory ? newlyOpened(openUnits, memory.open[memKey] ?? null) : [];
+  const freshKey = fresh.join(",");
+  const openKey = openUnits.join(",");
+  // Unlock moment: chime and the buddy's line, then remember what's open now.
+  const celebrateUnlock = useEffectEvent(() => {
+    if (freshKey) {
+      playSound("done");
+      speak(buddySays("trail.unlocked", { buddy: learner.buddy }), {
+        band: learner.band,
+        buddy: learner.buddy,
+        enabled: voice,
+      });
+    }
+    writeMemory((m) => {
+      m.open[memKey] = openKey ? openKey.split(",") : [];
+    });
+  });
+  useEffect(() => {
+    if (ready && memKey) celebrateUnlock();
+  }, [ready, memKey, freshKey]);
+
   const rest = useRest(learner);
   useSpokenPrompt(ready && learner && !rest ? buddyLine("trail.start") : "", learner?.band);
   if (!ready || !learner || !subject) return <Loading />;
@@ -108,7 +138,17 @@ export default function Trail({ subjectId }) {
 
   const open = (node) => {
     if (node.state === "planned") return say(t("trail.planned"));
-    if (node.state === "locked") return say(t("trail.locked"));
+    if (node.state === "locked") {
+      // Point at the trophy that opens this unit: the one at the end of the unit before.
+      const i = units.findIndex((u) => u.id === node.unitId);
+      const before = units[i - 1];
+      if (before) {
+        const tid = `${before.id}-trophy`;
+        setPointAt(tid);
+        trophyRefs.current[tid]?.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+      return say(buddySays("trail.locked", { buddy: learner.buddy }));
+    }
     const u = getUnit(node.unitId);
     const title =
       node.kind === "review"
@@ -125,7 +165,7 @@ export default function Trail({ subjectId }) {
   };
   const say = (msg) => {
     setToast(msg);
-    speak(msg, { enabled: voice });
+    speak(msg, { band: learner.band, buddy: learner.buddy, enabled: voice });
   };
   const goNext = () => (trail.next ? open(trail.next) : say(t("trail.allDone")));
 
@@ -181,6 +221,7 @@ export default function Trail({ subjectId }) {
                 return (
                   <Box
                     key={node.id}
+                    className={fresh.includes(node.unitId) ? "unlock-in" : undefined}
                     sx={{
                       position: "absolute",
                       ...pos,
@@ -212,10 +253,23 @@ export default function Trail({ subjectId }) {
                   key={node.id}
                   component="button"
                   type="button"
-                  ref={node.state === "next" ? nextRef : undefined}
+                  ref={(el) => {
+                    if (node.state === "next") nextRef.current = el;
+                    if (node.kind === "trophy") trophyRefs.current[node.id] = el;
+                  }}
                   onClick={() => open(node)}
+                  className={
+                    [fresh.includes(node.unitId) ? "unlock-in" : "", pointAt === node.id ? "glow" : ""].join(
+                      " ",
+                    ) || undefined
+                  }
+                  data-unit={node.unitId}
                   aria-label={`${label}${node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
-                  sx={{ ...stoneSx(node), ...pos }}
+                  sx={{
+                    ...stoneSx(node),
+                    ...pos,
+                    ...(fresh.includes(node.unitId) ? { animationDelay: `${0.15 * (node.n || 7)}s` } : {}),
+                  }}
                 >
                   {node.kind === "trophy" ? "🏆" : node.kind === "review" ? "🔁" : node.n}
                   {node.stars ? (
@@ -291,7 +345,7 @@ export default function Trail({ subjectId }) {
           </Button>
           <Box sx={{ flex: 1 }} />
           <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
-            <Buddy id={learner.buddy} outfit={learner.outfit} size={80} />
+            <Buddy id={learner.buddy} outfit={learner.outfit} size={80} mood={pointAt ? "point" : "happy"} />
             <Bubble small>{buddyLine("trail.start")}</Bubble>
           </Box>
         </Box>

@@ -1,0 +1,250 @@
+{
+  "schema": "unit/1",
+  "id": "letters-a-e",
+  "subject": "language",
+  "title": "Letters A to E",
+  "band": "sprout",
+  "status": "ready",
+  "summary": "Meet the letters A to E, big and small, and build your first words.",
+  "items": [
+    {
+      "id": "a",
+      "label": "A",
+      "say": "ay",
+      "letter": "a",
+      "emoji": "🍎",
+      "fact": "A is for apple.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "b",
+      "label": "B",
+      "say": "bee",
+      "letter": "b",
+      "emoji": "⚽",
+      "fact": "B is for ball.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "c",
+      "label": "C",
+      "say": "see",
+      "letter": "c",
+      "emoji": "🐈",
+      "fact": "C is for cat.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "d",
+      "label": "D",
+      "say": "dee",
+      "letter": "d",
+      "emoji": "🦆",
+      "fact": "D is for duck.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "e",
+      "label": "E",
+      "say": "ee",
+      "letter": "e",
+      "emoji": "🥚",
+      "fact": "E is for egg.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "bed",
+      "label": "bed",
+      "emoji": "🛏️",
+      "fact": "We sleep in a bed.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "cab",
+      "label": "cab",
+      "emoji": "🚕",
+      "fact": "A cab is a taxi.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "bee",
+      "label": "bee",
+      "emoji": "🐝",
+      "fact": "A bee makes honey.",
+      "tags": [
+        "word"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "letters-a-e-1",
+      "title": "Meet A and B",
+      "focus": [
+        "a",
+        "b"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "case-match"
+        }
+      ]
+    },
+    {
+      "id": "letters-a-e-2",
+      "title": "Meet C, D and E",
+      "focus": [
+        "c",
+        "d",
+        "e"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "case-match"
+        }
+      ]
+    },
+    {
+      "id": "letters-a-e-3",
+      "title": "Big and small",
+      "focus": [],
+      "review": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "exercises": [
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "case-match"
+        }
+      ]
+    },
+    {
+      "id": "letters-a-e-4",
+      "title": "Build a word",
+      "focus": [
+        "bed",
+        "cab"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "build-word"
+        }
+      ]
+    },
+    {
+      "id": "letters-a-e-5",
+      "title": "More words",
+      "focus": [
+        "bee"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "build-word"
+        }
+      ]
+    },
+    {
+      "id": "letters-a-e-6",
+      "title": "Letter mix",
+      "focus": [],
+      "review": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "bed",
+        "cab",
+        "bee"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "build-word"
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 6,
+    "game": "memory"
+  }
+}

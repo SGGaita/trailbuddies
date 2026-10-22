@@ -20,7 +20,7 @@
       "Your next lesson is waiting!"
     ],
     "trail.locked": [
-      "Finish the trophy to open this one!"
+      "This part opens when you win the trophy. It's right here!"
     ],
     "trail.planned": [
       "This part of the trail is coming soon!"
@@ -62,6 +62,60 @@
     ],
     "lesson.leave": [
       "Do you want to stop? Your answers so far are saved."
+    ],
+    "fallback": [
+      "Well done!",
+      "Let's keep going!"
+    ],
+    "lesson.perfect": [
+      "Every answer right first time! Wow, {name}!",
+      "Perfect! You didn't miss a single one!"
+    ],
+    "greet.today": [
+      "Hi {name}! Last time we did {last}. Shall we try {next} today?",
+      "Hello {name}! Remember {last}? Next up: {next}!"
+    ],
+    "greet.today-new": [
+      "Hi {name}! Let's start our trail together!"
+    ],
+    "greet.again": [
+      "Welcome back, {name}!",
+      "Hi again, {name}!"
+    ],
+    "trail.unlocked": [
+      "Look! A new part of the trail is open!",
+      "You did it! New stones to explore!"
+    ],
+    "lesson.explain-compare": [
+      "This group has {a}, and this one has {b}. {big} is more than {small}!",
+      "Let's count: {a} here and {b} there. {big} is more!"
+    ],
+    "lesson.explain-compare-fewer": [
+      "This group has {a}, and this one has {b}. {small} is fewer than {big}!"
+    ],
+    "lesson.explain-odd": [
+      "The {odd} lives {where}. The others live {others}.",
+      "{odd} is different: it lives {where}!"
+    ],
+    "lesson.explain-odd-number": [
+      "The others all have {same}. This one has {odd}!"
+    ],
+    "lesson.sort-wrong": [
+      "Not that basket. That's {bin}.",
+      "Hmm, that one is {bin}. Try another!"
+    ],
+    "lesson.word-done": [
+      "You made the word {word}!",
+      "{word}! You built it!"
+    ],
+    "buddies.pick": [
+      "Tap a buddy to say hello!"
+    ],
+    "buddies.confirm": [
+      "Do you want {buddy} as your buddy?"
+    ],
+    "buddies.chosen": [
+      "Yay! Let's go exploring, {name}!"
     ]
   }
 }
