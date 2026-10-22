@@ -20,7 +20,8 @@ export function unitProgress(unit, progress) {
 }
 
 /**
- * A unit is open when it has content and it's the first unit, or the one before it is finished.
+ * A unit is open when it has content and it's the first unit, or the trophy of the unit
+ * before it has been won (all lessons, then the trophy review).
  * @param {TrailUnit[]} units
  * @param {number} index
  * @param {Progress} progress
@@ -29,8 +30,7 @@ export function unitOpen(units, index, progress) {
   const u = units[index];
   if (!u || u.status === "planned") return false;
   if (index === 0) return true;
-  const prev = unitProgress(units[index - 1], progress);
-  return prev.complete || prev.lessonsDone;
+  return unitProgress(units[index - 1], progress).complete;
 }
 
 /**
@@ -70,3 +70,18 @@ export function currentUnit(units, progress) {
  * @param {Progress} progress
  */
 export const totalStars = (progress) => Object.values(progress).reduce((a, b) => a + (b > 0 ? b : 0), 0);
+
+/**
+ * Whether a learner may play a stone: any lesson in an open unit, or the trophy once
+ * every lesson in the unit is done.
+ * @param {TrailUnit[]} units
+ * @param {string} unitId
+ * @param {number | "trophy"} step 1-based lesson number or "trophy"
+ * @param {Progress} progress
+ */
+export function canPlay(units, unitId, step, progress) {
+  const i = units.findIndex((u) => u.id === unitId);
+  if (i < 0 || !unitOpen(units, i, progress)) return false;
+  if (step === "trophy") return unitProgress(units[i], progress).lessonsDone;
+  return Number.isInteger(step) && step >= 1 && step <= units[i].lessonIds.length;
+}

@@ -11,7 +11,7 @@ import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubject, getUnit } from "@trailbuddies/content";
 import { layoutTrail, pathData, subjectProgress, currentUnit } from "@trailbuddies/domain";
-import { useFamily, useHydrated } from "@/lib/store";
+import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import { speak } from "@/lib/speech";
 import LearnerShell from "@/components/shell/LearnerShell";
@@ -21,6 +21,14 @@ import Loading from "@/components/Loading";
 
 const W = 600; // virtual layout width; the trail scales to the screen
 const ITEM_PREVIEW = 8;
+
+/** Items shown on the start card: the lesson's focus items, or the whole unit for trophies. */
+function lessonItems({ node, unit }) {
+  if (node.kind !== "lesson") return unit.items.slice(0, ITEM_PREVIEW);
+  const l = unit.lessons[node.n - 1];
+  const ids = l?.focus?.length ? l.focus : l?.review || [];
+  return unit.items.filter((i) => ids.includes(i.id));
+}
 
 const stoneSx = (node) => {
   const big = node.state === "next";
@@ -62,7 +70,7 @@ const stoneSx = (node) => {
 /** C05 Subject trail. Units are stages, lessons are stones, each unit ends with a trophy. */
 export default function Trail({ subjectId }) {
   const ready = useHydrated();
-  const learner = useFamily((s) => s.learners.find((l) => l.id === s.activeId));
+  const learner = useLearner();
   const voice = useFamily((s) => s.settings.voice);
   const goal = useFamily((s) => s.settings.goal);
   const router = useRouter();
@@ -73,7 +81,11 @@ export default function Trail({ subjectId }) {
   const subject = getSubject(subjectId);
   const units = useMemo(() => trailUnits(subjectId), [subjectId]);
   const progress = learner?.progress;
-  const trail = useMemo(() => layoutTrail(units, progress || {}, { width: W }), [units, progress]);
+  const review = !!learner && learner.reviewDue(subjectId).length > 0;
+  const trail = useMemo(
+    () => layoutTrail(units, progress || {}, { width: W, review }),
+    [units, progress, review],
+  );
 
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
@@ -93,17 +105,23 @@ export default function Trail({ subjectId }) {
     if (node.state === "locked") return say(t("trail.locked"));
     const u = getUnit(node.unitId);
     const title =
-      node.kind === "trophy"
-        ? `${units.find((x) => x.id === node.unitId).title} trophy`
-        : u?.lessons[node.n - 1]?.title || `Lesson ${node.n}`;
-    setLesson({ node, title, unit: u });
+      node.kind === "review"
+        ? t("trail.review")
+        : node.kind === "trophy"
+          ? `${units.find((x) => x.id === node.unitId).title} trophy`
+          : u?.lessons[node.n - 1]?.title || `Lesson ${node.n}`;
+    const href =
+      node.kind === "review"
+        ? `/play/review/${subjectId}`
+        : `/play/lesson/${node.unitId}/${node.kind === "trophy" ? "trophy" : node.n}`;
+    setLesson({ node, title, unit: u, href });
     speak(title, { enabled: voice });
   };
   const say = (msg) => {
     setToast(msg);
     speak(msg, { enabled: voice });
   };
-  const goNext = () => (trail.next ? open(trail.next) : say("All done here!"));
+  const goNext = () => (trail.next ? open(trail.next) : say(t("trail.allDone")));
 
   return (
     <LearnerShell learner={learner} title={subject.place} back="/play/map" goal={goal} nav={false}>
@@ -177,7 +195,12 @@ export default function Trail({ subjectId }) {
                     {node.state === "planned" ? " · soon" : node.state === "locked" ? " · locked" : ""}
                   </Box>
                 );
-              const label = node.kind === "trophy" ? "Trophy" : `Lesson ${node.n}`;
+              const label =
+                node.kind === "trophy"
+                  ? "Trophy"
+                  : node.kind === "review"
+                    ? t("trail.review")
+                    : `Lesson ${node.n}`;
               return (
                 <Box
                   key={node.id}
@@ -188,7 +211,7 @@ export default function Trail({ subjectId }) {
                   aria-label={`${label}${node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
                   sx={{ ...stoneSx(node), ...pos }}
                 >
-                  {node.kind === "trophy" ? "🏆" : node.n}
+                  {node.kind === "trophy" ? "🏆" : node.kind === "review" ? "🔁" : node.n}
                   {node.stars ? (
                     <Box component="small" sx={{ fontSize: 11, color: colors.sun.deep }}>
                       {"★".repeat(node.stars)}
@@ -323,7 +346,7 @@ export default function Trail({ subjectId }) {
             </Typography>
             {lesson.unit && (
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
-                {lesson.unit.items.map((it) => (
+                {lessonItems(lesson).map((it) => (
                   <Box
                     key={it.id}
                     sx={{
@@ -342,11 +365,20 @@ export default function Trail({ subjectId }) {
               </Box>
             )}
             <Typography sx={{ color: "text.secondary" }}>
-              {t("trail.lessonSoon", { n: lesson.node.n || "trophy", title: lesson.title })}
+              {lesson.node.kind === "review"
+                ? t("trail.reviewSub")
+                : lesson.node.kind === "trophy"
+                  ? t("trail.trophySub")
+                  : t("trail.level", { level: learner.levelFor(subjectId) })}
             </Typography>
-            <Button variant="contained" onClick={() => setLesson(null)}>
-              OK
-            </Button>
+            <Box sx={{ display: "flex", gap: 1.5 }}>
+              <Button variant="outlined" sx={{ borderWidth: 2 }} onClick={() => setLesson(null)}>
+                {t("common.notNow")}
+              </Button>
+              <Button variant="contained" onClick={() => router.push(lesson.href)} autoFocus>
+                {t("trail.start")}
+              </Button>
+            </Box>
           </>
         )}
       </Dialog>

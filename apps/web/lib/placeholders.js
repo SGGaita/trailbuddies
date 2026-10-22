@@ -11,7 +11,6 @@ export const FAMILY = {
   progress: { title: "Progress", sprint: "Sprint 5", story: "PAR-02, ADP-02" },
   create: { title: "Create", sprint: "Sprint 5", story: "BLD-01..13" },
   rewards: { title: "Wishes & awards", sprint: "Phase 2 (Sprint 11)", story: "BST-04, BST-05" },
-  settings: { title: "Settings", sprint: "Sprint 5", story: "PAR-03, PAR-05" },
 };
 export const TEACH = {
   class: { title: "Class & roster", sprint: "Phase 2 (Sprint 9)", story: "CLS-02, CLS-03" },

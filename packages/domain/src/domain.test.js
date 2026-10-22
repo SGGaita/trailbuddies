@@ -45,10 +45,11 @@ describe("progress", () => {
       complete: true,
     });
   });
-  test("next unit opens after the previous unit's lessons; planned never opens", () => {
+  test("next unit opens once the previous unit's trophy is won; planned never opens", () => {
     expect(unitOpen(units, 1, {})).toBe(false);
-    expect(unitOpen(units, 1, { "a-1": 1, "a-2": 1, "a-3": 1 })).toBe(true);
-    const all = { "a-1": 1, "a-2": 1, "a-3": 1, "b-1": 1, "b-2": 1, "b-3": 1 };
+    expect(unitOpen(units, 1, { "a-1": 1, "a-2": 1, "a-3": 1 })).toBe(false);
+    expect(unitOpen(units, 1, { "a-1": 1, "a-2": 1, "a-3": 1, [trophyId("a")]: 2 })).toBe(true);
+    const all = { "a-1": 1, "a-2": 1, "a-3": 1, [trophyId("a")]: 1, "b-1": 1, "b-2": 1, "b-3": 1, [trophyId("b")]: 1 };
     expect(unitOpen(units, 2, all)).toBe(false);
   });
   test("subject progress and current unit", () => {

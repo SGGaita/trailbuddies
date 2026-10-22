@@ -3,12 +3,65 @@
   "buddy": "all",
   "lang": "en",
   "events": {
-    "greet.first": ["Hi {name}! Let's start our trail together!", "Hello {name}! I'm so happy to meet you!"],
-    "greet.back": ["Hi {name}! Welcome back!", "Hello again, {name}! Ready to explore?"],
-    "map.pick": ["Where shall we go today?", "Pick a place to explore!"],
-    "trail.start": ["Tap the big stone to start!", "Your next lesson is waiting!"],
-    "trail.locked": ["Finish the trophy to open this one!"],
-    "trail.planned": ["This part of the trail is coming soon!"],
-    "profile.pick": ["Who's playing today? Tap your picture!"]
+    "greet.first": [
+      "Hi {name}! Let's start our trail together!",
+      "Hello {name}! I'm so happy to meet you!"
+    ],
+    "greet.back": [
+      "Hi {name}! Welcome back!",
+      "Hello again, {name}! Ready to explore?"
+    ],
+    "map.pick": [
+      "Where shall we go today?",
+      "Pick a place to explore!"
+    ],
+    "trail.start": [
+      "Tap the big stone to start!",
+      "Your next lesson is waiting!"
+    ],
+    "trail.locked": [
+      "Finish the trophy to open this one!"
+    ],
+    "trail.planned": [
+      "This part of the trail is coming soon!"
+    ],
+    "profile.pick": [
+      "Who's playing today? Tap your picture!"
+    ],
+    "lesson.correct": [
+      "Yes! Well done!",
+      "That is right!",
+      "Brilliant!",
+      "You got it!",
+      "Great counting!"
+    ],
+    "lesson.repeat": [
+      "Let us listen again.",
+      "Try again. Listen carefully."
+    ],
+    "lesson.eliminate": [
+      "Good try! I took one away. Look for the glowing one.",
+      "Nearly! One is gone now. Try again."
+    ],
+    "lesson.reveal": [
+      "Here it is! Tap the glowing one.",
+      "Look, it is this one. Tap it!"
+    ],
+    "lesson.done": [
+      "You finished, {name}!",
+      "Lesson done! Super work, {name}!"
+    ],
+    "lesson.kept-going": [
+      "You kept going even when it was tricky. That is how we learn!"
+    ],
+    "lesson.goal": [
+      "You reached your goal for today!"
+    ],
+    "lesson.trophy": [
+      "You won the trophy, {name}! A new part of the trail is open!"
+    ],
+    "lesson.leave": [
+      "Do you want to stop? Your answers so far are saved."
+    ]
   }
 }

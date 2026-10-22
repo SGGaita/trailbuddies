@@ -5,7 +5,7 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { t } from "@trailbuddies/i18n";
-import { useFamily, useHydrated } from "@/lib/store";
+import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import LearnerShell from "@/components/shell/LearnerShell";
 import FamilyShell from "@/components/shell/FamilyShell";
 import TeachShell from "@/components/shell/TeachShell";
@@ -20,6 +20,8 @@ import Loading from "@/components/Loading";
 export default function Placeholder({ area, title, sprint, href, story }) {
   const ready = useHydrated();
   const s = useFamily();
+  const active = useLearner();
+  const first = useLearner(s.learners[0]?.id);
   if (!ready) return <Loading />;
   const body = (
     <Card
@@ -60,7 +62,7 @@ export default function Placeholder({ area, title, sprint, href, story }) {
         {body}
       </FamilyShell>
     );
-  const learner = s.learners.find((l) => l.id === s.activeId) || s.learners[0];
+  const learner = active || first;
   return (
     <LearnerShell learner={learner} title={title} back="/play/map" active={href} goal={s.settings.goal}>
       <Box sx={{ p: { xs: 2, sm: 4 } }}>

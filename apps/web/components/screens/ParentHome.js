@@ -10,7 +10,7 @@ import Chip from "@mui/material/Chip";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { ageFrom, bandForAge, isAdult, totalStars } from "@trailbuddies/domain";
-import { useFamily, useHydrated } from "@/lib/store";
+import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Buddy from "@/components/art/Buddy";
@@ -36,9 +36,10 @@ const ACTIONS = [
 export default function ParentHome() {
   const ready = useHydrated();
   const s = useFamily();
+  const learners = useLearners();
   if (!ready) return <Loading />;
   const goal = s.settings.goal;
-  const minutes = s.learners.reduce((n, l) => n + l.week.reduce((a, b) => a + b, 0), 0);
+  const minutes = learners.reduce((n, l) => n + l.week.reduce((a, b) => a + b, 0), 0);
   const name = (id) => s.learners.find((l) => l.id === id)?.name || "";
 
   return (
@@ -98,7 +99,7 @@ export default function ParentHome() {
           },
         }}
       >
-        {s.learners.map((l) => {
+        {learners.map((l) => {
           const age = ageFrom(l.birth);
           return (
             <Card

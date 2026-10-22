@@ -10,7 +10,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubjects } from "@trailbuddies/content";
 import { subjectProgress, currentUnit } from "@trailbuddies/domain";
-import { useFamily, useHydrated } from "@/lib/store";
+import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
@@ -34,7 +34,7 @@ function subjectsWithProgress(progress) {
 /** C04 World map: islands on tablet and web, a card list on phone. */
 export default function WorldMap() {
   const ready = useHydrated();
-  const learner = useFamily((s) => s.learners.find((l) => l.id === s.activeId));
+  const learner = useLearner();
   const goal = useFamily((s) => s.settings.goal);
   const router = useRouter();
   useEffect(() => {
