@@ -24,7 +24,8 @@ export function planLesson(where, learner, seed) {
   if (!unit) return { blocked: "/play/map" };
   const back = `/play/trail/${unit.subject}`;
   const step = where.step === "trophy" ? "trophy" : Number(where.step);
-  if (!canPlay(trailUnits(unit.subject), unit.id, step, learner.progress)) return { blocked: back };
+  if (!canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject]))
+    return { blocked: back };
   const opts = { level: learner.levelFor(unit.subject), band: learner.band, r };
   const lesson = step === "trophy" ? buildTrophy(unit, opts) : buildLesson(unit, step - 1, opts);
   return { lesson, back };

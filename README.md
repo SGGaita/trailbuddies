@@ -76,6 +76,15 @@ docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web u
 
 This starts db, redis, api, worker **and** the web app on http://localhost:3000. Files you save in `apps/web` or `packages` are copied into the container and hot-reload; a change to `package.json` or `pnpm-lock.yaml` rebuilds the image. Ctrl+C stops the stack. Stop `pnpm dev` first, or set `WEB_PORT=3001` in `infra/.env`. Production web is on Vercel; this container is for local use only.
 
+### Signing in locally
+
+- Start the stack (it includes **Mailpit**), then `pnpm dev`. Open http://localhost:3000, choose "I'm a parent or carer" and enter any email address.
+- The sign-in email lands in Mailpit at http://localhost:8025: open it and tap the link.
+- Running the API without Docker and without SMTP set? The link is printed in the API log instead.
+- "Try the demo family" loads Zawadi, Amani and Joseph on this device only (never synced).
+- Google sign-in appears once `TB_GOOGLE_CLIENT_ID` and `TB_GOOGLE_CLIENT_SECRET` are set in `infra/.env` (redirect URI `<TB_WEB_URL>/api/auth/google/callback`).
+- In production, set `TB_SMTP_HOST/PORT/USER/PASSWORD`, `TB_SMTP_STARTTLS=true`, `TB_COOKIE_SECURE=true`, `TB_WEB_URL` on the VPS, and `TB_API_URL` (the API's URL) on Vercel. See ADR 0005.
+
 ### Docker troubleshooting (Windows)
 
 - **`pip install` fails with "from versions: none"** while CI passes: the containers can't reach PyPI reliably. Add `"dns": ["8.8.8.8", "1.1.1.1"]` in Docker Desktop → Settings → Docker Engine, Apply & restart. The Dockerfile already gives pip a 120 s timeout and 10 retries for slow links; a build can take several minutes.

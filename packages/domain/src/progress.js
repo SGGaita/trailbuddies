@@ -25,11 +25,14 @@ export function unitProgress(unit, progress) {
  * @param {TrailUnit[]} units
  * @param {number} index
  * @param {Progress} progress
+ * @param {string | null} [start] starting unit from placement
  */
-export function unitOpen(units, index, progress) {
+export function unitOpen(units, index, progress, start) {
   const u = units[index];
   if (!u || u.status === "planned") return false;
   if (index === 0) return true;
+  // Placement (or a grown-up's shortcut) opens every unit up to the starting one.
+  if (start && index <= units.findIndex((x) => x.id === start)) return true;
   return unitProgress(units[index - 1], progress).complete;
 }
 
@@ -55,10 +58,11 @@ export function subjectProgress(units, progress) {
  * @param {TrailUnit[]} units
  * @param {Progress} progress
  */
-export function currentUnit(units, progress) {
+export function currentUnit(units, progress, start) {
   let last = null;
-  for (let i = 0; i < units.length; i++) {
-    if (!unitOpen(units, i, progress)) continue;
+  const from = start ? Math.max(0, units.findIndex((x) => x.id === start)) : 0;
+  for (let i = from; i < units.length; i++) {
+    if (!unitOpen(units, i, progress, start)) continue;
     last = units[i];
     if (!unitProgress(units[i], progress).complete) return units[i];
   }
@@ -78,10 +82,11 @@ export const totalStars = (progress) => Object.values(progress).reduce((a, b) =>
  * @param {string} unitId
  * @param {number | "trophy"} step 1-based lesson number or "trophy"
  * @param {Progress} progress
+ * @param {string | null} [start] starting unit from placement
  */
-export function canPlay(units, unitId, step, progress) {
+export function canPlay(units, unitId, step, progress, start) {
   const i = units.findIndex((u) => u.id === unitId);
-  if (i < 0 || !unitOpen(units, i, progress)) return false;
+  if (i < 0 || !unitOpen(units, i, progress, start)) return false;
   if (step === "trophy") return unitProgress(units[i], progress).lessonsDone;
   return Number.isInteger(step) && step >= 1 && step <= units[i].lessonIds.length;
 }

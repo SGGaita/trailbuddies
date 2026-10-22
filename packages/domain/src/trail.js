@@ -30,15 +30,17 @@ const COLUMNS = [0.28, 0.55, 0.78, 0.55]; // zig-zag positions as fractions of w
  * @returns {{ width: number, height: number, nodes: TrailNode[], path: Array<[number, number]>, next: TrailNode | null }}
  */
 export function layoutTrail(units, progress, opts = {}) {
-  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120, review = false } = opts;
+  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120, review = false, start = null } = opts;
   const nodes = [];
   const path = [];
   let y = top;
   let next = null;
   let col = 0;
+  // With a placement start, "next" is in the starting unit or later.
+  const startIndex = start ? Math.max(0, units.findIndex((u) => u.id === start)) : 0;
 
   units.forEach((u, ui) => {
-    const open = unitOpen(units, ui, progress);
+    const open = unitOpen(units, ui, progress, start);
     const planned = u.status === "planned";
     const p = unitProgress(u, progress);
     nodes.push({
@@ -58,7 +60,7 @@ export function layoutTrail(units, progress, opts = {}) {
       /** @type {NodeState} */
       let state = planned ? "planned" : !open ? "locked" : stars > 0 ? "done" : "open";
       const node = { kind: /** @type {const} */ ("lesson"), id, unitId: u.id, n: li + 1, x, y, state, stars };
-      if (state === "open" && !next) {
+      if (state === "open" && !next && ui >= startIndex) {
         node.state = "next";
         next = node;
       }
@@ -88,7 +90,7 @@ export function layoutTrail(units, progress, opts = {}) {
       state: tState,
       stars: tStars,
     };
-    if (tState === "open" && !next) {
+    if (tState === "open" && !next && ui >= startIndex) {
       trophy.state = "next";
       next = trophy;
     }

@@ -17,6 +17,7 @@ import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
+import RestScreen, { useRest } from "@/components/RestScreen";
 import { EXERCISES } from "./Exercises";
 import LessonComplete from "./LessonComplete";
 import LessonProgress from "./LessonProgress";
@@ -56,6 +57,9 @@ function Player({ where, learner }) {
   const goal = useFamily((s) => s.settings.goal);
   const record = useFamily((s) => s.record);
   const router = useRouter();
+  // Checked when the lesson opens only, so finishing a lesson always shows its stars.
+  const restNow = useRest(learner);
+  const [rest] = useState(restNow);
 
   const [plan] = useState(() => {
     const p = planLesson(where, learner, Date.now());
@@ -170,6 +174,7 @@ function Player({ where, learner }) {
     router.push(plan.back || "/play/map");
   };
 
+  if (rest) return <RestScreen reason={rest} learner={learner} />;
   if (plan.blocked) return <Loading />;
   if (outcome)
     return (
@@ -191,7 +196,10 @@ function Player({ where, learner }) {
           alignItems: "center",
           gap: { xs: 1.25, sm: 2 },
           px: { xs: 1.5, sm: 3.75 },
-          pt: { xs: "calc(env(safe-area-inset-top, 0px) + 10px)", sm: "calc(env(safe-area-inset-top, 0px) + 18px)" },
+          pt: {
+            xs: "calc(env(safe-area-inset-top, 0px) + 10px)",
+            sm: "calc(env(safe-area-inset-top, 0px) + 18px)",
+          },
           pb: { xs: 1.25, sm: 1.75 },
         }}
       >

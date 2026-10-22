@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { demo, passGate } from "./helpers.js";
 
 // Sprint 1: whole lessons played end to end at phone, tablet and desktop.
 // `tb_e2e` makes exercises mark answers with data attributes (never set in normal use).
@@ -32,7 +33,8 @@ test.afterEach(async ({ page }) => {
 });
 
 /** Pick a learner on the profile screen. */
-async function as(page, name) {
+async function as(page, name, { fresh = true } = {}) {
+  if (fresh) await demo(page);
   await page.goto("/play");
   await page.getByRole("button", { name: new RegExp(name) }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
@@ -157,10 +159,20 @@ test("keyboard: number keys answer; stopping keeps the answers given", async ({ 
   await expect(page.getByRole("heading", { name: "Do you want to stop?" })).toBeVisible();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
   await expect(page).toHaveURL(/\/play\/trail\/numbers$/);
-  const answered = await page.evaluate(() => {
-    const s = JSON.parse(localStorage.getItem("trailbuddies-family-v2")).state;
-    return s.events.filter((e) => e.type === "item_answered" && e.data.lessonId === "counting-1-5-1").length;
-  });
+  const answered = await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const req = indexedDB.open("trailbuddies-demo");
+        req.onsuccess = () => {
+          const all = req.result.transaction("events").objectStore("events").getAll();
+          all.onsuccess = () =>
+            resolve(
+              all.result.filter((e) => e.type === "item_answered" && e.data.lessonId === "counting-1-5-1")
+                .length,
+            );
+        };
+      }),
+  );
   expect(answered).toBe(1); // the answer just given was saved, though the lesson was left
 });
 
@@ -201,13 +213,15 @@ test("locked lessons send you back to the trail", async ({ page }) => {
 });
 
 test("a grown-up fixes the difficulty and lessons show more choices", async ({ page }, testInfo) => {
+  await demo(page);
   await page.goto("/family/settings");
+  await passGate(page);
   await expect(page.getByRole("heading", { name: "Difficulty" })).toBeVisible();
   await page.getByRole("group", { name: "Difficulty for Zawadi" }).getByRole("button", { name: "3" }).click();
   await expect(page.getByText(/Numbers: Now: Level 3/).first()).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "s1-settings");
-  await as(page, "Zawadi");
+  await as(page, "Zawadi", { fresh: false });
   await page.goto("/play/lesson/counting-1-5/1");
   await page.getByRole("button", { name: "Let's play!" }).click();
   // Lesson 1 asks with 2 choices at level 2; level 3 adds one (all 3 items it has met).

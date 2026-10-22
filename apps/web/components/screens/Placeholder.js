@@ -1,5 +1,7 @@
 "use client";
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
@@ -22,7 +24,12 @@ export default function Placeholder({ area, title, sprint, href, story }) {
   const s = useFamily();
   const active = useLearner();
   const first = useLearner(s.learners[0]?.id);
-  if (!ready) return <Loading />;
+  const router = useRouter();
+  const noLearner = ready && area === "play" && !(active || first);
+  useEffect(() => {
+    if (noLearner) router.replace("/play");
+  }, [noLearner, router]);
+  if (!ready || noLearner) return <Loading />;
   const body = (
     <Card
       sx={{

@@ -1,4 +1,4 @@
-"""FastAPI app. Sprint 0: health and version. Auth, families and sync arrive in Sprint 2."""
+"""FastAPI app: health, grown-up sign-in, families and learners, consent and progress sync."""
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from . import __version__
 from .db import get_session
+from .routes import auth, families, sync
 from .settings import get_settings
 
 
@@ -21,8 +22,11 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Content-Type"],
+        allow_credentials=True,
     )
+    for r in (auth.router, families.router, sync.router):
+        app.include_router(r)
 
     @app.get("/health")
     def health(session: Session = Depends(get_session)) -> dict:

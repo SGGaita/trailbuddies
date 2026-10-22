@@ -130,3 +130,5 @@ export function activity(results, now = new Date()) {
   const todays = results.filter((r) => r.at >= today);
   return { lessonsToday: todays.length, minutesToday: Math.round(todays.reduce((n, r) => n + r.durationSec, 0) / 60), week };
 }
+
+export { createSyncer, newer } from "./client.js";

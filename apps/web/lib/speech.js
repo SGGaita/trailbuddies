@@ -1,6 +1,8 @@
 // Speech service. Recorded clips (buddy lines, content words, a parent's own voice)
 // play when one exists; otherwise the device voice says the text. Ported from Martha's
 // Learning Corner. Clips arrive with the voice packs (Sprint 6) and parent recordings (Sprint 5).
+import { useFamily } from "./store";
+
 let voice = null;
 let token = 0;
 let audio = null;
@@ -20,6 +22,9 @@ if (canSpeak()) {
   pickVoice();
   speechSynthesis.onvoiceschanged = pickVoice;
 }
+
+/** The family's voice-speed setting (slow 0.8, normal 1, fast 1.15). */
+const voiceScale = () => useFamily.getState().settings?.voice_rate || 1;
 
 /** Speaking rate per band: slower for the youngest learners. */
 export const RATE = { seedling: 0.8, sprout: 0.85, explorer: 0.95, voyager: 1, trailblazer: 1 };
@@ -70,7 +75,7 @@ export function speak(text, { rate, band, clip, done, enabled = true } = {}) {
     try {
       const u = new SpeechSynthesisUtterance(text);
       if (voice) u.voice = voice;
-      u.rate = rate ?? RATE[band] ?? 0.9;
+      u.rate = Math.min(2, (rate ?? RATE[band] ?? 0.9) * voiceScale());
       u.pitch = 1.1;
       u.onend = finish;
       u.onerror = finish;
