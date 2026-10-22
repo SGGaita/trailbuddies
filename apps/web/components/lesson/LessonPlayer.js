@@ -218,11 +218,11 @@ function Player({ where, learner }) {
           flexDirection: "column",
           alignItems: "center",
           gap: { xs: 2, sm: 3 },
-          px: { xs: 2, sm: 4 },
+          // Same side padding as the header, full width, so the buddy row lines up
+          // under the close button (prototype: padding 18px 30px, left-aligned).
+          px: { xs: 1.5, sm: 3.75 },
           pb: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
-          maxWidth: 1100,
           width: "100%",
-          mx: "auto",
         }}
       >
         <Box
