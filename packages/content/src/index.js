@@ -5,12 +5,14 @@
  */
 import catalogue from "./catalogue.json" with { type: "json" };
 import countingOneToFive from "./units/numbers/counting-1-5.json" with { type: "json" };
+import countingSixToTen from "./units/numbers/counting-6-10.json" with { type: "json" };
 import buddyEn from "./buddy/en.json" with { type: "json" };
 import builtInBadges from "./badges/built-in.json" with { type: "json" };
 
 /** Units with full content, by id. */
 export const UNITS = {
   [countingOneToFive.id]: countingOneToFive,
+  [countingSixToTen.id]: countingSixToTen,
 };
 
 export { catalogue, builtInBadges };
@@ -20,6 +22,9 @@ export const getSubjects = () => catalogue.subjects;
 
 /** @param {string} id */
 export const getSubject = (id) => catalogue.subjects.find((s) => s.id === id) || null;
+
+/** Units with full content for a subject, in trail order. @param {string} subjectId */
+export const getReadyUnits = (subjectId) => (getSubject(subjectId)?.units || []).map((u) => UNITS[u.id]).filter(Boolean);
 
 /**
  * Full unit content, or null if the unit is only planned.

@@ -18,7 +18,7 @@
           "id": "counting-6-10",
           "title": "Counting 6 to 10",
           "band": "seedling",
-          "status": "planned",
+          "status": "ready",
           "lessons": 6
         },
         {
@@ -121,7 +121,13 @@
           "status": "planned",
           "lessons": 6
         },
-        { "id": "wild-animals", "title": "Wild animals", "band": "sprout", "status": "planned", "lessons": 6 }
+        {
+          "id": "wild-animals",
+          "title": "Wild animals",
+          "band": "sprout",
+          "status": "planned",
+          "lessons": 6
+        }
       ]
     },
     {

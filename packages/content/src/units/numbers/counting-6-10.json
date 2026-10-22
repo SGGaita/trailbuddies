@@ -1,0 +1,137 @@
+{
+  "schema": "unit/1",
+  "id": "counting-6-10",
+  "subject": "numbers",
+  "title": "Counting 6 to 10",
+  "band": "seedling",
+  "status": "ready",
+  "summary": "Count on from 5 to 10; recognise 6 to 10; compare and order groups up to 10.",
+  "requires": ["counting-1-5"],
+  "items": [
+    {
+      "id": "six",
+      "label": "6",
+      "say": "six",
+      "number": 6,
+      "emoji": "🍊",
+      "fact": "A ladybird has six legs."
+    },
+    {
+      "id": "seven",
+      "label": "7",
+      "say": "seven",
+      "number": 7,
+      "emoji": "🌈",
+      "fact": "A rainbow has seven colours."
+    },
+    {
+      "id": "eight",
+      "label": "8",
+      "say": "eight",
+      "number": 8,
+      "emoji": "🐙",
+      "fact": "An octopus has eight arms."
+    },
+    {
+      "id": "nine",
+      "label": "9",
+      "say": "nine",
+      "number": 9,
+      "emoji": "🍌",
+      "fact": "Nine is one less than ten."
+    },
+    {
+      "id": "ten",
+      "label": "10",
+      "say": "ten",
+      "number": 10,
+      "emoji": "🖐️",
+      "fact": "Two hands have ten fingers. Wiggle them!"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "counting-6-10-1",
+      "title": "Meet 6 and 7",
+      "focus": ["six", "seven"],
+      "exercises": [
+        { "type": "listen-tap", "choices": 2 },
+        { "type": "count" },
+        { "type": "match" },
+        { "type": "count" },
+        { "type": "name-it", "choices": 2 }
+      ]
+    },
+    {
+      "id": "counting-6-10-2",
+      "title": "Meet 8",
+      "focus": ["eight"],
+      "review": ["six", "seven"],
+      "exercises": [
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "count" },
+        { "type": "compare" },
+        { "type": "count" },
+        { "type": "match" }
+      ]
+    },
+    {
+      "id": "counting-6-10-3",
+      "title": "Meet 9 and 10",
+      "focus": ["nine", "ten"],
+      "review": ["eight"],
+      "exercises": [
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 3 },
+        { "type": "match" },
+        { "type": "count" }
+      ]
+    },
+    {
+      "id": "counting-6-10-4",
+      "title": "How many? 6 to 10",
+      "focus": [],
+      "review": ["six", "seven", "eight", "nine", "ten"],
+      "exercises": [
+        { "type": "count" },
+        { "type": "name-it", "choices": 3 },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 4 },
+        { "type": "count" }
+      ]
+    },
+    {
+      "id": "counting-6-10-5",
+      "title": "More or fewer",
+      "focus": [],
+      "review": ["six", "seven", "eight", "nine", "ten"],
+      "exercises": [
+        { "type": "compare" },
+        { "type": "compare" },
+        { "type": "odd-one-out", "choices": 3 },
+        { "type": "count" },
+        { "type": "compare" }
+      ]
+    },
+    {
+      "id": "counting-6-10-6",
+      "title": "6 to 10 in order",
+      "focus": [],
+      "review": ["six", "seven", "eight", "nine", "ten"],
+      "exercises": [
+        { "type": "sequence", "prompt": "Put the numbers in order, starting with the smallest." },
+        { "type": "count" },
+        { "type": "listen-tap", "choices": 4 },
+        { "type": "sequence" },
+        { "type": "match" }
+      ]
+    }
+  ],
+  "checkpoint": { "review": 6, "game": "jigsaw" },
+  "buddy": {
+    "intro": ["Bigger numbers now! Let's count past five.", "Can you count all the way to ten?"],
+    "praise": ["Ten out of ten counting!", "You're a counting star!"],
+    "hint": ["Count slowly, one at a time.", "Start at one and keep going."]
+  }
+}

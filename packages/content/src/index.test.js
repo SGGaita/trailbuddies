@@ -1,4 +1,4 @@
-import { getSubjects, getSubject, getUnit, lessonIds, buddyLine, catalogue } from "./index.js";
+import { getSubjects, getSubject, getUnit, getReadyUnits, lessonIds, buddyLine, catalogue } from "./index.js";
 
 test("catalogue lists the five MVP subjects", () => {
   expect(getSubjects().map((s) => s.id)).toEqual(["numbers", "language", "animals", "colours", "shapes"]);
@@ -7,7 +7,10 @@ test("catalogue lists the five MVP subjects", () => {
 
 test("ready units have content; planned units don't", () => {
   expect(getUnit("counting-1-5").items).toHaveLength(5);
+  expect(getUnit("counting-6-10").items.map((i) => i.number)).toEqual([6, 7, 8, 9, 10]);
   expect(getUnit("farm-animals")).toBeNull();
+  expect(getReadyUnits("numbers").map((u) => u.id)).toEqual(["counting-1-5", "counting-6-10"]);
+  expect(getReadyUnits("animals")).toEqual([]);
 });
 
 test("lesson ids come from content or the catalogue count", () => {

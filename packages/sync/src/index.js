@@ -79,7 +79,10 @@ export function mergeEvents(...lists) {
 
 /**
  * Derived state for one learner from their events.
- * Stars keep the best result per lesson; the wallet is the sum of earn/spend.
+ * - progress: best stars per lesson id (trophies use "<unit>-trophy")
+ * - treasures: earned minus spent, never below zero
+ * - answers: every item answer (for mastery and spaced review)
+ * - results: every completed lesson in order (for difficulty, daily goal and minutes)
  * @param {ProgressEvent[]} events
  * @param {string} learnerId
  */
@@ -88,15 +91,42 @@ export function deriveState(events, learnerId) {
   const progress = {};
   let treasures = 0;
   const badges = new Set();
-  for (const e of events) {
+  /** @type {Array<{ itemId: string, firstTry: boolean, at: number }>} */
+  const answers = [];
+  /** @type {Array<{ lessonId: string, unitId?: string, subjectId?: string, kind: string, stars: number, at: number, durationSec: number }>} */
+  const results = [];
+  const ordered = [...events].sort((a, b) => (a.id < b.id ? -1 : 1));
+  for (const e of ordered) {
     if (e.learnerId !== learnerId) continue;
     const d = /** @type {any} */ (e.data);
-    if (e.type === "lesson_completed")
-      progress[d.lessonId] = Math.max(progress[d.lessonId] || 0, d.stars || 0);
+    const at = Date.parse(e.at);
+    if (e.type === "lesson_completed") {
+      // Reviews are practice: they count for the day and for mastery, not for trail stars.
+      if (d.kind !== "review") progress[d.lessonId] = Math.max(progress[d.lessonId] || 0, d.stars || 0);
+      results.push({ lessonId: d.lessonId, unitId: d.unitId, subjectId: d.subjectId, kind: d.kind || "lesson", stars: d.stars || 0, at, durationSec: d.durationSec || 0 });
+    } else if (e.type === "item_answered") answers.push({ itemId: d.itemId, firstTry: !!d.firstTry, at });
     else if (e.type === "treasure_earned") treasures += d.amount || 0;
     else if (e.type === "treasure_spent") treasures -= d.amount || 0;
     else if (e.type === "badge_awarded") badges.add(d.badgeId);
   }
   const stars = Object.values(progress).reduce((a, b) => a + b, 0);
-  return { progress, stars, treasures: Math.max(0, treasures), badges: [...badges] };
+  return { progress, stars, treasures: Math.max(0, treasures), badges: [...badges], answers, results };
+}
+
+/**
+ * Lessons and minutes for a calendar day, and minutes for each of the last 7 days (oldest first).
+ * @param {Array<{ at: number, durationSec: number }>} results
+ * @param {Date} now
+ */
+export function activity(results, now = new Date()) {
+  const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const today = dayStart(now);
+  const DAY = 86400000;
+  const week = Array.from({ length: 7 }, (_, i) => {
+    const from = today - (6 - i) * DAY;
+    const mins = results.filter((r) => r.at >= from && r.at < from + DAY).reduce((n, r) => n + r.durationSec, 0) / 60;
+    return Math.round(mins);
+  });
+  const todays = results.filter((r) => r.at >= today);
+  return { lessonsToday: todays.length, minutesToday: Math.round(todays.reduce((n, r) => n + r.durationSec, 0) / 60), week };
 }

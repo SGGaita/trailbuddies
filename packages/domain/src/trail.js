@@ -9,7 +9,7 @@ import { unitOpen, unitProgress, trophyId } from "./progress.js";
 /** @typedef {"done" | "next" | "open" | "locked" | "planned"} NodeState */
 /**
  * @typedef {object} TrailNode
- * @property {"banner" | "lesson" | "trophy"} kind
+ * @property {"banner" | "lesson" | "trophy" | "review"} kind
  * @property {string} id
  * @property {string} unitId
  * @property {number} x
@@ -25,11 +25,12 @@ const COLUMNS = [0.28, 0.55, 0.78, 0.55]; // zig-zag positions as fractions of w
 /**
  * @param {TrailUnit[]} units in trail order
  * @param {Record<string, number>} progress
- * @param {{ width?: number, top?: number, bannerGap?: number, stoneGap?: number, trophyGap?: number }} [opts]
+ * @param {{ width?: number, top?: number, bannerGap?: number, stoneGap?: number, trophyGap?: number, review?: boolean }} [opts]
+ *   review: add a review stone (items due for practice) just before the next stone
  * @returns {{ width: number, height: number, nodes: TrailNode[], path: Array<[number, number]>, next: TrailNode | null }}
  */
 export function layoutTrail(units, progress, opts = {}) {
-  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120 } = opts;
+  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120, review = false } = opts;
   const nodes = [];
   const path = [];
   let y = top;
@@ -96,6 +97,19 @@ export function layoutTrail(units, progress, opts = {}) {
     y += trophyGap;
   });
 
+  if (review && next) {
+    // Slot a review stone in before the next stone, shifting everything below it down.
+    const at = nodes.indexOf(next);
+    const shift = stoneGap;
+    for (let i = at; i < nodes.length; i++) nodes[i] = { ...nodes[i], y: nodes[i].y + shift };
+    const reviewNode = { kind: /** @type {const} */ ("review"), id: "review", unitId: next.unitId, x: Math.round(width * 0.3), y: next.y, state: /** @type {NodeState} */ ("open") };
+    nodes.splice(at, 0, reviewNode);
+    const pi = path.findIndex(([px, py]) => px === next.x && py === next.y);
+    for (let i = pi; i < path.length; i++) path[i] = [path[i][0], path[i][1] + shift];
+    path.splice(pi, 0, [reviewNode.x, reviewNode.y]);
+    next = nodes[at + 1];
+    y += shift;
+  }
   return { width, height: y, nodes, path, next };
 }
 

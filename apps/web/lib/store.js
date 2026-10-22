@@ -1,8 +1,9 @@
 "use client";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { seedFamily } from "./seed";
+import { learnerView } from "./learner";
 
 const safeStorage = createJSONStorage(() => {
   try {
@@ -21,8 +22,9 @@ const safeStorage = createJSONStorage(() => {
 });
 
 /**
- * Local-first family store (Sprint 0). Sprint 2 swaps the seed for the API and
- * moves progress to the sync event log; screens keep reading the same shape.
+ * Local-first family store. Profiles and settings, plus an append-only event log
+ * (ADR 0002). Everything a learner has done is derived from `events`; Sprint 2 adds
+ * the outbox upload and replaces the seed with the API.
  */
 export const useFamily = create(
   persist(
@@ -31,10 +33,15 @@ export const useFamily = create(
       /** @param {string} id */
       setActive: (id) => set({ activeId: id }),
       toggleVoice: () => set((s) => ({ settings: { ...s.settings, voice: !s.settings.voice } })),
+      /** @param {string} learnerId @param {"auto" | "1" | "2" | "3"} difficulty */
+      setDifficulty: (learnerId, difficulty) =>
+        set((s) => ({ learners: s.learners.map((l) => (l.id === learnerId ? { ...l, difficulty } : l)) })),
+      /** Append events (already built with createEvent). */
+      record: (events) => set((s) => ({ events: [...s.events, ...events] })),
       reset: () => set(seedFamily()),
       active: () => get().learners.find((l) => l.id === get().activeId) || null,
     }),
-    { name: "trailbuddies-family-v1", storage: safeStorage, version: 1 },
+    { name: "trailbuddies-family-v2", storage: safeStorage, version: 2 },
   ),
 );
 
@@ -47,4 +54,22 @@ export function useHydrated() {
     return useFamily.persist.onFinishHydration(done);
   }, []);
   return ok;
+}
+
+/**
+ * A learner's profile plus everything derived from the event log.
+ * @param {string | null | undefined} id defaults to the active learner
+ */
+export function useLearner(id) {
+  const learnerId = useFamily((s) => id ?? s.activeId);
+  const learner = useFamily((s) => s.learners.find((l) => l.id === learnerId));
+  const events = useFamily((s) => s.events);
+  return useMemo(() => (learner ? learnerView(learner, events) : null), [learner, events]);
+}
+
+/** Every learner with derived state (parent dashboard). */
+export function useLearners() {
+  const learners = useFamily((s) => s.learners);
+  const events = useFamily((s) => s.events);
+  return useMemo(() => learners.map((l) => learnerView(l, events)), [learners, events]);
 }

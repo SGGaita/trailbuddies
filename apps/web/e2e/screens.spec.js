@@ -52,7 +52,7 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await next.click();
   await expect(page.getByRole("dialog").getByRole("heading", { name: "Meet 4 and 5" })).toBeVisible();
   await shot(page, testInfo, "4-lesson-dialog");
-  await page.getByRole("button", { name: "OK" }).click();
+  await page.getByRole("button", { name: "Not now" }).click();
 
   await page
     .getByRole("button", { name: /coming soon/ })
@@ -82,6 +82,7 @@ test("parent home", async ({ page }, testInfo) => {
   await shot(page, testInfo, "5-family");
   await page.getByRole("link", { name: "Settings" }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/family\/settings$/);
+  await expect(page.getByRole("heading", { name: "Difficulty" })).toBeVisible();
 });
 
 test("teacher and placeholder screens", async ({ page }, testInfo) => {
