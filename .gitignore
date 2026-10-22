@@ -19,3 +19,6 @@ test-results/
 apps/web/e2e/screenshots/
 .venv/
 *.db
+
+# Local troubleshooting scripts and logs (never commit)
+_netdiag/
