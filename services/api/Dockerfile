@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+# Patient pip: on slow links PyPI index pages can stall past pip's default 15 s,
+# which surfaces as a misleading "from versions: none".
+ENV PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

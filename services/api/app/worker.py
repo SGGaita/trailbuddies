@@ -18,3 +18,6 @@ class WorkerSettings:
     functions = [heartbeat]
     cron_jobs = [cron(heartbeat, minute={0, 30})]
     redis_settings = RedisSettings.from_dsn(get_settings().redis_url)
+    # Refresh the Redis health key often so `arq --check` (the compose healthcheck)
+    # recovers within 30 s of a Redis restart instead of arq's default hour.
+    health_check_interval = 30

@@ -54,7 +54,7 @@ pnpm --filter @trailbuddies/web exec playwright install chromium   # once
 pnpm --filter @trailbuddies/web e2e                                # screenshots in apps/web/e2e/screenshots
 
 # API, database, Redis and worker in Docker
-copy infra\.env.example infra\.env           # then set POSTGRES_PASSWORD
+copy infra\.env.example infra\.env           # then set POSTGRES_PASSWORD (letters and digits only)
 docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build db redis api worker
 curl http://localhost:8000/health              # {"status":"ok",...}
 
@@ -65,6 +65,12 @@ py -3.12 -m venv .venv
 pip install -r requirements-dev.txt
 pytest
 ```
+
+### Docker troubleshooting (Windows)
+
+- **`pip install` fails with "from versions: none"** while CI passes: the containers can't reach PyPI reliably. Add `"dns": ["8.8.8.8", "1.1.1.1"]` in Docker Desktop → Settings → Docker Engine, Apply & restart. The Dockerfile already gives pip a 120 s timeout and 10 retries for slow links; a build can take several minutes.
+- **`ports are not available ... 127.0.0.1:5432`**: PostgreSQL is installed on this PC (`netstat -ano | findstr :5432`). Set `POSTGRES_HOST_PORT=5433` in `infra/.env`. Host tools (psql, Alembic run outside Docker) then use port 5433; `localhost:5432` is your native PostgreSQL.
+- **API unhealthy, logs say "Name or service not known"**: `POSTGRES_PASSWORD` contains `@`, `:`, `/`, `#`, `?` or `%`. Use letters and digits only. If the db volume already exists, change it in place too: `docker exec trailbuddies-db-1 psql -U trailbuddies -d trailbuddies -c "ALTER USER trailbuddies PASSWORD 'new-one';"`
 
 ## Quick start: the prototype
 
