@@ -66,6 +66,16 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+### Web app in Docker (optional)
+
+`pnpm dev` is the fastest way to work on the web app. If you'd rather start everything with one command:
+
+```powershell
+docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web up --build --watch
+```
+
+This starts db, redis, api, worker **and** the web app on http://localhost:3000. Files you save in `apps/web` or `packages` are copied into the container and hot-reload; a change to `package.json` or `pnpm-lock.yaml` rebuilds the image. Ctrl+C stops the stack. Stop `pnpm dev` first, or set `WEB_PORT=3001` in `infra/.env`. Production web is on Vercel; this container is for local use only.
+
 ### Docker troubleshooting (Windows)
 
 - **`pip install` fails with "from versions: none"** while CI passes: the containers can't reach PyPI reliably. Add `"dns": ["8.8.8.8", "1.1.1.1"]` in Docker Desktop → Settings → Docker Engine, Apply & restart. The Dockerfile already gives pip a 120 s timeout and 10 retries for slow links; a build can take several minutes.

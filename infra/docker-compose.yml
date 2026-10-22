@@ -1,5 +1,6 @@
 # Local stack (Docker Desktop) and, with the "prod" profile, the VPS.
 #   Local:  docker compose -f infra/docker-compose.yml --env-file infra/.env up -d db redis api worker
+#   + web:  docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web up --watch
 #   VPS:    docker compose -f infra/docker-compose.yml --env-file infra/.env --profile prod up -d
 name: trailbuddies
 
@@ -72,6 +73,35 @@ services:
       TB_REDIS_URL: redis://redis:6379/0
     depends_on:
       api: { condition: service_healthy }
+    restart: unless-stopped
+
+  # Web app with live reload, for local use only (production web is on Vercel).
+  #   docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web up --watch
+  # Don't run `pnpm dev` at the same time unless you change WEB_PORT.
+  web:
+    profiles: ["web"]
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile.dev
+    image: trailbuddies-web:dev
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    develop:
+      watch:
+        # Saved files are copied into the container; Next.js hot-reloads them.
+        - action: sync
+          path: ../apps/web
+          target: /repo/apps/web
+          ignore: ["**/node_modules/", ".next/", "e2e/screenshots/", "test-results/"]
+        - action: sync
+          path: ../packages
+          target: /repo/packages
+          ignore: ["**/node_modules/"]
+        # New or changed dependencies: rebuild the image.
+        - action: rebuild
+          path: ../pnpm-lock.yaml
+        - action: rebuild
+          path: ../apps/web/package.json
     restart: unless-stopped
 
   caddy:
