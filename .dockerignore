@@ -1,0 +1,17 @@
+# Build context for apps/web/Dockerfile.dev (repo root). Keep it small: never send the
+# Windows node_modules (wrong native binaries) or build output into the image.
+**/node_modules
+**/.next
+**/.turbo
+.git
+apps/web/e2e/screenshots
+apps/web/test-results
+apps/web/playwright-report
+prototype
+design
+docs
+services
+infra
+tools
+**/.env
+**/.env.*
