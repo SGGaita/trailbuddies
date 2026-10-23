@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { hashPin } from "@trailbuddies/domain";
 import { newServer, fakeApi, seedServer } from "./fakeApi.js";
 import { shot, noSideScroll, watchErrors, demo, passGate } from "./helpers.js";
+import { PRAISE } from "./helpers.js";
 
 // Sprint 2: sign-up, onboarding (all 7 steps), the parent gate, and sync across devices.
 // Network status lines ("Failed to load resource") are expected when a test goes offline.
@@ -177,16 +178,20 @@ test("a second device signs in and gets the family and its progress", async ({ p
   await page.getByRole("button", { name: "Stop the lesson" }).waitFor();
   await page.locator('[data-answer="yes"], [data-side="l"], [data-order]').first().waitFor();
   const before = srv.events.length;
-  // Answer whatever the first step is, so there is something to save.
+  // Finish whatever the first step is, so there is an answer to save.
   const tile = page.locator('[data-answer="yes"]');
   const left = page.locator('[data-side="l"]');
   if (await tile.isVisible()) await tile.click();
   else if (await left.first().isVisible()) {
-    const id = await left.first().getAttribute("data-pair");
-    await left.first().click();
-    await page.locator(`[data-side="r"][data-pair="${id}"]`).click();
-  } else await page.locator('[data-order="0"]').click();
-  await page.waitForTimeout(300);
+    for (const id of await left.evaluateAll((els) => els.map((e) => e.getAttribute("data-pair")))) {
+      await page.locator(`[data-side="l"][data-pair="${id}"]`).click();
+      await page.locator(`[data-side="r"][data-pair="${id}"]`).click();
+    }
+  } else {
+    const n = await page.locator("[data-order]").count();
+    for (let k = 0; k < n; k++) await page.locator(`[data-order="${k}"]`).click();
+  }
+  await expect(page.getByRole("status")).toContainText(PRAISE);
   await page.getByRole("button", { name: "Stop the lesson" }).click();
   await page.getByRole("button", { name: "Stop", exact: true }).click();
   await expect.poll(() => srv.events.length, { timeout: 10_000 }).toBeGreaterThan(before);
