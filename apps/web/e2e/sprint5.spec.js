@@ -350,7 +350,11 @@ test("offline: a photo card works at once, waits to upload, and uploads on Retry
   await shot(page, testInfo, "s5-waiting");
   expect(Object.values(srv.media).filter((m) => m.status === "ready")).toHaveLength(0);
   srv.offline = false;
-  await page.getByRole("button", { name: "Retry" }).click();
+  // Retry, unless the background retry (BLD-15) has already uploaded it and hidden the banner.
+  await page
+    .getByRole("button", { name: "Retry" })
+    .click({ timeout: 3000 })
+    .catch(() => {});
   await expect(page.getByText("1 item waiting to upload")).toHaveCount(0, { timeout: 10_000 });
   await expect.poll(() => Object.values(srv.media).filter((m) => m.status === "ready").length).toBe(1);
   await expect.poll(() => Object.values(srv.lessons).map((l) => l.title)).toEqual(["Our dog"]);
