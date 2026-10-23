@@ -1,6 +1,6 @@
 # Cloudflare R2 setup for photos and voice clips
 
-Trailbuddies keeps grown-ups' photos and voice clips (Lesson Builder, Sprint 5) in an S3-compatible bucket. Locally that's MinIO in Docker. In production it's **Cloudflare R2**.
+Trailbuddies keeps grown-ups' photos and voice clips (Lesson Builder, Sprint 5) in an S3-compatible bucket. Locally the API keeps them on a Docker volume instead. In production they go in **Cloudflare R2**.
 
 This guide lists what to create in R2, what to copy into the server's settings and how to check it works.
 
@@ -92,7 +92,7 @@ Browsers upload straight to R2, so the bucket must allow your web app's address.
 
 - `YOUR-WEB-DOMAIN` is where the web app runs: your Vercel domain, or the custom domain that points at it. It must match `TB_WEB_URL` on the server.
 - To test Vercel **preview** deployments against production storage, add the exact preview URL. A better option is a separate staging bucket (see "Staging" below).
-- Don't add `http://localhost:3000` to the production bucket. Local development uses MinIO.
+- Don't add `http://localhost:3000` to the production bucket. Local development doesn't use R2.
 
 ## Step 5: Make the media secret
 
@@ -121,10 +121,10 @@ TB_S3_SECRET_KEY=<Secret Access Key from the password manager>
 TB_MEDIA_SECRET=<the long random value>
 ```
 
-- `TB_S3_ENDPOINT` and `TB_S3_PUBLIC_ENDPOINT` are the same for R2. They only differ locally, where the API reaches MinIO at `http://minio:9000` but the browser uses `http://localhost:9000`.
+- `TB_S3_ENDPOINT` and `TB_S3_PUBLIC_ENDPOINT` are the same for R2.
 - With the EU jurisdiction, use `https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com` for both.
 - `TB_S3_REGION` must be `auto` for R2.
-- Don't start the `minio` service on the VPS.
+- `TB_MEDIA_BACKEND=s3` is required: without it the API keeps files on the server's disk, the local default.
 
 Restart the API and worker so they read the new values:
 

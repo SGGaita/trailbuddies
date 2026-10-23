@@ -9,7 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 COPY alembic ./alembic
 COPY alembic.ini .
-RUN useradd --create-home api && chown -R api /app
+# media-data: local photo and clip storage (a volume in docker compose).
+RUN useradd --create-home api && mkdir -p /app/media-data && chown -R api /app
 USER api
 EXPOSE 8000
 # Migrations run first, then the server. The worker uses the same image with a different command.
