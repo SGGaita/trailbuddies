@@ -25,6 +25,7 @@ import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
 import Island from "@/components/art/Island";
+import NumberMountain from "@/components/art/NumberMountain";
 import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
@@ -186,7 +187,11 @@ export default function WorldMap() {
                     <Chip size="small" label="Favourite" color="secondary" />
                   ) : null}
                 </Box>
-                <Island kind={s.island} width="min(180px, 100%)" height={120} />
+                {s.id === "numbers" ? (
+                  <NumberMountain small width="min(240px, 100%)" />
+                ) : (
+                  <Island kind={s.island} width="min(180px, 100%)" height={120} />
+                )}
                 <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
                   {s.place}
                 </Typography>
@@ -305,7 +310,11 @@ export default function WorldMap() {
               opacity: first && s.id !== "numbers" ? 0.55 : 1,
             }}
           >
-            <Island kind={s.island} width={88} height={62} />
+            {s.id === "numbers" ? (
+              <NumberMountain small width={110} />
+            ) : (
+              <Island kind={s.island} width={88} height={62} />
+            )}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}
