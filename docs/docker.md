@@ -50,10 +50,7 @@ git pull
 pnpm install
 ```
 
-From Sprint 5 on, add `minio` to step 2 so photos and voice clips work:
-```bat
-docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build db redis mailpit minio api worker
-```
+Photos and voice clips need nothing extra locally: the API keeps them on a Docker volume (see §8).
 
 `git pull` needs a clean working copy. If it complains about local changes, run `git status` to see them first.
 
@@ -129,12 +126,10 @@ In PowerShell, `curl` is an alias for `Invoke-WebRequest`. Use `curl.exe` to get
 | Postgres | `localhost:5432` (or your `POSTGRES_HOST_PORT`) | Database |
 | Redis | `localhost:6379` | Worker queue |
 | Mailpit | http://localhost:8025 | Catches sign-in emails locally |
-| MinIO console (from Sprint 5) | http://localhost:9001 | Local photo and voice-clip storage |
-| MinIO S3 API (from Sprint 5) | http://localhost:9000 | Presigned uploads |
 
 Every port is bound to `127.0.0.1`, so nothing is reachable from other machines on your network.
 
-Containers reach each other by service name (`db:5432`, `redis:6379`, `minio:9000`, `mailpit:1025`), not by `localhost`.
+Containers reach each other by service name (`db:5432`, `redis:6379`, `mailpit:1025`), not by `localhost`.
 
 ## 5. Database
 
@@ -213,11 +208,9 @@ The worker uses the API's image, so rebuild `api` and restart both.
 ## 8. Mail and media (local)
 
 - **Sign-in emails:** open http://localhost:8025. Every email the API sends lands there, and nothing leaves your PC.
-- **Photos and voice clips** (once Sprint 5, PR #240, is merged):
-  - Start MinIO with the rest of the stack: `dc up -d db redis mailpit minio api worker`.
-  - Open the console at http://localhost:9001 and sign in with `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` from `infra\.env`.
-  - The API creates the `trailbuddies-media` bucket the first time it's used.
+- **Photos and voice clips:** locally the API stores them on the `media-data` volume and serves them through `/api` with short-lived signed links. There's nothing to start or set up.
   - `dc down -v` also deletes the stored media.
+  - We used to run MinIO for this. Its Docker images were withdrawn in September 2026 ("pull access denied for minio/minio"), so it's no longer part of the stack.
   - Production uses Cloudflare R2 instead: see [r2-setup.md](r2-setup.md).
 
 ## 9. Troubleshooting
@@ -232,6 +225,7 @@ The worker uses the API's image, so rebuild `api` and restart both.
 | A service keeps restarting | Run `dc logs --tail 200 <service>`, then `dc ps` to see its health. |
 | Changes to Python code don't show | The API image has the code baked in. Rebuild: `dc up -d --build api worker`. |
 | Out of disk space | See the cleanup commands in §10. |
+| `pull access denied for minio/minio` | Your `infra/docker-compose.yml` is older than the fix that removed MinIO. Run `git pull` on `main`. If `infra/.env` still has `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD`, delete those lines. |
 | Something odd with WSL | `wsl --shutdown`, then restart Docker Desktop. |
 
 ## 10. General Docker reference
