@@ -6,6 +6,61 @@ Run every command from the repo root, `C:\projects\trailbuddies`. Where cmd and 
 
 ---
 
+## Quick start: pull the latest code and run it locally
+
+This is the usual routine. The commands are the same in cmd and PowerShell.
+
+**1. Get the latest code**
+```bat
+cd C:\projects\trailbuddies
+git checkout main
+git pull
+pnpm install
+```
+
+**2. Start the back end in Docker** (database, Redis, Mailpit, API, worker)
+```bat
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build db redis mailpit api worker
+```
+`--build` rebuilds the API with the code you just pulled. The API applies new migrations itself when it starts.
+
+**3. Start the web app**
+```bat
+pnpm dev
+```
+Open http://localhost:3000. Sign-in emails arrive at http://localhost:8025.
+
+**Or run everything in Docker, the web app included** (instead of steps 2 and 3):
+```bat
+docker compose -f infra/docker-compose.yml --env-file infra/.env --profile web up --build --watch
+```
+
+**Check and stop**
+```bat
+docker compose -f infra/docker-compose.yml --env-file infra/.env ps
+docker compose -f infra/docker-compose.yml --env-file infra/.env logs -f api
+docker compose -f infra/docker-compose.yml --env-file infra/.env down
+```
+
+**Try a branch before merging it** (for example `sprint-5`): use this instead of step 1.
+```bat
+git fetch
+git checkout sprint-5
+git pull
+pnpm install
+```
+
+From Sprint 5 on, add `minio` to step 2 so photos and voice clips work:
+```bat
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build db redis mailpit minio api worker
+```
+
+`git pull` needs a clean working copy. If it complains about local changes, run `git status` to see them first.
+
+The first time on a new PC, do the one-time setup in §1 before this routine.
+
+---
+
 ## 1. One-time setup
 
 1. Install **Docker Desktop**, start it, and wait until it shows *Engine running*.
