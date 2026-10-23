@@ -87,6 +87,9 @@ This starts db, redis, api, worker **and** the web app on http://localhost:3000.
 
 ### Docker troubleshooting (Windows)
 
+Full command guide for cmd and PowerShell: [docs/docker.md](docs/docker.md).
+
+
 - **`pip install` fails with "from versions: none"** while CI passes: the containers can't reach PyPI reliably. Add `"dns": ["8.8.8.8", "1.1.1.1"]` in Docker Desktop → Settings → Docker Engine, Apply & restart. The Dockerfile already gives pip a 120 s timeout and 10 retries for slow links; a build can take several minutes.
 - **`ports are not available ... 127.0.0.1:5432`**: PostgreSQL is installed on this PC (`netstat -ano | findstr :5432`). Set `POSTGRES_HOST_PORT=5433` in `infra/.env`. Host tools (psql, Alembic run outside Docker) then use port 5433; `localhost:5432` is your native PostgreSQL.
 - **API unhealthy, logs say "Name or service not known"**: `POSTGRES_PASSWORD` contains `@`, `:`, `/`, `#`, `?` or `%`. Use letters and digits only. If the db volume already exists, change it in place too: `docker exec trailbuddies-db-1 psql -U trailbuddies -d trailbuddies -c "ALTER USER trailbuddies PASSWORD 'new-one';"`
