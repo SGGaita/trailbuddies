@@ -18,6 +18,7 @@ import { playSound } from "@/lib/sounds";
 import { readMemory, writeMemory } from "@/lib/memory";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
+import NumberMountain, { NUMBER_MOUNTAIN_SRC } from "@/components/art/NumberMountain";
 import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
@@ -133,6 +134,7 @@ export default function Trail({ subjectId }) {
   if (rest) return <RestScreen reason={rest} learner={learner} />;
 
   const sp = subjectProgress(units, learner.progress);
+  const mountain = subjectId === "numbers";
   const unit = currentUnit(units, learner.progress, start) || units[0];
   const content = getUnit(unit.id);
 
@@ -181,6 +183,11 @@ export default function Trail({ subjectId }) {
             px: 1,
           }}
         >
+          {mountain && (
+            <Box sx={{ maxWidth: { xs: 420, sm: 520 }, mx: "auto", pt: { xs: 1.5, sm: 2.5 } }}>
+              <NumberMountain peaks band={learner.band} buddy={learner.buddy} />
+            </Box>
+          )}
           <Box
             sx={{
               position: "relative",
@@ -188,6 +195,20 @@ export default function Trail({ subjectId }) {
               maxWidth: W,
               mx: "auto",
               aspectRatio: `${W} / ${trail.height}`,
+              ...(mountain && {
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: `url(${NUMBER_MOUNTAIN_SRC})`,
+                  backgroundRepeat: "repeat-y",
+                  backgroundSize: "100% auto",
+                  backgroundPosition: "center 40px",
+                  opacity: 0.08,
+                  filter: "blur(1px)",
+                  pointerEvents: "none",
+                },
+              }),
             }}
           >
             <svg
@@ -292,6 +313,11 @@ export default function Trail({ subjectId }) {
           component="aside"
           sx={{
             display: { xs: "none", sm: "flex" },
+            position: "sticky",
+            top: 74, // LearnerShell header height on tablet and web
+            alignSelf: "flex-start",
+            height: "calc(100dvh - 74px)",
+            overflowY: "auto",
             width: { sm: 280, lg: 310 },
             flex: "none",
             flexDirection: "column",

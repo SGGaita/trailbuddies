@@ -39,6 +39,8 @@ const EXTRAS = [
   "/sounds/right.wav",
   "/sounds/miss.wav",
   "/sounds/done.wav",
+  "/art/number-mountain.webp",
+  "/art/number-mountain-sm.webp",
 ];
 
 function worker(BUILD_ID, PAGES, EXTRAS) {
@@ -122,7 +124,11 @@ function worker(BUILD_ID, PAGES, EXTRAS) {
     }
 
     // Build assets are content-hashed: cache first, forever.
-    if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+    if (
+      url.pathname.startsWith("/_next/static/") ||
+      url.pathname.startsWith("/icons/") ||
+      url.pathname.startsWith("/art/")
+    ) {
       e.respondWith(
         (async () => {
           const cache = await caches.open(CACHE);
