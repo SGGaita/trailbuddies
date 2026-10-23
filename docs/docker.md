@@ -218,6 +218,7 @@ The worker uses the API's image, so rebuild `api` and restart both.
   - Open the console at http://localhost:9001 and sign in with `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` from `infra\.env`.
   - The API creates the `trailbuddies-media` bucket the first time it's used.
   - `dc down -v` also deletes the stored media.
+  - Production uses Cloudflare R2 instead: see [r2-setup.md](r2-setup.md).
 
 ## 9. Troubleshooting
 
