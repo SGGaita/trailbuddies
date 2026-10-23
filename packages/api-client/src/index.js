@@ -75,6 +75,21 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     /** @param {string} familyId @param {string} learnerId */
     deleteLearner: (familyId, learnerId) =>
       request(`${fam(familyId)}/learners/${encodeURIComponent(learnerId)}`, { method: "DELETE" }),
+    /** Custom lessons (Lesson Builder). @param {string} familyId */
+    lessons: (familyId) => request(`${fam(familyId)}/lessons`),
+    /** @param {string} familyId @param {string} lessonId @param {object} body */
+    putLesson: (familyId, lessonId, body) =>
+      request(`${fam(familyId)}/lessons/${encodeURIComponent(lessonId)}`, { method: "PUT", json: body }),
+    /** @param {string} familyId @param {string} lessonId */
+    deleteLesson: (familyId, lessonId) =>
+      request(`${fam(familyId)}/lessons/${encodeURIComponent(lessonId)}`, { method: "DELETE" }),
+    /** Reserve an upload. @param {string} familyId @param {{ id: string, kind: "photo" | "voice", content_type: string, bytes: number }} body */
+    startMedia: (familyId, body) => request(`${fam(familyId)}/media`, { method: "POST", json: body }),
+    /** Ask the server to check an uploaded file. @param {string} familyId @param {string} mediaId */
+    completeMedia: (familyId, mediaId) =>
+      request(`${fam(familyId)}/media/${encodeURIComponent(mediaId)}/complete`, { method: "POST" }),
+    /** Where the browser can fetch a family member's media (redirects to a short-lived link). */
+    mediaUrl: (familyId, mediaId) => `${base}${fam(familyId)}/media/${encodeURIComponent(mediaId)}`,
     /** @param {string} id */
     members: (id) => request(`${fam(id)}/members`),
     /** @param {string} id @param {{ email: string, role: "parent" | "viewer" }} body */
@@ -82,7 +97,8 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     /** @param {string} id @param {number} inviteId */
     cancelInvite: (id, inviteId) => request(`${fam(id)}/invites/${inviteId}`, { method: "DELETE" }),
     /** @param {string} id @param {string} userId */
-    removeMember: (id, userId) => request(`${fam(id)}/members/${encodeURIComponent(userId)}`, { method: "DELETE" }),
+    removeMember: (id, userId) =>
+      request(`${fam(id)}/members/${encodeURIComponent(userId)}`, { method: "DELETE" }),
     /** @param {string} token */
     acceptInvite: (token) => post("/invites/accept", { token }),
     /** @param {string} familyId @param {object[]} events */

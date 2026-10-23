@@ -1,16 +1,38 @@
 import { getUnit, getReadyUnits } from "@trailbuddies/content";
-import { buildLesson, buildTrophy, buildReview, canPlay, rng } from "@trailbuddies/domain";
+import {
+  buildLesson,
+  buildTrophy,
+  buildReview,
+  buildCustomLesson,
+  canPlay,
+  normaliseLesson,
+  rng,
+} from "@trailbuddies/domain";
 import { createEvent } from "@trailbuddies/sync";
 import { trailUnits } from "./trail";
 
 /**
  * Plan what the player should run. Returns `{ lesson }` or `{ blocked }` with the trail to go back to.
- * @param {{ kind: "lesson" | "trophy" | "review", unitId?: string, step?: string, subjectId?: string }} where
+ * @param {{ kind: "lesson" | "trophy" | "review" | "custom", unitId?: string, step?: string, subjectId?: string, id?: string, preview?: boolean }} where
  * @param {any} learner learnerView
  * @param {number} seed
+ * @param {any[]} [lessons] the family's custom lessons
  */
-export function planLesson(where, learner, seed) {
+export function planLesson(where, learner, seed, lessons = []) {
   const r = rng(seed);
+  if (where.kind === "custom") {
+    // A lesson from the Lesson Builder: for children it's assigned to, or a grown-up's preview.
+    const back = where.preview ? `/family/create/lesson?id=${where.id}` : "/play/more/island";
+    const custom = lessons.find((l) => l.id === where.id);
+    if (!custom || (!where.preview && !(custom.assigned || []).includes(learner.id)))
+      return { blocked: back };
+    const lesson = buildCustomLesson(normaliseLesson(custom), {
+      level: learner.levelFor("family"),
+      band: learner.band,
+      r,
+    });
+    return { lesson, back, custom };
+  }
   if (where.kind === "review") {
     const units = getReadyUnits(where.subjectId);
     const lesson = buildReview(units, learner.reviewDue(where.subjectId), {

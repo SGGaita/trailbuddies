@@ -33,7 +33,8 @@ export const getSubjects = () => catalogue.subjects;
 export const getSubject = (id) => catalogue.subjects.find((s) => s.id === id) || null;
 
 /** Units with full content for a subject, in trail order. @param {string} subjectId */
-export const getReadyUnits = (subjectId) => (getSubject(subjectId)?.units || []).map((u) => UNITS[u.id]).filter(Boolean);
+export const getReadyUnits = (subjectId) =>
+  (getSubject(subjectId)?.units || []).map((u) => UNITS[u.id]).filter(Boolean);
 
 /**
  * Full unit content, or null if the unit is only planned.
@@ -104,3 +105,37 @@ export function buddySays(event, { buddy = null, vars = {}, last = null, r = Mat
 
 /** The reward economy (RWD-09): earning amounts, the daily cap, badge payouts and shop prices. */
 export { economy };
+
+import library from "./library.json" with { type: "json" };
+
+/**
+ * The built-in picture library for the Lesson Builder (BLD-02): a curated set plus every
+ * picture the content units use, each with a name and tags to search.
+ * @returns {Array<{ emoji: string, name: string, tags: string[] }>}
+ */
+export function libraryPictures() {
+  const out = [...library.pictures];
+  const seen = new Set(out.map((p) => p.emoji));
+  for (const u of Object.values(UNITS))
+    for (const it of u.items)
+      if (it.emoji && !seen.has(it.emoji) && !/^\d/.test(it.label)) {
+        seen.add(it.emoji);
+        out.push({ emoji: it.emoji, name: it.label.toLowerCase(), tags: [u.subject] });
+      }
+  return out;
+}
+
+/**
+ * Search the picture library: names first, then tags. Empty query → everything.
+ * @param {string} query
+ */
+export function searchLibrary(query) {
+  const q = String(query || "")
+    .trim()
+    .toLowerCase();
+  const all = libraryPictures();
+  if (!q) return all;
+  const byName = all.filter((p) => p.name.includes(q));
+  const byTag = all.filter((p) => !byName.includes(p) && p.tags.some((t) => t.startsWith(q)));
+  return [...byName, ...byTag];
+}

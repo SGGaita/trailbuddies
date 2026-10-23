@@ -15,6 +15,8 @@ export function newServer() {
     learners: {},
     events: [],
     consents: {},
+    lessons: {}, // id -> lesson (with family_id)
+    media: {}, // id -> { family, kind, type, bytes: Buffer | null, status }
     tokens: {},
     sent: [],
     offline: false,
@@ -56,6 +58,7 @@ const defaultSettings = () => ({
  */
 export async function fakeApi(context, srv) {
   let sessionId = null;
+  let m0;
   const signIn = (uid) => {
     sessionId = `S${Object.keys(srv.sessions).length + 1}-${Math.random().toString(36).slice(2)}`;
     srv.sessions[sessionId] = uid;
@@ -76,7 +79,8 @@ export async function fakeApi(context, srv) {
     const url = new URL(req.url());
     const path = url.pathname.replace(/^\/api/, "");
     const method = req.method();
-    const body = req.postData() ? JSON.parse(req.postData()) : {};
+    const isJson = (req.headers()["content-type"] || "").includes("json");
+    const body = isJson && req.postData() ? JSON.parse(req.postData()) : {};
     const userId = sessionId && srv.sessions[sessionId];
     const user = userId && srv.users[userId];
     const membership = user && srv.members.find((x) => x.user === userId);
@@ -84,6 +88,19 @@ export async function fakeApi(context, srv) {
     const role = membership?.role;
     const forbidViewer = () => json(route, 403, { detail: "This role can only view progress" });
 
+    // Signed media links (the real API signs them; any link here works).
+    m0 = path.match(/^\/media\/blob\/([^/]+)$/);
+    if (m0 && method === "PUT") {
+      const md = srv.media[m0[1]];
+      if (!md) return json(route, 403, { detail: "Link expired" });
+      md.bytes = req.postDataBuffer();
+      return json(route, 204);
+    }
+    if (m0 && method === "GET") {
+      const md = srv.media[m0[1]];
+      if (!md?.bytes || md.status !== "ready") return json(route, 404, { detail: "Not found" });
+      return route.fulfill({ status: 200, contentType: md.type, body: md.bytes });
+    }
     if (path === "/auth/config") return json(route, 200, { google: false, policy_version: POLICY });
     if (path === "/policy")
       return json(route, 200, {
@@ -98,7 +115,8 @@ export async function fakeApi(context, srv) {
         never: ["No ads and no tracking or analytics companies."],
         scopes: {
           progress: { label: "Save progress so it follows each child to every device", required: true },
-          voice: { label: "Let grown-ups record their own voice for lessons (later)", required: false },
+          voice: { label: "Let grown-ups record their own voice for lessons", required: false },
+          photos: { label: "Let grown-ups add their own photos to lessons", required: false },
         },
       });
     if (path === "/auth/magic-link" && method === "POST") {
@@ -223,6 +241,63 @@ export async function fakeApi(context, srv) {
       delete srv.learners[m[2]];
       srv.events = srv.events.filter((e) => e.learnerId !== m[2]);
       return json(route, 204);
+    }
+    // Custom lessons (Lesson Builder).
+    m = path.match(/^\/families\/([^/]+)\/lessons$/);
+    if (m && method === "GET")
+      return json(route, 200, {
+        lessons: Object.values(srv.lessons)
+          .filter((l) => l.family_id === m[1])
+          .map(({ family_id: _f, ...l }) => l),
+      });
+    m = path.match(/^\/families\/([^/]+)\/lessons\/([^/]+)$/);
+    if (m && method === "PUT") {
+      if (role === "viewer") return forbidViewer();
+      const cur = srv.lessons[m[2]];
+      if (!cur || Date.parse(body.updated_at) > Date.parse(cur.updated_at))
+        srv.lessons[m[2]] = { id: m[2], family_id: m[1], ...body };
+      const { family_id: _f, ...out } = srv.lessons[m[2]];
+      return json(route, 200, out);
+    }
+    if (m && method === "DELETE") {
+      if (role === "viewer") return forbidViewer();
+      delete srv.lessons[m[2]];
+      return json(route, 204);
+    }
+    // Photos and voice clips: reserve, upload, check (any EXIF is refused, like GPS data).
+    m = path.match(/^\/families\/([^/]+)\/media$/);
+    if (m && method === "POST") {
+      if (role === "viewer") return forbidViewer();
+      const scope = body.kind === "photo" ? "photos" : "voice";
+      if (!srv.consents[m[1]]?.scopes?.[scope])
+        return json(route, 403, { detail: { code: "consent_needed", scope, message: "Turn this on first." } });
+      const md = srv.media[body.id] || { family: m[1], kind: body.kind, type: body.content_type, bytes: null };
+      md.status = md.status === "ready" ? "ready" : "pending";
+      srv.media[body.id] = md;
+      return json(route, 201, {
+        id: body.id,
+        status: md.status,
+        upload: md.status === "ready" ? null : { url: `/api/media/blob/${body.id}?exp=1&sig=x`, method: "PUT", headers: { "Content-Type": body.content_type } },
+      });
+    }
+    m = path.match(/^\/families\/([^/]+)\/media\/([^/]+)\/complete$/);
+    if (m && method === "POST") {
+      const md = srv.media[m[2]];
+      if (!md || md.family !== m[1]) return json(route, 404, { detail: "Not found" });
+      if (!md.bytes) return json(route, 409, { detail: { code: "not_uploaded", message: "Not yet" } });
+      if (md.kind === "photo" && md.bytes.includes(Buffer.from("Exif\0\0"))) {
+        md.status = "rejected";
+        md.bytes = null;
+        return json(route, 422, { detail: { code: "gps_metadata", message: "Location data" } });
+      }
+      md.status = "ready";
+      return json(route, 200, { id: m[2], kind: md.kind, status: "ready" });
+    }
+    m = path.match(/^\/families\/([^/]+)\/media\/([^/]+)$/);
+    if (m && method === "GET") {
+      const md = srv.media[m[2]];
+      if (!md || md.family !== m[1] || md.status !== "ready") return json(route, 404, { detail: "Not found" });
+      return route.fulfill({ status: 307, headers: { location: `/api/media/blob/${m[2]}?exp=1&sig=x` } });
     }
     if (path === "/sync/events" && method === "POST") {
       if (role === "viewer") return forbidViewer();

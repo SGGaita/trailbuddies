@@ -9,7 +9,11 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: `http://localhost:${port}`,
-    launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
+    launchOptions: {
+      ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}),
+      // A fake microphone (a steady tone) for the Lesson Builder's voice recorder.
+      args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+    },
   },
   projects: [
     { name: "phone", use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },

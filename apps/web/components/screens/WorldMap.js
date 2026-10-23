@@ -16,6 +16,8 @@ import {
   orderSubjects,
   layoutTrail,
   greetingFor,
+  customId,
+  lessonsFor,
   dayKey,
 } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
@@ -91,6 +93,7 @@ export default function WorldMap() {
     else if (noBuddy) router.replace("/play/buddies"); // new learners meet the buddies first
   }, [ready, learner, noBuddy, router]);
   const voice = useFamily((s) => s.settings.voice);
+  const lessons = useFamily((s) => s.lessons);
   const [memory] = useState(() => (typeof window === "undefined" ? null : readMemory()));
   const subjects = subjectsWithProgress(learner?.progress || {}, learner?.placement, learner?.interests);
   const rest = useRest(learner);
@@ -125,6 +128,18 @@ export default function WorldMap() {
   const hear = useTapToHear(learner?.band);
   if (!ready || !learner || noBuddy) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
+
+  // MAP-06: a glowing marker on Family Island while a grown-up's lesson hasn't been played.
+  const fresh = lessonsFor(lessons, learner.id).filter((l) => !learner.progress[customId(l.id)]).length;
+  const newChip = fresh ? (
+    <Chip
+      size="small"
+      className="glow"
+      color="secondary"
+      label={t("island.newCount", { n: fresh })}
+      data-testid="island-new"
+    />
+  ) : null;
 
   const sub = (s) =>
     s.p.done
@@ -189,7 +204,7 @@ export default function WorldMap() {
             onClick={hear("island", t("map.familyIsland"))}
             sx={PLACE_SX}
           >
-            <Box sx={{ height: 22 }} />
+            <Box sx={{ height: 22 }}>{newChip}</Box>
             <Island kind="family" width="min(180px, 100%)" height={120} />
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
               {t("map.familyIsland")}
@@ -326,12 +341,13 @@ export default function WorldMap() {
           }}
         >
           <Island kind="family" width={88} height={62} />
-          <Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
               {t("map.familyIsland")}
             </Typography>
             <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("map.familyIslandSub")}</Typography>
           </Box>
+          {newChip}
         </Box>
         <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

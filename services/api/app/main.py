@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from . import __version__
 from .db import get_session
-from .routes import auth, families, members, sync
+from .routes import auth, families, lessons, media, members, sync
 from .settings import get_settings
 
 
@@ -25,7 +25,7 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type"],
         allow_credentials=True,
     )
-    for r in (auth.router, families.router, members.router, sync.router):
+    for r in (auth.router, families.router, members.router, sync.router, lessons.router, media.router):
         app.include_router(r)
 
     @app.get("/health")

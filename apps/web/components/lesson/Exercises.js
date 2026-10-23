@@ -6,6 +6,8 @@ import Icon from "@/components/Icon";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { speak } from "@/lib/speech";
+import { ItemFace } from "@/components/MediaImage";
+import JigsawStep from "./JigsawStep";
 
 /**
  * Lesson exercises. Each one is told the hint-ladder state (`hint`) and reports every tap
@@ -204,7 +206,7 @@ export function ListenTap(props) {
   const options = step.options.map((it) => ({
     id: it.id,
     label: words(it),
-    face: isNumber(it) ? it.label : it.emoji || it.label,
+    face: isNumber(it) ? it.label : it.photo ? <ItemFace it={it} /> : it.emoji || it.label,
   }));
   return <SingleChoice {...props} options={options} answerId={step.target.id} />;
 }
@@ -235,7 +237,7 @@ export function NameIt(props) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2.5 }}>
       <Box aria-hidden="true" sx={{ fontSize: { xs: 84, sm: 120 }, lineHeight: 1 }}>
-        {step.target.emoji}
+        <ItemFace it={step.target} />
       </Box>
       <SingleChoice
         {...props}
@@ -462,7 +464,12 @@ export function Match({ step, hint, done, onTry, e2e, faces, onPair }) {
   };
   const left =
     faces?.l ||
-    ((it) => (numbers ? <Group count={it.number} emoji={it.emoji} size={{ xs: 18, sm: 24 }} /> : it.emoji));
+    ((it) =>
+      numbers ? (
+        <Group count={it.number} emoji={it.emoji} size={{ xs: 18, sm: 24 }} />
+      ) : (
+        <ItemFace it={it} />
+      ));
   const right = faces?.r || ((it) => it.label);
   const col = (side, list, face) => (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.5 } }}>
@@ -740,7 +747,7 @@ export function Sort({ step, hint, done, onTry, e2e, band, voice, buddy, say }) 
               ...drag.style(it.id),
             }}
           >
-            {it.emoji}
+            <ItemFace it={it} />
             <Box component="span" sx={{ fontSize: { xs: 14, sm: 16 } }}>
               {it.label}
             </Box>
@@ -799,7 +806,7 @@ export function Sort({ step, hint, done, onTry, e2e, band, voice, buddy, say }) 
                   .filter((i) => sorted[i.id] === b.id)
                   .map((i) => (
                     <span key={i.id} className="popin" aria-label={words(i)} role="img">
-                      {i.emoji}
+                      <ItemFace it={i} />
                     </span>
                   ))}
               </Box>
@@ -938,7 +945,7 @@ export function Intro({ step, band, voice, buddy, heard, onHeard }) {
           ) : (
             <>
               <Box component="span" sx={{ fontSize: { xs: 56, sm: 72 } }}>
-                {it.emoji}
+                <ItemFace it={it} />
               </Box>
               <Box component="span" sx={{ fontSize: { xs: 22, sm: 28 } }}>
                 {it.label}
@@ -963,4 +970,5 @@ export const EXERCISES = {
   "case-match": CaseMatch,
   sort: Sort,
   "build-word": BuildWord,
+  jigsaw: JigsawStep,
 };

@@ -10,10 +10,10 @@ import { sceneSvg } from "@/lib/scenes";
 /**
  * Jigsaw (GAM-01): 4 / 9 / 16 pieces by band; Seedlings see a faint picture to guide them.
  * Drag a piece onto its place or tap a piece then a place. The last piece shows the whole
- * picture and the buddy names it.
+ * picture and the buddy names it. With `art` it puzzles over any picture (a family photo).
  */
-export default function Jigsaw({ unit, learner, seed, say, onDone }) {
-  const side = jigsawSide(learner.band);
+export default function Jigsaw({ unit, learner, seed, onDone, art, side: fixedSide }) {
+  const side = fixedSide || jigsawSide(learner.band);
   const [pieces] = useState(() => jigsawPieces(side, rng(seed)));
   const [placed, setPlaced] = useState(/** @type {string[]} */ ([]));
   const [sel, setSel] = useState(/** @type {string | null} */ (null));
@@ -21,7 +21,8 @@ export default function Jigsaw({ unit, learner, seed, say, onDone }) {
   const [drag, setDrag] = useState(/** @type {null | { id: string, dx: number, dy: number }} */ (null));
   const dragRef = useRef(/** @type {any} */ (null));
   const suppress = useRef(false);
-  const [svg] = useState(() => sceneSvg(unit));
+  // `art`: SVG markup for a picture from elsewhere (a grown-up's photo, GAM-02).
+  const [svg] = useState(() => art || sceneSvg(unit));
   const step = 600 / side;
   const guide = learner.band === "seedling";
   const e2e = (() => {
@@ -39,7 +40,8 @@ export default function Jigsaw({ unit, learner, seed, say, onDone }) {
     if (`${p.row}-${p.col}` === cell) {
       const now = [...placed, id];
       setPlaced(now);
-      if (now.length === pieces.length) onDone(buddyLine("game.picture", { topic: unit.title }, 0, learner.buddy));
+      if (now.length === pieces.length)
+        onDone(buddyLine("game.picture", { topic: unit.title }, 0, learner.buddy));
     } else {
       setShake(id);
       setTimeout(() => setShake(null), 380);
@@ -93,7 +95,16 @@ export default function Jigsaw({ unit, learner, seed, say, onDone }) {
   const tray = pieces.filter((p) => !placed.includes(p.id));
 
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: { xs: 2, sm: 3 }, width: "100%", justifyContent: "center" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: "center",
+        gap: { xs: 2, sm: 3 },
+        width: "100%",
+        justifyContent: "center",
+      }}
+    >
       <Box
         role="grid"
         aria-label={unit.title}
@@ -138,7 +149,11 @@ export default function Jigsaw({ unit, learner, seed, say, onDone }) {
                 "& svg": { width: "100%", height: "100%" },
               }}
             >
-              {p && <Box className="popin" sx={{ width: "100%", height: "100%" }}>{tile(p, "100%")}</Box>}
+              {p && (
+                <Box className="popin" sx={{ width: "100%", height: "100%" }}>
+                  {tile(p, "100%")}
+                </Box>
+              )}
             </Box>
           );
         })}
@@ -168,7 +183,13 @@ export default function Jigsaw({ unit, learner, seed, say, onDone }) {
               userSelect: "none",
               "& svg": { width: "100%", height: "100%" },
               ...(drag?.id === p.id
-                ? { transform: `translate(${drag.dx}px, ${drag.dy}px) scale(1.08)`, pointerEvents: "none", position: "relative", zIndex: 5, boxShadow: "0 12px 24px rgba(38,51,34,.25)" }
+                ? {
+                    transform: `translate(${drag.dx}px, ${drag.dy}px) scale(1.08)`,
+                    pointerEvents: "none",
+                    position: "relative",
+                    zIndex: 5,
+                    boxShadow: "0 12px 24px rgba(38,51,34,.25)",
+                  }
                 : {}),
             }}
           >

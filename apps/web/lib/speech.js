@@ -45,6 +45,12 @@ const clips = new Map();
 /** @param {string} assetId @param {string} url */
 export const registerClip = (assetId, url) => clips.set(assetId, url);
 
+/** A grown-up's recording of a card's word (BLD-01): said instead of the device voice. */
+const textClips = new Map();
+/** @param {string} text @param {string} url */
+export const registerTextClip = (text, url) => textClips.set(text.trim().toLowerCase(), url);
+export const clearTextClips = () => textClips.clear();
+
 export function stop() {
   token++;
   if (canSpeak()) {
@@ -98,7 +104,7 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
     setTimeout(finish, Math.max(1600, text.length * 110));
   };
 
-  const url = clip && clips.get(clip);
+  const url = (clip && clips.get(clip)) || textClips.get(text.trim().toLowerCase());
   if (url) {
     try {
       audio = new Audio(url);

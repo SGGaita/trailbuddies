@@ -152,6 +152,15 @@
     ],
     "games.locked": [
       "Play a lesson in {topic} first, then you can play it here!"
+    ],
+    "rest.goodbye": [
+      "That's all for today, {name}! Time for a rest. See you tomorrow!"
+    ],
+    "rest.bedtime": [
+      "Shh, it's sleepy time. Goodnight, {name}!"
+    ],
+    "island.hello": [
+      "Here are lessons from your family!"
     ]
   }
 }

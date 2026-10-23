@@ -33,9 +33,9 @@ function nextStop(subjectId, progress, start) {
 
 /**
  * C07 Lesson complete: stars, treasures, the daily goal and "kept going" praise.
- * @param {{ lesson: any, outcome: any, learner: any, goal: number, back: string }} props
+ * @param {{ lesson: any, outcome: any, learner: any, goal: number, back: string, preview?: boolean }} props
  */
-export default function LessonComplete({ lesson, outcome, learner, goal, back }) {
+export default function LessonComplete({ lesson, outcome, learner, goal, back, preview = false }) {
   const voice = useFamily((s) => s.settings.voice);
   // BDG-03 / LES-16: new badges celebrate after the end screen has shown for a moment.
   const [celebrate, setCelebrate] = useState(false);
@@ -47,10 +47,13 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
   }, [hasBadges]);
   const trophy = lesson.kind === "trophy";
   const review = lesson.kind === "review";
+  const custom = lesson.kind === "custom";
   const next = useMemo(
     () =>
-      review ? null : nextStop(lesson.subjectId, learner.progress, learner.placement?.[lesson.subjectId]),
-    [review, lesson.subjectId, learner.progress, learner.placement],
+      review || custom
+        ? null
+        : nextStop(lesson.subjectId, learner.progress, learner.placement?.[lesson.subjectId]),
+    [review, custom, lesson.subjectId, learner.progress, learner.placement],
   );
   const today = learner.today;
   // From the script table, in this learner's buddy's words (BUD-08).
@@ -135,31 +138,33 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back })
             <Coin kind="gem" value={<CountUp value={outcome.treasures} prefix="+" />} />
           </Box>
         )}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            px: 2,
-            py: 1,
-            borderRadius: 4,
-            bgcolor: today >= goal ? colors.leaf.soft : "background.paper",
-            border: `2px solid ${today >= goal ? colors.leaf.main : colors.line}`,
-            fontWeight: 800,
-          }}
-        >
-          {today >= goal ? "✓ " : ""}
-          {outcome.reachedGoal
-            ? t("done.goalReached")
-            : t("done.goal", { done: Math.min(today, goal), goal })}
-        </Box>
+        {!preview && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 1,
+              borderRadius: 4,
+              bgcolor: today >= goal ? colors.leaf.soft : "background.paper",
+              border: `2px solid ${today >= goal ? colors.leaf.main : colors.line}`,
+              fontWeight: 800,
+            }}
+          >
+            {today >= goal ? "✓ " : ""}
+            {outcome.reachedGoal
+              ? t("done.goalReached")
+              : t("done.goal", { done: Math.min(today, goal), goal })}
+          </Box>
+        )}
       </Box>
       {outcome.keptGoing && (
         <Typography sx={{ fontWeight: 800, color: colors.berry.deep }}>{t("done.keptGoing")}</Typography>
       )}
       <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center", mt: 1 }}>
         <Button component={Link} href={back} variant="outlined" size="large" sx={{ borderWidth: 2 }}>
-          {t("done.trail")}
+          {preview ? t("builder.backToBuilder") : custom ? t("done.island") : t("done.trail")}
         </Button>
         {next && (
           <Button component={Link} href={next.href} variant="contained" size="large" autoFocus>

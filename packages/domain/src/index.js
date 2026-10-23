@@ -17,3 +17,6 @@ export * from "./buddy.js";
 export * from "./streak.js";
 export * from "./badges.js";
 export * from "./games.js";
+export * from "./custom.js";
+export * from "./media.js";
+export * from "./parent.js";

@@ -3,7 +3,7 @@ import Dexie from "dexie";
 
 /**
  * On-device storage (IndexedDB via Dexie): the event log and its outbox, plus sync
- * metadata. One database per family, and a separate one for the demo family, so demo
+ * metadata, and the Lesson Builder's photos and voice clips. One database per family, and a separate one for the demo family, so demo
  * events can never be uploaded. Profiles and settings are small and live in the store.
  */
 
@@ -16,6 +16,8 @@ export function familyDb(name) {
   if (!open.has(name)) {
     const db = new Dexie(`trailbuddies-${name}`);
     db.version(1).stores({ events: "id, sent", meta: "key" });
+    // Sprint 5: grown-ups' photos and voice clips, kept here so cards work offline.
+    db.version(2).stores({ events: "id, sent", meta: "key", media: "id, state" });
     open.set(name, db);
   }
   return open.get(name);

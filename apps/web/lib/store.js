@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useEffect, useMemo, useState } from "react";
 import { ulid } from "@trailbuddies/sync";
+import { normaliseLesson, nextVersion } from "@trailbuddies/domain";
 import { seedFamily } from "./seed";
 import { learnerView } from "./learner";
 import { familyDb, loadEvents, saveEvents } from "./db";
@@ -46,6 +47,10 @@ const empty = () => ({
   activeId: /** @type {string | null} */ (null),
   /** Learners removed on this device that the server still has. */
   removed: /** @type {string[]} */ ([]),
+  /** Custom lessons from the Lesson Builder (BLD-01..09). */
+  lessons: /** @type {any[]} */ ([]),
+  /** Lessons deleted on this device that the server still has. */
+  removedLessons: /** @type {string[]} */ ([]),
 });
 
 /** Called after local changes so account mode can sync (set by lib/account.js). */
@@ -71,6 +76,8 @@ export const useFamily = create(
       events: /** @type {any[]} */ ([]),
       eventsReady: false,
       sync: { state: "idle", at: null, pending: 0 },
+      /** Photos and clips waiting to upload, and how many have failed 3 times (BLD-16). */
+      uploads: { waiting: 0, failed: 0 },
       gateUntil: 0,
 
       /** Load the demo family into its own database (never uploaded). */
@@ -85,6 +92,7 @@ export const useFamily = create(
           family: { ...seed.family, id: "demo", role: "owner" },
           settings: { ...DEFAULT_SETTINGS, ...seed.settings },
           learners: seed.learners,
+          lessons: seed.lessons,
           waiting: seed.waiting,
           events: seed.events,
           eventsReady: true,
@@ -158,6 +166,36 @@ export const useFamily = create(
       },
       /** @param {string} learnerId @param {"auto" | "1" | "2" | "3"} difficulty */
       setDifficulty: (learnerId, difficulty) => get().updateLearner(learnerId, { difficulty }),
+      /**
+       * Save a custom lesson (new or edited). Card ids never change; the version goes up when
+       * the cards or template change. Returns the saved lesson.
+       */
+      saveLesson: (draft) => {
+        const before = get().lessons.find((l) => l.id === draft.id);
+        const id = draft.id || ulid();
+        const clean = normaliseLesson({ ...draft, id, version: before?.version });
+        const saved = {
+          ...clean,
+          version: nextVersion(before, clean),
+          by: before?.by || draft.by || get().family?.parent || get().user?.name || "",
+          created_at: before?.created_at || now(),
+          updated_at: now(),
+          dirty: true,
+        };
+        set((s) => ({
+          lessons: before ? s.lessons.map((l) => (l.id === id ? saved : l)) : [...s.lessons, saved],
+        }));
+        afterChange();
+        return saved;
+      },
+      /** @param {string} id */
+      deleteLesson: (id) => {
+        set((s) => ({
+          lessons: s.lessons.filter((l) => l.id !== id),
+          removedLessons: s.mode === "account" ? [...s.removedLessons, id] : s.removedLessons,
+        }));
+        afterChange();
+      },
       /** Append events (built with createEvent): memory now, IndexedDB and the outbox next. */
       record: (events) => {
         const s = get();
@@ -174,8 +212,21 @@ export const useFamily = create(
       name: "trailbuddies-family-v3",
       storage: safeStorage,
       version: 3,
-      partialize: ({ mode, user, family, settings, learners, waiting, activeId, removed }) => ({
+      partialize: ({
+        mode,
+        user,
+        family,
+        settings,
+        learners,
+        waiting,
+        activeId,
         removed,
+        lessons,
+        removedLessons,
+      }) => ({
+        removed,
+        lessons,
+        removedLessons,
         mode,
         user,
         family,

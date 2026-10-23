@@ -95,10 +95,33 @@ export function seedEvents(now = new Date()) {
   ];
 }
 
+/** A lesson Grace made in the Lesson Builder, waiting on Family Island for Zawadi and Amani. */
+export const seedLessons = (now = new Date()) => [
+  {
+    id: "demo-house",
+    title: "Around our house",
+    template: "sort",
+    cards: [
+      { id: "h1", label: "Bed", emoji: "🛏️", group: "Inside" },
+      { id: "h2", label: "Chair", emoji: "🪑", group: "Inside" },
+      { id: "h3", label: "Teapot", emoji: "🫖", group: "Inside" },
+      { id: "h4", label: "Tree", emoji: "🌳", group: "Outside" },
+      { id: "h5", label: "Kite", emoji: "🪁", group: "Outside" },
+      { id: "h6", label: "Flower", emoji: "🌸", group: "Outside" },
+    ],
+    assigned: ["zawadi", "amani"],
+    version: 1,
+    by: "Grace",
+    created_at: now.toISOString(),
+    updated_at: now.toISOString(),
+  },
+];
+
 export const seedFamily = (now = new Date()) => ({
   family: { parent: "Grace", plan: "Free" },
   settings: { voice: true, goal: 2, limit: 20 },
   learners: seedProfiles(),
+  lessons: seedLessons(now),
   events: seedEvents(now),
   waiting: [{ id: "w1", learnerId: "zawadi", text: "asked for Bedtime story of my choice" }],
   activeId: null,
