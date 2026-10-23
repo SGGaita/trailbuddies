@@ -345,7 +345,7 @@ test("offline: a photo card works at once, waits to upload, and uploads on Retry
   await page.getByRole("button", { name: "Give it to Wanjiru" }).click();
   await page.getByRole("link", { name: "Done" }).click();
   await expect(page.getByText("1 item waiting to upload")).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText("Our dog")).toBeVisible();
+  await expect(page.getByText("Our dog", { exact: true }).first()).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "s5-waiting");
   expect(Object.values(srv.media).filter((m) => m.status === "ready")).toHaveLength(0);
