@@ -9,7 +9,8 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { ageFrom, bandForAge, isAdult, totalStars } from "@trailbuddies/domain";
+import { ageFrom, bandForAge, isAdult, totalStars, weekSummary } from "@trailbuddies/domain";
+import { builtInBadges } from "@trailbuddies/content";
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
@@ -149,6 +150,7 @@ export default function ParentHome() {
                 value={Math.min(100, (l.today / goal) * 100)}
                 sx={{ height: 10, borderRadius: 5, bgcolor: colors.sand }}
               />
+              <WeekLine learner={l} />
             </Card>
           );
         })}
@@ -197,5 +199,17 @@ export default function ParentHome() {
         Open the learner app
       </Button>
     </FamilyShell>
+  );
+}
+
+/** PAR-01: this week's minutes and lessons, and the latest badge. */
+function WeekLine({ learner }) {
+  const w = weekSummary(learner.results);
+  const latest = builtInBadges.find((b) => b.id === learner.badges.at(-1));
+  return (
+    <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+      {t("family.weekKid", { minutes: w.minutes, lessons: w.lessons })}
+      {latest ? ` · ${t("family.latestBadge", { name: latest.name })}` : ""}
+    </Typography>
   );
 }

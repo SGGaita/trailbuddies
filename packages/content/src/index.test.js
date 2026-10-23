@@ -1,5 +1,17 @@
 import { jest } from "@jest/globals";
-import { getSubjects, getSubject, getUnit, getReadyUnits, lessonIds, buddyLine, buddySays, linesFor, catalogue } from "./index.js";
+import {
+  getSubjects,
+  getSubject,
+  getUnit,
+  getReadyUnits,
+  lessonIds,
+  buddyLine,
+  buddySays,
+  linesFor,
+  catalogue,
+  searchLibrary,
+  libraryPictures,
+} from "./index.js";
 
 test("catalogue lists the five MVP subjects", () => {
   expect(getSubjects().map((s) => s.id)).toEqual(["numbers", "language", "animals", "colours", "shapes"]);
@@ -46,6 +58,19 @@ describe("buddy script table", () => {
     }
   });
   test("placeholders are filled", () => {
-    expect(buddyLine("greet.again", { name: "Amani" }, 0, "kiki")).toBe("Hello, Amani! Ready for a calm adventure?");
+    expect(buddyLine("greet.again", { name: "Amani" }, 0, "kiki")).toBe(
+      "Hello, Amani! Ready for a calm adventure?",
+    );
   });
+});
+
+test("the picture library is searchable by name and tag (BLD-02)", () => {
+  const all = libraryPictures();
+  expect(all.length).toBeGreaterThanOrEqual(140);
+  expect(new Set(all.map((p) => p.emoji)).size).toBe(all.length);
+  expect(searchLibrary("giraffe")[0]).toMatchObject({ emoji: "🦒", name: "giraffe" });
+  const farm = searchLibrary("farm");
+  expect(farm.map((p) => p.name)).toEqual(expect.arrayContaining(["cow", "goat", "tractor"]));
+  expect(searchLibrary("")).toHaveLength(all.length);
+  expect(searchLibrary("zzzz")).toEqual([]);
 });

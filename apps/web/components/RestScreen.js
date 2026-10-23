@@ -41,9 +41,12 @@ export default function RestScreen({ reason, learner }) {
           {reason === "bedtime" ? t("rest.bedtimeSub") : t("rest.limitSub")}
         </Typography>
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
-          <Button component={Link} href="/play" variant="contained">
-            {t("gate.back")}
-          </Button>
+          {/* PAR-03: at bedtime only the grown-ups button works. */}
+          {reason !== "bedtime" && (
+            <Button component={Link} href="/play" variant="contained">
+              {t("gate.back")}
+            </Button>
+          )}
           <Button
             component={Link}
             href="/family"

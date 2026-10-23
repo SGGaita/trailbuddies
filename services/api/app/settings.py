@@ -38,6 +38,24 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
 
+    # Grown-ups' photos and voice clips (BLD-15). "s3": presigned uploads to an S3-compatible
+    # store (Cloudflare R2 in production, MinIO in docker compose). "local": files on this
+    # server's disk behind short-lived signed URLs (tests and a plain `uvicorn` run).
+    media_backend: str = "local"
+    media_dir: str = "media-data"
+    # Signs local upload/download URLs. Must be set to a long random value in production.
+    media_secret: str = "dev-only-media-secret"
+    # Where the browser reaches this API (the web app proxies /api/* here).
+    media_url_base: str = "/api"
+    media_url_minutes: int = 15
+    s3_endpoint: str = ""
+    # The endpoint browsers use for presigned URLs, if different (MinIO behind docker).
+    s3_public_endpoint: str = ""
+    s3_bucket: str = "trailbuddies-media"
+    s3_region: str = "auto"
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+
     @property
     def google_enabled(self) -> bool:
         return bool(self.google_client_id and self.google_client_secret)

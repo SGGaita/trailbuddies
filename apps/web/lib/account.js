@@ -3,6 +3,7 @@ import { createClient, ApiError } from "@trailbuddies/api-client";
 import { createSyncer, newer } from "@trailbuddies/sync";
 import { useFamily, onLocalChange, dbName } from "./store";
 import { familyDb, outbox, cursor, saveEvents, loadEvents, pendingCount, forget } from "./db";
+import { uploadMedia, refreshUploadStatus } from "./media";
 
 /** The API, through the web app's own /api proxy (same-origin session cookie). */
 export const api = createClient({ baseUrl: "/api" });
@@ -37,6 +38,67 @@ export const learnerFromApi = (a) => ({
   wish: a.wish ?? null,
   updated_at: a.updated_at,
 });
+
+/** Store lesson ↔ API lesson (Lesson Builder). */
+export const lessonToApi = (l) => ({
+  title: l.title,
+  template: l.template,
+  question: l.question ?? null,
+  puzzle_card: l.puzzleCard ?? null,
+  cards: l.cards,
+  assigned: l.assigned,
+  version: l.version || 1,
+  updated_at: l.updated_at,
+});
+export const lessonFromApi = (a) => ({
+  id: a.id,
+  title: a.title,
+  template: a.template,
+  ...(a.question ? { question: a.question } : {}),
+  ...(a.puzzle_card ? { puzzleCard: a.puzzle_card } : {}),
+  cards: a.cards,
+  assigned: a.assigned,
+  version: a.version,
+  updated_at: a.updated_at,
+});
+
+/** Merge the server's lessons: a dirty local edit wins only if it's newer. */
+function applyLessons(remote) {
+  const s = get();
+  const local = new Map(s.lessons.map((l) => [l.id, l]));
+  const lessons = remote
+    .filter((a) => !s.removedLessons.includes(a.id))
+    .map((a) => {
+      const theirs = lessonFromApi(a);
+      const mine = local.get(a.id);
+      local.delete(a.id);
+      return mine?.dirty ? newer(theirs, mine) : { ...theirs, by: mine?.by };
+    });
+  for (const l of local.values()) if (l.dirty) lessons.push(l);
+  useFamily.setState({ lessons });
+}
+
+async function pushLessons() {
+  const s = get();
+  const fam = s.family;
+  if (!fam?.id || !fam.consent || fam.role === "viewer") return;
+  for (const id of s.removedLessons) {
+    try {
+      await api.deleteLesson(fam.id, id);
+    } catch (e) {
+      if (!(e instanceof ApiError && e.status === 404)) throw e;
+    }
+    useFamily.setState((st) => ({ removedLessons: st.removedLessons.filter((x) => x !== id) }));
+  }
+  for (const l of s.lessons.filter((x) => x.dirty)) {
+    await api.putLesson(fam.id, l.id, lessonToApi(l));
+    useFamily.setState((st) => ({
+      lessons: st.lessons.map((x) =>
+        x.id === l.id && x.updated_at === l.updated_at ? { ...x, dirty: false } : x,
+      ),
+    }));
+  }
+}
 
 /** Merge the server's copy into the store: dirty local edits win only if they are newer. */
 function applyMe(me) {
@@ -211,10 +273,14 @@ export async function syncNow() {
   useFamily.setState({ sync: { ...get().sync, state: "syncing" } });
   try {
     await pushProfiles();
+    // Photos and clips first, then the lessons that use them (a card works locally meanwhile).
+    await uploadMedia(api);
+    await pushLessons();
     // Carers only read: their devices pull progress but never upload.
     if (get().family?.role === "viewer") await syncer.pull();
     else await syncer.syncOnce();
     applyMe(await api.me());
+    applyLessons((await api.lessons(s.family.id)).lessons);
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch (e) {
     const signedOut = e instanceof ApiError && e.status === 401;
@@ -227,6 +293,13 @@ export async function syncNow() {
       },
     });
   }
+  await refreshUploadStatus();
+}
+
+/** A grown-up pressed Retry on the "waiting to upload" banner (BLD-16). */
+export async function retryUploads() {
+  await uploadMedia(api, { retry: true });
+  syncNow();
 }
 
 /** Debounced sync after local changes. */

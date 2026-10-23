@@ -1,0 +1,1180 @@
+{
+  "schema": "library/1",
+  "pictures": [
+    {
+      "emoji": "🐕",
+      "name": "dog",
+      "tags": [
+        "animal",
+        "pet"
+      ]
+    },
+    {
+      "emoji": "🐈",
+      "name": "cat",
+      "tags": [
+        "animal",
+        "pet"
+      ]
+    },
+    {
+      "emoji": "🐄",
+      "name": "cow",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🐐",
+      "name": "goat",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🐑",
+      "name": "sheep",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🐖",
+      "name": "pig",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🐔",
+      "name": "hen",
+      "tags": [
+        "animal",
+        "farm",
+        "bird",
+        "chicken"
+      ]
+    },
+    {
+      "emoji": "🐓",
+      "name": "rooster",
+      "tags": [
+        "animal",
+        "farm",
+        "bird"
+      ]
+    },
+    {
+      "emoji": "🐤",
+      "name": "chick",
+      "tags": [
+        "animal",
+        "farm",
+        "bird",
+        "baby"
+      ]
+    },
+    {
+      "emoji": "🦆",
+      "name": "duck",
+      "tags": [
+        "animal",
+        "bird",
+        "water"
+      ]
+    },
+    {
+      "emoji": "🐎",
+      "name": "horse",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🫏",
+      "name": "donkey",
+      "tags": [
+        "animal",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🐇",
+      "name": "rabbit",
+      "tags": [
+        "animal",
+        "pet"
+      ]
+    },
+    {
+      "emoji": "🐁",
+      "name": "mouse",
+      "tags": [
+        "animal",
+        "small"
+      ]
+    },
+    {
+      "emoji": "🐟",
+      "name": "fish",
+      "tags": [
+        "animal",
+        "water",
+        "pet"
+      ]
+    },
+    {
+      "emoji": "🐠",
+      "name": "tropical fish",
+      "tags": [
+        "animal",
+        "water",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "🐬",
+      "name": "dolphin",
+      "tags": [
+        "animal",
+        "water",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "🐳",
+      "name": "whale",
+      "tags": [
+        "animal",
+        "water",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "🐙",
+      "name": "octopus",
+      "tags": [
+        "animal",
+        "water",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "🦀",
+      "name": "crab",
+      "tags": [
+        "animal",
+        "water",
+        "sea",
+        "beach"
+      ]
+    },
+    {
+      "emoji": "🐢",
+      "name": "turtle",
+      "tags": [
+        "animal",
+        "water"
+      ]
+    },
+    {
+      "emoji": "🐊",
+      "name": "crocodile",
+      "tags": [
+        "animal",
+        "water",
+        "river"
+      ]
+    },
+    {
+      "emoji": "🦛",
+      "name": "hippo",
+      "tags": [
+        "animal",
+        "water",
+        "river",
+        "africa"
+      ]
+    },
+    {
+      "emoji": "🦒",
+      "name": "giraffe",
+      "tags": [
+        "animal",
+        "wild",
+        "africa",
+        "savannah"
+      ]
+    },
+    {
+      "emoji": "🐘",
+      "name": "elephant",
+      "tags": [
+        "animal",
+        "wild",
+        "africa",
+        "savannah"
+      ]
+    },
+    {
+      "emoji": "🦁",
+      "name": "lion",
+      "tags": [
+        "animal",
+        "wild",
+        "africa",
+        "savannah"
+      ]
+    },
+    {
+      "emoji": "🐆",
+      "name": "leopard",
+      "tags": [
+        "animal",
+        "wild",
+        "africa"
+      ]
+    },
+    {
+      "emoji": "🦓",
+      "name": "zebra",
+      "tags": [
+        "animal",
+        "wild",
+        "africa",
+        "savannah"
+      ]
+    },
+    {
+      "emoji": "🦏",
+      "name": "rhino",
+      "tags": [
+        "animal",
+        "wild",
+        "africa"
+      ]
+    },
+    {
+      "emoji": "🐃",
+      "name": "buffalo",
+      "tags": [
+        "animal",
+        "wild",
+        "africa"
+      ]
+    },
+    {
+      "emoji": "🐒",
+      "name": "monkey",
+      "tags": [
+        "animal",
+        "wild",
+        "forest"
+      ]
+    },
+    {
+      "emoji": "🦍",
+      "name": "gorilla",
+      "tags": [
+        "animal",
+        "wild",
+        "forest"
+      ]
+    },
+    {
+      "emoji": "🐍",
+      "name": "snake",
+      "tags": [
+        "animal",
+        "wild"
+      ]
+    },
+    {
+      "emoji": "🦎",
+      "name": "lizard",
+      "tags": [
+        "animal",
+        "small"
+      ]
+    },
+    {
+      "emoji": "🐸",
+      "name": "frog",
+      "tags": [
+        "animal",
+        "water",
+        "pond"
+      ]
+    },
+    {
+      "emoji": "🦋",
+      "name": "butterfly",
+      "tags": [
+        "animal",
+        "insect",
+        "air"
+      ]
+    },
+    {
+      "emoji": "🐝",
+      "name": "bee",
+      "tags": [
+        "animal",
+        "insect",
+        "air"
+      ]
+    },
+    {
+      "emoji": "🐞",
+      "name": "ladybird",
+      "tags": [
+        "animal",
+        "insect"
+      ]
+    },
+    {
+      "emoji": "🐜",
+      "name": "ant",
+      "tags": [
+        "animal",
+        "insect",
+        "small"
+      ]
+    },
+    {
+      "emoji": "🕷️",
+      "name": "spider",
+      "tags": [
+        "animal",
+        "small"
+      ]
+    },
+    {
+      "emoji": "🦅",
+      "name": "eagle",
+      "tags": [
+        "animal",
+        "bird",
+        "air"
+      ]
+    },
+    {
+      "emoji": "🦉",
+      "name": "owl",
+      "tags": [
+        "animal",
+        "bird",
+        "air",
+        "night"
+      ]
+    },
+    {
+      "emoji": "🦜",
+      "name": "parrot",
+      "tags": [
+        "animal",
+        "bird",
+        "air"
+      ]
+    },
+    {
+      "emoji": "🦩",
+      "name": "flamingo",
+      "tags": [
+        "animal",
+        "bird",
+        "water"
+      ]
+    },
+    {
+      "emoji": "🐧",
+      "name": "penguin",
+      "tags": [
+        "animal",
+        "bird",
+        "cold"
+      ]
+    },
+    {
+      "emoji": "🐻",
+      "name": "bear",
+      "tags": [
+        "animal",
+        "wild"
+      ]
+    },
+    {
+      "emoji": "🐼",
+      "name": "panda",
+      "tags": [
+        "animal",
+        "wild"
+      ]
+    },
+    {
+      "emoji": "🦊",
+      "name": "fox",
+      "tags": [
+        "animal",
+        "wild"
+      ]
+    },
+    {
+      "emoji": "🦔",
+      "name": "hedgehog",
+      "tags": [
+        "animal",
+        "small"
+      ]
+    },
+    {
+      "emoji": "🐿️",
+      "name": "squirrel",
+      "tags": [
+        "animal",
+        "small",
+        "tree"
+      ]
+    },
+    {
+      "emoji": "🍎",
+      "name": "apple",
+      "tags": [
+        "food",
+        "fruit",
+        "red"
+      ]
+    },
+    {
+      "emoji": "🍌",
+      "name": "banana",
+      "tags": [
+        "food",
+        "fruit",
+        "yellow"
+      ]
+    },
+    {
+      "emoji": "🥭",
+      "name": "mango",
+      "tags": [
+        "food",
+        "fruit"
+      ]
+    },
+    {
+      "emoji": "🍊",
+      "name": "orange",
+      "tags": [
+        "food",
+        "fruit"
+      ]
+    },
+    {
+      "emoji": "🍉",
+      "name": "watermelon",
+      "tags": [
+        "food",
+        "fruit"
+      ]
+    },
+    {
+      "emoji": "🍍",
+      "name": "pineapple",
+      "tags": [
+        "food",
+        "fruit"
+      ]
+    },
+    {
+      "emoji": "🍇",
+      "name": "grapes",
+      "tags": [
+        "food",
+        "fruit"
+      ]
+    },
+    {
+      "emoji": "🍓",
+      "name": "strawberry",
+      "tags": [
+        "food",
+        "fruit",
+        "red"
+      ]
+    },
+    {
+      "emoji": "🥑",
+      "name": "avocado",
+      "tags": [
+        "food",
+        "fruit",
+        "green"
+      ]
+    },
+    {
+      "emoji": "🥕",
+      "name": "carrot",
+      "tags": [
+        "food",
+        "vegetable"
+      ]
+    },
+    {
+      "emoji": "🌽",
+      "name": "maize",
+      "tags": [
+        "food",
+        "vegetable",
+        "corn"
+      ]
+    },
+    {
+      "emoji": "🥔",
+      "name": "potato",
+      "tags": [
+        "food",
+        "vegetable"
+      ]
+    },
+    {
+      "emoji": "🍅",
+      "name": "tomato",
+      "tags": [
+        "food",
+        "vegetable",
+        "red"
+      ]
+    },
+    {
+      "emoji": "🥬",
+      "name": "greens",
+      "tags": [
+        "food",
+        "vegetable",
+        "sukuma"
+      ]
+    },
+    {
+      "emoji": "🥚",
+      "name": "egg",
+      "tags": [
+        "food"
+      ]
+    },
+    {
+      "emoji": "🍞",
+      "name": "bread",
+      "tags": [
+        "food"
+      ]
+    },
+    {
+      "emoji": "🍚",
+      "name": "rice",
+      "tags": [
+        "food"
+      ]
+    },
+    {
+      "emoji": "🥛",
+      "name": "milk",
+      "tags": [
+        "food",
+        "drink"
+      ]
+    },
+    {
+      "emoji": "🍯",
+      "name": "honey",
+      "tags": [
+        "food"
+      ]
+    },
+    {
+      "emoji": "🍪",
+      "name": "biscuit",
+      "tags": [
+        "food",
+        "snack"
+      ]
+    },
+    {
+      "emoji": "🍰",
+      "name": "cake",
+      "tags": [
+        "food",
+        "party"
+      ]
+    },
+    {
+      "emoji": "🫖",
+      "name": "teapot",
+      "tags": [
+        "home",
+        "kitchen",
+        "tea"
+      ]
+    },
+    {
+      "emoji": "🥄",
+      "name": "spoon",
+      "tags": [
+        "home",
+        "kitchen"
+      ]
+    },
+    {
+      "emoji": "🍽️",
+      "name": "plate",
+      "tags": [
+        "home",
+        "kitchen"
+      ]
+    },
+    {
+      "emoji": "🪑",
+      "name": "chair",
+      "tags": [
+        "home",
+        "furniture"
+      ]
+    },
+    {
+      "emoji": "🛏️",
+      "name": "bed",
+      "tags": [
+        "home",
+        "furniture",
+        "bedroom"
+      ]
+    },
+    {
+      "emoji": "🛁",
+      "name": "bath",
+      "tags": [
+        "home",
+        "bathroom"
+      ]
+    },
+    {
+      "emoji": "🚪",
+      "name": "door",
+      "tags": [
+        "home"
+      ]
+    },
+    {
+      "emoji": "🪟",
+      "name": "window",
+      "tags": [
+        "home"
+      ]
+    },
+    {
+      "emoji": "🧸",
+      "name": "teddy",
+      "tags": [
+        "toy",
+        "home"
+      ]
+    },
+    {
+      "emoji": "⚽",
+      "name": "football",
+      "tags": [
+        "toy",
+        "sport",
+        "ball"
+      ]
+    },
+    {
+      "emoji": "🏀",
+      "name": "basketball",
+      "tags": [
+        "toy",
+        "sport",
+        "ball"
+      ]
+    },
+    {
+      "emoji": "🪁",
+      "name": "kite",
+      "tags": [
+        "toy",
+        "outside",
+        "air"
+      ]
+    },
+    {
+      "emoji": "🧩",
+      "name": "puzzle",
+      "tags": [
+        "toy"
+      ]
+    },
+    {
+      "emoji": "🎈",
+      "name": "balloon",
+      "tags": [
+        "toy",
+        "party"
+      ]
+    },
+    {
+      "emoji": "📚",
+      "name": "books",
+      "tags": [
+        "school",
+        "reading"
+      ]
+    },
+    {
+      "emoji": "✏️",
+      "name": "pencil",
+      "tags": [
+        "school",
+        "writing"
+      ]
+    },
+    {
+      "emoji": "🎒",
+      "name": "school bag",
+      "tags": [
+        "school"
+      ]
+    },
+    {
+      "emoji": "🖍️",
+      "name": "crayon",
+      "tags": [
+        "school",
+        "drawing"
+      ]
+    },
+    {
+      "emoji": "👟",
+      "name": "shoes",
+      "tags": [
+        "clothes"
+      ]
+    },
+    {
+      "emoji": "👕",
+      "name": "t-shirt",
+      "tags": [
+        "clothes"
+      ]
+    },
+    {
+      "emoji": "👗",
+      "name": "dress",
+      "tags": [
+        "clothes"
+      ]
+    },
+    {
+      "emoji": "🧢",
+      "name": "cap",
+      "tags": [
+        "clothes",
+        "hat"
+      ]
+    },
+    {
+      "emoji": "🧦",
+      "name": "socks",
+      "tags": [
+        "clothes"
+      ]
+    },
+    {
+      "emoji": "🧥",
+      "name": "coat",
+      "tags": [
+        "clothes"
+      ]
+    },
+    {
+      "emoji": "☂️",
+      "name": "umbrella",
+      "tags": [
+        "weather",
+        "rain"
+      ]
+    },
+    {
+      "emoji": "🚗",
+      "name": "car",
+      "tags": [
+        "transport",
+        "road"
+      ]
+    },
+    {
+      "emoji": "🚌",
+      "name": "bus",
+      "tags": [
+        "transport",
+        "road"
+      ]
+    },
+    {
+      "emoji": "🚲",
+      "name": "bicycle",
+      "tags": [
+        "transport",
+        "road"
+      ]
+    },
+    {
+      "emoji": "🏍️",
+      "name": "motorbike",
+      "tags": [
+        "transport",
+        "road",
+        "boda"
+      ]
+    },
+    {
+      "emoji": "🚂",
+      "name": "train",
+      "tags": [
+        "transport"
+      ]
+    },
+    {
+      "emoji": "✈️",
+      "name": "aeroplane",
+      "tags": [
+        "transport",
+        "air"
+      ]
+    },
+    {
+      "emoji": "⛵",
+      "name": "boat",
+      "tags": [
+        "transport",
+        "water"
+      ]
+    },
+    {
+      "emoji": "🚜",
+      "name": "tractor",
+      "tags": [
+        "transport",
+        "farm"
+      ]
+    },
+    {
+      "emoji": "🚑",
+      "name": "ambulance",
+      "tags": [
+        "transport",
+        "help"
+      ]
+    },
+    {
+      "emoji": "🚒",
+      "name": "fire engine",
+      "tags": [
+        "transport",
+        "help"
+      ]
+    },
+    {
+      "emoji": "☀️",
+      "name": "sun",
+      "tags": [
+        "weather",
+        "sky",
+        "day"
+      ]
+    },
+    {
+      "emoji": "🌙",
+      "name": "moon",
+      "tags": [
+        "sky",
+        "night"
+      ]
+    },
+    {
+      "emoji": "⭐",
+      "name": "star",
+      "tags": [
+        "sky",
+        "night"
+      ]
+    },
+    {
+      "emoji": "☁️",
+      "name": "cloud",
+      "tags": [
+        "weather",
+        "sky"
+      ]
+    },
+    {
+      "emoji": "🌧️",
+      "name": "rain",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "emoji": "🌈",
+      "name": "rainbow",
+      "tags": [
+        "weather",
+        "sky",
+        "colour"
+      ]
+    },
+    {
+      "emoji": "⛰️",
+      "name": "mountain",
+      "tags": [
+        "place",
+        "nature"
+      ]
+    },
+    {
+      "emoji": "🌳",
+      "name": "tree",
+      "tags": [
+        "nature",
+        "plant"
+      ]
+    },
+    {
+      "emoji": "🌻",
+      "name": "sunflower",
+      "tags": [
+        "nature",
+        "plant",
+        "flower"
+      ]
+    },
+    {
+      "emoji": "🌸",
+      "name": "flower",
+      "tags": [
+        "nature",
+        "plant"
+      ]
+    },
+    {
+      "emoji": "🍃",
+      "name": "leaf",
+      "tags": [
+        "nature",
+        "plant",
+        "green"
+      ]
+    },
+    {
+      "emoji": "🌊",
+      "name": "wave",
+      "tags": [
+        "water",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "🏠",
+      "name": "house",
+      "tags": [
+        "home",
+        "place"
+      ]
+    },
+    {
+      "emoji": "🏫",
+      "name": "school",
+      "tags": [
+        "place"
+      ]
+    },
+    {
+      "emoji": "🏥",
+      "name": "hospital",
+      "tags": [
+        "place",
+        "help"
+      ]
+    },
+    {
+      "emoji": "⛪",
+      "name": "church",
+      "tags": [
+        "place"
+      ]
+    },
+    {
+      "emoji": "🕌",
+      "name": "mosque",
+      "tags": [
+        "place"
+      ]
+    },
+    {
+      "emoji": "🛒",
+      "name": "shop",
+      "tags": [
+        "place",
+        "market"
+      ]
+    },
+    {
+      "emoji": "🏖️",
+      "name": "beach",
+      "tags": [
+        "place",
+        "sea"
+      ]
+    },
+    {
+      "emoji": "👶",
+      "name": "baby",
+      "tags": [
+        "people",
+        "family"
+      ]
+    },
+    {
+      "emoji": "👧",
+      "name": "girl",
+      "tags": [
+        "people",
+        "family"
+      ]
+    },
+    {
+      "emoji": "👦",
+      "name": "boy",
+      "tags": [
+        "people",
+        "family"
+      ]
+    },
+    {
+      "emoji": "👩",
+      "name": "woman",
+      "tags": [
+        "people",
+        "family",
+        "mum"
+      ]
+    },
+    {
+      "emoji": "👨",
+      "name": "man",
+      "tags": [
+        "people",
+        "family",
+        "dad"
+      ]
+    },
+    {
+      "emoji": "👵",
+      "name": "grandma",
+      "tags": [
+        "people",
+        "family",
+        "shosho"
+      ]
+    },
+    {
+      "emoji": "👴",
+      "name": "grandpa",
+      "tags": [
+        "people",
+        "family",
+        "guka"
+      ]
+    },
+    {
+      "emoji": "👩‍🏫",
+      "name": "teacher",
+      "tags": [
+        "people",
+        "school"
+      ]
+    },
+    {
+      "emoji": "👩‍⚕️",
+      "name": "doctor",
+      "tags": [
+        "people",
+        "help"
+      ]
+    },
+    {
+      "emoji": "❤️",
+      "name": "heart",
+      "tags": [
+        "shape",
+        "love",
+        "red"
+      ]
+    },
+    {
+      "emoji": "🔺",
+      "name": "triangle",
+      "tags": [
+        "shape"
+      ]
+    },
+    {
+      "emoji": "🟦",
+      "name": "square",
+      "tags": [
+        "shape",
+        "blue"
+      ]
+    },
+    {
+      "emoji": "⚪",
+      "name": "circle",
+      "tags": [
+        "shape",
+        "white"
+      ]
+    },
+    {
+      "emoji": "🔴",
+      "name": "red",
+      "tags": [
+        "colour"
+      ]
+    },
+    {
+      "emoji": "🟡",
+      "name": "yellow",
+      "tags": [
+        "colour"
+      ]
+    },
+    {
+      "emoji": "🟢",
+      "name": "green",
+      "tags": [
+        "colour"
+      ]
+    },
+    {
+      "emoji": "🔵",
+      "name": "blue",
+      "tags": [
+        "colour"
+      ]
+    }
+  ]
+}

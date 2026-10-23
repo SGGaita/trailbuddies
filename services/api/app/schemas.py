@@ -135,3 +135,49 @@ class EventIn(Strict):
 class EventsIn(Strict):
     family_id: str
     events: list[EventIn] = Field(max_length=500)
+
+
+MediaKind = Literal["photo", "voice"]
+Template = Literal["learn", "sort", "puzzle"]
+ULID_RE = r"^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$"
+
+
+def _ulid(**kw):
+    return Field(min_length=26, max_length=26, pattern=ULID_RE, **kw)
+
+
+def _one_line(v: str | None) -> str | None:
+    return " ".join(v.split()) if v is not None else None
+
+
+class MediaIn(Strict):
+    id: str = _ulid()
+    kind: MediaKind
+    content_type: str = Field(max_length=64)
+    bytes: int = Field(gt=0)
+
+
+class CardIn(Strict):
+    """One card. Free text from a grown-up's screen, kept short and on one line."""
+
+    id: str = Field(min_length=1, max_length=26, pattern=r"^[0-9A-Za-z_-]+$")
+    label: str = Field(min_length=1, max_length=40)
+    emoji: str | None = Field(default=None, max_length=16)
+    photo: str | None = _ulid(default=None)
+    voice: str | None = _ulid(default=None)
+    group: str | None = Field(default=None, max_length=24)
+
+    _clean = field_validator("label", "group")(lambda v: _one_line(v))
+
+
+class CustomLessonIn(Strict):
+    title: str = Field(min_length=1, max_length=60)
+    template: Template = "learn"
+    question: str | None = Field(default=None, max_length=80)
+    puzzle_card: str | None = Field(default=None, max_length=26)
+    cards: list[CardIn] = Field(min_length=1, max_length=12)
+    assigned: list[str] = Field(default_factory=list, max_length=6)
+    version: int = Field(default=1, ge=1)
+    updated_at: datetime
+
+    _clean = field_validator("title", "question")(lambda v: _one_line(v))

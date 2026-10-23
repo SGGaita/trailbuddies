@@ -29,6 +29,8 @@ def test_upgrade_creates_tables_and_downgrade_removes_them(tmp_path):
         "sessions",
         "login_tokens",
         "events",
+        "custom_lessons",
+        "media_assets",
     } <= tables
     learner_cols = {c["name"] for c in inspect(create_engine(url)).get_columns("learners")}
     # Data minimisation: no surname, email, photo or location for children.

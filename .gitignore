@@ -22,3 +22,4 @@ apps/web/e2e/screenshots/
 
 # Local troubleshooting scripts and logs (never commit)
 _netdiag/
+services/api/media-data/

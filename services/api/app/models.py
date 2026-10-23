@@ -147,7 +147,7 @@ class EditHistory(Base):
     __tablename__ = "edit_history"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
-    entity: Mapped[str] = mapped_column(String(16), doc="learner or family")
+    entity: Mapped[str] = mapped_column(String(16), doc="learner, family or lesson")
     entity_id: Mapped[str] = mapped_column(String(26), index=True)
     data: Mapped[dict] = mapped_column(JSON)
     reason: Mapped[str] = mapped_column(
@@ -169,3 +169,39 @@ class Invite(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class MediaAsset(Base):
+    """A grown-up's photo or voice clip for a custom lesson (BLD-15). The file itself is in
+    object storage; this row says whose it is and whether the server has checked it."""
+
+    __tablename__ = "media_assets"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True, doc="made on the device, so cards work offline")
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(8), doc="photo or voice")
+    content_type: Mapped[str] = mapped_column(String(32))
+    bytes: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(12), default="pending", doc="pending, ready or rejected")
+    reject_code: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CustomLesson(Base):
+    """A lesson a grown-up made in the Lesson Builder (BLD-01..09). Cards keep their ids for
+    life so progress survives edits; the lesson's exercises are generated on the device."""
+
+    __tablename__ = "custom_lessons"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(60))
+    template: Mapped[str] = mapped_column(String(8))
+    question: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    puzzle_card: Mapped[str | None] = mapped_column(String(26), nullable=True)
+    cards: Mapped[list] = mapped_column(JSON, default=list)
+    assigned: Mapped[list] = mapped_column(JSON, default=list, doc="learner ids")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

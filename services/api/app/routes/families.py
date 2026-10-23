@@ -74,8 +74,8 @@ POLICY = {
     ],
     "scopes": {
         "progress": {"label": "Save progress so it follows each child to every device", "required": True},
-        "voice": {"label": "Let grown-ups record their own voice for lessons (later)", "required": False},
-        "photos": {"label": "Let grown-ups add their own photos to lessons (later)", "required": False},
+        "voice": {"label": "Let grown-ups record their own voice for lessons", "required": False},
+        "photos": {"label": "Let grown-ups add their own photos to lessons", "required": False},
     },
 }
 

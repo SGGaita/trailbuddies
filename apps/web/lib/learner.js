@@ -12,7 +12,7 @@ import {
 import { getReadyUnits, economy } from "@trailbuddies/content";
 
 /** Earning reasons that count toward the daily cap. */
-const CAPPED = new Set(["lesson", "trophy", "review", "game"]);
+const CAPPED = new Set(["lesson", "trophy", "review", "game", "custom"]);
 
 /**
  * Compose a learner's view from their profile and the event log: progress, treasures,

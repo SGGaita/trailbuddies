@@ -9,11 +9,12 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { buddySays, economy } from "@trailbuddies/content";
-import { startLadder, answer, lessonOutcome, celebrationFor } from "@trailbuddies/domain";
+import { startLadder, answer, lessonOutcome, celebrationFor, restReason } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
 import { payable, badgeEvents } from "@/lib/rewards";
-import { speak, stop } from "@/lib/speech";
+import { speak, stop, registerTextClip, clearTextClips } from "@/lib/speech";
+import { mediaUrl } from "@/lib/media";
 import { playSound } from "@/lib/sounds";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
@@ -40,11 +41,13 @@ function readE2E() {
  * C06 Lesson player. Runs a lesson, trophy or review: intro, then exercises with the
  * three-step hint ladder, then the lesson-complete screen. All scoring is in
  * @trailbuddies/domain; this component only sequences steps and records events.
- * @param {{ where: { kind: "lesson" | "trophy" | "review", unitId?: string, step?: string, subjectId?: string } }} props
+ * A custom lesson can also run as a grown-up's preview (BLD-07): same child screens, a
+ * "Preview" banner, and nothing is recorded.
+ * @param {{ where: { kind: "lesson" | "trophy" | "review" | "custom", unitId?: string, step?: string, subjectId?: string, id?: string, preview?: boolean, learnerId?: string } }} props
  */
 export default function LessonPlayer({ where }) {
   const ready = useHydrated();
-  const learner = useLearner();
+  const learner = useLearner(where.preview ? where.learnerId : undefined);
   const router = useRouter();
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
@@ -61,10 +64,12 @@ function Player({ where, learner }) {
   const router = useRouter();
   // Checked when the lesson opens only, so finishing a lesson always shows its stars.
   const restNow = useRest(learner);
-  const [rest] = useState(restNow);
+  const preview = !!where.preview;
+  const [rest, setRest] = useState(preview ? null : restNow);
+  const settings = useFamily((s) => s.settings);
 
   const [plan] = useState(() => {
-    const p = planLesson(where, learner, Date.now());
+    const p = planLesson(where, learner, Date.now(), useFamily.getState().lessons);
     if (p.blocked) return p;
     return {
       ...p,
@@ -118,7 +123,38 @@ function Player({ where, learner }) {
 
   useEffect(() => stop, []);
 
+  // A grown-up's recordings say the card words in their own voice (BLD-01).
+  useEffect(() => {
+    if (!plan.custom) return undefined;
+    let live = true;
+    const made = [];
+    plan.custom.cards
+      .filter((c) => c.voice)
+      .forEach((c) =>
+        mediaUrl(c.voice).then((url) => {
+          if (!live || !url) return;
+          made.push(url);
+          registerTextClip(c.label, url);
+        }),
+      );
+    return () => {
+      live = false;
+      clearTextClips();
+      made.filter((u) => u.startsWith("blob:")).forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [plan]);
+
   const finish = () => {
+    if (preview) {
+      // BLD-07: a preview plays exactly like the real thing but records nothing.
+      const o = lessonOutcome(lesson, results.current, {
+        lessonsToday: plan.todayBefore,
+        goal,
+        rules: economy.earn,
+      });
+      setOutcome({ ...o, treasures: 0, badges: [], reachedGoal: false, preview: true });
+      return;
+    }
     const o = lessonOutcome(lesson, results.current, {
       lessonsToday: plan.todayBefore,
       goal,
@@ -136,9 +172,28 @@ function Player({ where, learner }) {
     setOutcome({ ...o, treasures: paid, badges: won.badges });
   };
 
+  /** Keep the answers given so far (leaving early, or resting mid-lesson). */
+  const keepAnswers = () => {
+    if (preview || !lesson) return;
+    const o = lessonOutcome(lesson, results.current, { lessonsToday: plan.todayBefore, goal });
+    const events = completionEvents(learner.id, lesson, { ...o, complete: false }, { durationSec: 0 });
+    if (events.length) record(events);
+  };
+
   const advance = () => {
-    if (index + 1 >= lesson.steps.length) finish();
-    else setIndex(index + 1);
+    if (index + 1 >= lesson.steps.length) return finish();
+    // PAR-03: when the time limit or bedtime arrives mid-lesson, the activity that was
+    // playing finishes first, then the buddy says goodbye and the break screen shows.
+    const elapsed = (Date.now() - plan.startedAt) / 60_000;
+    const due = preview || learner.adult ? null : restReason(settings, learner.minutes + elapsed);
+    if (due) {
+      keepAnswers();
+      const vars = { name: learner.name };
+      say(buddySays(due === "bedtime" ? "rest.bedtime" : "rest.goodbye", { buddy, vars }));
+      setRest(due);
+      return;
+    }
+    setIndex(index + 1);
   };
 
   // After a right answer, move on once the praise has shown. Tied to state (not a
@@ -200,11 +255,7 @@ function Player({ where, learner }) {
 
   const leave = () => {
     stop();
-    if (lesson) {
-      const o = lessonOutcome(lesson, results.current, { lessonsToday: plan.todayBefore, goal });
-      const events = completionEvents(learner.id, lesson, { ...o, complete: false }, { durationSec: 0 });
-      if (events.length) record(events);
-    }
+    keepAnswers();
     router.push(plan.back || "/play/map");
   };
 
@@ -212,7 +263,14 @@ function Player({ where, learner }) {
   if (plan.blocked) return <Loading />;
   if (outcome)
     return (
-      <LessonComplete lesson={lesson} outcome={outcome} learner={learner} goal={goal} back={plan.back} />
+      <LessonComplete
+        lesson={lesson}
+        outcome={outcome}
+        learner={learner}
+        goal={goal}
+        back={plan.back}
+        preview={preview}
+      />
     );
 
   const Exercise = EXERCISES[step.type];
@@ -223,6 +281,7 @@ function Player({ where, learner }) {
       component="main"
       sx={{ minHeight: "100dvh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}
     >
+      {preview && <PreviewBanner />}
       <Box
         component="header"
         sx={{
@@ -376,6 +435,26 @@ function Player({ where, learner }) {
           </Button>
         </Box>
       </Dialog>
+    </Box>
+  );
+}
+
+/** BLD-07: shown over a grown-up's preview so it's never mistaken for a child's session. */
+export function PreviewBanner() {
+  return (
+    <Box
+      role="note"
+      sx={{
+        bgcolor: colors.sun.main,
+        color: colors.ink,
+        textAlign: "center",
+        fontWeight: 800,
+        py: 0.75,
+        px: 2,
+        fontSize: 15,
+      }}
+    >
+      {t("builder.previewBanner")}
     </Box>
   );
 }
