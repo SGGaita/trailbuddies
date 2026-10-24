@@ -385,6 +385,7 @@ export default {
   "progress.recentNone": "No lessons yet.",
   "progress.badges": "Badges",
   "progress.badgesNone": "None yet",
+  "progress.badgesEarned": "{n} earned",
   "progress.openAs": "Open the learner app as {name}",
   "progress.practice": "Practice",
   "placeholder.sprint": "This screen is built in {sprint}. The prototype shows how it will work.",

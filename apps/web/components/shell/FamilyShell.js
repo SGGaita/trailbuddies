@@ -164,8 +164,10 @@ export default function FamilyShell({
         <Box component="main" sx={{ flex: 1, px: { xs: 2.25, sm: 4.25 }, py: 3 }}>
           <Box
             sx={{
-              maxWidth: wide ? 1100 : 720,
-              mx: "auto",
+              // Wide pages (home, progress) fill the main area like the prototype;
+              // form pages stay a readable centred column.
+              maxWidth: wide ? "none" : 720,
+              mx: wide ? 0 : "auto",
               display: "flex",
               flexDirection: "column",
               gap: 1.75,
