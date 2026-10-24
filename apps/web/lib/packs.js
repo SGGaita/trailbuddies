@@ -72,12 +72,18 @@ export function wantedSubjects(learners) {
 export async function syncPacks({ force = false, learners } = {}) {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return;
   const st = useFamily.getState();
+  // The demo family has no server; its content is what's built in.
+  if (st.mode !== "account") return;
   let manifest;
   try {
     manifest = await api.contentManifest(CHANNEL);
   } catch {
     useFamily.setState({ packs: { ...st.packs, release: null, checkedAt: Date.now() } });
     return; // nothing published yet, or offline: built-in content keeps working
+  }
+  if (!manifest?.release) {
+    useFamily.setState({ packs: { ...st.packs, release: null, checkedAt: Date.now() } });
+    return;
   }
   const rows = await store().packs.toArray();
   const cached = Object.fromEntries(rows.map((r) => [r.subject, r.hash]));

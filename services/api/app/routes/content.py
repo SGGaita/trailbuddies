@@ -2,6 +2,8 @@
 isn't personal, so these need no sign-in; a pack's name carries its hash, so it never changes
 and can be cached for a year."""
 
+import json
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..packs import CHANNELS, PACK_NAME, manifest_key
@@ -15,8 +17,8 @@ def manifest(channel: str = "production", storage=Depends(get_storage)) -> Respo
     if channel not in CHANNELS:
         raise HTTPException(422, "channel is production or preview")
     data = storage.get_key(manifest_key(channel))
-    if data is None:
-        raise HTTPException(404, "No packs published yet")
+    if data is None:  # nothing published yet: the built-in content is all there is
+        data = json.dumps({"schema": "packs/1", "release": None, "channel": channel, "packs": []}).encode()
     return Response(data, media_type="application/json", headers={"Cache-Control": "no-cache"})
 
 

@@ -180,7 +180,12 @@ def test_published_packs_are_served_without_sign_in(client, storage, tmp_path):
         ],
     }
     (folder / "manifest-production.json").write_text(json.dumps(manifest))
-    assert client.get("/content/manifest").status_code == 404
+    assert client.get("/content/manifest").json() == {
+        "schema": "packs/1",
+        "release": None,
+        "channel": "production",
+        "packs": [],
+    }
     assert publish(folder, storage) == ["numbers.0123456789abcdef.json", "manifest-production.json"]
     r = client.get("/content/manifest?channel=production")
     assert r.status_code == 200 and r.json()["release"] == "2027.03.1"

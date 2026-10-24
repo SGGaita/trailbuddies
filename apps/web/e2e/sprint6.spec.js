@@ -136,7 +136,7 @@ test("a grown-up locks one subject's level (ADP-02)", async ({ page }, testInfo)
   await demo(page);
   await page.goto("/family/settings");
   await passGate(page);
-  await page.getByRole("combobox", { name: "Numbers level for Zawadi" }).click();
+  await page.getByRole("group", { name: "Subject levels for Zawadi" }).getByRole("combobox", { name: "Numbers" }).click();
   await page.getByRole("option", { name: "Locked: easier" }).click();
   await expect(page.getByText(/Numbers: Now: Level 1/).first()).toBeVisible();
   await noSideScroll(page);
@@ -312,5 +312,5 @@ test("content packs download and update lessons on the next launch (CNT-02, OFF-
   await page.getByRole("button", { name: /Wanjiru/ }).click();
   await page.goto("/play/trail/numbers");
   await page.getByRole("button", { name: /^Lesson 1/ }).first().click();
-  await expect(page.getByText("Meet one, two and three (updated)")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Meet one, two and three (updated)" })).toBeVisible();
 });

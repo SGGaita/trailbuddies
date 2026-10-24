@@ -255,7 +255,11 @@ export function SubjectLocks({ learner, disabled }) {
     updateLearner(learner.id, { levels: next });
   };
   return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1, width: "100%" }}>
+    <Box
+      role="group"
+      aria-label={`Subject levels for ${learner.name}`}
+      sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1, width: "100%" }}
+    >
       {subjects.map((s) => (
         <TextField
           key={s.id}
@@ -265,7 +269,6 @@ export function SubjectLocks({ learner, disabled }) {
           value={levels[s.id] || "auto"}
           onChange={(e) => set(s.id, e.target.value)}
           disabled={disabled}
-          slotProps={{ select: { "aria-label": `${s.name} level for ${learner.name}` } }}
           sx={{ minWidth: 150, flex: { xs: "1 1 140px", sm: "0 0 auto" } }}
         >
           {DIFFICULTY_SETTINGS.map((d) => (

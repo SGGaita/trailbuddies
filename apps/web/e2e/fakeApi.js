@@ -116,7 +116,8 @@ export async function fakeApi(context, srv) {
     // Published content needs no sign-in (CNT-02).
     if (path === "/content/manifest") {
       const man = srv.manifest[url.searchParams.get("channel") || "production"];
-      return man ? json(route, 200, man) : json(route, 404, { detail: "No packs published yet" });
+      const channel = url.searchParams.get("channel") || "production";
+      return json(route, 200, man || { schema: "packs/1", release: null, channel, packs: [] });
     }
     m0 = path.match(/^\/content\/packs\/([^/]+)$/);
     if (m0) return srv.packs[m0[1]] ? json(route, 200, srv.packs[m0[1]]) : json(route, 404, { detail: "Pack not found" });
