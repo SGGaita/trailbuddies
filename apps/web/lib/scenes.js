@@ -1,3 +1,4 @@
+import { hasArt, itemSvg } from "./itemArt";
 /**
  * Jigsaw pictures (GAM-01): a simple illustrated scene per topic, drawn from shapes and
  * the unit's own pictures, until illustrated art or a parent's photo is used (Sprint 5).
@@ -44,7 +45,9 @@ export function sceneSvg(unit) {
       const y = i < 3 ? 300 : 490;
       parts.push(
         `<circle cx="${x}" cy="${y}" r="72" fill="#fff" opacity=".85"/>`,
-        `<text x="${x}" y="${y - 12}" font-size="64" text-anchor="middle" dominant-baseline="middle">${esc(it.emoji || "")}</text>`,
+        hasArt(it)
+          ? `<g transform="translate(${x - 40} ${y - 52}) scale(.8)">${itemSvg(it)}</g>`
+          : `<text x="${x}" y="${y - 12}" font-size="64" text-anchor="middle" dominant-baseline="middle">${esc(it.emoji || "")}</text>`,
         `<text x="${x}" y="${y + 46}" font-size="34" font-weight="800" font-family="sans-serif" fill="#263322" text-anchor="middle">${esc(it.label)}</text>`,
       );
     });

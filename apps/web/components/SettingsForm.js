@@ -10,7 +10,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Alert from "@mui/material/Alert";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { hashPin, pinProblem, needsPin, ageFrom } from "@trailbuddies/domain";
+import { hashPin, pinProblem, needsPin, ageFrom, BREAK_CHOICES } from "@trailbuddies/domain";
 import { economy } from "@trailbuddies/content";
 import { useFamily } from "@/lib/store";
 
@@ -41,7 +41,10 @@ const Row = ({ title, sub, children }) => (
   </Box>
 );
 
-/** Daily goal, screen-time limit, bedtime lock, voice, voice speed and sound. */
+/**
+ * Daily goal, screen-time limit, bedtime lock, voice, voice speed, sound, break reminders
+ * (PAR-04), captions (ACC-03), calm mode (ACC-02) and the treasure limit.
+ */
 export function FamilySettingsForm() {
   const settings = useFamily((s) => s.settings);
   const setSettings = useFamily((s) => s.setSettings);
@@ -129,6 +132,33 @@ export function FamilySettingsForm() {
           onChange={(e) => setSettings({ sound: e.target.checked })}
           slotProps={{ input: { "aria-label": t("settings.sound") } }}
         />
+      </Row>
+      <Row title={t("settings.breaks")} sub={t("settings.breaksSub")}>
+        {group(
+          settings.breaks || 0,
+          (breaks) => setSettings({ breaks }),
+          BREAK_CHOICES.map((n) => [n, n ? String(n) : t("settings.off")]),
+          t("settings.breaks"),
+        )}
+      </Row>
+      <Row title={t("settings.captions")} sub={t("settings.captionsSub")}>
+        <Switch
+          checked={settings.captions !== false}
+          onChange={(e) => setSettings({ captions: e.target.checked })}
+          slotProps={{ input: { "aria-label": t("settings.captions") } }}
+        />
+      </Row>
+      <Row title={t("settings.calm")} sub={t("settings.calmSub")}>
+        {group(
+          settings.calm || "device",
+          (calm) => setSettings({ calm }),
+          [
+            ["device", t("settings.calmDevice")],
+            ["on", t("settings.on")],
+            ["off", t("settings.off")],
+          ],
+          t("settings.calm"),
+        )}
       </Row>
       <Row title={t("settings.cap")} sub={t("settings.capSub", { n: economy.dailyCap })}>
         <Switch

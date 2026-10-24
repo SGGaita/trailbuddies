@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getUnit, buddySays } from "@trailbuddies/content";
-import { gameTopics } from "@trailbuddies/domain";
+import { gameTopics, customUnit, LESSON_GAMES } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { gameEvents } from "@/lib/rewards";
 import { speak } from "@/lib/speech";
@@ -35,8 +35,18 @@ export default function GamePlayer({ game, unitId }) {
   const ready = useHydrated();
   const learner = useLearner();
   const router = useRouter();
-  const unit = getUnit(unitId);
-  const open = !!learner && !!unit && gameTopics([unit], learner.progress)[0].open;
+  const q = useSearchParams();
+  // BLD-06: a family lesson's cards can be played in the games its grown-up switched on.
+  const lesson = useFamily((s) => (unitId === "family" ? s.lessons.find((l) => l.id === q.get("lesson")) : null));
+  const familyOpen =
+    !!lesson &&
+    !!learner &&
+    (lesson.assigned || []).includes(learner.id) &&
+    (lesson.options?.games ?? LESSON_GAMES).includes(game) &&
+    lesson.cards.length >= 3;
+  const unit = unitId === "family" ? (familyOpen ? customUnit(lesson) : null) : getUnit(unitId);
+  const open =
+    !!learner && !!unit && (unitId === "family" ? familyOpen : gameTopics([unit], learner.progress)[0].open);
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
     else if (ready && learner && !open) router.replace("/play/more/games");

@@ -2,6 +2,8 @@
 // routing on /api/*. It follows the real API's contract (see services/api/tests) so the
 // web app's sign-in, onboarding and sync can be tested at every screen size.
 
+import { countryRules, deviceName, deviceLimit } from "@trailbuddies/domain";
+
 export const POLICY = "2026-10";
 const LIMITS = { free: 1, family: 6 };
 
@@ -20,6 +22,9 @@ export function newServer() {
     tokens: {},
     sent: [],
     offline: false,
+    devices: {}, // session id -> { name, last_seen_at }
+    manifest: {}, // channel -> published manifest (CNT-02)
+    packs: {}, // file -> pack
     seq: 0,
   };
 }
@@ -35,6 +40,8 @@ const familyOut = (srv, fam, role = "owner") => ({
   ...fam,
   role,
   learner_limit: LIMITS[fam.plan] ?? 1,
+  device_limit: deviceLimit(fam.plan),
+  region: countryRules(fam.country).region,
   consent: srv.consents[fam.id] || null,
   learners: Object.values(srv.learners)
     .filter((l) => l.family_id === fam.id)
@@ -49,6 +56,9 @@ const defaultSettings = () => ({
   voice_rate: 1,
   sound: true,
   treasure_cap: true,
+  breaks: 0,
+  captions: true,
+  calm: "device",
 });
 
 /**
@@ -59,9 +69,10 @@ const defaultSettings = () => ({
 export async function fakeApi(context, srv) {
   let sessionId = null;
   let m0;
-  const signIn = (uid) => {
+  const signIn = (uid, ua) => {
     sessionId = `S${Object.keys(srv.sessions).length + 1}-${Math.random().toString(36).slice(2)}`;
     srv.sessions[sessionId] = uid;
+    srv.devices[sessionId] = { name: deviceName(ua), last_seen_at: new Date().toISOString() };
   };
   const userFor = (email) => {
     let u = Object.values(srv.users).find((x) => x.email === email);
@@ -102,6 +113,13 @@ export async function fakeApi(context, srv) {
       return route.fulfill({ status: 200, contentType: md.type, body: md.bytes });
     }
     if (path === "/auth/config") return json(route, 200, { google: false, policy_version: POLICY });
+    // Published content needs no sign-in (CNT-02).
+    if (path === "/content/manifest") {
+      const man = srv.manifest[url.searchParams.get("channel") || "production"];
+      return man ? json(route, 200, man) : json(route, 404, { detail: "No packs published yet" });
+    }
+    m0 = path.match(/^\/content\/packs\/([^/]+)$/);
+    if (m0) return srv.packs[m0[1]] ? json(route, 200, srv.packs[m0[1]]) : json(route, 404, { detail: "Pack not found" });
     if (path === "/policy")
       return json(route, 200, {
         version: POLICY,
@@ -131,7 +149,7 @@ export async function fakeApi(context, srv) {
         return json(route, 400, { detail: "This link has expired or was already used. Ask for a new one." });
       delete srv.tokens[body.token];
       const [u, isNew] = userFor(email);
-      signIn(u.id);
+      signIn(u.id, req.headers()["user-agent"]);
       return json(route, 200, { user: u, new: isNew });
     }
     if (path === "/invites/accept" && method === "POST") {
@@ -141,7 +159,7 @@ export async function fakeApi(context, srv) {
       inv.accepted = true;
       const [u] = userFor(inv.email);
       srv.members.push({ family: inv.family, user: u.id, role: inv.role });
-      signIn(u.id);
+      signIn(u.id, req.headers()["user-agent"]);
       return json(route, 200, { family_id: inv.family, role: inv.role });
     }
     if (path === "/auth/logout") {
@@ -182,6 +200,7 @@ export async function fakeApi(context, srv) {
       const f = srv.families[m[1]];
       if (Date.parse(body.updated_at) > Date.parse(f.updated_at)) {
         if (body.settings) f.settings = body.settings;
+        if (body.country) f.country = body.country.toUpperCase();
         if (body.clear_pin) f.pin = null;
         else if (body.pin) f.pin = body.pin;
         f.updated_at = body.updated_at;
@@ -194,6 +213,7 @@ export async function fakeApi(context, srv) {
         policy_version: body.policy_version,
         scopes: body.scopes,
         method: "checkbox",
+        region: countryRules(srv.families[m[1]].country).region,
         given_at: new Date().toISOString(),
       };
       return json(route, 201, srv.consents[m[1]]);
@@ -222,9 +242,34 @@ export async function fakeApi(context, srv) {
       srv.sent.push({ to: inv.email, token, kind: "invite" });
       return json(route, 201, { id: inv.id, email: inv.email, role: inv.role });
     }
+    // Devices (FAM-08).
+    m = path.match(/^\/families\/([^/]+)\/devices$/);
+    if (m && method === "GET") {
+      const users = srv.members.filter((x) => x.family === m[1]).map((x) => x.user);
+      const devices = Object.entries(srv.sessions)
+        .filter(([, uid]) => users.includes(uid))
+        .map(([sid, uid]) => ({
+          id: sid,
+          name: srv.devices[sid]?.name || "A device",
+          who: srv.users[uid].name || srv.users[uid].email.split("@")[0],
+          last_seen_at: srv.devices[sid]?.last_seen_at || new Date().toISOString(),
+          this_device: sid === sessionId,
+        }));
+      const limit = deviceLimit(srv.families[m[1]].plan);
+      return json(route, 200, { devices, limit, over: Math.max(0, devices.length - limit) });
+    }
+    m = path.match(/^\/families\/([^/]+)\/devices\/([^/]+)$/);
+    if (m && method === "DELETE") {
+      if (!srv.sessions[m[2]]) return json(route, 404, { detail: "Device not found" });
+      delete srv.sessions[m[2]];
+      return json(route, 204);
+    }
     m = path.match(/^\/families\/([^/]+)\/learners\/([^/]+)$/);
     if (m && method === "PUT") {
       if (role === "viewer") return forbidViewer();
+      // ONB-05: a country with different privacy rules needs consent again.
+      if (srv.consents[m[1]]?.region && srv.consents[m[1]].region !== countryRules(srv.families[m[1]].country).region)
+        return json(route, 403, { detail: "Your country's privacy rules changed. Please agree again." });
       const cur = srv.learners[m[2]];
       const count = Object.values(srv.learners).filter((l) => l.family_id === m[1]).length;
       const limit = LIMITS[srv.families[m[1]].plan] ?? 1;

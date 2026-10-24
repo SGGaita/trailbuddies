@@ -45,3 +45,18 @@ test("structured errors keep their code (plan limit)", async () => {
   const c = createClient({ baseUrl: "/api", fetch: recorder(402, body).fetch });
   await expect(c.putLearner("F", "L", {})).rejects.toMatchObject({ status: 402, code: "plan_limit", message: "Your plan allows 6 learners." });
 });
+
+test("device and content paths", async () => {
+  const r = recorder(200, {});
+  const c = createClient({ baseUrl: "/api", fetch: r.fetch });
+  await c.devices("F1");
+  await c.signOutDevice("F1", "S 1");
+  await c.contentManifest("production");
+  await c.contentPack("numbers.0123456789abcdef.json");
+  expect(r.calls.map((x) => `${x.init.method || "GET"} ${x.url}`)).toEqual([
+    "GET /api/families/F1/devices",
+    "DELETE /api/families/F1/devices/S%201",
+    "GET /api/content/manifest?channel=production",
+    "GET /api/content/packs/numbers.0123456789abcdef.json",
+  ]);
+});

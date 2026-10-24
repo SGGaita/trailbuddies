@@ -2,6 +2,7 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
+import { ItemFace } from "@/components/MediaImage";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -9,10 +10,10 @@ import Dialog from "@mui/material/Dialog";
 import Snackbar from "@mui/material/Snackbar";
 import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubject, getUnit, buddyLine, buddySays } from "@trailbuddies/content";
+import { getSubject, getUnit, getReadyUnits, buddyLine, buddySays } from "@trailbuddies/content";
 import { layoutTrail, pathData, subjectProgress, currentUnit, newlyOpened } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
-import { trailUnits } from "@/lib/trail";
+import { trailUnits, lessonHref } from "@/lib/trail";
 import { speak } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import { readMemory, writeMemory } from "@/lib/memory";
@@ -71,6 +72,9 @@ const stoneSx = (node) => {
   if (node.state === "planned") Object.assign(base, { opacity: 0.4, borderStyle: "dashed" });
   return base;
 };
+
+/** Bronze stars mark units a placement skipped (ADP-05, ONB-09). */
+const BRONZE = "#b0702f";
 
 /** C05 Subject trail. Units are stages, lessons are stones, each unit ends with a trophy. */
 export default function Trail({ subjectId }) {
@@ -161,7 +165,7 @@ export default function Trail({ subjectId }) {
     const href =
       node.kind === "review"
         ? `/play/review/${subjectId}`
-        : `/play/lesson/${node.unitId}/${node.kind === "trophy" ? "trophy" : node.n}`;
+        : lessonHref(node.unitId, node.kind === "trophy" ? "trophy" : node.n);
     setLesson({ node, title, unit: u, href });
     speak(title, { enabled: voice });
   };
@@ -170,6 +174,13 @@ export default function Trail({ subjectId }) {
     speak(msg, { band: learner.band, buddy: learner.buddy, enabled: voice });
   };
   const goNext = () => (trail.next ? open(trail.next) : say(t("trail.allDone")));
+  // ADP-05: a child can skip what they already know (offered up front the first time).
+  const goPlace = () =>
+    router.push(`/play/placement?learner=${encodeURIComponent(learner.id)}&subject=${subjectId}`);
+  const firstVisit =
+    !start &&
+    getReadyUnits(subjectId).length > 1 &&
+    !units.some((u) => u.lessonIds.some((id) => learner.progress[id]));
 
   return (
     <LearnerShell learner={learner} title={subject.place} back="/play/map" goal={goal} nav={false}>
@@ -183,6 +194,30 @@ export default function Trail({ subjectId }) {
             px: 1,
           }}
         >
+          {firstVisit && (
+            <Box
+              sx={{
+                maxWidth: 520,
+                mx: "auto",
+                mt: { xs: 1.5, sm: 2.5 },
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                p: 1.5,
+                bgcolor: "background.paper",
+                border: `2px solid ${colors.line}`,
+                borderRadius: 4.5,
+              }}
+            >
+              <Box aria-hidden="true" sx={{ fontSize: 34 }}>
+                🎯
+              </Box>
+              <Typography sx={{ flex: 1, fontWeight: 800 }}>{t("trail.knowIt")}</Typography>
+              <Button variant="contained" onClick={goPlace}>
+                {t("trail.showWhatYouKnow")}
+              </Button>
+            </Box>
+          )}
           {mountain && (
             <Box sx={{ maxWidth: { xs: 420, sm: 520 }, mx: "auto", pt: { xs: 1.5, sm: 2.5 } }}>
               <NumberMountain peaks band={learner.band} buddy={learner.buddy} />
@@ -285,7 +320,7 @@ export default function Trail({ subjectId }) {
                     ) || undefined
                   }
                   data-unit={node.unitId}
-                  aria-label={`${label}${node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
+                  aria-label={`${label}${node.bronze ? ", skipped, bronze star" : node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
                   sx={{
                     ...stoneSx(node),
                     ...pos,
@@ -294,7 +329,7 @@ export default function Trail({ subjectId }) {
                 >
                   {node.kind === "trophy" ? "🏆" : node.kind === "review" ? "🔁" : node.n}
                   {node.stars ? (
-                    <Box component="small" sx={{ fontSize: 11, color: colors.sun.deep }}>
+                    <Box component="small" sx={{ fontSize: 11, color: node.bronze ? BRONZE : colors.sun.deep }}>
                       {"★".repeat(node.stars)}
                     </Box>
                   ) : node.state === "next" ? (
@@ -354,7 +389,7 @@ export default function Trail({ subjectId }) {
                     fontSize: 28,
                   }}
                 >
-                  {it.emoji || it.label}
+                  <ItemFace it={it} fallback />
                 </Box>
               ))}
             </Box>
@@ -365,7 +400,7 @@ export default function Trail({ subjectId }) {
           <Button
             variant="outlined"
             sx={{ borderWidth: 2 }}
-            onClick={() => say("Show what you know arrives in Sprint 6.")}
+            onClick={goPlace}
           >
             {t("trail.showWhatYouKnow")}
           </Button>
@@ -445,7 +480,7 @@ export default function Trail({ subjectId }) {
                       fontSize: 30,
                     }}
                   >
-                    {it.emoji}
+                    <ItemFace it={it} />
                   </Box>
                 ))}
               </Box>

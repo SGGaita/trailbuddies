@@ -3,6 +3,7 @@ import {
   ageFrom,
   bandForAge,
   effectiveLevel,
+  settingFor,
   foldMastery,
   dueForReview,
   isAdult,
@@ -31,7 +32,7 @@ export function learnerView(learner, events, now = new Date(), { goal = 2 } = {}
   /** @param {string} subjectId */
   const levelFor = (subjectId) =>
     effectiveLevel(
-      learner.difficulty,
+      settingFor(learner, subjectId),
       band,
       state.results.filter((r) => r.subjectId === subjectId && r.kind === "lesson").map((r) => r.stars),
     );
@@ -68,6 +69,10 @@ export function learnerView(learner, events, now = new Date(), { goal = 2 } = {}
     adult: isAdult(age),
     today: act.lessonsToday,
     minutes: act.minutesToday,
+    // PAR-04: today's lessons, for break reminders.
+    todayResults: state.results.filter((r) => r.at >= new Date(now).setHours(0, 0, 0, 0)),
+    // OFF-02: subjects this learner has played, kept on the device for offline use.
+    subjectsStarted: [...new Set(state.results.map((r) => r.subjectId).filter(Boolean))],
     week: act.week,
     levelFor,
     reviewDue,

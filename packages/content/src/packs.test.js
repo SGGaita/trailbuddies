@@ -1,3 +1,4 @@
+import { installPack, getUnit, getSubject } from "./index.js";
 import { loadContent, buildPacks, productionProblems, shipsOn, promptSheet } from "../scripts/packs.js";
 
 const content = loadContent();
@@ -48,5 +49,23 @@ describe("CNT-09 prompt sheets", () => {
     expect(md.split("\n").filter((l) => l.startsWith("| ") && l.includes("`img-"))).toHaveLength(
       farm.items.length,
     );
+  });
+});
+
+describe("installing a downloaded pack", () => {
+  test("its units replace the built-in ones and new catalogue entries are added", () => {
+    const unit = structuredClone(getUnit("counting-1-5"));
+    unit.lessons[0].title = "Counting fun (from a pack)";
+    const extra = { id: "numbers-extra", title: "Extra", band: "sprout", status: "ready", lessons: 1 };
+    const ok = installPack({
+      schema: "pack/1",
+      subject: { id: "numbers", units: [{ id: "counting-1-5", title: "Counting 1 to 5", band: "seedling", status: "ready", lessons: 6 }, extra] },
+      units: [unit],
+    });
+    expect(ok).toBe(true);
+    expect(getUnit("counting-1-5").lessons[0].title).toBe("Counting fun (from a pack)");
+    expect(getSubject("numbers").units.at(-1).id).toBe("numbers-extra");
+    expect(installPack({ schema: "pack/1", subject: { id: "cooking", units: [] }, units: [] })).toBe(false);
+    expect(installPack({ nope: true })).toBe(false);
   });
 });

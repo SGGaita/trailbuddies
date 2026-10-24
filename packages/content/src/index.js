@@ -15,6 +15,8 @@ import economy from "./economy.json" with { type: "json" };
 
 /** Units with full content, by id. */
 export const UNITS = Object.fromEntries(ALL_UNITS.map((u) => [u.id, u]));
+/** Units shipped inside this build (they have their own pages); others come from packs. */
+export const BUILT_IN_UNIT_IDS = new Set(ALL_UNITS.map((u) => u.id));
 
 export { catalogue, builtInBadges };
 
@@ -52,6 +54,26 @@ export const getUnit = (id) => {
   const u = UNITS[id];
   return u && (u.status === "ready" || (SHOW_DRAFTS && u.status === "draft")) ? u : null;
 };
+
+/**
+ * Install a downloaded content pack (CNT-02, OFF-02): its units replace the built-in copies
+ * and its catalogue entries are merged into the subject (new units are added at the end).
+ * Called before the app first renders, so a new pack takes effect on the next launch.
+ * @param {any} pack a "pack/1" document from the content API
+ * @returns {boolean} false if it isn't a pack for a subject this app knows
+ */
+export function installPack(pack) {
+  if (pack?.schema !== "pack/1") return false;
+  const subject = catalogue.subjects.find((s) => s.id === pack.subject?.id);
+  if (!subject || !Array.isArray(pack.units)) return false;
+  for (const u of pack.units) if (u?.schema === "unit/1" && u.subject === subject.id) UNITS[u.id] = u;
+  for (const entry of pack.subject.units || []) {
+    const i = subject.units.findIndex((e) => e.id === entry.id);
+    if (i >= 0) subject.units[i] = { ...subject.units[i], ...entry };
+    else subject.units.push(entry);
+  }
+  return true;
+}
 
 /**
  * Lesson ids for a unit, from content if available, otherwise numbered from the catalogue.

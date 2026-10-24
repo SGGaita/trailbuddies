@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useFamily } from "@/lib/store";
 import { refreshAccount, syncNow } from "@/lib/account";
+import { installStoredPacks, syncPacks } from "@/lib/packs";
 
 const EVERY_MS = 60_000;
 
@@ -14,6 +15,8 @@ export default function DataBoot() {
   useEffect(() => {
     let timer = null;
     const boot = async () => {
+      // Downloaded content packs first, so every screen renders with them (OFF-02).
+      await installStoredPacks();
       const s = useFamily.getState();
       if (s.mode) await s.loadEvents();
       else useFamily.setState({ eventsReady: true });
@@ -21,11 +24,15 @@ export default function DataBoot() {
         await refreshAccount();
         syncNow();
       }
+      syncPacks();
       timer = setInterval(() => document.visibilityState === "visible" && syncNow(), EVERY_MS);
     };
     if (useFamily.persist.hasHydrated()) boot();
     const unsub = useFamily.persist.onFinishHydration(boot);
-    const online = () => syncNow();
+    const online = () => {
+      syncNow();
+      syncPacks();
+    };
     window.addEventListener("online", online);
     return () => {
       unsub();

@@ -7,8 +7,8 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { buddyLine, getUnit } from "@trailbuddies/content";
-import { layoutTrail } from "@trailbuddies/domain";
-import { trailUnits } from "@/lib/trail";
+import { layoutTrail, breakDue, minutesSinceBreak } from "@trailbuddies/domain";
+import { trailUnits, lessonHref } from "@/lib/trail";
 import { speak } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import { useFamily } from "@/lib/store";
@@ -17,18 +17,20 @@ import Bubble from "@/components/Bubble";
 import { Coin } from "@/components/Coins";
 import CountUp from "@/components/rewards/CountUp";
 import BadgeCelebration from "@/components/rewards/BadgeCelebration";
+import StretchBreak from "@/components/rewards/StretchBreak";
+import { readMemory, writeMemory } from "@/lib/memory";
 
 /** Where "Next" goes: the next stone on the trail after this result was recorded. */
 function nextStop(subjectId, progress, start) {
   const { next } = layoutTrail(trailUnits(subjectId), progress, { start });
   if (!next) return null;
   if (next.kind === "trophy")
-    return { href: `/play/lesson/${next.unitId}/trophy`, label: t("done.trophyNext") };
+    return { href: lessonHref(next.unitId, "trophy"), label: t("done.trophyNext") };
   if (next.n === 1) {
     const title = getUnit(next.unitId)?.title || "";
-    return { href: `/play/lesson/${next.unitId}/1`, label: t("done.newUnit", { title }) };
+    return { href: lessonHref(next.unitId, 1), label: t("done.newUnit", { title }) };
   }
-  return { href: `/play/lesson/${next.unitId}/${next.n}`, label: t("done.next") };
+  return { href: lessonHref(next.unitId, next.n), label: t("done.next") };
 }
 
 /**
@@ -37,14 +39,28 @@ function nextStop(subjectId, progress, start) {
  */
 export default function LessonComplete({ lesson, outcome, learner, goal, back, preview = false }) {
   const voice = useFamily((s) => s.settings.voice);
+  const breaks = useFamily((s) => s.settings.breaks);
   // BDG-03 / LES-16: new badges celebrate after the end screen has shown for a moment.
   const [celebrate, setCelebrate] = useState(false);
   const hasBadges = (outcome.badges || []).length > 0;
+  // PAR-04: a stretch is due once enough play has passed since the last one (read once).
+  const [stretchDue] = useState(
+    () =>
+      !preview &&
+      breakDue({ breaks }, minutesSinceBreak(learner.todayResults || [], readMemory().breaks[learner.id] || null)),
+  );
+  const [stretch, setStretch] = useState(false);
   useEffect(() => {
-    if (!hasBadges) return undefined;
-    const id = setTimeout(() => setCelebrate(true), 1800);
+    if (!hasBadges && !stretchDue) return undefined;
+    const id = setTimeout(() => (hasBadges ? setCelebrate(true) : setStretch(true)), hasBadges ? 1800 : 2200);
     return () => clearTimeout(id);
-  }, [hasBadges]);
+  }, [hasBadges, stretchDue]);
+  const stretchDone = () => {
+    writeMemory((m) => {
+      m.breaks[learner.id] = Date.now();
+    });
+    setStretch(false);
+  };
   const trophy = lesson.kind === "trophy";
   const review = lesson.kind === "review";
   const custom = lesson.kind === "custom";
@@ -177,9 +193,13 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back, p
           badges={outcome.badges}
           learner={learner}
           voice={voice}
-          onDone={() => setCelebrate(false)}
+          onDone={() => {
+            setCelebrate(false);
+            if (stretchDue) setStretch(true);
+          }}
         />
       )}
+      {stretch && <StretchBreak learner={learner} voice={voice} onDone={stretchDone} />}
     </Box>
   );
 }

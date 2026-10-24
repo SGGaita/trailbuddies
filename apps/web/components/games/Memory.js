@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import Box from "@mui/material/Box";
+import { ItemFace } from "@/components/MediaImage";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
@@ -94,7 +95,7 @@ export default function Memory({ unit, learner, seed, say, onDone }) {
               {open && (
                 <>
                   <Box component="span" sx={{ fontSize: { xs: 38, sm: 52 }, lineHeight: 1 }}>
-                    {card.item.emoji || card.item.label}
+                    <ItemFace it={card.item} fallback />
                   </Box>
                   <Box component="span" sx={{ fontWeight: 800, fontSize: { xs: 13, sm: 16 } }}>
                     {card.item.label}

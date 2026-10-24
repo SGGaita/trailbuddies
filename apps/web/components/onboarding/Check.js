@@ -26,26 +26,32 @@ import Bubble from "@/components/Bubble";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 
-/** The placement check a child takes during onboarding: no hints, no scores, just a start point. */
-export default function Check() {
+/**
+ * The placement check: no hints, no scores, just a start point. Grown-ups run it in
+ * onboarding; a child can also choose "Show what you know" on a new subject's trail
+ * (ADP-05), and then `back` returns to that trail.
+ * @param {{ back?: string }} props
+ */
+export default function Check({ back = "/start/interests" }) {
   const ready = useHydrated();
   const params = useSearchParams();
   const learner = useFamily((s) => s.learners.find((l) => l.id === params.get("learner")));
   if (!ready) return <Loading />;
-  if (!learner) return <Gone />;
-  return <Quiz learner={learner} subject={params.get("subject") || "numbers"} />;
+  if (!learner) return <Gone back={back} />;
+  const subject = params.get("subject") || "numbers";
+  return <Quiz learner={learner} subject={subject} back={back.replace("{subject}", subject)} />;
 }
 
-function Gone() {
+function Gone({ back }) {
   const router = useRouter();
   return (
     <Box sx={{ p: 4, textAlign: "center" }}>
-      <Button onClick={() => router.replace("/start/interests")}>{t("start.continue")}</Button>
+      <Button onClick={() => router.replace(back.includes("{subject}") ? "/play" : back)}>{t("start.continue")}</Button>
     </Box>
   );
 }
 
-function Quiz({ learner, subject }) {
+function Quiz({ learner, subject, back }) {
   const router = useRouter();
   const voice = useFamily((s) => s.settings.voice);
   const updateLearner = useFamily((s) => s.updateLearner);
@@ -101,7 +107,7 @@ function Quiz({ learner, subject }) {
               ? t("start.checkDone", { unit: getUnit(result)?.title || result })
               : t("start.checkBeginning")}
           </Typography>
-          <Button variant="contained" size="large" onClick={() => router.push("/start/interests")}>
+          <Button variant="contained" size="large" onClick={() => router.push(back)}>
             {t("start.continue")}
           </Button>
         </Box>
@@ -125,7 +131,7 @@ function Quiz({ learner, subject }) {
         }}
       >
         <IconButton
-          onClick={() => router.push("/start/interests")}
+          onClick={() => router.push(back)}
           aria-label={t("lesson.leave")}
           sx={{
             border: `2px solid ${colors.line}`,

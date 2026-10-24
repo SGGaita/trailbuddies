@@ -103,6 +103,15 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     acceptInvite: (token) => post("/invites/accept", { token }),
     /** @param {string} familyId @param {object[]} events */
     pushEvents: (familyId, events) => post("/sync/events", { family_id: familyId, events }),
+    /** Signed-in devices of the family (FAM-08). @param {string} familyId */
+    devices: (familyId) => request(`${fam(familyId)}/devices`),
+    /** @param {string} familyId @param {string} sessionId */
+    signOutDevice: (familyId, sessionId) =>
+      request(`${fam(familyId)}/devices/${encodeURIComponent(sessionId)}`, { method: "DELETE" }),
+    /** Published content (CNT-02): no sign-in needed. @param {"production" | "preview"} channel */
+    contentManifest: (channel) => request(`/content/manifest?channel=${encodeURIComponent(channel)}`),
+    /** @param {string} file a pack's file name from the manifest */
+    contentPack: (file) => request(`/content/packs/${encodeURIComponent(file)}`),
     /** @param {string} familyId @param {number} after */
     pullEvents: (familyId, after = 0) =>
       request(`/sync/events?family_id=${encodeURIComponent(familyId)}&after=${after}`),

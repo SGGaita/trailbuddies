@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubjects, getReadyUnits, buddyLine } from "@trailbuddies/content";
-import { gameTopics } from "@trailbuddies/domain";
+import { gameTopics, lessonsFor, LESSON_GAMES } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { speak } from "@/lib/speech";
 import LearnerShell from "@/components/shell/LearnerShell";
@@ -27,6 +27,7 @@ export default function GamesCorner() {
   const learner = useLearner();
   const voice = useFamily((s) => s.settings.voice);
   const goal = useFamily((s) => s.settings.goal);
+  const lessons = useFamily((s) => s.lessons);
   const router = useRouter();
   const [game, setGame] = useState("memory");
   useEffect(() => {
@@ -38,6 +39,10 @@ export default function GamesCorner() {
     learner.progress,
   );
   const say = (text) => speak(text, { band: learner.band, buddy: learner.buddy, enabled: voice });
+  // BLD-06: family lessons whose grown-up switched this game on.
+  const family = lessonsFor(lessons, learner.id).filter(
+    (l) => l.cards.length >= 3 && (l.options?.games ?? LESSON_GAMES).includes(game),
+  );
 
   return (
     <LearnerShell learner={learner} title={t("games.title")} back="/play/map" active="/play/more/games" goal={goal}>
@@ -121,6 +126,26 @@ export default function GamesCorner() {
                   <TopicFace tp={tp} locked />
                 </Box>
               )}
+            </li>
+          ))}
+          {family.map((l) => (
+            <li key={l.id}>
+              <Box
+                component={Link}
+                href={`/play/game/${game}/family?lesson=${encodeURIComponent(l.id)}`}
+                aria-label={`${l.title}, ${t("games.fromFamily")}`}
+                sx={tile(true)}
+              >
+                <Box component="span" aria-hidden="true" sx={{ fontSize: 34, lineHeight: 1 }}>
+                  🏡
+                </Box>
+                <Box component="span" sx={{ fontWeight: 800, fontSize: { xs: 15, sm: 17 } }}>
+                  {l.title}
+                </Box>
+                <Box component="span" sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary" }}>
+                  {t("games.fromFamily")}
+                </Box>
+              </Box>
             </li>
           ))}
         </Box>
