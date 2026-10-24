@@ -50,7 +50,7 @@ test("the shop: try on, buy, wear and save for something dearer", async ({ page 
   await page.getByRole("tab", { name: "Hats" }).click();
   await page.getByRole("button", { name: "Try on Crown" }).click();
   await page.getByRole("button", { name: /Buy for 250/ }).click();
-  await expect(page.getByText("Just 175 more treasures")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Just 175 more treasures/ })).toBeVisible();
   await shot(page, testInfo, "s4-need-more");
   await page.getByRole("button", { name: "Save for it" }).click();
   await page.goto("/play/map");

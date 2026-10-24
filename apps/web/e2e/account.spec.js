@@ -25,10 +25,11 @@ async function signIn(page, srv, email = "grace@example.com") {
 }
 
 /** Answer every placement question correctly. */
+/** Get the first unit's questions right (she can count to 5), then miss one. */
 async function passCheck(page) {
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 12; i++) {
     if (await page.getByRole("heading", { name: /Thank you/ }).isVisible()) return;
-    await page.locator('[data-answer="yes"]').click();
+    await page.locator(i < 2 ? '[data-answer="yes"]' : '[data-answer="no"]').first().click();
     await page.waitForTimeout(150);
   }
 }
@@ -96,7 +97,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
   await wanjiru.getByRole("button", { name: /Animals/ }).click();
   await expect(wanjiru.getByRole("button", { name: /Animals/ })).toHaveAttribute("aria-pressed", "true");
   await shot(page, testInfo, "o6-interests");
-  await wanjiru.getByRole("link", { name: "Start the check" }).click();
+  await wanjiru.getByRole("link", { name: "Start the check" }).first().click();
   await expect(page).toHaveURL(/\/start\/check/);
   await shot(page, testInfo, "o7-check");
   await passCheck(page);
@@ -148,6 +149,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "family_id",
       "id",
       "interests",
+      "levels",
       "name",
       "outfit",
       "placement",

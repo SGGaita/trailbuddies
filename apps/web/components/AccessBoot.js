@@ -9,7 +9,8 @@ import { onSpeech } from "@/lib/speech";
  * Accessibility settings for the whole app.
  * ACC-02 calm mode: sets html[data-calm] from the family setting, or from the device's
  * reduced-motion setting when it's "device".
- * ACC-03 captions: while the buddy speaks, the words show in a caption at the bottom.
+ * ACC-03 captions: while the buddy speaks, words that aren't already on screen show in a
+ * caption at the top.
  */
 export default function AccessBoot() {
   const calm = useFamily((s) => s.settings?.calm || "device");
@@ -34,6 +35,9 @@ export default function AccessBoot() {
     return onSpeech((text) => {
       clearTimeout(timer);
       if (text) {
+        // Words already on screen (a speech bubble, a heading) need no caption.
+        const shown = (document.querySelector("main")?.innerText || "").replace(/\s+/g, " ");
+        if (shown.includes(text.replace(/\s+/g, " ").trim())) return;
         since = Date.now();
         setLine(text);
       } else {
@@ -52,7 +56,8 @@ export default function AccessBoot() {
         position: "fixed",
         left: "50%",
         transform: "translateX(-50%)",
-        bottom: { xs: "calc(env(safe-area-inset-bottom, 0px) + 84px)", sm: 24 },
+        // At the top, so it never covers a button the child needs.
+        top: "calc(env(safe-area-inset-top, 0px) + 8px)",
         zIndex: 1500,
         maxWidth: "min(640px, calc(100vw - 32px))",
         px: 2,
@@ -61,7 +66,7 @@ export default function AccessBoot() {
         bgcolor: "rgba(38,51,34,.88)",
         color: "#fff",
         fontWeight: 700,
-        fontSize: { xs: 16, sm: 18 },
+        fontSize: { xs: 15, sm: 18 },
         lineHeight: 1.35,
         textAlign: "center",
         pointerEvents: "none",

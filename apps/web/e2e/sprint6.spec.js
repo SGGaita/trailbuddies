@@ -157,7 +157,8 @@ test("calm mode and captions (ACC-02, ACC-03)", async ({ page }, testInfo) => {
   await expect(page.locator("html")).toHaveAttribute("data-calm", "1");
   await as(page, "Zawadi", { fresh: false });
   await page.goto("/play/lesson/counting-1-5/1");
-  await page.getByRole("button", { name: /Hear it again/ }).first().click();
+  // A fun fact isn't written anywhere on screen, so it gets a caption.
+  await page.getByRole("button", { name: "Hear one" }).click();
   await expect(page.getByTestId("caption")).toBeVisible();
   await shot(page, testInfo, "s6-caption");
   // A celebration is a short fade, not a bounce.
