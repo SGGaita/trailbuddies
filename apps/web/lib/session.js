@@ -1,4 +1,4 @@
-import { getUnit, getReadyUnits } from "@trailbuddies/content";
+import { getUnit, getReadyUnits, SHOW_DRAFTS } from "@trailbuddies/content";
 import {
   buildLesson,
   buildTrophy,
@@ -44,9 +44,12 @@ export function planLesson(where, learner, seed, lessons = []) {
   }
   const unit = getUnit(where.unitId);
   if (!unit) return { blocked: "/play/map" };
-  const back = `/play/trail/${unit.subject}`;
+  // CNT-04: outside production a grown-up can preview any unit from /review, locks or not.
+  const reviewing = !!where.preview && SHOW_DRAFTS;
+  const back = reviewing ? "/review" : `/play/trail/${unit.subject}`;
   const step = where.step === "trophy" ? "trophy" : Number(where.step);
-  if (!canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject]))
+  if (step !== "trophy" && !(step >= 1 && step <= unit.lessons.length)) return { blocked: back };
+  if (!reviewing && !canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject]))
     return { blocked: back };
   const opts = { level: learner.levelFor(unit.subject), band: learner.band, r };
   const lesson = step === "trophy" ? buildTrophy(unit, opts) : buildLesson(unit, step - 1, opts);

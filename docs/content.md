@@ -30,7 +30,7 @@ Run these from the repo root:
 
 ## Reviewing a draft unit
 
-1. Play it in development (`pnpm dev`) or a preview deployment. Drafts are playable there.
+1. Open http://localhost:3000/review in development (or `/review` on a preview deployment). It lists every unit with its status, and each lesson has a button that plays it as the chosen child would: no locks, nothing saved.
 2. Check the following:
    - every fact is true and kind
    - every word is spelt the way children are taught

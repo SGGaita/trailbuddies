@@ -12,10 +12,17 @@ function Go() {
   const q = useSearchParams();
   const unit = q.get("unit") || "";
   const step = q.get("step") || "1";
+  // ?preview=1&learner=<id>: a grown-up reviewing a unit (records nothing; see /review).
+  const preview = q.get("preview") === "1";
   return (
     <LessonPlayer
-      key={`${unit}/${step}`}
-      where={{ kind: step === "trophy" ? "trophy" : "lesson", unitId: unit, step }}
+      key={`${unit}/${step}/${preview}`}
+      where={{
+        kind: step === "trophy" ? "trophy" : "lesson",
+        unitId: unit,
+        step,
+        ...(preview ? { preview: true, learnerId: q.get("learner") || undefined } : {}),
+      }}
     />
   );
 }
