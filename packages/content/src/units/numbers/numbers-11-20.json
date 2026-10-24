@@ -1,0 +1,278 @@
+{
+  "schema": "unit/1",
+  "id": "numbers-11-20",
+  "subject": "numbers",
+  "title": "Numbers 11 to 20",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Teen numbers as ten and some more, up to twenty.",
+  "requires": [
+    "counting-6-10"
+  ],
+  "items": [
+    {
+      "id": "eleven",
+      "label": "11",
+      "say": "eleven",
+      "number": 11,
+      "emoji": "⚽",
+      "fact": "A football team has eleven players."
+    },
+    {
+      "id": "twelve",
+      "label": "12",
+      "say": "twelve",
+      "number": 12,
+      "emoji": "🥚",
+      "fact": "Twelve eggs fill a big egg box."
+    },
+    {
+      "id": "thirteen",
+      "label": "13",
+      "say": "thirteen",
+      "number": 13,
+      "emoji": "🍞",
+      "fact": "Thirteen is ten and three."
+    },
+    {
+      "id": "fourteen",
+      "label": "14",
+      "say": "fourteen",
+      "number": 14,
+      "emoji": "🐢",
+      "fact": "Fourteen is ten and four."
+    },
+    {
+      "id": "fifteen",
+      "label": "15",
+      "say": "fifteen",
+      "number": 15,
+      "emoji": "⭐",
+      "fact": "Fifteen is ten and five."
+    },
+    {
+      "id": "sixteen",
+      "label": "16",
+      "say": "sixteen",
+      "number": 16,
+      "emoji": "🌼",
+      "fact": "Sixteen is ten and six."
+    },
+    {
+      "id": "seventeen",
+      "label": "17",
+      "say": "seventeen",
+      "number": 17,
+      "emoji": "🍊",
+      "fact": "Seventeen is ten and seven."
+    },
+    {
+      "id": "eighteen",
+      "label": "18",
+      "say": "eighteen",
+      "number": 18,
+      "emoji": "🐜",
+      "fact": "Eighteen is ten and eight."
+    },
+    {
+      "id": "nineteen",
+      "label": "19",
+      "say": "nineteen",
+      "number": 19,
+      "emoji": "🎈",
+      "fact": "Nineteen is one less than twenty."
+    },
+    {
+      "id": "twenty",
+      "label": "20",
+      "say": "twenty",
+      "number": 20,
+      "emoji": "🖐️",
+      "fact": "Twenty is ten and ten: all your fingers and toes!"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "numbers-11-20-1",
+      "title": "Eleven and twelve",
+      "focus": [
+        "eleven",
+        "twelve"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "numbers-11-20-2",
+      "title": "Ten and three, ten and four",
+      "focus": [
+        "thirteen",
+        "fourteen"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "twelve"
+      ]
+    },
+    {
+      "id": "numbers-11-20-3",
+      "title": "Fifteen and sixteen",
+      "focus": [
+        "fifteen",
+        "sixteen"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "count"
+        }
+      ],
+      "review": [
+        "fourteen"
+      ]
+    },
+    {
+      "id": "numbers-11-20-4",
+      "title": "Seventeen and eighteen",
+      "focus": [
+        "seventeen",
+        "eighteen"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sequence"
+        }
+      ],
+      "review": [
+        "sixteen"
+      ]
+    },
+    {
+      "id": "numbers-11-20-5",
+      "title": "All the way to twenty",
+      "focus": [
+        "nineteen",
+        "twenty"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "sequence"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "eighteen"
+      ]
+    },
+    {
+      "id": "numbers-11-20-6",
+      "title": "Teen numbers in order",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sequence"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "sequence"
+        }
+      ],
+      "review": [
+        "eleven",
+        "twelve",
+        "thirteen",
+        "fourteen",
+        "fifteen",
+        "sixteen",
+        "seventeen",
+        "eighteen",
+        "nineteen",
+        "twenty"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 6,
+    "game": "jigsaw"
+  }
+}

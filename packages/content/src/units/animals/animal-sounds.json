@@ -1,0 +1,217 @@
+{
+  "schema": "unit/1",
+  "id": "animal-sounds",
+  "subject": "animals",
+  "title": "Animal sounds",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Who says moo, woof and quack? Name animals and the sounds they make.",
+  "items": [
+    {
+      "id": "cow-moo",
+      "label": "cow",
+      "fact": "A cow says moo.",
+      "emoji": "🐄",
+      "image": "img-cow-moo"
+    },
+    {
+      "id": "dog-woof",
+      "label": "dog",
+      "fact": "A dog says woof.",
+      "emoji": "🐕",
+      "image": "img-dog-woof"
+    },
+    {
+      "id": "cat-meow",
+      "label": "cat",
+      "fact": "A cat says meow.",
+      "emoji": "🐈",
+      "image": "img-cat-meow"
+    },
+    {
+      "id": "duck-quack",
+      "label": "duck",
+      "fact": "A duck says quack.",
+      "emoji": "🦆",
+      "image": "img-duck-quack"
+    },
+    {
+      "id": "sheep-baa",
+      "label": "sheep",
+      "fact": "A sheep says baa.",
+      "emoji": "🐑",
+      "image": "img-sheep-baa"
+    },
+    {
+      "id": "lion-roar",
+      "label": "lion",
+      "fact": "A lion says roar!",
+      "emoji": "🦁",
+      "image": "img-lion-roar"
+    },
+    {
+      "id": "hen-cluck",
+      "label": "hen",
+      "fact": "A hen says cluck cluck.",
+      "emoji": "🐔",
+      "image": "img-hen-cluck"
+    },
+    {
+      "id": "frog-ribbit",
+      "label": "frog",
+      "fact": "A frog says ribbit.",
+      "emoji": "🐸",
+      "image": "img-frog-ribbit"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "animal-sounds-1",
+      "title": "Moo and woof",
+      "focus": [
+        "cow-moo",
+        "dog-woof"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "animal-sounds-2",
+      "title": "Meow and quack",
+      "focus": [
+        "cat-meow",
+        "duck-quack"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "dog-woof"
+      ]
+    },
+    {
+      "id": "animal-sounds-3",
+      "title": "Baa and roar",
+      "focus": [
+        "sheep-baa",
+        "lion-roar"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "cow-moo"
+      ]
+    },
+    {
+      "id": "animal-sounds-4",
+      "title": "Cluck and ribbit",
+      "focus": [
+        "hen-cluck",
+        "frog-ribbit"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "duck-quack"
+      ]
+    },
+    {
+      "id": "animal-sounds-5",
+      "title": "Who said that?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "cow-moo",
+        "dog-woof",
+        "cat-meow",
+        "duck-quack",
+        "sheep-baa",
+        "lion-roar",
+        "hen-cluck",
+        "frog-ribbit"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "memory"
+  }
+}

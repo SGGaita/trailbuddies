@@ -1,0 +1,231 @@
+{
+  "schema": "unit/1",
+  "id": "number-shapes-0-10",
+  "subject": "numbers",
+  "title": "Number shapes 0 to 10",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Zero, and seeing small numbers at a glance: dice dots and ten frames up to 10.",
+  "requires": [
+    "counting-6-10"
+  ],
+  "items": [
+    {
+      "id": "zero",
+      "label": "0",
+      "say": "zero",
+      "number": 0,
+      "emoji": "🥚",
+      "fact": "Zero means none at all. An empty nest has zero eggs."
+    },
+    {
+      "id": "one-dot",
+      "label": "1",
+      "say": "one",
+      "number": 1,
+      "emoji": "🔴",
+      "fact": "One dot sits in the middle of a dice."
+    },
+    {
+      "id": "two-dots",
+      "label": "2",
+      "say": "two",
+      "number": 2,
+      "emoji": "🔴",
+      "fact": "Two dots make a line, corner to corner."
+    },
+    {
+      "id": "three-dots",
+      "label": "3",
+      "say": "three",
+      "number": 3,
+      "emoji": "🔴",
+      "fact": "Three dots make a slide on a dice."
+    },
+    {
+      "id": "four-dots",
+      "label": "4",
+      "say": "four",
+      "number": 4,
+      "emoji": "🔴",
+      "fact": "Four dots sit in the four corners."
+    },
+    {
+      "id": "five-dots",
+      "label": "5",
+      "say": "five",
+      "number": 5,
+      "emoji": "🔴",
+      "fact": "Five is four corners and one in the middle."
+    },
+    {
+      "id": "six-dots",
+      "label": "6",
+      "say": "six",
+      "number": 6,
+      "emoji": "🔴",
+      "fact": "Six dots make two rows of three."
+    },
+    {
+      "id": "ten-frame",
+      "label": "10",
+      "say": "ten",
+      "number": 10,
+      "emoji": "🔴",
+      "fact": "A full ten frame has ten dots: two rows of five."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "number-shapes-0-10-1",
+      "title": "Zero means none",
+      "focus": [
+        "zero",
+        "one-dot",
+        "two-dots"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "number-shapes-0-10-2",
+      "title": "Dots on a dice",
+      "focus": [
+        "three-dots",
+        "four-dots"
+      ],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "compare"
+        }
+      ],
+      "review": [
+        "two-dots"
+      ]
+    },
+    {
+      "id": "number-shapes-0-10-3",
+      "title": "Five and six",
+      "focus": [
+        "five-dots",
+        "six-dots"
+      ],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "four-dots"
+      ]
+    },
+    {
+      "id": "number-shapes-0-10-4",
+      "title": "A full ten frame",
+      "focus": [
+        "ten-frame"
+      ],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "five-dots",
+        "six-dots"
+      ]
+    },
+    {
+      "id": "number-shapes-0-10-5",
+      "title": "Spot it fast",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "sequence"
+        }
+      ],
+      "review": [
+        "zero",
+        "one-dot",
+        "two-dots",
+        "three-dots",
+        "four-dots",
+        "five-dots",
+        "six-dots",
+        "ten-frame"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "memory"
+  }
+}

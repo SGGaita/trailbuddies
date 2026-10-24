@@ -1,5 +1,7 @@
 import { jest } from "@jest/globals";
 import {
+  playableUnits,
+  SHOW_DRAFTS,
   getSubjects,
   getSubject,
   getUnit,
@@ -18,13 +20,28 @@ test("catalogue lists the five MVP subjects", () => {
   expect(catalogue.subjects.flatMap((s) => s.units)).toHaveLength(26);
 });
 
-test("ready units have content; planned units don't", () => {
+test("ready units always play; drafts only outside production", () => {
   expect(getUnit("counting-1-5").items).toHaveLength(5);
   expect(getUnit("counting-6-10").items.map((i) => i.number)).toEqual([6, 7, 8, 9, 10]);
-  expect(getUnit("farm-animals")).toBeNull();
-  expect(getReadyUnits("numbers").map((u) => u.id)).toEqual(["counting-1-5", "counting-6-10"]);
-  expect(getReadyUnits("animals").map((u) => u.id)).toEqual(["where-animals-live"]);
-  expect(getReadyUnits("language").map((u) => u.id)).toEqual(["letters-a-e"]);
+  expect(playableUnits("numbers", { drafts: false }).map((u) => u.id)).toEqual([
+    "counting-1-5",
+    "counting-6-10",
+  ]);
+  expect(playableUnits("animals", { drafts: false }).map((u) => u.id)).toEqual(["where-animals-live"]);
+  expect(playableUnits("colours", { drafts: false })).toEqual([]);
+  // Tests run as development: drafts play, in catalogue order (CNT-04).
+  expect(SHOW_DRAFTS).toBe(true);
+  expect(getUnit("farm-animals").status).toBe("draft");
+  expect(getReadyUnits("numbers").map((u) => u.id)).toEqual([
+    "counting-1-5",
+    "counting-6-10",
+    "number-shapes-0-10",
+    "more-less-same",
+    "numbers-11-20",
+  ]);
+  expect(
+    ["numbers", "language", "animals", "colours", "shapes"].flatMap((s) => getReadyUnits(s)),
+  ).toHaveLength(26);
 });
 
 test("lesson ids come from content or the catalogue count", () => {

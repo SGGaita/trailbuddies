@@ -1,0 +1,77 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-elephant",
+      "kind": "image",
+      "path": "animals/wild-animals/elephant.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a elephant; emoji 🐘 stands in until approved."
+    },
+    {
+      "id": "img-wild-lion",
+      "kind": "image",
+      "path": "animals/wild-animals/wild-lion.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a lion; emoji 🦁 stands in until approved."
+    },
+    {
+      "id": "img-wild-zebra",
+      "kind": "image",
+      "path": "animals/wild-animals/wild-zebra.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a zebra; emoji 🦓 stands in until approved."
+    },
+    {
+      "id": "img-wild-giraffe",
+      "kind": "image",
+      "path": "animals/wild-animals/wild-giraffe.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a giraffe; emoji 🦒 stands in until approved."
+    },
+    {
+      "id": "img-hippo",
+      "kind": "image",
+      "path": "animals/wild-animals/hippo.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a hippo; emoji 🦛 stands in until approved."
+    },
+    {
+      "id": "img-crocodile",
+      "kind": "image",
+      "path": "animals/wild-animals/crocodile.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a crocodile; emoji 🐊 stands in until approved."
+    },
+    {
+      "id": "img-monkey",
+      "kind": "image",
+      "path": "animals/wild-animals/monkey.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a monkey; emoji 🐒 stands in until approved."
+    },
+    {
+      "id": "img-gorilla",
+      "kind": "image",
+      "path": "animals/wild-animals/gorilla.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a gorilla; emoji 🦍 stands in until approved."
+    }
+  ]
+}

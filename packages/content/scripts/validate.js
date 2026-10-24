@@ -5,6 +5,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, relative, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validate, matchesCatalogue, unapprovedAssets } from "@trailbuddies/content-schema";
+import { unitsIndex } from "./units-index.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const prod = process.argv.includes("--prod");
@@ -44,6 +45,10 @@ for (const s of cat.subjects)
   for (const u of s.units)
     if ((u.status === "ready" || u.status === "draft") && !seen.has(u.id))
       report(catFile, [`unit "${u.id}" is ${u.status} but has no content file`]);
+
+const indexFile = join(root, "units", "all.js");
+if (!existsSync(indexFile) || readFileSync(indexFile, "utf8") !== unitsIndex())
+  report(indexFile, ["out of date: run `pnpm --filter @trailbuddies/content units:index`"]);
 
 for (const f of walk(join(root, "buddy"))) report(f, validate("buddy-script", read(f)).errors);
 report(join(root, "economy.json"), validate("economy", read(join(root, "economy.json"))).errors);

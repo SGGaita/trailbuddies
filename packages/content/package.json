@@ -11,9 +11,13 @@
   "scripts": {
     "lint": "eslint src",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
-    "validate": "node scripts/validate.js"
+    "validate": "node scripts/validate.js",
+    "units:index": "node scripts/units-index.js"
   },
   "dependencies": {
     "@trailbuddies/content-schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@trailbuddies/domain": "workspace:*"
   }
 }

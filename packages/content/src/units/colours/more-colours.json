@@ -1,0 +1,258 @@
+{
+  "schema": "unit/1",
+  "id": "more-colours",
+  "subject": "colours",
+  "title": "More colours",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Green, orange, purple and pink, and the things that wear them.",
+  "requires": [
+    "red-yellow-blue"
+  ],
+  "groups": [
+    {
+      "id": "green",
+      "label": "Green",
+      "say": "green"
+    },
+    {
+      "id": "orange",
+      "label": "Orange",
+      "say": "orange"
+    },
+    {
+      "id": "purple",
+      "label": "Purple",
+      "say": "purple"
+    },
+    {
+      "id": "pink",
+      "label": "Pink",
+      "say": "pink"
+    }
+  ],
+  "items": [
+    {
+      "id": "col-green",
+      "label": "green",
+      "fact": "Green like grass.",
+      "tags": [
+        "green"
+      ],
+      "colour": "#43A047",
+      "shape": "splash"
+    },
+    {
+      "id": "col-orange",
+      "label": "orange",
+      "fact": "Orange like an orange.",
+      "tags": [
+        "orange"
+      ],
+      "colour": "#FB8C00",
+      "shape": "splash"
+    },
+    {
+      "id": "col-purple",
+      "label": "purple",
+      "fact": "Purple like grapes.",
+      "tags": [
+        "purple"
+      ],
+      "colour": "#8E24AA",
+      "shape": "splash"
+    },
+    {
+      "id": "col-pink",
+      "label": "pink",
+      "fact": "Pink like a flamingo.",
+      "tags": [
+        "pink"
+      ],
+      "colour": "#EC407A",
+      "shape": "splash"
+    },
+    {
+      "id": "frog-green",
+      "label": "frog",
+      "fact": "This frog is green.",
+      "emoji": "🐸",
+      "tags": [
+        "green"
+      ]
+    },
+    {
+      "id": "orange-fruit",
+      "label": "orange",
+      "fact": "An orange is orange!",
+      "emoji": "🍊",
+      "tags": [
+        "orange"
+      ]
+    },
+    {
+      "id": "grapes",
+      "label": "grapes",
+      "fact": "These grapes are purple.",
+      "emoji": "🍇",
+      "tags": [
+        "purple"
+      ]
+    },
+    {
+      "id": "flamingo",
+      "label": "flamingo",
+      "fact": "A flamingo is pink.",
+      "emoji": "🦩",
+      "tags": [
+        "pink"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "more-colours-1",
+      "title": "Green",
+      "focus": [
+        "col-green",
+        "frog-green"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "more-colours-2",
+      "title": "Orange",
+      "focus": [
+        "col-orange",
+        "orange-fruit"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-green"
+      ]
+    },
+    {
+      "id": "more-colours-3",
+      "title": "Purple",
+      "focus": [
+        "col-purple",
+        "grapes"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-orange"
+      ]
+    },
+    {
+      "id": "more-colours-4",
+      "title": "Pink",
+      "focus": [
+        "col-pink",
+        "flamingo"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-purple"
+      ]
+    },
+    {
+      "id": "more-colours-5",
+      "title": "Colour hunt",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "col-green",
+        "col-orange",
+        "col-purple",
+        "col-pink",
+        "frog-green",
+        "orange-fruit",
+        "grapes",
+        "flamingo"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "sorting-race"
+  }
+}

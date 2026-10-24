@@ -1,0 +1,228 @@
+{
+  "schema": "unit/1",
+  "id": "colours-of-things",
+  "subject": "colours",
+  "title": "Colours of things",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Name the colour of everyday things around us.",
+  "requires": [
+    "red-yellow-blue"
+  ],
+  "groups": [
+    {
+      "id": "red",
+      "label": "Red",
+      "say": "red"
+    },
+    {
+      "id": "green",
+      "label": "Green",
+      "say": "green"
+    },
+    {
+      "id": "yellow",
+      "label": "Yellow",
+      "say": "yellow"
+    },
+    {
+      "id": "blue",
+      "label": "Blue",
+      "say": "blue"
+    }
+  ],
+  "items": [
+    {
+      "id": "fire-engine",
+      "label": "fire engine",
+      "fact": "A fire engine is red so everyone can see it.",
+      "emoji": "🚒",
+      "tags": [
+        "red"
+      ]
+    },
+    {
+      "id": "apple-red",
+      "label": "apple",
+      "fact": "This apple is red.",
+      "emoji": "🍎",
+      "tags": [
+        "red"
+      ]
+    },
+    {
+      "id": "leaf",
+      "label": "leaf",
+      "fact": "Most leaves are green.",
+      "emoji": "🍃",
+      "tags": [
+        "green"
+      ]
+    },
+    {
+      "id": "broccoli",
+      "label": "broccoli",
+      "fact": "Broccoli is green and good for you.",
+      "emoji": "🥦",
+      "tags": [
+        "green"
+      ]
+    },
+    {
+      "id": "lemon",
+      "label": "lemon",
+      "fact": "A lemon is yellow and sour.",
+      "emoji": "🍋",
+      "tags": [
+        "yellow"
+      ]
+    },
+    {
+      "id": "chick",
+      "label": "chick",
+      "fact": "A baby chick is fluffy and yellow.",
+      "emoji": "🐥",
+      "tags": [
+        "yellow"
+      ]
+    },
+    {
+      "id": "blue-car",
+      "label": "car",
+      "fact": "This car is blue.",
+      "emoji": "🚙",
+      "tags": [
+        "blue"
+      ]
+    },
+    {
+      "id": "butterfly-blue",
+      "label": "butterfly",
+      "fact": "This butterfly has blue wings.",
+      "emoji": "🦋",
+      "tags": [
+        "blue"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "colours-of-things-1",
+      "title": "Red things",
+      "focus": [
+        "fire-engine",
+        "apple-red"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "colours-of-things-2",
+      "title": "Green things",
+      "focus": [
+        "leaf",
+        "broccoli"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "apple-red"
+      ]
+    },
+    {
+      "id": "colours-of-things-3",
+      "title": "Yellow and blue things",
+      "focus": [
+        "lemon",
+        "chick",
+        "blue-car",
+        "butterfly-blue"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "leaf"
+      ]
+    },
+    {
+      "id": "colours-of-things-4",
+      "title": "What colour is it?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "fire-engine",
+        "apple-red",
+        "leaf",
+        "broccoli",
+        "lemon",
+        "chick",
+        "blue-car",
+        "butterfly-blue"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "sorting-race"
+  }
+}

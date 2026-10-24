@@ -1,0 +1,59 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-pet-dog",
+      "kind": "image",
+      "path": "animals/domestic-animals/pet-dog.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a dog; emoji 🐕 stands in until approved."
+    },
+    {
+      "id": "img-pet-cat",
+      "kind": "image",
+      "path": "animals/domestic-animals/pet-cat.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a cat; emoji 🐈 stands in until approved."
+    },
+    {
+      "id": "img-rabbit",
+      "kind": "image",
+      "path": "animals/domestic-animals/rabbit.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a rabbit; emoji 🐇 stands in until approved."
+    },
+    {
+      "id": "img-goldfish",
+      "kind": "image",
+      "path": "animals/domestic-animals/goldfish.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a goldfish; emoji 🐠 stands in until approved."
+    },
+    {
+      "id": "img-parrot",
+      "kind": "image",
+      "path": "animals/domestic-animals/parrot.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a parrot; emoji 🦜 stands in until approved."
+    },
+    {
+      "id": "img-tortoise",
+      "kind": "image",
+      "path": "animals/domestic-animals/tortoise.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a tortoise; emoji 🐢 stands in until approved."
+    }
+  ]
+}

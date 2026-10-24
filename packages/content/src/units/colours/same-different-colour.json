@@ -1,0 +1,228 @@
+{
+  "schema": "unit/1",
+  "id": "same-different-colour",
+  "subject": "colours",
+  "title": "Same and different",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Spot the same colour, and the one that's different.",
+  "requires": [
+    "more-colours"
+  ],
+  "groups": [
+    {
+      "id": "warm",
+      "label": "Warm colours",
+      "say": "a warm colour like the sun",
+      "emoji": "🔥"
+    },
+    {
+      "id": "cool",
+      "label": "Cool colours",
+      "say": "a cool colour like the sea",
+      "emoji": "💧"
+    }
+  ],
+  "items": [
+    {
+      "id": "sd-red-ball",
+      "label": "red ball",
+      "fact": "This is a red ball.",
+      "tags": [
+        "warm"
+      ],
+      "colour": "#E53935",
+      "shape": "ball"
+    },
+    {
+      "id": "sd-red-hat",
+      "label": "red hat",
+      "fact": "This is a red hat.",
+      "tags": [
+        "warm"
+      ],
+      "colour": "#E53935",
+      "shape": "hat"
+    },
+    {
+      "id": "sd-orange-ball",
+      "label": "orange ball",
+      "fact": "This is a orange ball.",
+      "tags": [
+        "warm"
+      ],
+      "colour": "#FB8C00",
+      "shape": "ball"
+    },
+    {
+      "id": "sd-yellow-ball",
+      "label": "yellow ball",
+      "fact": "This is a yellow ball.",
+      "tags": [
+        "warm"
+      ],
+      "colour": "#FDD835",
+      "shape": "ball"
+    },
+    {
+      "id": "sd-blue-ball",
+      "label": "blue ball",
+      "fact": "This is a blue ball.",
+      "tags": [
+        "cool"
+      ],
+      "colour": "#1E88E5",
+      "shape": "ball"
+    },
+    {
+      "id": "sd-green-ball",
+      "label": "green ball",
+      "fact": "This is a green ball.",
+      "tags": [
+        "cool"
+      ],
+      "colour": "#43A047",
+      "shape": "ball"
+    },
+    {
+      "id": "sd-blue-hat",
+      "label": "blue hat",
+      "fact": "This is a blue hat.",
+      "tags": [
+        "cool"
+      ],
+      "colour": "#1E88E5",
+      "shape": "hat"
+    },
+    {
+      "id": "sd-purple-ball",
+      "label": "purple ball",
+      "fact": "This is a purple ball.",
+      "tags": [
+        "cool"
+      ],
+      "colour": "#8E24AA",
+      "shape": "ball"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "same-different-colour-1",
+      "title": "Same colour",
+      "focus": [
+        "sd-red-ball",
+        "sd-red-hat",
+        "sd-blue-ball",
+        "sd-blue-hat"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "same-different-colour-2",
+      "title": "Warm colours",
+      "focus": [
+        "sd-orange-ball",
+        "sd-yellow-ball"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "sd-red-ball"
+      ]
+    },
+    {
+      "id": "same-different-colour-3",
+      "title": "Cool colours",
+      "focus": [
+        "sd-green-ball",
+        "sd-purple-ball"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "sd-blue-ball"
+      ]
+    },
+    {
+      "id": "same-different-colour-4",
+      "title": "Which one is different?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "sd-red-ball",
+        "sd-red-hat",
+        "sd-orange-ball",
+        "sd-yellow-ball",
+        "sd-blue-ball",
+        "sd-green-ball",
+        "sd-blue-hat",
+        "sd-purple-ball"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

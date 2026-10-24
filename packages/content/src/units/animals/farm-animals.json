@@ -1,0 +1,225 @@
+{
+  "schema": "unit/1",
+  "id": "farm-animals",
+  "subject": "animals",
+  "title": "Farm animals",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Animals on the farm, sorted by two legs and four legs.",
+  "groups": [
+    {
+      "id": "two-legs",
+      "label": "Two legs",
+      "say": "with two legs",
+      "emoji": "🐾"
+    },
+    {
+      "id": "four-legs",
+      "label": "Four legs",
+      "say": "with four legs",
+      "emoji": "🐾"
+    }
+  ],
+  "items": [
+    {
+      "id": "farm-cow",
+      "label": "cow",
+      "fact": "A cow gives us milk.",
+      "emoji": "🐄",
+      "tags": [
+        "four-legs"
+      ],
+      "image": "img-farm-cow"
+    },
+    {
+      "id": "goat",
+      "label": "goat",
+      "fact": "A goat likes to climb.",
+      "emoji": "🐐",
+      "tags": [
+        "four-legs"
+      ],
+      "image": "img-goat"
+    },
+    {
+      "id": "farm-sheep",
+      "label": "sheep",
+      "fact": "A sheep's wool keeps us warm.",
+      "emoji": "🐑",
+      "tags": [
+        "four-legs"
+      ],
+      "image": "img-farm-sheep"
+    },
+    {
+      "id": "farm-pig",
+      "label": "pig",
+      "fact": "A pig rolls in mud to stay cool.",
+      "emoji": "🐖",
+      "tags": [
+        "four-legs"
+      ],
+      "image": "img-farm-pig"
+    },
+    {
+      "id": "donkey",
+      "label": "donkey",
+      "fact": "A donkey can carry heavy loads.",
+      "emoji": "🫏",
+      "tags": [
+        "four-legs"
+      ],
+      "image": "img-donkey"
+    },
+    {
+      "id": "farm-hen",
+      "label": "hen",
+      "fact": "A hen lays eggs.",
+      "emoji": "🐔",
+      "tags": [
+        "two-legs"
+      ],
+      "image": "img-farm-hen"
+    },
+    {
+      "id": "farm-duck",
+      "label": "duck",
+      "fact": "A duck can swim and fly.",
+      "emoji": "🦆",
+      "tags": [
+        "two-legs"
+      ],
+      "image": "img-farm-duck"
+    },
+    {
+      "id": "turkey",
+      "label": "turkey",
+      "fact": "A turkey has a red wattle under its beak.",
+      "emoji": "🦃",
+      "tags": [
+        "two-legs"
+      ],
+      "image": "img-turkey"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "farm-animals-1",
+      "title": "Cows and goats",
+      "focus": [
+        "farm-cow",
+        "goat",
+        "farm-hen"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "farm-animals-2",
+      "title": "Sheep and pigs",
+      "focus": [
+        "farm-sheep",
+        "farm-pig",
+        "farm-duck"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "goat"
+      ]
+    },
+    {
+      "id": "farm-animals-3",
+      "title": "Donkeys and turkeys",
+      "focus": [
+        "donkey",
+        "turkey"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "farm-hen"
+      ]
+    },
+    {
+      "id": "farm-animals-4",
+      "title": "Two legs or four?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "farm-cow",
+        "goat",
+        "farm-sheep",
+        "farm-pig",
+        "donkey",
+        "farm-hen",
+        "farm-duck",
+        "turkey"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "sorting-race"
+  }
+}

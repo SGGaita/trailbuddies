@@ -1,0 +1,192 @@
+{
+  "schema": "unit/1",
+  "id": "upper-lower",
+  "subject": "language",
+  "title": "Big and small letters",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Match capital letters to small letters.",
+  "requires": [
+    "letters-a-e"
+  ],
+  "items": [
+    {
+      "id": "case-f",
+      "label": "F",
+      "say": "eff",
+      "letter": "f",
+      "emoji": "🐟",
+      "fact": "F is for fish.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "case-h",
+      "label": "H",
+      "say": "aitch",
+      "letter": "h",
+      "emoji": "🏠",
+      "fact": "H is for house.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "case-j",
+      "label": "J",
+      "say": "jay",
+      "letter": "j",
+      "emoji": "🧃",
+      "fact": "J is for juice.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "case-l",
+      "label": "L",
+      "say": "ell",
+      "letter": "l",
+      "emoji": "🦁",
+      "fact": "L is for lion.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "case-r",
+      "label": "R",
+      "say": "ar",
+      "letter": "r",
+      "emoji": "🌈",
+      "fact": "R is for rainbow.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "case-u",
+      "label": "U",
+      "say": "you",
+      "letter": "u",
+      "emoji": "☂️",
+      "fact": "U is for umbrella.",
+      "tags": [
+        "letter"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "upper-lower-1",
+      "title": "F and H",
+      "focus": [
+        "case-f",
+        "case-h"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "case-match"
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-2",
+      "title": "J and L",
+      "focus": [
+        "case-j",
+        "case-l"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "case-match"
+        }
+      ],
+      "review": [
+        "case-h"
+      ]
+    },
+    {
+      "id": "upper-lower-3",
+      "title": "R and U",
+      "focus": [
+        "case-r",
+        "case-u"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "case-match"
+        }
+      ],
+      "review": [
+        "case-l"
+      ]
+    },
+    {
+      "id": "upper-lower-4",
+      "title": "Big meets small",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "case-match"
+        }
+      ],
+      "review": [
+        "case-f",
+        "case-h",
+        "case-j",
+        "case-l",
+        "case-r",
+        "case-u"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}
