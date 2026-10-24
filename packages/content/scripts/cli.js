@@ -5,7 +5,7 @@
 //     units:index                       rebuild src/units/all.js after adding a unit
 //     packs:build --channel <production|preview> --release <yyyy.mm.n> [--out dist/packs]
 //     assets:prompts <subject>/<unit>   write prompts/<unit>.md, the illustration briefs
-//     assets:import <folder>            bring generated pictures in (512 px WebP, status "reviewed")
+//     assets:import <folder> [--license "<terms>"]  bring pictures in (512 px WebP, "reviewed")
 //     assets:approve <unit>             approve a unit's reviewed pictures after checking them
 //     unit:ready <unit> | unit:draft <unit>   publish a reviewed unit to children, or take it back
 //     audio:normalise [dir]             trim silence and normalise loudness (needs ffmpeg)
@@ -70,7 +70,7 @@ else if (cmd === "packs:build") {
 } else if (cmd === "assets:import") {
   if (!args[0]) fail("give the folder with the pictures, e.g. pnpm content assets:import C:\\Users\\you\\Downloads\\animals");
   const sharp = (await import("sharp")).default;
-  const { done, unknown } = await importImages(args[0], { sharp });
+  const { done, unknown } = await importImages(args[0], { sharp, license: flag("license") });
   done.forEach((d) => console.log(`  ✓ ${d}`));
   unknown.forEach((n) => console.log(`  ? ${n}: no asset with that name (use the asset id, e.g. img-goat.png)`));
   console.log(`✓ ${done.length} picture(s) imported. Check them with pnpm dev, then: pnpm content assets:approve <unit>`);

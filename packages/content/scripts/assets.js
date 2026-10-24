@@ -41,9 +41,10 @@ export function assetForFile(name, root = SRC) {
  * 512 px WebP (no metadata) at its asset path, and set to "reviewed" so it shows in
  * development and previews for checking. Approve it afterwards with assets:approve.
  * @param {string} folder
- * @param {{ sharp: any, root?: string, out?: string }} opts
+ * @param {{ sharp: any, root?: string, out?: string, license?: string }} opts license: recorded
+ *   on each imported picture, e.g. the image tool's terms
  */
-export async function importImages(folder, { sharp, root = SRC, out = PUBLIC_ART }) {
+export async function importImages(folder, { sharp, root = SRC, out = PUBLIC_ART, license }) {
   const done = [];
   const unknown = [];
   for (const name of readdirSync(folder).filter((n) => /\.(png|jpe?g|webp)$/i.test(n))) {
@@ -59,6 +60,7 @@ export async function importImages(folder, { sharp, root = SRC, out = PUBLIC_ART
     const m = read(f.assets);
     const a = m.assets.find((x) => x.id === hit.asset.id);
     if (a.review_status === "draft") a.review_status = "reviewed";
+    if (license) a.license = license;
     write(f.assets, m);
     done.push(`${hit.unitId}/${a.id}`);
   }

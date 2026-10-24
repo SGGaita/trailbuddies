@@ -27,14 +27,14 @@ describe("illustrations (CNT-03, CNT-09)", () => {
     await sharp({ create: { width: 10, height: 10, channels: 3, background: "#000" } })
       .png()
       .toFile(join(sb.pics, "unicorn.png"));
-    const r = await importImages(sb.pics, { sharp, root: sb.root, out: sb.out });
+    const r = await importImages(sb.pics, { sharp, root: sb.root, out: sb.out, license: "OpenAI terms" });
     expect(r.done.sort()).toEqual(["farm-animals/img-donkey", "farm-animals/img-goat"]);
     expect(r.unknown).toEqual(["unicorn.png"]);
     const file = join(sb.out, "animals/farm-animals/goat.webp");
     expect(existsSync(file)).toBe(true);
     expect(await sharp(file).metadata()).toMatchObject({ format: "webp", width: 512, height: 512 });
     const m = read(join(sb.root, "units/animals/farm-animals.assets.json"));
-    expect(m.assets.find((a) => a.id === "img-goat").review_status).toBe("reviewed");
+    expect(m.assets.find((a) => a.id === "img-goat")).toMatchObject({ review_status: "reviewed", license: "OpenAI terms" });
     expect(m.assets.find((a) => a.id === "img-hen-cluck")).toBeUndefined();
   });
 
