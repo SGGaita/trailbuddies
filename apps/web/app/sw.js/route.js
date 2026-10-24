@@ -1,7 +1,9 @@
 // Serves /sw.js, the offline service worker (approach ported from Martha's Learning Corner).
 // Generated at build time so the page list always matches the routes, and every deploy
 // gets a fresh cache version.
-import { getSubjects } from "@trailbuddies/content";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { getSubjects, ALL_ASSETS, ART_BASE } from "@trailbuddies/content";
 import { PLAY_MORE, FAMILY, TEACH } from "@/lib/placeholders";
 
 export const dynamic = "force-static";
@@ -41,6 +43,12 @@ const EXTRAS = [
   "/sounds/done.wav",
   "/art/number-mountain.webp",
   "/art/number-mountain-sm.webp",
+  // Approved unit illustrations that are in this build, so lessons look right offline.
+  ...Object.values(ALL_ASSETS)
+    .flatMap((m) => m.assets)
+    .filter((a) => a.kind === "image" && a.review_status === "approved")
+    .map((a) => ART_BASE + a.path)
+    .filter((url) => existsSync(join(process.cwd(), "public", url))),
 ];
 
 function worker(BUILD_ID, PAGES, EXTRAS) {

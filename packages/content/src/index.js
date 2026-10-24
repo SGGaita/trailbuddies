@@ -4,7 +4,7 @@
  * and `pnpm --filter @trailbuddies/content units:index` (the validator checks all three).
  */
 import catalogue from "./catalogue.json" with { type: "json" };
-import { ALL_UNITS } from "./units/all.js";
+import { ALL_UNITS, ALL_ASSETS } from "./units/all.js";
 import buddyEn from "./buddy/en.json" with { type: "json" };
 import zipEn from "./buddy/en.zip.json" with { type: "json" };
 import tumiEn from "./buddy/en.tumi.json" with { type: "json" };
@@ -17,6 +17,7 @@ import economy from "./economy.json" with { type: "json" };
 export const UNITS = Object.fromEntries(ALL_UNITS.map((u) => [u.id, u]));
 /** Units shipped inside this build (they have their own pages); others come from packs. */
 export const BUILT_IN_UNIT_IDS = new Set(ALL_UNITS.map((u) => u.id));
+export { ALL_ASSETS };
 
 export { catalogue, builtInBadges };
 
@@ -43,6 +44,33 @@ export const playableUnits = (subjectId, { drafts = SHOW_DRAFTS } = {}) =>
     .map((u) => UNITS[u.id])
     .filter((u) => u && (u.status === "ready" || (drafts && u.status === "draft")));
 
+/** Where the web app serves unit illustrations (apps/web/public/art/units/<asset path>). */
+export const ART_BASE = "/art/units/";
+
+/**
+ * Which illustrations show (CNT-03): approved ones everywhere; in development and previews
+ * also ones still in review, so a grown-up can check them on screen before approving.
+ * @param {{ review_status: string }} asset
+ * @param {{ drafts?: boolean }} [opts]
+ */
+export const assetShows = (asset, { drafts = SHOW_DRAFTS } = {}) =>
+  !!asset && (asset.review_status === "approved" || (drafts && asset.review_status === "reviewed"));
+
+/**
+ * Give each item whose illustration may show an `imageSrc` (the emoji stays as the fallback).
+ * @param {any} unit @param {any} manifest
+ */
+export function attachImages(unit, manifest, opts) {
+  const byId = new Map((manifest?.assets || []).map((a) => [a.id, a]));
+  for (const it of unit.items) {
+    const asset = it.image && byId.get(it.image);
+    if (assetShows(asset, opts)) it.imageSrc = ART_BASE + asset.path;
+    else delete it.imageSrc;
+  }
+  return unit;
+}
+ALL_UNITS.forEach((u) => attachImages(u, ALL_ASSETS[u.id]));
+
 /** Units with content a child can play here, in trail order. @param {string} subjectId */
 export const getReadyUnits = (subjectId) => playableUnits(subjectId);
 
@@ -66,7 +94,9 @@ export function installPack(pack) {
   if (pack?.schema !== "pack/1") return false;
   const subject = catalogue.subjects.find((s) => s.id === pack.subject?.id);
   if (!subject || !Array.isArray(pack.units)) return false;
-  for (const u of pack.units) if (u?.schema === "unit/1" && u.subject === subject.id) UNITS[u.id] = u;
+  for (const u of pack.units)
+    if (u?.schema === "unit/1" && u.subject === subject.id)
+      UNITS[u.id] = attachImages(u, pack.assets?.[u.id] || ALL_ASSETS[u.id]);
   for (const entry of pack.subject.units || []) {
     const i = subject.units.findIndex((e) => e.id === entry.id);
     if (i >= 0) subject.units[i] = { ...subject.units[i], ...entry };

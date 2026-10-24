@@ -19,6 +19,7 @@
     "@trailbuddies/content-schema": "workspace:*"
   },
   "devDependencies": {
-    "@trailbuddies/domain": "workspace:*"
+    "@trailbuddies/domain": "workspace:*",
+    "sharp": "^0.35.5"
   }
 }
