@@ -49,16 +49,7 @@ describe("progress", () => {
     expect(unitOpen(units, 1, {})).toBe(false);
     expect(unitOpen(units, 1, { "a-1": 1, "a-2": 1, "a-3": 1 })).toBe(false);
     expect(unitOpen(units, 1, { "a-1": 1, "a-2": 1, "a-3": 1, [trophyId("a")]: 2 })).toBe(true);
-    const all = {
-      "a-1": 1,
-      "a-2": 1,
-      "a-3": 1,
-      [trophyId("a")]: 1,
-      "b-1": 1,
-      "b-2": 1,
-      "b-3": 1,
-      [trophyId("b")]: 1,
-    };
+    const all = { "a-1": 1, "a-2": 1, "a-3": 1, [trophyId("a")]: 1, "b-1": 1, "b-2": 1, "b-3": 1, [trophyId("b")]: 1 };
     expect(unitOpen(units, 2, all)).toBe(false);
   });
   test("subject progress and current unit", () => {

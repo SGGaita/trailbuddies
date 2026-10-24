@@ -29,32 +29,11 @@ import { buildExercise } from "./lesson.js";
  * @property {string} [question]  picture puzzle: asked after the jigsaw
  * @property {string} [puzzleCard] picture puzzle: the card whose photo is the jigsaw
  * @property {number} [version]
- * @property {LessonOptions} [options]
  */
 
 export const TEMPLATES = /** @type {const} */ (["learn", "sort", "puzzle"]);
 export const CARD_LIMITS = { min: 3, max: 12 };
 export const LIMITS = { title: 60, label: 40, question: 80, group: 24, fact: 120 };
-export const NUMBER_MAX = 20;
-export const ACTIVITIES = { min: 3, max: 8 };
-export const HINTS = /** @type {const} */ (["full", "light", "none"]);
-export const LESSON_GAMES = ["memory", "jigsaw"];
-const BANDS = ["seedling", "sprout", "explorer", "voyager", "trailblazer"];
-
-/**
- * Tidy lesson settings: unknown values are dropped so the defaults apply.
- * @param {LessonOptions | undefined} o
- * @returns {LessonOptions}
- */
-export function normaliseOptions(o = {}) {
-  const out = {};
-  if (BANDS.includes(o.band)) out.band = o.band;
-  const n = Math.round(Number(o.activities));
-  if (Number.isFinite(n) && n >= ACTIVITIES.min && n <= ACTIVITIES.max) out.activities = n;
-  if (HINTS.includes(o.hints)) out.hints = o.hints;
-  if (Array.isArray(o.games)) out.games = LESSON_GAMES.filter((g) => o.games.includes(g));
-  return out;
-}
 /** Prefix of a custom lesson's id in progress keys, events and routes. */
 export const customId = (/** @type {string} */ id) => `custom-${id}`;
 export const isCustomId = (/** @type {string} */ id) => typeof id === "string" && id.startsWith("custom-");
@@ -113,16 +92,6 @@ export function normaliseLesson(lesson) {
       if (g) out.group = g;
       const fact = clean(c.fact, LIMITS.fact);
       if (fact) out.fact = fact;
-      const n = Number(c.number);
-      if (
-        c.number !== undefined &&
-        c.number !== null &&
-        c.number !== "" &&
-        Number.isInteger(n) &&
-        n >= 0 &&
-        n <= NUMBER_MAX
-      )
-        out.number = n;
       return out;
     })
     .filter((c) => c.label)
@@ -143,7 +112,6 @@ export function normaliseLesson(lesson) {
       ? { question: clean(lesson.question, LIMITS.question) || "What is this?", puzzleCard }
       : {}),
     version: lesson.version || 1,
-    options: normaliseOptions(lesson.options),
   };
 }
 
@@ -155,7 +123,7 @@ export function normaliseLesson(lesson) {
  */
 export function nextVersion(before, after) {
   if (!before) return 1;
-  const key = (l) => JSON.stringify([l.template, l.question, l.puzzleCard, l.cards, l.options || {}]);
+  const key = (l) => JSON.stringify([l.template, l.question, l.puzzleCard, l.cards]);
   return key(before) === key(after) ? before.version || 1 : (before.version || 1) + 1;
 }
 
@@ -169,7 +137,6 @@ const toItem = (/** @type {Card} */ c) => ({
   ...(c.voice ? { voice: c.voice } : {}),
   ...(c.group ? { tags: [`g:${c.group.toLowerCase()}`] } : {}),
   ...(c.fact ? { fact: c.fact } : {}),
-  ...(typeof c.number === "number" ? { number: c.number } : {}),
 });
 
 /** The custom lesson as a unit, so the regular exercise builders can use it. */
@@ -191,40 +158,16 @@ export const TEMPLATE_STEPS = {
 };
 
 /**
- * The activity types for a lesson: the template's pattern, with a counting activity when
- * at least two cards have a number, stretched or cut to the grown-up's activity count.
- * @param {CustomLesson} lesson
- */
-export function activityTypes(lesson) {
-  const base = [...(TEMPLATE_STEPS[lesson.template] || TEMPLATE_STEPS.learn)];
-  if (lesson.cards.filter((c) => typeof c.number === "number").length >= 2) base.splice(2, 0, "count");
-  const n = lesson.options?.activities || base.length;
-  return Array.from({ length: n }, (_, i) => base[i % base.length]);
-}
-
-/**
  * Generate a playable lesson from a custom lesson.
  * @param {CustomLesson} lesson
  * @param {{ level: number, band: string, r: Rng }} opts
  * @returns {import("./lesson.js").Lesson}
  */
-export function buildCustomLesson(lesson, { level: childLevel, band: childBand, r }) {
-  const opts = normaliseOptions(lesson.options);
-  // BLD-06: a grown-up's band wins; Seedling questions keep to 2-3 choices.
-  const band = opts.band || childBand;
-  const level = band === "seedling" ? Math.min(childLevel, 2) : childLevel;
+export function buildCustomLesson(lesson, { level, band, r }) {
   const unit = customUnit(lesson);
   const id = unit.id;
   const all = unit.items;
-  const base = {
-    id,
-    unitId: id,
-    subjectId: "family",
-    kind: "custom",
-    title: lesson.title,
-    level,
-    hints: opts.hints || "full",
-  };
+  const base = { id, unitId: id, subjectId: "family", kind: "custom", title: lesson.title, level };
 
   if (lesson.template === "puzzle") {
     // GAM-02: a jigsaw of the photo, then the grown-up's question with picture choices.
@@ -267,7 +210,7 @@ export function buildCustomLesson(lesson, { level: childLevel, band: childBand, 
     if (!queue.length) queue = shuffle(all, r);
     return queue.shift();
   };
-  const types = activityTypes(lesson);
+  const types = TEMPLATE_STEPS[lesson.template] || TEMPLATE_STEPS.learn;
   const steps = [
     {
       id: `${id}-intro`,

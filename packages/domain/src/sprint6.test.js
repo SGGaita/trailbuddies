@@ -108,7 +108,7 @@ describe("BLD-03 / BLD-06 custom lessons", () => {
       id: "L2",
       title: "Seedling",
       template: "learn",
-      cards: cards.map(({ number, ...c }) => c),
+      cards: cards.map(({ number: _n, ...c }) => c),
       options: { band: "seedling", activities: 5 },
     });
     for (let seed = 1; seed < 20; seed++) {

@@ -48,8 +48,7 @@ export function updateMastery(m, rightFirstTime, at) {
 export function foldMastery(answers) {
   /** @type {Record<string, ItemMastery>} */
   const out = {};
-  for (const a of [...answers].sort((x, y) => x.at - y.at))
-    out[a.itemId] = updateMastery(out[a.itemId], a.firstTry, a.at);
+  for (const a of [...answers].sort((x, y) => x.at - y.at)) out[a.itemId] = updateMastery(out[a.itemId], a.firstTry, a.at);
   return out;
 }
 

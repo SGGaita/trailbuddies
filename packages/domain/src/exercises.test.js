@@ -14,15 +14,10 @@ test("letter lessons use case-match with capital and small letters", () => {
     expect(types(l)).toEqual(["listen-tap", "case-match", "listen-tap", "match", "case-match"]);
     const cm = l.steps.find((s) => s.type === "case-match");
     expect(cm.items.length).toBeGreaterThanOrEqual(3);
-    expect(cm.items.every((i) => typeof i.letter === "string" && i.label === i.letter.toUpperCase())).toBe(
-      true,
-    );
-    expect([...cm.options].sort((a, b) => (a.id < b.id ? -1 : 1))).toEqual(
-      [...cm.items].sort((a, b) => (a.id < b.id ? -1 : 1)),
-    );
+    expect(cm.items.every((i) => typeof i.letter === "string" && i.label === i.letter.toUpperCase())).toBe(true);
+    expect([...cm.options].sort((a, b) => (a.id < b.id ? -1 : 1))).toEqual([...cm.items].sort((a, b) => (a.id < b.id ? -1 : 1)));
     // listen-tap never mixes words into letter choices
-    for (const s of l.steps.filter((x) => x.type === "listen-tap"))
-      expect(s.options.every((o) => o.letter)).toBe(true);
+    for (const s of l.steps.filter((x) => x.type === "listen-tap")) expect(s.options.every((o) => o.letter)).toBe(true);
   }
 });
 
@@ -72,18 +67,7 @@ test("compare and number odd-one-out explain themselves", () => {
   const cmp = lesson.steps.find((s) => s.type === "compare");
   expect(cmp.explain.vars.big).toBeGreaterThan(cmp.explain.vars.small);
   expect([cmp.explain.vars.a, cmp.explain.vars.b]).toEqual(cmp.options.map((o) => o.number));
-  const odd = buildExercise(
-    { type: "odd-one-out" },
-    {
-      id: "x",
-      next: () => counting.items[1],
-      pool: counting.items,
-      all: counting.items,
-      level: 2,
-      band: "sprout",
-      r: rng(2),
-    },
-  );
+  const odd = buildExercise({ type: "odd-one-out" }, { id: "x", next: () => counting.items[1], pool: counting.items, all: counting.items, level: 2, band: "sprout", r: rng(2) });
   expect(odd.explain.event).toBe("lesson.explain-odd-number");
 });
 

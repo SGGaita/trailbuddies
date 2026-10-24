@@ -34,11 +34,7 @@ export function memoryDeck(items, band, r) {
  * @param {() => number} r
  */
 export function jigsawPieces(side, r) {
-  const cells = Array.from({ length: side * side }, (_, i) => ({
-    id: `p${i}`,
-    row: Math.floor(i / side),
-    col: i % side,
-  }));
+  const cells = Array.from({ length: side * side }, (_, i) => ({ id: `p${i}`, row: Math.floor(i / side), col: i % side }));
   return shuffle(cells, r);
 }
 

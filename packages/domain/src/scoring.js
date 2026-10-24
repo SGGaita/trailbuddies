@@ -37,8 +37,7 @@ export function treasuresFor({ perfect, reachedGoal, kind = "lesson" }, rules = 
  * @param {number} earnedToday already earned today (capped sources only)
  * @param {number | null} cap
  */
-export const capped = (amount, earnedToday, cap) =>
-  cap ? Math.max(0, Math.min(amount, cap - earnedToday)) : amount;
+export const capped = (amount, earnedToday, cap) => (cap ? Math.max(0, Math.min(amount, cap - earnedToday)) : amount);
 
 /** Praise effort when the child needed several hints but finished. */
 export const keptGoing = (/** @type {number} */ hintsUsed) => hintsUsed >= 3;

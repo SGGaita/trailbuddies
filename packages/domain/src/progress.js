@@ -60,12 +60,7 @@ export function subjectProgress(units, progress) {
  */
 export function currentUnit(units, progress, start) {
   let last = null;
-  const from = start
-    ? Math.max(
-        0,
-        units.findIndex((x) => x.id === start),
-      )
-    : 0;
+  const from = start ? Math.max(0, units.findIndex((x) => x.id === start)) : 0;
   for (let i = from; i < units.length; i++) {
     if (!unitOpen(units, i, progress, start)) continue;
     last = units[i];

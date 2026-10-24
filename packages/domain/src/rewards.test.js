@@ -46,41 +46,21 @@ describe("economy (RWD-03, RWD-09)", () => {
   });
 });
 
-const base = {
-  progress: {},
-  stars: 0,
-  badges: [],
-  answers: [],
-  results: [],
-  games: [],
-  mastery: {},
-  byDay: {},
-  goal: 2,
-  now: NOW,
-};
+const base = { progress: {}, stars: 0, badges: [], answers: [], results: [], games: [], mastery: {}, byDay: {}, goal: 2, now: NOW };
 describe("badge engine (BDG-01, BDG-02)", () => {
   test("15 built-in badges across five categories with tiers", () => {
     expect(badges).toHaveLength(15);
-    expect(new Set(badges.map((b) => b.category))).toEqual(
-      new Set(["learning", "mastery", "effort", "consistency", "exploration"]),
-    );
+    expect(new Set(badges.map((b) => b.category))).toEqual(new Set(["learning", "mastery", "effort", "consistency", "exploration"]));
     expect(badges.every((b) => b.tier && b.icon && b.how)).toBe(true);
   });
   test("first lesson earns First Steps; already earned badges aren't earned again", () => {
-    const s = {
-      ...base,
-      results: [{ kind: "lesson", stars: 2, hints: 0, subjectId: "numbers" }],
-      progress: { "counting-1-5-1": 2 },
-      stars: 2,
-    };
+    const s = { ...base, results: [{ kind: "lesson", stars: 2, hints: 0, subjectId: "numbers" }], progress: { "counting-1-5-1": 2 }, stars: 2 };
     expect(newBadges(badges, s).map((b) => b.id)).toEqual(["first-steps"]);
     expect(newBadges(badges, { ...s, badges: ["first-steps"] })).toEqual([]);
   });
   test("ten 3-star lessons earns Perfect Ten (works offline: just state)", () => {
     const progress = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`u-${i + 1}`, 3]));
-    expect(
-      newBadges(badges, { ...base, progress, stars: 30, badges: ["first-steps"] }).map((b) => b.id),
-    ).toContain("perfect-ten");
+    expect(newBadges(badges, { ...base, progress, stars: 30, badges: ["first-steps"] }).map((b) => b.id)).toContain("perfect-ten");
   });
   test("effort, comeback, streak, exploration and completion rules", () => {
     const s = {
@@ -100,35 +80,14 @@ describe("badge engine (BDG-01, BDG-02)", () => {
       progress: { "counting-1-5-trophy": 3, "counting-6-10-trophy": 2 },
     };
     const ids = newBadges(badges, s).map((b) => b.id);
-    for (const id of [
-      "never-give-up",
-      "comeback-kid",
-      "week-warrior",
-      "world-traveller",
-      "game-master",
-      "counting-champ",
-    ])
-      expect(ids).toContain(id);
+    for (const id of ["never-give-up", "comeback-kid", "week-warrior", "world-traveller", "game-master", "counting-champ"]) expect(ids).toContain(id);
     expect(ids).not.toContain("letter-explorer");
     expect(badgeStats(s).comebacks).toBe(1);
   });
   test("combo and mastery rules; payouts by tier", () => {
     const s = { ...base, mastery: { one: { mastered: true } } };
     expect(ruleMet({ type: "mastery", items: ["one"] }, badgeStats(s), s)).toBe(true);
-    expect(
-      ruleMet(
-        {
-          type: "combo",
-          op: "and",
-          all: [
-            { type: "mastery", items: ["one"] },
-            { type: "count", metric: "lessons", n: 1 },
-          ],
-        },
-        badgeStats(s),
-        s,
-      ),
-    ).toBe(false);
+    expect(ruleMet({ type: "combo", op: "and", all: [{ type: "mastery", items: ["one"] }, { type: "count", metric: "lessons", n: 1 }] }, badgeStats(s), s)).toBe(false);
     expect(badgePayout({ tier: "gold" }, economy.badge)).toBe(50);
   });
 });
@@ -139,11 +98,7 @@ describe("games (GAM-01, GAM-03, GAM-05)", () => {
     expect(["seedling", "sprout", "voyager"].map(jigsawSide)).toEqual([2, 3, 4]);
   });
   test("a memory deck works from any 6 cards, e.g. a custom lesson", () => {
-    const custom = Array.from({ length: 6 }, (_, i) => ({
-      id: `card${i}`,
-      label: `Card ${i}`,
-      image: `asset-${i}`,
-    }));
+    const custom = Array.from({ length: 6 }, (_, i) => ({ id: `card${i}`, label: `Card ${i}`, image: `asset-${i}` }));
     const deck = memoryDeck(custom, "explorer", rng(1));
     expect(deck).toHaveLength(12);
     const counts = {};
