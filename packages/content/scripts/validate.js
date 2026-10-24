@@ -52,7 +52,9 @@ for (const s of cat.subjects)
 if (prod) report(join(root, "units"), productionProblems(loadContent(root)));
 
 const indexFile = join(root, "units", "all.js");
-if (!existsSync(indexFile) || readFileSync(indexFile, "utf8") !== unitsIndex())
+// Compare without line endings: Git on Windows checks files out with CRLF.
+const lf = (t) => t.replace(/\r\n/g, "\n");
+if (!existsSync(indexFile) || lf(readFileSync(indexFile, "utf8")) !== lf(unitsIndex()))
   report(indexFile, ["out of date: run `pnpm --filter @trailbuddies/content units:index`"]);
 
 for (const f of walk(join(root, "buddy"))) report(f, validate("buddy-script", read(f)).errors);
