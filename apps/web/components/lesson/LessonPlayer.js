@@ -209,7 +209,7 @@ function Player({ where, learner }) {
     if (stepDone) return;
     if (correct && !finished) return; // a correct part of a match or sequence
     const cur = ladders[step.id] || startLadder();
-    const res = answer(cur, correct, { wrongOptionIds: wrongIds, chosenId });
+    const res = answer(cur, correct, { wrongOptionIds: wrongIds, chosenId, hints: lesson.hints });
     setLadders((l) => ({ ...l, [step.id]: res.state }));
     if (res.effect === "correct") {
       playSound("right");

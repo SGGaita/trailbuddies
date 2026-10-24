@@ -31,6 +31,11 @@ class UserOut(BaseModel):
     id: str
     email: str
     name: str
+    google: bool = Field(default=False, description="a Google account is linked (ONB-03)")
+
+    @classmethod
+    def of(cls, u) -> "UserOut":
+        return cls(id=u.id, email=u.email, name=u.name, google=bool(u.google_sub))
 
 
 class MeIn(Strict):
@@ -52,6 +57,13 @@ class FamilySettings(Strict):
     sound: bool = True
     treasure_cap: bool = Field(
         default=True, description="daily treasure cap on (100 a day by default); off = no cap"
+    )
+    breaks: Literal[0, 10, 15, 20, 30] = Field(
+        default=0, description="stretch break every N minutes of play; 0 = off (PAR-04)"
+    )
+    captions: bool = Field(default=True, description="show everything the buddy says (ACC-03)")
+    calm: Literal["device", "on", "off"] = Field(
+        default="device", description="reduced motion: follow the device, or always on/off (ACC-02)"
     )
 
 
@@ -100,6 +112,9 @@ class LearnerIn(Strict):
     interests: list[str] = Field(default_factory=list, max_length=12)
     placement: dict[str, str] = Field(default_factory=dict, max_length=10)
     difficulty: Difficulty = "auto"
+    levels: dict[str, Difficulty] = Field(
+        default_factory=dict, max_length=12, description="per-subject level lock (ADP-02)"
+    )
     wish: str | None = Field(default=None, max_length=32, description="shop item the learner is saving for")
     updated_at: datetime
 
@@ -167,8 +182,18 @@ class CardIn(Strict):
     voice: str | None = _ulid(default=None)
     group: str | None = Field(default=None, max_length=24)
     fact: str | None = Field(default=None, max_length=120)
+    number: int | None = Field(default=None, ge=0, le=20, description="how many, for counting (BLD-03)")
 
     _clean = field_validator("label", "group", "fact")(lambda v: _one_line(v))
+
+
+class LessonOptions(Strict):
+    """A grown-up's settings for a custom lesson (BLD-06)."""
+
+    band: Literal["seedling", "sprout", "explorer", "voyager", "trailblazer"] | None = None
+    activities: int | None = Field(default=None, ge=3, le=8)
+    hints: Literal["full", "light", "none"] | None = None
+    games: list[Literal["memory", "jigsaw"]] | None = Field(default=None, max_length=2)
 
 
 class CustomLessonIn(Strict):
@@ -179,6 +204,7 @@ class CustomLessonIn(Strict):
     cards: list[CardIn] = Field(min_length=1, max_length=12)
     assigned: list[str] = Field(default_factory=list, max_length=6)
     version: int = Field(default=1, ge=1)
+    options: LessonOptions = LessonOptions()
     updated_at: datetime
 
     _clean = field_validator("title", "question")(lambda v: _one_line(v))

@@ -26,6 +26,7 @@ import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
 import { FamilySettingsForm, PinSetup } from "@/components/SettingsForm";
+import { CountrySection, DevicesSection, OfflineSection, SubjectLocks } from "@/components/screens/SettingsSections";
 
 const Section = ({ title, sub, children }) => (
   <Card sx={{ p: { xs: 2, sm: 3 } }}>
@@ -77,7 +78,10 @@ function AccountSection() {
         ? t("settings.offline")
         : t("settings.sync");
   return (
-    <Section title={t("settings.account")} sub={user ? t("settings.signedInAs", { email: user.email }) : ""}>
+    <Section
+      title={t("settings.account")}
+      sub={user ? `${t("settings.signedInAs", { email: user.email })}${user.google ? ` · ${t("settings.googleLinked")}` : ""}` : ""}
+    >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flexWrap: "wrap" }} role="status">
         <Box
           aria-hidden="true"
@@ -322,6 +326,9 @@ export default function FamilySettings() {
           </>
         )}
         <PlanSection />
+        <CountrySection />
+        <DevicesSection />
+        <OfflineSection />
         <GrownUpsSection />
         <Section title={t("settings.difficulty")} sub={t("settings.difficultySub")}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -364,6 +371,7 @@ export default function FamilySettings() {
                     </ToggleButton>
                   ))}
                 </ToggleButtonGroup>
+                <SubjectLocks learner={l} disabled={viewer} />
               </Box>
             ))}
           </Box>

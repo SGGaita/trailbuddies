@@ -1,0 +1,77 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-farm-cow",
+      "kind": "image",
+      "path": "animals/farm-animals/farm-cow.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a cow; emoji 🐄 stands in until approved."
+    },
+    {
+      "id": "img-goat",
+      "kind": "image",
+      "path": "animals/farm-animals/goat.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a goat; emoji 🐐 stands in until approved."
+    },
+    {
+      "id": "img-farm-sheep",
+      "kind": "image",
+      "path": "animals/farm-animals/farm-sheep.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a sheep; emoji 🐑 stands in until approved."
+    },
+    {
+      "id": "img-farm-pig",
+      "kind": "image",
+      "path": "animals/farm-animals/farm-pig.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a pig; emoji 🐖 stands in until approved."
+    },
+    {
+      "id": "img-donkey",
+      "kind": "image",
+      "path": "animals/farm-animals/donkey.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a donkey; emoji 🫏 stands in until approved."
+    },
+    {
+      "id": "img-farm-hen",
+      "kind": "image",
+      "path": "animals/farm-animals/farm-hen.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a hen; emoji 🐔 stands in until approved."
+    },
+    {
+      "id": "img-farm-duck",
+      "kind": "image",
+      "path": "animals/farm-animals/farm-duck.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a duck; emoji 🦆 stands in until approved."
+    },
+    {
+      "id": "img-turkey",
+      "kind": "image",
+      "path": "animals/farm-animals/turkey.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a turkey; emoji 🦃 stands in until approved."
+    }
+  ]
+}

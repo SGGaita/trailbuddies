@@ -1,0 +1,77 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-cow-moo",
+      "kind": "image",
+      "path": "animals/animal-sounds/cow-moo.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a cow; emoji 🐄 stands in until approved."
+    },
+    {
+      "id": "img-dog-woof",
+      "kind": "image",
+      "path": "animals/animal-sounds/dog-woof.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a dog; emoji 🐕 stands in until approved."
+    },
+    {
+      "id": "img-cat-meow",
+      "kind": "image",
+      "path": "animals/animal-sounds/cat-meow.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a cat; emoji 🐈 stands in until approved."
+    },
+    {
+      "id": "img-duck-quack",
+      "kind": "image",
+      "path": "animals/animal-sounds/duck-quack.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a duck; emoji 🦆 stands in until approved."
+    },
+    {
+      "id": "img-sheep-baa",
+      "kind": "image",
+      "path": "animals/animal-sounds/sheep-baa.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a sheep; emoji 🐑 stands in until approved."
+    },
+    {
+      "id": "img-lion-roar",
+      "kind": "image",
+      "path": "animals/animal-sounds/lion-roar.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a lion; emoji 🦁 stands in until approved."
+    },
+    {
+      "id": "img-hen-cluck",
+      "kind": "image",
+      "path": "animals/animal-sounds/hen-cluck.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a hen; emoji 🐔 stands in until approved."
+    },
+    {
+      "id": "img-frog-ribbit",
+      "kind": "image",
+      "path": "animals/animal-sounds/frog-ribbit.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a frog; emoji 🐸 stands in until approved."
+    }
+  ]
+}

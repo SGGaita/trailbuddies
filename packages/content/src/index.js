@@ -1,13 +1,10 @@
 /**
  * Built-in content packs. JSON files are the source of truth; this module
- * gives apps a small read API over them. New units need a JSON file here and
- * an entry in UNITS below (the validator fails if the catalogue and files disagree).
+ * gives apps a small read API over them. A new unit needs a JSON file, a catalogue entry
+ * and `pnpm --filter @trailbuddies/content units:index` (the validator checks all three).
  */
 import catalogue from "./catalogue.json" with { type: "json" };
-import countingOneToFive from "./units/numbers/counting-1-5.json" with { type: "json" };
-import countingSixToTen from "./units/numbers/counting-6-10.json" with { type: "json" };
-import lettersAtoE from "./units/language/letters-a-e.json" with { type: "json" };
-import whereAnimalsLive from "./units/animals/where-animals-live.json" with { type: "json" };
+import { ALL_UNITS } from "./units/all.js";
 import buddyEn from "./buddy/en.json" with { type: "json" };
 import zipEn from "./buddy/en.zip.json" with { type: "json" };
 import tumiEn from "./buddy/en.tumi.json" with { type: "json" };
@@ -17,12 +14,9 @@ import builtInBadges from "./badges/built-in.json" with { type: "json" };
 import economy from "./economy.json" with { type: "json" };
 
 /** Units with full content, by id. */
-export const UNITS = {
-  [countingOneToFive.id]: countingOneToFive,
-  [countingSixToTen.id]: countingSixToTen,
-  [lettersAtoE.id]: lettersAtoE,
-  [whereAnimalsLive.id]: whereAnimalsLive,
-};
+export const UNITS = Object.fromEntries(ALL_UNITS.map((u) => [u.id, u]));
+/** Units shipped inside this build (they have their own pages); others come from packs. */
+export const BUILT_IN_UNIT_IDS = new Set(ALL_UNITS.map((u) => u.id));
 
 export { catalogue, builtInBadges };
 
@@ -32,15 +26,54 @@ export const getSubjects = () => catalogue.subjects;
 /** @param {string} id */
 export const getSubject = (id) => catalogue.subjects.find((s) => s.id === id) || null;
 
-/** Units with full content for a subject, in trail order. @param {string} subjectId */
-export const getReadyUnits = (subjectId) =>
-  (getSubject(subjectId)?.units || []).map((u) => UNITS[u.id]).filter(Boolean);
+/**
+ * Draft units (written but not yet approved, CNT-04) play in development and previews only.
+ * A production build sets NEXT_PUBLIC_TB_CHANNEL=production and hides them from children.
+ */
+export const SHOW_DRAFTS =
+  typeof process === "undefined" || process.env.NEXT_PUBLIC_TB_CHANNEL !== "production";
+
+/**
+ * Playable units for a subject, in trail order.
+ * @param {string} subjectId
+ * @param {{ drafts?: boolean }} [opts]
+ */
+export const playableUnits = (subjectId, { drafts = SHOW_DRAFTS } = {}) =>
+  (getSubject(subjectId)?.units || [])
+    .map((u) => UNITS[u.id])
+    .filter((u) => u && (u.status === "ready" || (drafts && u.status === "draft")));
+
+/** Units with content a child can play here, in trail order. @param {string} subjectId */
+export const getReadyUnits = (subjectId) => playableUnits(subjectId);
 
 /**
  * Full unit content, or null if the unit is only planned.
  * @param {string} id
  */
-export const getUnit = (id) => UNITS[id] || null;
+export const getUnit = (id) => {
+  const u = UNITS[id];
+  return u && (u.status === "ready" || (SHOW_DRAFTS && u.status === "draft")) ? u : null;
+};
+
+/**
+ * Install a downloaded content pack (CNT-02, OFF-02): its units replace the built-in copies
+ * and its catalogue entries are merged into the subject (new units are added at the end).
+ * Called before the app first renders, so a new pack takes effect on the next launch.
+ * @param {any} pack a "pack/1" document from the content API
+ * @returns {boolean} false if it isn't a pack for a subject this app knows
+ */
+export function installPack(pack) {
+  if (pack?.schema !== "pack/1") return false;
+  const subject = catalogue.subjects.find((s) => s.id === pack.subject?.id);
+  if (!subject || !Array.isArray(pack.units)) return false;
+  for (const u of pack.units) if (u?.schema === "unit/1" && u.subject === subject.id) UNITS[u.id] = u;
+  for (const entry of pack.subject.units || []) {
+    const i = subject.units.findIndex((e) => e.id === entry.id);
+    if (i >= 0) subject.units[i] = { ...subject.units[i], ...entry };
+    else subject.units.push(entry);
+  }
+  return true;
+}
 
 /**
  * Lesson ids for a unit, from content if available, otherwise numbered from the catalogue.

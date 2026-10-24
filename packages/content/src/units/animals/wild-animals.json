@@ -1,0 +1,234 @@
+{
+  "schema": "unit/1",
+  "id": "wild-animals",
+  "subject": "animals",
+  "title": "Wild animals",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Wild animals of Africa and where they live: grassland, river or forest.",
+  "requires": [
+    "where-animals-live"
+  ],
+  "groups": [
+    {
+      "id": "grassland",
+      "label": "Grassland",
+      "say": "on the grassland",
+      "emoji": "🌾"
+    },
+    {
+      "id": "river",
+      "label": "River",
+      "say": "in the river",
+      "emoji": "🏞️"
+    },
+    {
+      "id": "forest",
+      "label": "Forest",
+      "say": "in the forest",
+      "emoji": "🌳"
+    }
+  ],
+  "items": [
+    {
+      "id": "elephant",
+      "label": "elephant",
+      "fact": "An elephant drinks with its trunk.",
+      "emoji": "🐘",
+      "tags": [
+        "grassland"
+      ],
+      "image": "img-elephant"
+    },
+    {
+      "id": "wild-lion",
+      "label": "lion",
+      "fact": "Lions live together in a pride.",
+      "emoji": "🦁",
+      "tags": [
+        "grassland"
+      ],
+      "image": "img-wild-lion"
+    },
+    {
+      "id": "wild-zebra",
+      "label": "zebra",
+      "fact": "Zebras live in big herds.",
+      "emoji": "🦓",
+      "tags": [
+        "grassland"
+      ],
+      "image": "img-wild-zebra"
+    },
+    {
+      "id": "wild-giraffe",
+      "label": "giraffe",
+      "fact": "A giraffe is the tallest animal.",
+      "emoji": "🦒",
+      "tags": [
+        "grassland"
+      ],
+      "image": "img-wild-giraffe"
+    },
+    {
+      "id": "hippo",
+      "label": "hippo",
+      "fact": "A hippo spends the hot day in the river.",
+      "emoji": "🦛",
+      "tags": [
+        "river"
+      ],
+      "image": "img-hippo"
+    },
+    {
+      "id": "crocodile",
+      "label": "crocodile",
+      "fact": "A crocodile can stay still for a long time.",
+      "emoji": "🐊",
+      "tags": [
+        "river"
+      ],
+      "image": "img-crocodile"
+    },
+    {
+      "id": "monkey",
+      "label": "monkey",
+      "fact": "A monkey swings from tree to tree.",
+      "emoji": "🐒",
+      "tags": [
+        "forest"
+      ],
+      "image": "img-monkey"
+    },
+    {
+      "id": "gorilla",
+      "label": "gorilla",
+      "fact": "Gorillas live in family groups in the forest.",
+      "emoji": "🦍",
+      "tags": [
+        "forest"
+      ],
+      "image": "img-gorilla"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "wild-animals-1",
+      "title": "On the grassland",
+      "focus": [
+        "elephant",
+        "wild-lion",
+        "wild-zebra"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "wild-animals-2",
+      "title": "Tall and wet",
+      "focus": [
+        "wild-giraffe",
+        "hippo",
+        "crocodile"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "elephant"
+      ]
+    },
+    {
+      "id": "wild-animals-3",
+      "title": "In the forest",
+      "focus": [
+        "monkey",
+        "gorilla"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "hippo"
+      ]
+    },
+    {
+      "id": "wild-animals-4",
+      "title": "Where do they live?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "elephant",
+        "wild-lion",
+        "wild-zebra",
+        "wild-giraffe",
+        "hippo",
+        "crocodile",
+        "monkey",
+        "gorilla"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "sorting-race"
+  }
+}

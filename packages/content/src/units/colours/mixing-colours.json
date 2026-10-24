@@ -1,0 +1,195 @@
+{
+  "schema": "unit/1",
+  "id": "mixing-colours",
+  "subject": "colours",
+  "title": "Mixing colours",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Mix two colours to make a new one: red and yellow make orange.",
+  "requires": [
+    "more-colours"
+  ],
+  "items": [
+    {
+      "id": "mix-red",
+      "label": "red",
+      "fact": "Red is one of the first colours.",
+      "tags": [
+        "red"
+      ],
+      "colour": "#E53935",
+      "shape": "splash"
+    },
+    {
+      "id": "mix-yellow",
+      "label": "yellow",
+      "fact": "Yellow is one of the first colours.",
+      "tags": [
+        "yellow"
+      ],
+      "colour": "#FDD835",
+      "shape": "splash"
+    },
+    {
+      "id": "mix-blue",
+      "label": "blue",
+      "fact": "Blue is one of the first colours.",
+      "tags": [
+        "blue"
+      ],
+      "colour": "#1E88E5",
+      "shape": "splash"
+    },
+    {
+      "id": "mix-orange",
+      "label": "orange",
+      "fact": "Red and yellow mixed together make orange.",
+      "tags": [
+        "orange"
+      ],
+      "colour": "#FB8C00",
+      "shape": "splash"
+    },
+    {
+      "id": "mix-green",
+      "label": "green",
+      "fact": "Blue and yellow mixed together make green.",
+      "tags": [
+        "green"
+      ],
+      "colour": "#43A047",
+      "shape": "splash"
+    },
+    {
+      "id": "mix-purple",
+      "label": "purple",
+      "fact": "Red and blue mixed together make purple.",
+      "tags": [
+        "purple"
+      ],
+      "colour": "#8E24AA",
+      "shape": "splash"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "mixing-colours-1",
+      "title": "Red and yellow make orange",
+      "focus": [
+        "mix-red",
+        "mix-yellow",
+        "mix-orange"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "mixing-colours-2",
+      "title": "Blue and yellow make green",
+      "focus": [
+        "mix-blue",
+        "mix-green"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "mix-yellow"
+      ]
+    },
+    {
+      "id": "mixing-colours-3",
+      "title": "Red and blue make purple",
+      "focus": [
+        "mix-purple"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "mix-red",
+        "mix-blue"
+      ]
+    },
+    {
+      "id": "mixing-colours-4",
+      "title": "Little colour scientist",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "name-it",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "mix-red",
+        "mix-yellow",
+        "mix-blue",
+        "mix-orange",
+        "mix-green",
+        "mix-purple"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

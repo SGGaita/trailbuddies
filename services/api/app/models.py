@@ -19,6 +19,9 @@ class User(Timestamped, Base):
     id: Mapped[str] = mapped_column(ULID, primary_key=True)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(120))
+    google_sub: Mapped[str | None] = mapped_column(
+        String(64), unique=True, nullable=True, doc="Google account id once linked (ONB-03)"
+    )
 
 
 class Family(Timestamped, Base):
@@ -76,6 +79,9 @@ class Learner(Timestamped, Base):
         doc="starting unit per subject from the placement quiz, e.g. {'numbers': 'counting-6-10'}",
     )
     difficulty: Mapped[str] = mapped_column(String(8), default="auto")
+    levels: Mapped[dict] = mapped_column(
+        JSON, default=dict, doc="per-subject level lock (ADP-02), e.g. {'numbers': '1'}"
+    )
     wish: Mapped[str | None] = mapped_column(
         String(32), nullable=True, doc="shop item the learner is saving for"
     )
@@ -97,6 +103,9 @@ class Consent(Base):
         default="checkbox",
         doc="how consent was given: checkbox now; a verified method before a US launch",
     )
+    region: Mapped[str | None] = mapped_column(
+        String(32), nullable=True, doc="privacy rules the consent was given under (ONB-05)"
+    )
     given_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -110,6 +119,9 @@ class Session(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    device_name: Mapped[str | None] = mapped_column(
+        String(60), nullable=True, doc="browser and system only, e.g. 'Chrome on Android' (FAM-08)"
+    )
 
 
 class LoginToken(Base):
@@ -202,6 +214,9 @@ class CustomLesson(Base):
     cards: Mapped[list] = mapped_column(JSON, default=list)
     assigned: Mapped[list] = mapped_column(JSON, default=list, doc="learner ids")
     version: Mapped[int] = mapped_column(Integer, default=1)
+    options: Mapped[dict] = mapped_column(
+        JSON, default=dict, doc="lesson settings: band, activities, hints, games (BLD-06)"
+    )
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

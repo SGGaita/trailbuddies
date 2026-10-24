@@ -95,6 +95,10 @@ importers:
       '@trailbuddies/content-schema':
         specifier: workspace:*
         version: link:../content-schema
+    devDependencies:
+      '@trailbuddies/domain':
+        specifier: workspace:*
+        version: link:../domain
 
   packages/content-schema:
     dependencies:

@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 from .db import get_session, utcnow
+from .devices import device_name
 from .ids import ulid
 from .models import FamilyMember, Session, User
 from .settings import get_settings
@@ -27,8 +28,9 @@ def aware(dt: datetime) -> datetime:
     return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
-def start_session(db: DbSession, user: User, response: Response) -> None:
+def start_session(db: DbSession, user: User, response: Response, request: Request | None = None) -> None:
     s = get_settings()
+    ua = request.headers.get("user-agent") if request else None
     token = secrets.token_urlsafe(32)
     now = utcnow()
     db.add(
@@ -39,6 +41,7 @@ def start_session(db: DbSession, user: User, response: Response) -> None:
             created_at=now,
             last_seen_at=now,
             expires_at=now + timedelta(days=s.session_days),
+            device_name=device_name(ua),
         )
     )
     db.commit()
@@ -74,6 +77,7 @@ def current_user(
     now = utcnow()
     if not row or aware(row.expires_at) <= now:
         raise HTTPException(401, "Not signed in")
+    request.state.session_id = row.id
     if now - aware(row.last_seen_at) > timedelta(days=1):
         row.last_seen_at = now
         row.expires_at = now + timedelta(days=get_settings().session_days)

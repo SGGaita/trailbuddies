@@ -22,6 +22,7 @@ export const learnerToApi = (l) => ({
   interests: l.interests || [],
   placement: l.placement || {},
   difficulty: l.difficulty || "auto",
+  levels: l.levels || {},
   wish: l.wish || null,
   updated_at: l.updated_at,
 });
@@ -35,6 +36,7 @@ export const learnerFromApi = (a) => ({
   interests: a.interests,
   placement: a.placement,
   difficulty: a.difficulty,
+  levels: a.levels || {},
   wish: a.wish ?? null,
   updated_at: a.updated_at,
 });
@@ -48,6 +50,7 @@ export const lessonToApi = (l) => ({
   cards: l.cards,
   assigned: l.assigned,
   version: l.version || 1,
+  options: l.options || {},
   updated_at: l.updated_at,
 });
 export const lessonFromApi = (a) => ({
@@ -59,6 +62,7 @@ export const lessonFromApi = (a) => ({
   cards: a.cards,
   assigned: a.assigned,
   version: a.version,
+  options: a.options || {},
   updated_at: a.updated_at,
 });
 
@@ -118,13 +122,23 @@ function applyMe(me) {
   const keepLocalFamily = s.family?.dirty && fam && newer(fam, s.family) === s.family;
   const family = fam
     ? keepLocalFamily
-      ? { ...s.family, consent: fam.consent, role: fam.role, learner_limit: fam.learner_limit }
+      ? {
+          ...s.family,
+          consent: fam.consent,
+          role: fam.role,
+          learner_limit: fam.learner_limit,
+          device_limit: fam.device_limit,
+          region: fam.region,
+          country: fam.country,
+        }
       : {
           id: fam.id,
           name: fam.name,
           country: fam.country,
           plan: fam.plan === "free" ? "Free" : fam.plan === "family" ? "Family" : fam.plan,
           learner_limit: fam.learner_limit,
+          device_limit: fam.device_limit,
+          region: fam.region,
           role: fam.role,
           pin: fam.pin,
           consent: fam.consent,
@@ -197,6 +211,9 @@ export function setupStep(s, policyVersion) {
   if (!s.family) return "/start/about";
   if (s.family.role === "viewer") return null; // carers join a family that's already set up
   if (!s.family.consent || (policyVersion && s.family.consent.policy_version !== policyVersion))
+    return "/start/consent";
+  // ONB-05: after moving to a country with different privacy rules, agree again.
+  if (s.family.region && s.family.consent.region && s.family.region !== s.family.consent.region)
     return "/start/consent";
   if (!s.learners.length) return "/start/learners";
   return null;
@@ -308,3 +325,22 @@ function soon() {
   queued = setTimeout(syncNow, 800);
 }
 onLocalChange(soon);
+
+/**
+ * ONB-05: change the family's country (online only). Returns "consent" when the new country
+ * has different privacy rules, so the grown-up is asked to agree again.
+ * @param {string} country ISO code
+ */
+export async function changeCountry(country) {
+  const fam = get().family;
+  if (!fam?.id) return "ok";
+  await api.patchFamily(fam.id, { country, updated_at: new Date().toISOString() });
+  await refreshAccount();
+  const f = get().family;
+  return f?.region && f.consent?.region && f.region !== f.consent.region ? "consent" : "ok";
+}
+
+/** FAM-08: this family's signed-in devices. */
+export const listDevices = () => api.devices(get().family.id);
+/** FAM-08: sign out one device. */
+export const signOutDevice = (id) => api.signOutDevice(get().family.id, id);

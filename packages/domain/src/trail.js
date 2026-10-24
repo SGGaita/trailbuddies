@@ -18,6 +18,7 @@ import { unitOpen, unitProgress, trophyId } from "./progress.js";
  * @property {number} [n] lesson number within the unit (1-based)
  * @property {number} [stars]
  * @property {string} [title]
+ * @property {boolean} [bronze] skipped by placement: shown done with a bronze star
  */
 
 const COLUMNS = [0.28, 0.55, 0.78, 0.55]; // zig-zag positions as fractions of width
@@ -59,7 +60,10 @@ export function layoutTrail(units, progress, opts = {}) {
       const stars = progress[id] || 0;
       /** @type {NodeState} */
       let state = planned ? "planned" : !open ? "locked" : stars > 0 ? "done" : "open";
-      const node = { kind: /** @type {const} */ ("lesson"), id, unitId: u.id, n: li + 1, x, y, state, stars };
+      // ADP-05 / ONB-09: units before the placement start show as done with a bronze star.
+      const bronze = !planned && ui < startIndex && stars === 0;
+      if (bronze) state = "done";
+      const node = { kind: /** @type {const} */ ("lesson"), id, unitId: u.id, n: li + 1, x, y, state, stars: bronze ? 1 : stars, ...(bronze ? { bronze } : {}) };
       if (state === "open" && !next && ui >= startIndex) {
         node.state = "next";
         next = node;
@@ -90,6 +94,7 @@ export function layoutTrail(units, progress, opts = {}) {
       state: tState,
       stars: tStars,
     };
+    if (!planned && ui < startIndex && tStars === 0) Object.assign(trophy, { state: "done", stars: 1, bronze: true });
     if (tState === "open" && !next && ui >= startIndex) {
       trophy.state = "next";
       next = trophy;

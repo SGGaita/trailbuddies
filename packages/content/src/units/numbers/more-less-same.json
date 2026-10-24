@@ -1,0 +1,209 @@
+{
+  "schema": "unit/1",
+  "id": "more-less-same",
+  "subject": "numbers",
+  "title": "More, less, same",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Compare two groups: which has more, which has fewer, and when they are the same.",
+  "requires": [
+    "counting-1-5"
+  ],
+  "items": [
+    {
+      "id": "two-mangoes",
+      "label": "2",
+      "say": "two",
+      "number": 2,
+      "emoji": "🥭",
+      "fact": "Mangoes grow on tall trees."
+    },
+    {
+      "id": "three-mangoes",
+      "label": "3",
+      "say": "three",
+      "number": 3,
+      "emoji": "🥭",
+      "fact": "A ripe mango is soft and sweet."
+    },
+    {
+      "id": "four-mangoes",
+      "label": "4",
+      "say": "four",
+      "number": 4,
+      "emoji": "🥭",
+      "fact": "Mango is a favourite fruit in Kenya."
+    },
+    {
+      "id": "five-mangoes",
+      "label": "5",
+      "say": "five",
+      "number": 5,
+      "emoji": "🥭",
+      "fact": "Five is more than four."
+    },
+    {
+      "id": "six-mangoes",
+      "label": "6",
+      "say": "six",
+      "number": 6,
+      "emoji": "🥭",
+      "fact": "Six is one more than five."
+    },
+    {
+      "id": "seven-mangoes",
+      "label": "7",
+      "say": "seven",
+      "number": 7,
+      "emoji": "🥭",
+      "fact": "Seven is one more than six."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "more-less-same-1",
+      "title": "Which has more?",
+      "focus": [
+        "two-mangoes",
+        "four-mangoes"
+      ],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        }
+      ]
+    },
+    {
+      "id": "more-less-same-2",
+      "title": "Which has fewer?",
+      "focus": [
+        "three-mangoes",
+        "five-mangoes"
+      ],
+      "exercises": [
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "two-mangoes"
+      ]
+    },
+    {
+      "id": "more-less-same-3",
+      "title": "One more",
+      "focus": [
+        "six-mangoes",
+        "seven-mangoes"
+      ],
+      "exercises": [
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "sequence"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        }
+      ],
+      "review": [
+        "five-mangoes"
+      ]
+    },
+    {
+      "id": "more-less-same-4",
+      "title": "The same or not?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "compare"
+        }
+      ],
+      "review": [
+        "two-mangoes",
+        "three-mangoes",
+        "four-mangoes",
+        "five-mangoes"
+      ]
+    },
+    {
+      "id": "more-less-same-5",
+      "title": "Line them up",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sequence"
+        },
+        {
+          "type": "compare"
+        },
+        {
+          "type": "count"
+        },
+        {
+          "type": "sequence"
+        },
+        {
+          "type": "compare"
+        }
+      ],
+      "review": [
+        "two-mangoes",
+        "three-mangoes",
+        "four-mangoes",
+        "five-mangoes",
+        "six-mangoes",
+        "seven-mangoes"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "quiz-show"
+  }
+}

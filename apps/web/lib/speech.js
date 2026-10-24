@@ -4,6 +4,14 @@
 import { useFamily } from "./store";
 
 let voice = null;
+/** ACC-03: listeners for captions; each gets the line being said, then null when it ends. */
+const listeners = new Set();
+/** @param {(text: string | null) => void} fn @returns {() => void} unsubscribe */
+export const onSpeech = (fn) => {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+};
+const emit = (text) => listeners.forEach((fn) => fn(text));
 let token = 0;
 let audio = null;
 
@@ -53,6 +61,7 @@ export const clearTextClips = () => textClips.clear();
 
 export function stop() {
   token++;
+  emit(null);
   if (canSpeak()) {
     try {
       speechSynthesis.cancel();
@@ -83,9 +92,11 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
   const finish = () => {
     if (finished || my !== token) return;
     finished = true;
+    emit(null);
     if (done) done();
   };
   if (!enabled || !text) return finish();
+  emit(text);
 
   const tts = () => {
     if (!canSpeak()) return finish();

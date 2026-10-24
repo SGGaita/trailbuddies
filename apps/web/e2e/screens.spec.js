@@ -58,11 +58,8 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await shot(page, testInfo, "4-lesson-dialog");
   await page.getByRole("button", { name: "Not now" }).click();
 
-  await page
-    .getByRole("button", { name: /coming soon/ })
-    .first()
-    .click();
-  await expect(page.getByText("This part of the trail is coming soon.")).toBeVisible();
+  // Sprint 6 drafts (shown outside production) fill the rest of the trail, locked until reached.
+  await expect(page.getByText("Number shapes 0 to 10 · locked")).toBeVisible();
 });
 
 test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {

@@ -1,0 +1,223 @@
+{
+  "schema": "unit/1",
+  "id": "sides-and-corners",
+  "subject": "shapes",
+  "title": "Sides and corners",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Count the sides and corners of a shape.",
+  "requires": [
+    "more-shapes"
+  ],
+  "groups": [
+    {
+      "id": "three-sides",
+      "label": "3 sides",
+      "say": "with three sides"
+    },
+    {
+      "id": "four-sides",
+      "label": "4 sides",
+      "say": "with four sides"
+    },
+    {
+      "id": "more-sides",
+      "label": "5 or more sides",
+      "say": "with five or more sides"
+    },
+    {
+      "id": "no-corners",
+      "label": "No corners",
+      "say": "with no corners"
+    }
+  ],
+  "items": [
+    {
+      "id": "sc-triangle",
+      "label": "triangle",
+      "fact": "A triangle has 3 sides and 3 corners.",
+      "tags": [
+        "three-sides"
+      ],
+      "shape": "triangle",
+      "colour": "#43A047"
+    },
+    {
+      "id": "sc-square",
+      "label": "square",
+      "fact": "A square has 4 sides and 4 corners.",
+      "tags": [
+        "four-sides"
+      ],
+      "shape": "square",
+      "colour": "#1E88E5"
+    },
+    {
+      "id": "sc-rectangle",
+      "label": "rectangle",
+      "fact": "A rectangle has 4 sides and 4 corners.",
+      "tags": [
+        "four-sides"
+      ],
+      "shape": "rectangle",
+      "colour": "#FB8C00"
+    },
+    {
+      "id": "sc-pentagon",
+      "label": "pentagon",
+      "fact": "A pentagon has 5 sides and 5 corners.",
+      "tags": [
+        "more-sides"
+      ],
+      "shape": "pentagon",
+      "colour": "#8E24AA"
+    },
+    {
+      "id": "sc-hexagon",
+      "label": "hexagon",
+      "fact": "A hexagon has 6 sides, like a honeycomb cell.",
+      "tags": [
+        "more-sides"
+      ],
+      "shape": "hexagon",
+      "colour": "#FDD835"
+    },
+    {
+      "id": "sc-circle",
+      "label": "circle",
+      "fact": "A circle has no corners at all.",
+      "tags": [
+        "no-corners"
+      ],
+      "shape": "circle",
+      "colour": "#E53935"
+    },
+    {
+      "id": "sc-oval",
+      "label": "oval",
+      "fact": "An oval has no corners either.",
+      "tags": [
+        "no-corners"
+      ],
+      "shape": "oval",
+      "colour": "#EC407A"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "sides-and-corners-1",
+      "title": "Three and four sides",
+      "focus": [
+        "sc-triangle",
+        "sc-square",
+        "sc-rectangle"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ]
+    },
+    {
+      "id": "sides-and-corners-2",
+      "title": "Five and six sides",
+      "focus": [
+        "sc-pentagon",
+        "sc-hexagon"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "sc-square"
+      ]
+    },
+    {
+      "id": "sides-and-corners-3",
+      "title": "No corners",
+      "focus": [
+        "sc-circle",
+        "sc-oval"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "sc-triangle"
+      ]
+    },
+    {
+      "id": "sides-and-corners-4",
+      "title": "Count the sides",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "sc-triangle",
+        "sc-square",
+        "sc-rectangle",
+        "sc-pentagon",
+        "sc-hexagon",
+        "sc-circle",
+        "sc-oval"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "sorting-race"
+  }
+}

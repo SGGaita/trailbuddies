@@ -1,0 +1,257 @@
+{
+  "schema": "unit/1",
+  "id": "shapes-around-us",
+  "subject": "shapes",
+  "title": "Shapes around us",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Find circles, rectangles, triangles and more in the world around us.",
+  "requires": [
+    "more-shapes"
+  ],
+  "groups": [
+    {
+      "id": "circle",
+      "label": "Circle",
+      "say": "a circle"
+    },
+    {
+      "id": "rectangle",
+      "label": "Rectangle",
+      "say": "a rectangle"
+    },
+    {
+      "id": "triangle",
+      "label": "Triangle",
+      "say": "a triangle"
+    },
+    {
+      "id": "diamond",
+      "label": "Diamond",
+      "say": "a diamond"
+    },
+    {
+      "id": "star",
+      "label": "Star",
+      "say": "a star"
+    }
+  ],
+  "items": [
+    {
+      "id": "door",
+      "label": "door",
+      "fact": "A door is a rectangle.",
+      "emoji": "🚪",
+      "tags": [
+        "rectangle"
+      ]
+    },
+    {
+      "id": "book",
+      "label": "book",
+      "fact": "A book is a rectangle.",
+      "emoji": "📕",
+      "tags": [
+        "rectangle"
+      ]
+    },
+    {
+      "id": "full-moon",
+      "label": "full moon",
+      "fact": "A full moon looks like a circle.",
+      "emoji": "🌕",
+      "tags": [
+        "circle"
+      ]
+    },
+    {
+      "id": "wheel",
+      "label": "wheel",
+      "fact": "A wheel is a circle so it can roll.",
+      "emoji": "🛞",
+      "tags": [
+        "circle"
+      ]
+    },
+    {
+      "id": "tent",
+      "label": "tent",
+      "fact": "A tent looks like a triangle.",
+      "emoji": "⛺",
+      "tags": [
+        "triangle"
+      ]
+    },
+    {
+      "id": "sailboat",
+      "label": "sail",
+      "fact": "A boat's sail is a triangle.",
+      "emoji": "⛵",
+      "tags": [
+        "triangle"
+      ]
+    },
+    {
+      "id": "kite-diamond",
+      "label": "kite",
+      "fact": "This kite is a diamond.",
+      "emoji": "🪁",
+      "tags": [
+        "diamond"
+      ]
+    },
+    {
+      "id": "star-fish",
+      "label": "starfish",
+      "fact": "A starfish is shaped like a star.",
+      "emoji": "⭐",
+      "tags": [
+        "star"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "shapes-around-us-1",
+      "title": "Rectangles at home",
+      "focus": [
+        "door",
+        "book"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "shapes-around-us-2",
+      "title": "Circles that roll and shine",
+      "focus": [
+        "full-moon",
+        "wheel"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "door"
+      ]
+    },
+    {
+      "id": "shapes-around-us-3",
+      "title": "Triangles outside",
+      "focus": [
+        "tent",
+        "sailboat"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "wheel"
+      ]
+    },
+    {
+      "id": "shapes-around-us-4",
+      "title": "Kites and stars",
+      "focus": [
+        "kite-diamond",
+        "star-fish"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "tent"
+      ]
+    },
+    {
+      "id": "shapes-around-us-5",
+      "title": "Shape detective",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "door",
+        "book",
+        "full-moon",
+        "wheel",
+        "tent",
+        "sailboat",
+        "kite-diamond",
+        "star-fish"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "sorting-race"
+  }
+}

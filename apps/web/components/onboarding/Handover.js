@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { lessonHref } from "@/lib/trail";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -38,7 +39,7 @@ export default function Handover() {
     setActive(learner.id);
     const subject = "numbers";
     const unit = learner.placement?.[subject] || getReadyUnits(subject)[0].id;
-    router.push(`/play/lesson/${unit}/1`);
+    router.push(lessonHref(unit, 1));
   };
 
   return (

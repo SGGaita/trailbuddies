@@ -1,0 +1,173 @@
+{
+  "schema": "unit/1",
+  "id": "domestic-animals",
+  "subject": "animals",
+  "title": "Pets at home",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Animals that live with families, and how we look after them.",
+  "items": [
+    {
+      "id": "pet-dog",
+      "label": "dog",
+      "fact": "A dog needs a walk every day.",
+      "emoji": "🐕",
+      "image": "img-pet-dog"
+    },
+    {
+      "id": "pet-cat",
+      "label": "cat",
+      "fact": "A cat cleans itself with its tongue.",
+      "emoji": "🐈",
+      "image": "img-pet-cat"
+    },
+    {
+      "id": "rabbit",
+      "label": "rabbit",
+      "fact": "A rabbit has long ears.",
+      "emoji": "🐇",
+      "image": "img-rabbit"
+    },
+    {
+      "id": "goldfish",
+      "label": "goldfish",
+      "fact": "A goldfish lives in water.",
+      "emoji": "🐠",
+      "image": "img-goldfish"
+    },
+    {
+      "id": "parrot",
+      "label": "parrot",
+      "fact": "Some parrots can copy words.",
+      "emoji": "🦜",
+      "image": "img-parrot"
+    },
+    {
+      "id": "tortoise",
+      "label": "tortoise",
+      "fact": "A tortoise carries its house: its shell.",
+      "emoji": "🐢",
+      "image": "img-tortoise"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "domestic-animals-1",
+      "title": "Dogs and cats",
+      "focus": [
+        "pet-dog",
+        "pet-cat"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "domestic-animals-2",
+      "title": "Rabbits and goldfish",
+      "focus": [
+        "rabbit",
+        "goldfish"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "pet-cat"
+      ]
+    },
+    {
+      "id": "domestic-animals-3",
+      "title": "Parrots and tortoises",
+      "focus": [
+        "parrot",
+        "tortoise"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "rabbit"
+      ]
+    },
+    {
+      "id": "domestic-animals-4",
+      "title": "Our pets",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "name-it",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "pet-dog",
+        "pet-cat",
+        "rabbit",
+        "goldfish",
+        "parrot",
+        "tortoise"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

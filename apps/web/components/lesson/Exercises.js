@@ -206,7 +206,7 @@ export function ListenTap(props) {
   const options = step.options.map((it) => ({
     id: it.id,
     label: words(it),
-    face: isNumber(it) ? it.label : it.photo ? <ItemFace it={it} /> : it.emoji || it.label,
+    face: isNumber(it) ? it.label : <ItemFace it={it} fallback />,
   }));
   return <SingleChoice {...props} options={options} answerId={step.target.id} />;
 }
@@ -350,7 +350,7 @@ export function OddOneOut(props) {
       face: (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5 }}>
           <Box component="span" sx={{ fontSize: { xs: 46, sm: 60 }, lineHeight: 1 }}>
-            {it.emoji}
+            <ItemFace it={it} />
           </Box>
           <Box component="span" sx={{ fontSize: { xs: 18, sm: 22 } }}>
             {it.label}
@@ -854,7 +854,7 @@ export function BuildWord({ step, hint, done, onTry, e2e, band, voice, buddy }) 
       {...(e2e ? { "data-word": step.target.label } : {})}
     >
       <Box aria-hidden="true" sx={{ fontSize: { xs: 84, sm: 112 }, lineHeight: 1 }}>
-        {step.target.emoji}
+        <ItemFace it={step.target} />
       </Box>
       <Row sx={{ gap: { xs: 1, sm: 1.5 } }}>
         {slots.map((id, i) => (

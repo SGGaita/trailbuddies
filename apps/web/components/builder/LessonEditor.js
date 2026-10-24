@@ -12,7 +12,17 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { CARD_LIMITS, LIMITS, TEMPLATES, groupsOf, templateProblem } from "@trailbuddies/domain";
+import {
+  CARD_LIMITS,
+  LIMITS,
+  TEMPLATES,
+  HINTS,
+  LESSON_GAMES,
+  groupsOf,
+  templateProblem,
+} from "@trailbuddies/domain";
+
+const BANDS = ["seedling", "sprout", "explorer"];
 import { ulid } from "@trailbuddies/sync";
 import { useFamily, useHydrated } from "@/lib/store";
 import { api, canEdit, refreshAccount } from "@/lib/account";
@@ -70,6 +80,14 @@ function Editor({ id }) {
   const kids = s.learners;
   const nameOf = (lid) => kids.find((l) => l.id === lid)?.name;
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
+  // BLD-06: lesson settings; undefined means "the default".
+  const setOption = (key, v) =>
+    setDraft((d) => {
+      const options = { ...(d.options || {}) };
+      if (v === undefined) delete options[key];
+      else options[key] = v;
+      return { ...d, options };
+    });
   const groups = groupsOf(draft.cards);
 
   if (id && !existing && !published)
@@ -433,6 +451,63 @@ function Editor({ id }) {
               </Box>
             </Card>
           )}
+          <Card sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 1.5 }} aria-label={t("builder.settings")} component="section">
+            <Typography sx={{ fontWeight: 800 }}>{t("builder.settings")}</Typography>
+            <Typography sx={{ fontSize: 14, color: "text.secondary", mt: -1 }}>{t("builder.settingsSub")}</Typography>
+            {[
+              {
+                key: "band",
+                title: t("builder.band"),
+                items: [["", t("builder.eachChild")], ...BANDS.map((b) => [b, t(`band.${b}`)])],
+              },
+              {
+                key: "activities",
+                title: t("builder.activities"),
+                items: [["", t("builder.default")], ...[3, 4, 5, 6, 8].map((n) => [n, String(n)])],
+              },
+              {
+                key: "hints",
+                title: t("builder.hints"),
+                items: HINTS.map((h) => [h === "full" ? "" : h, t(`builder.hints.${h}`)]),
+              },
+            ].map((row) => (
+              <Box key={row.key} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 14 }}>{row.title}</Typography>
+                <Box role="group" aria-label={row.title} sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+                  {row.items.map(([v, text]) => {
+                    const on = (draft.options?.[row.key] ?? "") === v;
+                    return (
+                      <ChoiceChip
+                        key={String(v)}
+                        on={on}
+                        onClick={() => setOption(row.key, v === "" ? undefined : v)}
+                      >
+                        {text}
+                      </ChoiceChip>
+                    );
+                  })}
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 14 }}>{t("builder.games")}</Typography>
+              <Box role="group" aria-label={t("builder.games")} sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+                {LESSON_GAMES.map((g) => {
+                  const games = draft.options?.games ?? LESSON_GAMES;
+                  const on = games.includes(g);
+                  return (
+                    <ChoiceChip
+                      key={g}
+                      on={on}
+                      onClick={() => setOption("games", on ? games.filter((x) => x !== g) : [...games, g])}
+                    >
+                      {t(`games.${g}`)}
+                    </ChoiceChip>
+                  );
+                })}
+              </Box>
+            </Box>
+          </Card>
           <Typography component="h2" sx={label}>
             {t("builder.who")}
           </Typography>

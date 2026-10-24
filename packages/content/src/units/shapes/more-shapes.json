@@ -1,0 +1,168 @@
+{
+  "schema": "unit/1",
+  "id": "more-shapes",
+  "subject": "shapes",
+  "title": "More shapes",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Rectangles, stars, hearts, ovals and diamonds.",
+  "requires": [
+    "circle-square-triangle"
+  ],
+  "items": [
+    {
+      "id": "shp-rectangle",
+      "label": "rectangle",
+      "fact": "A rectangle has two long sides and two short sides.",
+      "shape": "rectangle",
+      "colour": "#FB8C00"
+    },
+    {
+      "id": "shp-star",
+      "label": "star",
+      "fact": "This star has five points.",
+      "shape": "star",
+      "colour": "#FDD835"
+    },
+    {
+      "id": "shp-heart",
+      "label": "heart",
+      "fact": "We draw a heart to show love.",
+      "shape": "heart",
+      "colour": "#EC407A"
+    },
+    {
+      "id": "shp-oval",
+      "label": "oval",
+      "fact": "An oval is like a stretched circle, like an egg.",
+      "shape": "oval",
+      "colour": "#8E24AA"
+    },
+    {
+      "id": "shp-diamond",
+      "label": "diamond",
+      "fact": "A diamond is a square standing on one corner.",
+      "shape": "diamond",
+      "colour": "#1E88E5"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "more-shapes-1",
+      "title": "Rectangle and star",
+      "focus": [
+        "shp-rectangle",
+        "shp-star"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "more-shapes-2",
+      "title": "Heart and oval",
+      "focus": [
+        "shp-heart",
+        "shp-oval"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "shp-star"
+      ]
+    },
+    {
+      "id": "more-shapes-3",
+      "title": "Diamond",
+      "focus": [
+        "shp-diamond"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "shp-oval",
+        "shp-rectangle"
+      ]
+    },
+    {
+      "id": "more-shapes-4",
+      "title": "Five new shapes",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "name-it",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "shp-rectangle",
+        "shp-star",
+        "shp-heart",
+        "shp-oval",
+        "shp-diamond"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

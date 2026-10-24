@@ -12,7 +12,8 @@
     "test": "turbo run test",
     "content:validate": "pnpm --filter @trailbuddies/content validate",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "content": "pnpm --filter @trailbuddies/content cli"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

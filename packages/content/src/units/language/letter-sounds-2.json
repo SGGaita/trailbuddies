@@ -1,0 +1,288 @@
+{
+  "schema": "unit/1",
+  "id": "letter-sounds-2",
+  "subject": "language",
+  "title": "Letter sounds: m d g o c k",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Six more letter sounds and the words they help us read.",
+  "requires": [
+    "letter-sounds-1"
+  ],
+  "items": [
+    {
+      "id": "snd-m",
+      "label": "M",
+      "say": "mmm",
+      "letter": "m",
+      "emoji": "🐭",
+      "fact": "M says mmm, like at the start of mouse.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-d",
+      "label": "D",
+      "say": "d",
+      "letter": "d",
+      "emoji": "🐕",
+      "fact": "D says d, like at the start of dog.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-g",
+      "label": "G",
+      "say": "g",
+      "letter": "g",
+      "emoji": "🐐",
+      "fact": "G says g, like at the start of goat.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-o",
+      "label": "O",
+      "say": "o, like in octopus",
+      "letter": "o",
+      "emoji": "🐙",
+      "fact": "O says o, like at the start of octopus.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-c",
+      "label": "C",
+      "say": "c, like in cat",
+      "letter": "c",
+      "emoji": "🐈",
+      "fact": "C says c, like at the start of cat.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-k",
+      "label": "K",
+      "say": "k, like in kite",
+      "letter": "k",
+      "emoji": "🪁",
+      "fact": "K says k, like at the start of kite.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "dog-word",
+      "label": "dog",
+      "emoji": "🐕",
+      "fact": "A dog wags its tail when it is happy.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "mop",
+      "label": "mop",
+      "emoji": "🧹",
+      "fact": "We clean the floor with a mop.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "cot",
+      "label": "cot",
+      "emoji": "🛏️",
+      "fact": "A baby sleeps in a cot.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "dig",
+      "label": "dig",
+      "emoji": "⛏️",
+      "fact": "We dig a hole to plant a tree.",
+      "tags": [
+        "word"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "letter-sounds-2-1",
+      "title": "m and d",
+      "focus": [
+        "snd-m",
+        "snd-d"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "letter-sounds-2-2",
+      "title": "g and o",
+      "focus": [
+        "snd-g",
+        "snd-o"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "snd-d"
+      ]
+    },
+    {
+      "id": "letter-sounds-2-3",
+      "title": "c and k",
+      "focus": [
+        "snd-c",
+        "snd-k"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "snd-m"
+      ]
+    },
+    {
+      "id": "letter-sounds-2-4",
+      "title": "Read dog and mop",
+      "focus": [
+        "dog-word",
+        "mop"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "snd-d",
+        "snd-o"
+      ]
+    },
+    {
+      "id": "letter-sounds-2-5",
+      "title": "Read cot and dig",
+      "focus": [
+        "cot",
+        "dig"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "build-word"
+        }
+      ],
+      "review": [
+        "snd-c",
+        "snd-g"
+      ]
+    },
+    {
+      "id": "letter-sounds-2-6",
+      "title": "All six sounds",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "build-word"
+        }
+      ],
+      "review": [
+        "snd-m",
+        "snd-d",
+        "snd-g",
+        "snd-o",
+        "snd-c",
+        "snd-k",
+        "dog-word",
+        "mop",
+        "cot",
+        "dig"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 6,
+    "game": "memory"
+  }
+}

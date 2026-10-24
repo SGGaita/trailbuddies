@@ -1,0 +1,202 @@
+{
+  "schema": "unit/1",
+  "id": "circle-square-triangle",
+  "subject": "shapes",
+  "title": "Circle, square, triangle",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "Three first shapes, and things shaped like them.",
+  "groups": [
+    {
+      "id": "circle",
+      "label": "Circle",
+      "say": "round like a circle"
+    },
+    {
+      "id": "square",
+      "label": "Square",
+      "say": "like a square"
+    },
+    {
+      "id": "triangle",
+      "label": "Triangle",
+      "say": "like a triangle"
+    }
+  ],
+  "items": [
+    {
+      "id": "shp-circle",
+      "label": "circle",
+      "fact": "A circle is round all the way.",
+      "tags": [
+        "circle"
+      ],
+      "shape": "circle",
+      "colour": "#E53935"
+    },
+    {
+      "id": "shp-square",
+      "label": "square",
+      "fact": "A square has four sides the same.",
+      "tags": [
+        "square"
+      ],
+      "shape": "square",
+      "colour": "#1E88E5"
+    },
+    {
+      "id": "shp-triangle",
+      "label": "triangle",
+      "fact": "A triangle has three sides.",
+      "tags": [
+        "triangle"
+      ],
+      "shape": "triangle",
+      "colour": "#43A047"
+    },
+    {
+      "id": "clock",
+      "label": "clock",
+      "fact": "A clock face is a circle.",
+      "emoji": "🕐",
+      "tags": [
+        "circle"
+      ]
+    },
+    {
+      "id": "gift",
+      "label": "present",
+      "fact": "This present is a square box.",
+      "emoji": "🎁",
+      "tags": [
+        "square"
+      ]
+    },
+    {
+      "id": "pizza-slice",
+      "label": "pizza slice",
+      "fact": "A slice of pizza is a triangle.",
+      "emoji": "🍕",
+      "tags": [
+        "triangle"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "circle-square-triangle-1",
+      "title": "Circle",
+      "focus": [
+        "shp-circle",
+        "clock"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "circle-square-triangle-2",
+      "title": "Square",
+      "focus": [
+        "shp-square",
+        "gift"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "shp-circle"
+      ]
+    },
+    {
+      "id": "circle-square-triangle-3",
+      "title": "Triangle",
+      "focus": [
+        "shp-triangle",
+        "pizza-slice"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "shp-square"
+      ]
+    },
+    {
+      "id": "circle-square-triangle-4",
+      "title": "Shape spotting",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "shp-circle",
+        "shp-square",
+        "shp-triangle",
+        "clock",
+        "gift",
+        "pizza-slice"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "jigsaw"
+  }
+}

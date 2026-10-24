@@ -32,6 +32,9 @@ export const DEFAULT_SETTINGS = {
   voice_rate: 1,
   sound: true,
   treasure_cap: true,
+  breaks: 0,
+  captions: true,
+  calm: "device",
 };
 
 const empty = () => ({
@@ -78,6 +81,8 @@ export const useFamily = create(
       sync: { state: "idle", at: null, pending: 0 },
       /** Photos and clips waiting to upload, and how many have failed 3 times (BLD-16). */
       uploads: { waiting: 0, failed: 0 },
+      /** Content packs on this device (OFF-02): see lib/packs.js. */
+      packs: { release: null, cached: {}, ready: [], noRoom: [], waiting: false, unused: [], checkedAt: 0 },
       gateUntil: 0,
 
       /** Load the demo family into its own database (never uploaded). */

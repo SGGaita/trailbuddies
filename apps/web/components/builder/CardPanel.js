@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { searchLibrary } from "@trailbuddies/content";
-import { LIMITS } from "@trailbuddies/domain";
+import { LIMITS, NUMBER_MAX } from "@trailbuddies/domain";
 import { preparePhoto, saveMedia, createRecorder, mediaUrl, StorageFullError } from "@/lib/media";
 import { speak } from "@/lib/speech";
 import Card from "@mui/material/Card";
@@ -121,6 +121,7 @@ export default function CardPanel({
       label,
       group: String(card.group || "").trim() || undefined,
       fact: String(card.fact || "").trim() || undefined,
+      number: card.number === "" || card.number === undefined || card.number === null ? undefined : Number(card.number),
     });
   };
 
@@ -274,6 +275,20 @@ export default function CardPanel({
           onChange={(e) => set({ fact: e.target.value })}
           slotProps={{ htmlInput: { maxLength: LIMITS.fact } }}
           sx={inputSx}
+        />
+      </Field>
+      <Field label={t("builder.number")} id="card-number">
+        <TextField
+          id="card-number"
+          type="number"
+          placeholder={t("builder.numberPh")}
+          value={card.number ?? ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            set({ number: v === "" ? undefined : Math.max(0, Math.min(NUMBER_MAX, Math.round(Number(v)))) });
+          }}
+          slotProps={{ htmlInput: { min: 0, max: NUMBER_MAX, inputMode: "numeric" } }}
+          sx={{ ...inputSx, maxWidth: 160 }}
         />
       </Field>
       <Field label={t("builder.group")} id="card-group">

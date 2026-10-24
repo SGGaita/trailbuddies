@@ -1,0 +1,225 @@
+{
+  "schema": "unit/1",
+  "id": "big-small-shapes",
+  "subject": "shapes",
+  "title": "Big and small shapes",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "The same shape can be big or small.",
+  "requires": [
+    "circle-square-triangle"
+  ],
+  "groups": [
+    {
+      "id": "big",
+      "label": "Big",
+      "say": "big"
+    },
+    {
+      "id": "small",
+      "label": "Small",
+      "say": "small"
+    }
+  ],
+  "items": [
+    {
+      "id": "big-circle",
+      "label": "big circle",
+      "fact": "This is a big circle.",
+      "tags": [
+        "big"
+      ],
+      "shape": "circle:big",
+      "colour": "#E53935"
+    },
+    {
+      "id": "small-circle",
+      "label": "small circle",
+      "fact": "This is a small circle.",
+      "tags": [
+        "small"
+      ],
+      "shape": "circle:small",
+      "colour": "#E53935"
+    },
+    {
+      "id": "big-square",
+      "label": "big square",
+      "fact": "This is a big square.",
+      "tags": [
+        "big"
+      ],
+      "shape": "square:big",
+      "colour": "#1E88E5"
+    },
+    {
+      "id": "small-square",
+      "label": "small square",
+      "fact": "This is a small square.",
+      "tags": [
+        "small"
+      ],
+      "shape": "square:small",
+      "colour": "#1E88E5"
+    },
+    {
+      "id": "big-triangle",
+      "label": "big triangle",
+      "fact": "This is a big triangle.",
+      "tags": [
+        "big"
+      ],
+      "shape": "triangle:big",
+      "colour": "#43A047"
+    },
+    {
+      "id": "small-triangle",
+      "label": "small triangle",
+      "fact": "This is a small triangle.",
+      "tags": [
+        "small"
+      ],
+      "shape": "triangle:small",
+      "colour": "#43A047"
+    },
+    {
+      "id": "big-star",
+      "label": "big star",
+      "fact": "This is a big star.",
+      "tags": [
+        "big"
+      ],
+      "shape": "star:big",
+      "colour": "#FDD835"
+    },
+    {
+      "id": "small-star",
+      "label": "small star",
+      "fact": "This is a small star.",
+      "tags": [
+        "small"
+      ],
+      "shape": "star:small",
+      "colour": "#FDD835"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "big-small-shapes-1",
+      "title": "Big and small circles",
+      "focus": [
+        "big-circle",
+        "small-circle",
+        "big-square",
+        "small-square"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        }
+      ]
+    },
+    {
+      "id": "big-small-shapes-2",
+      "title": "Big and small triangles",
+      "focus": [
+        "big-triangle",
+        "small-triangle"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "big-circle"
+      ]
+    },
+    {
+      "id": "big-small-shapes-3",
+      "title": "Big and small stars",
+      "focus": [
+        "big-star",
+        "small-star"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        }
+      ],
+      "review": [
+        "small-square"
+      ]
+    },
+    {
+      "id": "big-small-shapes-4",
+      "title": "Big or small?",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        }
+      ],
+      "review": [
+        "big-circle",
+        "small-circle",
+        "big-square",
+        "small-square",
+        "big-triangle",
+        "small-triangle",
+        "big-star",
+        "small-star"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "sorting-race"
+  }
+}

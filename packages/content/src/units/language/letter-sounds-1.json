@@ -1,0 +1,285 @@
+{
+  "schema": "unit/1",
+  "id": "letter-sounds-1",
+  "subject": "language",
+  "title": "Letter sounds: s a t p i n",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "The first six letter sounds, then reading tiny words made from them.",
+  "items": [
+    {
+      "id": "snd-s",
+      "label": "S",
+      "say": "sss",
+      "letter": "s",
+      "emoji": "☀️",
+      "fact": "S says sss, like a snake. Sss is for sun.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-a",
+      "label": "A",
+      "say": "a, like in apple",
+      "letter": "a",
+      "emoji": "🍎",
+      "fact": "A says a, like at the start of apple.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-t",
+      "label": "T",
+      "say": "t",
+      "letter": "t",
+      "emoji": "🐯",
+      "fact": "T says t, like at the start of tiger.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-p",
+      "label": "P",
+      "say": "p",
+      "letter": "p",
+      "emoji": "🐷",
+      "fact": "P says p, like at the start of pig.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-i",
+      "label": "I",
+      "say": "i, like in insect",
+      "letter": "i",
+      "emoji": "🐜",
+      "fact": "I says i, like at the start of insect.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "snd-n",
+      "label": "N",
+      "say": "nnn",
+      "letter": "n",
+      "emoji": "🪺",
+      "fact": "N says nnn, like at the start of nest.",
+      "tags": [
+        "letter"
+      ]
+    },
+    {
+      "id": "pin",
+      "label": "pin",
+      "emoji": "📌",
+      "fact": "A pin is small and sharp. Ask a grown-up first!",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "tap",
+      "label": "tap",
+      "emoji": "🚰",
+      "fact": "Water comes out of a tap.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "nap",
+      "label": "nap",
+      "emoji": "😴",
+      "fact": "A nap is a little sleep.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "sit",
+      "label": "sit",
+      "emoji": "🪑",
+      "fact": "We sit on a chair.",
+      "tags": [
+        "word"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "letter-sounds-1-1",
+      "title": "s and a",
+      "focus": [
+        "snd-s",
+        "snd-a"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "letter-sounds-1-2",
+      "title": "t and p",
+      "focus": [
+        "snd-t",
+        "snd-p"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "snd-a"
+      ]
+    },
+    {
+      "id": "letter-sounds-1-3",
+      "title": "i and n",
+      "focus": [
+        "snd-i",
+        "snd-n"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "snd-s"
+      ]
+    },
+    {
+      "id": "letter-sounds-1-4",
+      "title": "Sound it out",
+      "focus": [
+        "pin",
+        "tap"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "snd-p",
+        "snd-t"
+      ]
+    },
+    {
+      "id": "letter-sounds-1-5",
+      "title": "More little words",
+      "focus": [
+        "nap",
+        "sit"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "build-word"
+        }
+      ],
+      "review": [
+        "snd-n",
+        "snd-i"
+      ]
+    },
+    {
+      "id": "letter-sounds-1-6",
+      "title": "All six sounds",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "case-match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "build-word"
+        }
+      ],
+      "review": [
+        "snd-s",
+        "snd-a",
+        "snd-t",
+        "snd-p",
+        "snd-i",
+        "snd-n",
+        "pin",
+        "tap",
+        "nap",
+        "sit"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 6,
+    "game": "memory"
+  }
+}

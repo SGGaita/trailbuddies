@@ -1,0 +1,59 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-zebra",
+      "kind": "image",
+      "path": "animals/animal-patterns/zebra.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a zebra; emoji 🦓 stands in until approved."
+    },
+    {
+      "id": "img-tiger",
+      "kind": "image",
+      "path": "animals/animal-patterns/tiger.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a tiger; emoji 🐅 stands in until approved."
+    },
+    {
+      "id": "img-bee-stripes",
+      "kind": "image",
+      "path": "animals/animal-patterns/bee-stripes.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a bee; emoji 🐝 stands in until approved."
+    },
+    {
+      "id": "img-leopard",
+      "kind": "image",
+      "path": "animals/animal-patterns/leopard.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a leopard; emoji 🐆 stands in until approved."
+    },
+    {
+      "id": "img-ladybird",
+      "kind": "image",
+      "path": "animals/animal-patterns/ladybird.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a ladybird; emoji 🐞 stands in until approved."
+    },
+    {
+      "id": "img-giraffe",
+      "kind": "image",
+      "path": "animals/animal-patterns/giraffe.webp",
+      "source": "ai-assisted",
+      "license": "to be confirmed",
+      "review_status": "draft",
+      "notes": "Illustration of a giraffe; emoji 🦒 stands in until approved."
+    }
+  ]
+}

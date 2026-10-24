@@ -1,13 +1,15 @@
 """Families, consent and learner profiles. Profile edits carry the device's edit time and
 the newest edit wins, so two devices editing offline settle the same way everywhere."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
+from ..devices import device_limit
 from ..ids import is_ulid, ulid
-from ..models import Consent, EditHistory, Event, Family, FamilyMember, Learner, User
+from ..models import Consent, EditHistory, Event, Family, FamilyMember, Learner, Session, User
+from ..regions import region_for
 from ..schemas import ConsentIn, FamilyIn, FamilyPatch, FamilySettings, LearnerIn
 from ..security import aware, current_user, membership
 from ..settings import get_settings
@@ -92,6 +94,7 @@ def learner_out(lr: Learner) -> dict:
         "interests": lr.interests or [],
         "placement": lr.placement or {},
         "difficulty": lr.difficulty,
+        "levels": lr.levels or {},
         "wish": lr.wish,
         "updated_at": aware(lr.updated_at).isoformat(),
     }
@@ -111,6 +114,8 @@ def family_out(db: DbSession, fam: Family, role: str) -> dict:
         "country": fam.country,
         "plan": fam.plan,
         "learner_limit": PLAN_LIMITS.get(fam.plan, 1),
+        "device_limit": device_limit(fam.plan),
+        "region": region_for(fam.country),
         "role": role,
         "settings": FamilySettings(**(fam.settings or {})).model_dump(),
         "pin": fam.pin,
@@ -119,6 +124,7 @@ def family_out(db: DbSession, fam: Family, role: str) -> dict:
             "policy_version": c.policy_version,
             "scopes": c.scopes,
             "method": c.method,
+            "region": c.region or region_for(fam.country),
             "given_at": aware(c.given_at).isoformat(),
         }
         if c
@@ -185,6 +191,10 @@ def patch_family(
         if body.name is not None:
             fam.name = body.name.strip()
         if body.country is not None:
+            # Consents given before regions were recorded were under the old country's rules.
+            c = latest_consent(db, family_id)
+            if c and not c.region:
+                c.region = region_for(fam.country)
             fam.country = FamilyIn(name=fam.name, country=body.country).country
         if body.settings is not None:
             fam.settings = body.settings.model_dump()
@@ -208,6 +218,7 @@ def give_consent(
     if missing:
         raise HTTPException(422, f"Required: {', '.join(missing)}")
     scopes = {k: bool(body.scopes.get(k)) for k in POLICY["scopes"]}
+    region = region_for(db.get(Family, family_id).country)
     db.add(
         Consent(
             family_id=family_id,
@@ -215,16 +226,20 @@ def give_consent(
             policy_version=body.policy_version,
             scopes=scopes,
             method="checkbox",
+            region=region,
         )
     )
     db.commit()
-    return {"policy_version": body.policy_version, "scopes": scopes, "method": "checkbox"}
+    return {"policy_version": body.policy_version, "scopes": scopes, "method": "checkbox", "region": region}
 
 
 def require_consent(db: DbSession, family_id: str) -> None:
     c = latest_consent(db, family_id)
     if not c or c.policy_version != get_settings().policy_version:
         raise HTTPException(403, "A grown-up needs to agree to the privacy summary first")
+    # ONB-05: after moving to a country with different privacy rules, consent is asked again.
+    if c.region and c.region != region_for(db.get(Family, family_id).country):
+        raise HTTPException(403, "Your country's privacy rules changed. Please agree again.")
 
 
 @router.put("/families/{family_id}/learners/{learner_id}")
@@ -281,4 +296,58 @@ def delete_learner(
     # Explicit, so it never depends on the database enforcing ON DELETE CASCADE.
     db.execute(delete(Event).where(Event.learner_id == learner_id))
     db.delete(lr)
+    db.commit()
+
+
+def device_out(row: Session, owner: User, current: str | None) -> dict:
+    return {
+        "id": row.id,
+        "name": row.device_name or "A device",
+        "who": owner.name or owner.email.split("@")[0],
+        "last_seen_at": aware(row.last_seen_at).isoformat(),
+        "this_device": row.id == current,
+    }
+
+
+@router.get("/families/{family_id}/devices")
+def list_devices(
+    family_id: str,
+    request: Request,
+    user: User = Depends(current_user),
+    db: DbSession = Depends(get_session),
+) -> dict:
+    """Every signed-in device of every grown-up in the family (FAM-08), newest first."""
+    membership(db, user, family_id)
+    fam = db.get(Family, family_id)
+    rows = db.execute(
+        select(Session, User)
+        .join(User, User.id == Session.user_id)
+        .join(FamilyMember, FamilyMember.user_id == User.id)
+        .where(FamilyMember.family_id == family_id, Session.expires_at > utcnow())
+        .order_by(Session.last_seen_at.desc())
+    ).all()
+    current = getattr(request.state, "session_id", None)
+    devices = [device_out(s, u, current) for s, u in rows]
+    return {
+        "devices": devices,
+        "limit": device_limit(fam.plan),
+        "over": max(0, len(devices) - device_limit(fam.plan)),
+    }
+
+
+@router.delete("/families/{family_id}/devices/{session_id}", status_code=204)
+def sign_out_device(
+    family_id: str, session_id: str, user: User = Depends(current_user), db: DbSession = Depends(get_session)
+) -> None:
+    """Sign out one device. Parents can sign out any family device; others only their own."""
+    m = membership(db, user, family_id)
+    row = db.get(Session, session_id)
+    member = row and db.scalar(
+        select(FamilyMember).where(FamilyMember.family_id == family_id, FamilyMember.user_id == row.user_id)
+    )
+    if not row or not member:
+        raise HTTPException(404, "Device not found")
+    if row.user_id != user.id and m.role not in {"owner", "parent"}:
+        raise HTTPException(403, "Only a parent can sign out someone else's device")
+    db.delete(row)
     db.commit()

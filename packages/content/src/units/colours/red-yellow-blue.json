@@ -1,0 +1,202 @@
+{
+  "schema": "unit/1",
+  "id": "red-yellow-blue",
+  "subject": "colours",
+  "title": "Red, yellow, blue",
+  "band": "seedling",
+  "status": "draft",
+  "summary": "The three first colours, and things that are red, yellow or blue.",
+  "groups": [
+    {
+      "id": "red",
+      "label": "Red",
+      "say": "red"
+    },
+    {
+      "id": "yellow",
+      "label": "Yellow",
+      "say": "yellow"
+    },
+    {
+      "id": "blue",
+      "label": "Blue",
+      "say": "blue"
+    }
+  ],
+  "items": [
+    {
+      "id": "col-red",
+      "label": "red",
+      "fact": "Red like a ripe tomato.",
+      "tags": [
+        "red"
+      ],
+      "colour": "#E53935",
+      "shape": "splash"
+    },
+    {
+      "id": "col-yellow",
+      "label": "yellow",
+      "fact": "Yellow like the sun.",
+      "tags": [
+        "yellow"
+      ],
+      "colour": "#FDD835",
+      "shape": "splash"
+    },
+    {
+      "id": "col-blue",
+      "label": "blue",
+      "fact": "Blue like the sky.",
+      "tags": [
+        "blue"
+      ],
+      "colour": "#1E88E5",
+      "shape": "splash"
+    },
+    {
+      "id": "strawberry",
+      "label": "strawberry",
+      "fact": "A strawberry is red.",
+      "emoji": "🍓",
+      "tags": [
+        "red"
+      ]
+    },
+    {
+      "id": "banana",
+      "label": "banana",
+      "fact": "A banana is yellow.",
+      "emoji": "🍌",
+      "tags": [
+        "yellow"
+      ]
+    },
+    {
+      "id": "whale-blue",
+      "label": "whale",
+      "fact": "This whale is blue.",
+      "emoji": "🐳",
+      "tags": [
+        "blue"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "red-yellow-blue-1",
+      "title": "Red",
+      "focus": [
+        "col-red",
+        "strawberry"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "name-it",
+          "choices": 2
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        }
+      ]
+    },
+    {
+      "id": "red-yellow-blue-2",
+      "title": "Yellow",
+      "focus": [
+        "col-yellow",
+        "banana"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-red"
+      ]
+    },
+    {
+      "id": "red-yellow-blue-3",
+      "title": "Blue",
+      "focus": [
+        "col-blue",
+        "whale-blue"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-yellow"
+      ]
+    },
+    {
+      "id": "red-yellow-blue-4",
+      "title": "Find the colour",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "sort"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "sort"
+        },
+        {
+          "type": "odd-one-out",
+          "choices": 3
+        }
+      ],
+      "review": [
+        "col-red",
+        "col-yellow",
+        "col-blue",
+        "strawberry",
+        "banana",
+        "whale-blue"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "sorting-race"
+  }
+}

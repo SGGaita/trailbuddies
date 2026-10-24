@@ -1,0 +1,226 @@
+{
+  "schema": "unit/1",
+  "id": "blending-cvc",
+  "subject": "language",
+  "title": "Blending c-a-t",
+  "band": "sprout",
+  "status": "draft",
+  "summary": "Blend three sounds into a word: c-a-t, cat!",
+  "requires": [
+    "letter-sounds-1"
+  ],
+  "items": [
+    {
+      "id": "cat-word",
+      "label": "cat",
+      "emoji": "🐈",
+      "fact": "A cat says meow.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "sun",
+      "label": "sun",
+      "emoji": "☀️",
+      "fact": "The sun keeps us warm.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "pig-word",
+      "label": "pig",
+      "emoji": "🐷",
+      "fact": "A pig likes the mud.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "hen-word",
+      "label": "hen",
+      "emoji": "🐔",
+      "fact": "A hen lays eggs.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "bus",
+      "label": "bus",
+      "emoji": "🚌",
+      "fact": "A bus carries lots of people.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "cup",
+      "label": "cup",
+      "emoji": "🥤",
+      "fact": "We drink from a cup.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "bed-word",
+      "label": "bed",
+      "emoji": "🛏️",
+      "fact": "We sleep in a bed.",
+      "tags": [
+        "word"
+      ]
+    },
+    {
+      "id": "map",
+      "label": "map",
+      "emoji": "🗺️",
+      "fact": "A map shows us the way.",
+      "tags": [
+        "word"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "blending-cvc-1",
+      "title": "c-a-t, cat",
+      "focus": [
+        "cat-word",
+        "sun"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 2
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ]
+    },
+    {
+      "id": "blending-cvc-2",
+      "title": "p-i-g, pig",
+      "focus": [
+        "pig-word",
+        "hen-word"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "sun"
+      ]
+    },
+    {
+      "id": "blending-cvc-3",
+      "title": "b-u-s, bus",
+      "focus": [
+        "bus",
+        "cup"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "hen-word"
+      ]
+    },
+    {
+      "id": "blending-cvc-4",
+      "title": "b-e-d, bed",
+      "focus": [
+        "bed-word",
+        "map"
+      ],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        }
+      ],
+      "review": [
+        "cup"
+      ]
+    },
+    {
+      "id": "blending-cvc-5",
+      "title": "Blend them all",
+      "focus": [],
+      "exercises": [
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "build-word"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 4
+        },
+        {
+          "type": "build-word"
+        }
+      ],
+      "review": [
+        "cat-word",
+        "sun",
+        "pig-word",
+        "hen-word",
+        "bus",
+        "cup",
+        "bed-word",
+        "map"
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 5,
+    "game": "memory"
+  }
+}

@@ -5,7 +5,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 export default function CountUp({ value, ms = 900, prefix = "" }) {
   const [shown, setShown] = useState(0);
   const run = useEffectEvent(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    if (document.documentElement.dataset.calm === "1") {
       requestAnimationFrame(() => setShown(value));
       return () => {};
     }
