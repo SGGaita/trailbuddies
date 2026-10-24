@@ -16,7 +16,8 @@ import { buildExercise } from "./lesson.js";
  * @property {string} [emoji] a library picture
  * @property {string} [photo] media asset id of a photo
  * @property {string} [voice] media asset id of a voice clip
- * @property {string} [group] category for 'Sort them'
+ * @property {string} [group] category for 'Sort into groups'
+ * @property {string} [fact]  a fun fact the buddy says after the word when the card is met
  */
 /**
  * @typedef {object} CustomLesson
@@ -32,7 +33,7 @@ import { buildExercise } from "./lesson.js";
 
 export const TEMPLATES = /** @type {const} */ (["learn", "sort", "puzzle"]);
 export const CARD_LIMITS = { min: 3, max: 12 };
-export const LIMITS = { title: 60, label: 40, question: 80, group: 24 };
+export const LIMITS = { title: 60, label: 40, question: 80, group: 24, fact: 120 };
 /** Prefix of a custom lesson's id in progress keys, events and routes. */
 export const customId = (/** @type {string} */ id) => `custom-${id}`;
 export const isCustomId = (/** @type {string} */ id) => typeof id === "string" && id.startsWith("custom-");
@@ -89,6 +90,8 @@ export function normaliseLesson(lesson) {
       if (c.voice) out.voice = c.voice;
       const g = clean(c.group, LIMITS.group);
       if (g) out.group = g;
+      const fact = clean(c.fact, LIMITS.fact);
+      if (fact) out.fact = fact;
       return out;
     })
     .filter((c) => c.label)
@@ -133,6 +136,7 @@ const toItem = (/** @type {Card} */ c) => ({
   ...(c.photo ? { photo: c.photo } : {}),
   ...(c.voice ? { voice: c.voice } : {}),
   ...(c.group ? { tags: [`g:${c.group.toLowerCase()}`] } : {}),
+  ...(c.fact ? { fact: c.fact } : {}),
 });
 
 /** The custom lesson as a unit, so the regular exercise builders can use it. */

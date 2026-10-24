@@ -6,7 +6,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
@@ -22,7 +21,16 @@ import Buddy from "@/components/art/Buddy";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import CardPanel from "./CardPanel";
-import { CardPic, UploadBanner } from "./parts";
+import { CardPic, ChoiceChip, Field, Pill, UploadBanner, inputSx } from "./parts";
+
+/** Prototype P10 tiles. Not built yet, so they show as "Soon" and do nothing. */
+const TILES = [
+  { icon: "sparkle", key: "builder.tile.remix" },
+  { icon: "share", key: "builder.tile.import" },
+  { icon: "trail", key: "builder.tile.trail" },
+  { icon: "badge", key: "builder.tile.badge" },
+];
+const label = { fontWeight: 800, fontSize: 15 };
 
 const blank = () => ({
   id: null,
@@ -124,7 +132,9 @@ function Editor({ id }) {
   const needed = CARD_LIMITS.min - draft.cards.length;
   const problem = templateProblem(draft.cards, draft.template);
   const photoCards = draft.cards.filter((c) => c.photo);
-  const title = draft.title.trim() || (existing ? existing.title : t("builder.make"));
+  const title = existing ? existing.title : t("builder.title");
+  const playTitle = draft.title.trim() || t("builder.untitled");
+  const others = [...s.lessons].reverse().filter((l) => l.id !== draft.id && !l.deleted);
 
   if (!editable)
     return (
@@ -135,137 +145,207 @@ function Editor({ id }) {
 
   if (editing)
     return (
-      <FamilyShell
+      <CardPanel
         title={editing.index >= 0 ? t("builder.editCard") : t("builder.addCard")}
-        back="/family/create"
         family={s.family}
-        active="/family/create"
+        card={editing.card}
+        groups={groups}
+        ensureConsent={ensureConsent}
+        onSave={saveCard}
+        onCancel={() => setEditing(null)}
       >
-        <CardPanel
-          card={editing.card}
-          groups={groups}
-          ensureConsent={ensureConsent}
-          onSave={saveCard}
-          onCancel={() => setEditing(null)}
-        />
         <ConsentDialog ask={ask} onAnswer={answerConsent} />
-      </FamilyShell>
+      </CardPanel>
     );
 
+  const names = draft.assigned.map(nameOf).filter(Boolean);
+  const cardsStep = step === "cards";
   return (
-    <FamilyShell title={title} back="/family/create" family={s.family} active="/family/create">
+    <FamilyShell
+      title={cardsStep ? title : playTitle}
+      {...(cardsStep ? { back: "/family/create" } : { onBack: () => setStep("cards") })}
+      family={s.family}
+      active="/family/create"
+      foot={
+        cardsStep ? (
+          <Button key="next" variant="contained" disabled={needed > 0} onClick={() => setStep("play")}>
+            {t("builder.toPlay")}
+          </Button>
+        ) : (
+          <Button
+            key="publish"
+            variant="contained"
+            color="secondary"
+            disabled={!!problem || !draft.assigned.length}
+            onClick={publish}
+          >
+            {names.length ? t("builder.publish", { names: names.join(" & ") }) : t("builder.publishNone")}
+          </Button>
+        )
+      }
+      footNote={
+        cardsStep && needed > 0
+          ? needed === 1
+            ? t("builder.needOne")
+            : t("builder.needMore", { n: needed })
+          : null
+      }
+    >
       <UploadBanner />
       {error && <Alert severity="warning">{error}</Alert>}
-      {step === "cards" ? (
+      {cardsStep ? (
         <>
-          <TextField
-            label={t("builder.name")}
-            placeholder={t("builder.namePh")}
-            value={draft.title}
-            onChange={(e) => set({ title: e.target.value })}
-            slotProps={{ htmlInput: { maxLength: LIMITS.title } }}
-            sx={{ maxWidth: 560 }}
-          />
-          <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", maxWidth: 760 }}
-          >
-            <Typography variant="h6" component="h2">
+          <Field label={t("builder.name")} id="lesson-name">
+            <TextField
+              id="lesson-name"
+              placeholder={t("builder.namePh")}
+              value={draft.title}
+              onChange={(e) => set({ title: e.target.value })}
+              slotProps={{ htmlInput: { maxLength: LIMITS.title } }}
+              sx={inputSx}
+            />
+          </Field>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1.25 }}>
+            <Typography component="h2" sx={label}>
               {t("builder.cards", { n: draft.cards.length })}
             </Typography>
-            <Typography sx={{ color: "text.secondary" }}>{t("builder.cardsRange")}</Typography>
+            <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("builder.cardsRange")}</Typography>
           </Box>
-          <Box
-            component="ul"
-            aria-label={t("builder.cards", { n: draft.cards.length })}
-            sx={{
-              listStyle: "none",
-              m: 0,
-              p: 0,
-              display: "grid",
-              gap: 1.25,
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-              maxWidth: 760,
-            }}
-          >
-            {draft.cards.map((c, i) => (
-              <li key={c.id}>
-                <Card sx={{ p: 1.25, display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <CardPic card={c} size={56} />
-                  <Box
-                    component="button"
-                    type="button"
-                    onClick={() => setEditing({ index: i, card: c })}
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                      textAlign: "left",
-                      border: 0,
-                      bgcolor: "transparent",
-                      p: 0,
-                      cursor: "pointer",
-                      color: "text.primary",
-                      font: "inherit",
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 800 }} noWrap>
-                      {c.label}
-                    </Typography>
-                    <Typography sx={{ color: "text.secondary", fontSize: 14 }} noWrap>
-                      {c.voice ? t("builder.yourVoice") : t("builder.deviceVoice")}
-                      {c.group ? ` · ${c.group}` : ""}
-                    </Typography>
-                  </Box>
-                  <IconButton
-                    aria-label={t("builder.removeCard", { label: c.label })}
-                    onClick={() => set({ cards: draft.cards.filter((x) => x.id !== c.id) })}
-                  >
-                    <Icon name="x" size={20} />
-                  </IconButton>
-                </Card>
-              </li>
-            ))}
-          </Box>
+          {draft.cards.length > 0 && (
+            <Box
+              component="ul"
+              aria-label={t("builder.cards", { n: draft.cards.length })}
+              sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1.25 }}
+            >
+              {draft.cards.map((c, i) => (
+                <li key={c.id}>
+                  <Card sx={{ p: 1.75, display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <CardPic card={c} size={56} />
+                    <Box
+                      component="button"
+                      type="button"
+                      onClick={() => setEditing({ index: i, card: c })}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        textAlign: "left",
+                        border: 0,
+                        bgcolor: "transparent",
+                        p: 0,
+                        cursor: "pointer",
+                        color: "text.primary",
+                        font: "inherit",
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 800 }} noWrap>
+                        {c.label}
+                      </Typography>
+                      <Typography sx={{ color: "text.secondary", fontSize: 13 }} noWrap>
+                        {c.voice ? t("builder.yourVoice") : t("builder.deviceVoice")}
+                        {c.group ? ` · ${c.group}` : ""}
+                        {c.fact ? ` · ${c.fact}` : ""}
+                      </Typography>
+                    </Box>
+                    <IconButton
+                      aria-label={t("builder.removeCard", { label: c.label })}
+                      onClick={() => set({ cards: draft.cards.filter((x) => x.id !== c.id) })}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        border: `1.5px solid ${colors.line}`,
+                        color: "text.primary",
+                      }}
+                    >
+                      <Icon name="x" size={18} />
+                    </IconButton>
+                  </Card>
+                </li>
+              ))}
+            </Box>
+          )}
           {draft.cards.length < CARD_LIMITS.max && (
             <Button
               variant="outlined"
               onClick={() => setEditing({ index: -1, card: { id: ulid() } })}
               startIcon={<Icon name="plus" size={20} />}
-              sx={{ alignSelf: "flex-start", borderWidth: 2 }}
+              sx={{ borderWidth: 2, minHeight: 52, fontSize: 17 }}
             >
               {t("builder.addCard")}
             </Button>
           )}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 1 }}>
-            <Button variant="contained" disabled={needed > 0} onClick={() => setStep("play")}>
-              {t("builder.toPlay")}
-            </Button>
-            {needed > 0 && (
-              <Typography sx={{ color: "text.secondary" }}>
-                {needed === 1 ? t("builder.needOne") : t("builder.needMore", { n: needed })}
-              </Typography>
-            )}
-            {existing && (
-              <Button color="error" onClick={() => setDeleting(true)} sx={{ ml: { sm: "auto" } }}>
-                {t("builder.delete")}
-              </Button>
-            )}
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.25 }}>
+            {TILES.map((tile) => (
+              <Card
+                key={tile.key}
+                aria-disabled="true"
+                sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 0.75, minHeight: 70 }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Icon name={tile.icon} size={20} />
+                  <Pill tone="soon">{t("builder.soon")}</Pill>
+                </Box>
+                <Typography sx={{ fontWeight: 800, textAlign: "center" }}>{t(tile.key)}</Typography>
+              </Card>
+            ))}
           </Box>
+          {others.length > 0 && (
+            <>
+              <Typography component="h2" sx={label}>
+                {t("builder.mine")}
+              </Typography>
+              <Card component="ul" sx={{ listStyle: "none", m: 0, px: 1.75, py: 0.25, gap: 0 }}>
+                {others.map((l, i) => {
+                  const who = l.assigned.map(nameOf).filter(Boolean);
+                  return (
+                    <li key={l.id}>
+                      <Box
+                        component={Link}
+                        href={`/family/create/lesson?id=${l.id}`}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 1.25,
+                          py: 1.25,
+                          borderTop: i ? `1px solid ${colors.line}` : 0,
+                          textDecoration: "none",
+                          color: "text.primary",
+                        }}
+                      >
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography sx={{ fontWeight: 800 }} noWrap>
+                            {l.title}
+                          </Typography>
+                          <Typography sx={{ color: "text.secondary", fontSize: 13 }} noWrap>
+                            {t("builder.cardsN", { n: l.cards.length })} ·{" "}
+                            {who.length
+                              ? t("builder.forWho", { names: who.join(", ") })
+                              : t("builder.forNobody")}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ transform: "scaleX(-1)", display: "flex", flex: "none" }}>
+                          <Icon name="back" size={20} />
+                        </Box>
+                      </Box>
+                    </li>
+                  );
+                })}
+              </Card>
+            </>
+          )}
+          {existing && (
+            <Button color="error" onClick={() => setDeleting(true)} sx={{ alignSelf: "flex-start" }}>
+              {t("builder.delete")}
+            </Button>
+          )}
         </>
       ) : (
         <>
-          <Typography variant="h6" component="h2">
+          <Typography component="h2" sx={label}>
             {t("builder.how")}
           </Typography>
-          <Box
-            role="radiogroup"
-            aria-label={t("builder.how")}
-            sx={{
-              display: "grid",
-              gap: 1.25,
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-            }}
-          >
-            {TEMPLATES.map((tp) => {
+          <Card role="radiogroup" aria-label={t("builder.how")} sx={{ px: 1.75, py: 0.25, gap: 0 }}>
+            {TEMPLATES.map((tp, i) => {
               const p = templateProblem(draft.cards, tp);
               const on = draft.template === tp;
               return (
@@ -277,41 +357,50 @@ function Editor({ id }) {
                   aria-checked={on}
                   onClick={() => set({ template: tp })}
                   sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1.25,
+                    width: "100%",
+                    py: 1.25,
+                    px: 0,
+                    border: 0,
+                    borderTop: i ? `1px solid ${colors.line}` : 0,
+                    bgcolor: "transparent",
                     textAlign: "left",
-                    p: 2,
-                    borderRadius: 4.5,
-                    border: `3px solid ${on ? colors.leaf.main : colors.line}`,
-                    bgcolor: on ? colors.leaf.soft : "background.paper",
                     color: "text.primary",
                     font: "inherit",
                     cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0.5,
                   }}
                 >
-                  <Typography sx={{ fontWeight: 800, fontSize: 17 }}>{t(`builder.tpl.${tp}`)}</Typography>
-                  <Typography sx={{ color: "text.secondary", fontSize: 14 }}>
-                    {t(`builder.tpl.${tp}Sub`)}
-                  </Typography>
-                  {p && (
-                    <Typography sx={{ color: colors.coral.deep, fontWeight: 800, fontSize: 14 }}>
-                      {t(`builder.need.${p.need}`, { n: p.n })}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: 800 }}>{t(`builder.tpl.${tp}`)}</Typography>
+                    <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+                      {t(`builder.tpl.${tp}Sub`)}
                     </Typography>
-                  )}
+                    {p && (
+                      <Typography sx={{ color: colors.coral.deep, fontWeight: 800, fontSize: 13 }}>
+                        {t(`builder.need.${p.need}`, { n: p.n })}
+                      </Typography>
+                    )}
+                  </Box>
+                  {on && <Pill>{t("builder.chosen")}</Pill>}
                 </Box>
               );
             })}
-          </Box>
+          </Card>
           {draft.template === "puzzle" && photoCards.length > 0 && (
-            <Card sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5, maxWidth: 760 }}>
-              <TextField
-                label={t("builder.question")}
-                placeholder={t("builder.questionPh")}
-                value={draft.question}
-                onChange={(e) => set({ question: e.target.value })}
-                slotProps={{ htmlInput: { maxLength: LIMITS.question } }}
-              />
+            <Card sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 1.5 }}>
+              <Field label={t("builder.question")} id="puzzle-question">
+                <TextField
+                  id="puzzle-question"
+                  placeholder={t("builder.questionPh")}
+                  value={draft.question}
+                  onChange={(e) => set({ question: e.target.value })}
+                  slotProps={{ htmlInput: { maxLength: LIMITS.question } }}
+                  sx={inputSx}
+                />
+              </Field>
               <Typography sx={{ fontWeight: 800 }}>{t("builder.puzzleCard")}</Typography>
               <Box
                 role="radiogroup"
@@ -344,53 +433,42 @@ function Editor({ id }) {
               </Box>
             </Card>
           )}
-          <Typography variant="h6" component="h2">
+          <Typography component="h2" sx={label}>
             {t("builder.who")}
           </Typography>
           <Box role="group" aria-label={t("builder.who")} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             {kids.map((k) => {
               const on = draft.assigned.includes(k.id);
               return (
-                <Chip
+                <ChoiceChip
                   key={k.id}
-                  label={k.name}
+                  on={on}
                   onClick={() =>
                     set({
                       assigned: on ? draft.assigned.filter((x) => x !== k.id) : [...draft.assigned, k.id],
                     })
                   }
-                  color={on ? "primary" : "default"}
-                  variant={on ? "filled" : "outlined"}
-                  aria-pressed={on}
-                  sx={{ fontWeight: 800, fontSize: 16, height: 40, px: 1 }}
-                />
+                >
+                  {k.name}
+                </ChoiceChip>
               );
             })}
           </Box>
-          <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap", alignItems: "center", mt: 1 }}>
-            <Button variant="outlined" onClick={() => setStep("cards")} sx={{ borderWidth: 2 }}>
-              {t("builder.cards", { n: draft.cards.length })}
-            </Button>
-            <Button
-              variant="outlined"
-              disabled={!!problem}
-              onClick={preview}
-              startIcon={<Icon name="play" size={20} />}
-              sx={{ borderWidth: 2 }}
-            >
-              {t("builder.preview")}
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              disabled={!!problem || !draft.assigned.length}
-              onClick={publish}
-            >
-              {draft.assigned.length
-                ? t("builder.publish", { names: draft.assigned.map(nameOf).filter(Boolean).join(" & ") })
-                : t("builder.publishNone")}
-            </Button>
-          </Box>
+          <Card sx={{ p: 1.75, display: "flex", flexDirection: "row", alignItems: "center", gap: 1.25 }}>
+            <Icon name="share" size={20} />
+            <Typography sx={{ color: "text.secondary", fontSize: 13, flex: 1 }}>
+              {t("builder.shareSoon")}
+            </Typography>
+          </Card>
+          <Button
+            variant="outlined"
+            disabled={!!problem}
+            onClick={preview}
+            startIcon={<Icon name="play" size={20} />}
+            sx={{ borderWidth: 2, minHeight: 52, fontSize: 17 }}
+          >
+            {t("builder.preview")}
+          </Button>
         </>
       )}
 

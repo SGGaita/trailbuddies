@@ -902,10 +902,17 @@ export function BuildWord({ step, hint, done, onTry, e2e, band, voice, buddy }) 
  */
 export function Intro({ step, band, voice, buddy, heard, onHeard }) {
   const [current, setCurrent] = useState(/** @type {string | null} */ (null));
-  const text = (it) => (it.fact ? `${words(it)}. ${it.fact}` : words(it));
+  // The word first (a grown-up's recording when there is one), then its fun fact.
+  const say = (it, done) => {
+    const opts = { band, buddy, enabled: voice };
+    speak(words(it), {
+      ...opts,
+      done: it.fact ? () => speak(it.fact, { ...opts, done }) : done,
+    });
+  };
   const hear = (it) => {
     setCurrent(it.id);
-    speak(text(it), { band, buddy, enabled: voice, done: () => setCurrent(null) });
+    say(it, () => setCurrent(null));
     onHeard(it.id);
   };
   const playAll = useEffectEvent(() => {
@@ -914,7 +921,7 @@ export function Intro({ step, band, voice, buddy, heard, onHeard }) {
       if (i >= items.length) return setCurrent(null);
       setCurrent(items[i].id);
       onHeard(items[i].id);
-      speak(text(items[i]), { band, buddy, enabled: voice, done: () => setTimeout(() => go(i + 1), 250) });
+      say(items[i], () => setTimeout(() => go(i + 1), 250));
     };
     speak(step.say, { band, buddy, enabled: voice, done: () => go(0) });
   });

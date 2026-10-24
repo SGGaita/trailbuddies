@@ -166,8 +166,9 @@ class CardIn(Strict):
     photo: str | None = _ulid(default=None)
     voice: str | None = _ulid(default=None)
     group: str | None = Field(default=None, max_length=24)
+    fact: str | None = Field(default=None, max_length=120)
 
-    _clean = field_validator("label", "group")(lambda v: _one_line(v))
+    _clean = field_validator("label", "group", "fact")(lambda v: _one_line(v))
 
 
 class CustomLessonIn(Strict):

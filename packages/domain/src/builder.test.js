@@ -121,11 +121,33 @@ describe("generated lessons", () => {
     const ids = new Set(pets.map((c) => c.id));
     questionSteps(g).forEach((s) => s.itemIds.forEach((id) => expect(ids.has(id)).toBe(true)));
   });
+  test("a fun fact is trimmed, capped at 120 and said in the intro", () => {
+    const l = lesson({
+      cards: [
+        { ...pets[0], fact: "  Simba   loves chasing balls.  " },
+        { ...pets[1], fact: "x".repeat(200) },
+        { ...pets[2], fact: "   " },
+      ],
+    });
+    expect(l.cards[0].fact).toBe("Simba loves chasing balls.");
+    expect(l.cards[1].fact).toHaveLength(120);
+    expect(l.cards[2]).not.toHaveProperty("fact");
+    const items = customUnit(l).items;
+    expect(items[0].fact).toBe("Simba loves chasing balls.");
+    expect(items[2]).not.toHaveProperty("fact");
+    const intro = buildCustomLesson(l, opts()).steps[0];
+    expect(intro.items.find((i) => i.id === pets[0].id).fact).toBe("Simba loves chasing balls.");
+  });
+  test("changing a fun fact bumps the version", () => {
+    const before = lesson();
+    const cards = before.cards.map((c, i) => (i ? c : { ...c, fact: "New fact." }));
+    expect(nextVersion(before, normaliseLesson({ ...before, cards }))).toBe(2);
+  });
   test("cards keep their photo and voice on the item", () => {
     const daisy = customUnit(lesson()).items.find((i) => i.id === "k2");
     expect(daisy).toMatchObject({ photo: "m1", voice: "v1", say: "Daisy the cow" });
   });
-  test("'Sort them' sorts by the grown-up's groups", () => {
+  test("'Sort into groups' sorts by the grown-up's groups", () => {
     const g = buildCustomLesson(lesson({ template: "sort" }), opts(3));
     const sort = g.steps.find((s) => s.type === "sort");
     expect(sort.bins.map((b) => b.label).sort()).toEqual(["Farm", "Pets"]);

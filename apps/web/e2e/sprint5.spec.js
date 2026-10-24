@@ -101,7 +101,7 @@ async function libraryCard(page, query, name, group) {
   await page.getByLabel("Search pictures").fill(query);
   await page.getByRole("button", { name: query, exact: true }).click();
   await page.getByLabel("Name on the card").fill(name);
-  if (group) await page.getByLabel("Group, for sorting (optional)").fill(group);
+  if (group) await page.getByLabel("Group, for sorting games (optional)").fill(group);
   await page.getByRole("button", { name: "Save card" }).click();
 }
 
@@ -123,6 +123,12 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
     .setInputFiles({ name: "dog.jpg", mimeType: "image/jpeg", buffer: PHOTO });
   await expect(page.getByText("Ready · location data removed")).toBeVisible();
   await page.getByLabel("Name on the card").fill("Simba the dog");
+  await page.getByLabel("A fun fact (optional)").fill("Simba loves chasing balls.");
+  await page.getByRole("button", { name: "home", exact: true }).click();
+  await expect(page.getByRole("button", { name: "home", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   // Hold to record (the test browser has a fake microphone).
   const mic = page.getByRole("button", { name: "Hold to record the name" });
   await mic.hover();
@@ -157,15 +163,16 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
       }),
   );
   expect(stripped).toEqual({ exif: false, w: 600, h: 600, voice: true });
+  await expect(page.getByText("Your voice · home · Simba loves chasing balls.")).toBeVisible();
   await libraryCard(page, "giraffe", "Giraffe");
   await expect(page.getByText("Add 1 more card")).toBeVisible();
   await libraryCard(page, "cat", "Tom the cat");
   await expect(page.getByText("Your voice", { exact: false }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   // Sort needs groups (BLD-04 scenario 2).
   await expect(page.getByText("Give the cards at least 2 groups")).toBeVisible();
-  await page.getByRole("radio", { name: /Sort them/ }).click();
-  await expect(page.getByRole("button", { name: "Choose who gets it" })).toBeDisabled();
+  await page.getByRole("radio", { name: /Sort into groups/ }).click();
+  await expect(page.getByRole("button", { name: "Publish to …" })).toBeDisabled();
   await page.getByRole("radio", { name: /Learn the names/ }).click();
   await page.getByRole("button", { name: "Zawadi" }).click();
   await page.getByRole("button", { name: "Amani" }).click();
@@ -180,11 +187,21 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
   await expect(page.getByRole("heading", { level: 1, name: DONE })).toBeVisible();
   expect((await events(page)).length).toBe(before);
   await page.getByRole("link", { name: "Back to the builder" }).click();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
-  await page.getByRole("button", { name: "Give it to Zawadi & Amani" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
+  await page.getByRole("button", { name: "Publish to Zawadi & Amani" }).click();
   await expect(page.getByRole("heading", { name: "“Our Pets” is ready" })).toBeVisible();
   await page.getByRole("link", { name: "Done" }).click();
   await expect(page.getByRole("link", { name: /Our Pets/ })).toContainText("For Zawadi, Amani");
+  const pets = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("trailbuddies-family-v3")).state.lessons.find(
+      (l) => l.title === "Our Pets",
+    ),
+  );
+  expect(pets.cards[0]).toMatchObject({
+    label: "Simba the dog",
+    group: "home",
+    fact: "Simba loves chasing balls.",
+  });
 
   // Zawadi sees it on Family Island, glowing (MAP-06, BLD-08).
   await as(page, "Zawadi", { fresh: false });
@@ -212,8 +229,8 @@ test("editing a played lesson keeps progress; new cards appear next time (BLD-09
   await libraryCard(page, "sun", "Sun", "Outside");
   await libraryCard(page, "spoon", "Spoon", "Inside");
   await expect(page.getByText("Cards (8)")).toBeVisible();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
-  await page.getByRole("button", { name: /Give it to/ }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
+  await page.getByRole("button", { name: /Publish to/ }).click();
   await page.getByRole("link", { name: "Done" }).click();
   const saved = await page.evaluate(
     () => JSON.parse(localStorage.getItem("trailbuddies-family-v3")).state.lessons,
@@ -242,11 +259,11 @@ test("a picture puzzle: a jigsaw of the photo, then the grown-up's question (GAM
   await page.getByRole("button", { name: "Save card" }).click();
   await libraryCard(page, "cat", "Tom");
   await libraryCard(page, "rabbit", "Bun");
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   await page.getByRole("radio", { name: /Picture puzzle/ }).click();
   await page.getByLabel("Question after the puzzle").fill("Who is this?");
   await page.getByRole("button", { name: "Zawadi" }).click();
-  await page.getByRole("button", { name: "Give it to Zawadi" }).click();
+  await page.getByRole("button", { name: "Publish to Zawadi" }).click();
   await page.getByRole("link", { name: "Done" }).click();
   await as(page, "Zawadi", { fresh: false });
   await page.goto("/play/more/island");
@@ -382,9 +399,9 @@ test("offline: a photo card works at once, waits to upload, and uploads on Retry
   await page.getByRole("button", { name: "Save card" }).click();
   await libraryCard(page, "cat", "Tom");
   await libraryCard(page, "cow", "Daisy");
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   await page.getByRole("button", { name: "Wanjiru" }).click();
-  await page.getByRole("button", { name: "Give it to Wanjiru" }).click();
+  await page.getByRole("button", { name: "Publish to Wanjiru" }).click();
   await page.getByRole("link", { name: "Done" }).click();
   await expect(page.getByText("1 item waiting to upload")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Our dog", { exact: true }).first()).toBeVisible();

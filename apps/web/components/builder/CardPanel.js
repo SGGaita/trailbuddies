@@ -13,15 +13,31 @@ import { searchLibrary } from "@trailbuddies/content";
 import { LIMITS } from "@trailbuddies/domain";
 import { preparePhoto, saveMedia, createRecorder, mediaUrl, StorageFullError } from "@/lib/media";
 import { speak } from "@/lib/speech";
+import Card from "@mui/material/Card";
+import FamilyShell from "@/components/shell/FamilyShell";
 import Icon from "@/components/Icon";
 import MediaImage from "@/components/MediaImage";
+import { ChoiceChip, Field, inputSx } from "./parts";
+
+/** Suggested groups for sorting games (prototype P11); the grown-up can type their own too. */
+const SUGGESTED = ["land", "water", "air", "home", "outside"];
 
 /**
  * P11 Add a card (BLD-01, BLD-02): a photo (camera or upload) or a library picture, the word,
- * an optional group for sorting, and the grown-up's own voice (hold to record).
- * @param {{ card: any, groups: string[], ensureConsent: (scope: "photos" | "voice") => Promise<boolean>, onSave: (card: any) => void, onCancel: () => void }} props
+ * an optional fun fact, an optional group for sorting, and the grown-up's own voice (hold to
+ * record). Its own screen: the back arrow cancels, Save card sits in the pinned footer.
+ * @param {{ title: string, family: any, card: any, groups: string[], ensureConsent: (scope: "photos" | "voice") => Promise<boolean>, onSave: (card: any) => void, onCancel: () => void, children?: React.ReactNode }} props
  */
-export default function CardPanel({ card: start, groups, ensureConsent, onSave, onCancel }) {
+export default function CardPanel({
+  title,
+  family,
+  card: start,
+  groups,
+  ensureConsent,
+  onSave,
+  onCancel,
+  children,
+}) {
   const [card, setCard] = useState(start);
   const [library, setLibrary] = useState(false);
   const [query, setQuery] = useState("");
@@ -32,6 +48,12 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
   const rec = useRef(/** @type {ReturnType<typeof createRecorder> | null} */ (null));
   const file = useRef(/** @type {HTMLInputElement | null} */ (null));
   const set = (patch) => setCard((c) => ({ ...c, ...patch }));
+  // A group typed by hand stays in the box; picking a chip clears it.
+  const [typed, setTyped] = useState(() =>
+    start.group && !SUGGESTED.concat(groups).some((g) => g.toLowerCase() === start.group.toLowerCase())
+      ? start.group
+      : "",
+  );
 
   const pickPhoto = async () => {
     if (await ensureConsent("photos")) file.current?.click();
@@ -94,13 +116,33 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
   const save = () => {
     const label = String(card.label || "").trim();
     if (!label) return setProblem("name");
-    onSave({ ...card, label, group: String(card.group || "").trim() || undefined });
+    onSave({
+      ...card,
+      label,
+      group: String(card.group || "").trim() || undefined,
+      fact: String(card.fact || "").trim() || undefined,
+    });
   };
 
   const pics = library ? searchLibrary(query).slice(0, 48) : [];
+  const group = String(card.group || "");
+  // The suggestions plus groups already used in this lesson, without repeats.
+  const chips = [...SUGGESTED, ...groups].filter(
+    (g, i, all) => all.findIndex((x) => x.toLowerCase() === g.toLowerCase()) === i,
+  );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 560 }}>
+    <FamilyShell
+      title={title}
+      onBack={onCancel}
+      family={family}
+      active="/family/create"
+      foot={
+        <Button variant="contained" onClick={save} disabled={!!busy}>
+          {t("builder.saveCard")}
+        </Button>
+      }
+    >
       <Box
         sx={{
           height: 200,
@@ -144,7 +186,7 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
           onClick={pickPhoto}
           disabled={busy === "photo"}
           startIcon={<Icon name="camera" size={20} />}
-          sx={{ borderWidth: 2 }}
+          sx={{ borderWidth: 2, minHeight: 52 }}
         >
           {t("builder.photo")}
         </Button>
@@ -153,13 +195,13 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
           onClick={() => setLibrary(!library)}
           startIcon={<Icon name="image" size={20} />}
           aria-pressed={library}
-          sx={{ borderWidth: 2 }}
+          sx={{ borderWidth: 2, minHeight: 52 }}
         >
           {t("builder.library")}
         </Button>
       </Box>
       {library && (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <Card sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 1.25 }}>
           <TextField
             label={t("builder.librarySearch")}
             value={query}
@@ -199,7 +241,7 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
                   sx={{
                     fontSize: 28,
                     height: 52,
-                    borderRadius: 3,
+                    borderRadius: 2.5,
                     border: `2px solid ${card.emoji === p.emoji ? colors.leaf.main : colors.line}`,
                     bgcolor: "background.paper",
                     cursor: "pointer",
@@ -212,50 +254,64 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
           ) : (
             <Typography sx={{ color: "text.secondary" }}>{t("builder.libraryEmpty")}</Typography>
           )}
-        </Box>
+        </Card>
       )}
-      <TextField
-        label={t("builder.cardName")}
-        placeholder={t("builder.cardNamePh")}
-        value={card.label || ""}
-        onChange={(e) => set({ label: e.target.value })}
-        slotProps={{ htmlInput: { maxLength: LIMITS.label } }}
-      />
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <Field label={t("builder.cardName")} id="card-name">
         <TextField
-          label={t("builder.group")}
+          id="card-name"
+          placeholder={t("builder.cardNamePh")}
+          value={card.label || ""}
+          onChange={(e) => set({ label: e.target.value })}
+          slotProps={{ htmlInput: { maxLength: LIMITS.label } }}
+          sx={inputSx}
+        />
+      </Field>
+      <Field label={t("builder.fact")} id="card-fact">
+        <TextField
+          id="card-fact"
+          placeholder={t("builder.factPh")}
+          value={card.fact || ""}
+          onChange={(e) => set({ fact: e.target.value })}
+          slotProps={{ htmlInput: { maxLength: LIMITS.fact } }}
+          sx={inputSx}
+        />
+      </Field>
+      <Field label={t("builder.group")} id="card-group">
+        <Box
+          role="group"
+          aria-label={t("builder.groupChips")}
+          sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}
+        >
+          {chips.map((g) => {
+            const on = group.toLowerCase() === g.toLowerCase();
+            return (
+              <ChoiceChip
+                key={g}
+                on={on}
+                onClick={() => {
+                  setTyped("");
+                  set({ group: on ? "" : g });
+                }}
+              >
+                {g}
+              </ChoiceChip>
+            );
+          })}
+        </Box>
+        <TextField
+          id="card-group"
           placeholder={t("builder.groupPh")}
-          value={card.group || ""}
-          onChange={(e) => set({ group: e.target.value })}
+          value={typed}
+          onChange={(e) => {
+            setTyped(e.target.value);
+            set({ group: e.target.value });
+          }}
           size="small"
           slotProps={{ htmlInput: { maxLength: LIMITS.group } }}
+          sx={{ ...inputSx, "& .MuiOutlinedInput-root": { bgcolor: "background.paper" }, maxWidth: 320 }}
         />
-        {groups.length > 0 && (
-          <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
-            {groups.map((g) => (
-              <Chip
-                key={g}
-                label={g}
-                onClick={() => set({ group: card.group === g ? "" : g })}
-                color={card.group === g ? "primary" : "default"}
-                variant={card.group === g ? "filled" : "outlined"}
-                aria-pressed={card.group === g}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          p: 1.5,
-          border: `2px solid ${colors.line}`,
-          borderRadius: 4.5,
-          bgcolor: "background.paper",
-        }}
-      >
+      </Field>
+      <Card sx={{ p: 1.75, display: "flex", alignItems: "center", gap: 1.5 }}>
         <IconButton
           aria-label={card.voice ? t("builder.reRecord") : t("builder.record")}
           aria-pressed={busy === "rec"}
@@ -284,10 +340,10 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
                 ? t("builder.recorded")
                 : t("builder.record")}
           </Typography>
-          <Typography sx={{ color: "text.secondary", fontSize: 14 }}>{t("builder.recordSub")}</Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("builder.recordSub")}</Typography>
         </Box>
         {(card.voice || card.label) && (
-          <Button size="small" variant="outlined" onClick={playVoice} sx={{ borderWidth: 2 }}>
+          <Button size="small" variant="outlined" onClick={playVoice} sx={{ borderWidth: 2, minHeight: 40 }}>
             {t("builder.play")}
           </Button>
         )}
@@ -296,7 +352,7 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
             <Icon name="x" size={20} />
           </IconButton>
         )}
-      </Box>
+      </Card>
       {problem && (
         <Alert severity={problem === "full" ? "error" : "warning"} sx={{ borderRadius: 4 }}>
           {problem === "full" ? (
@@ -316,14 +372,7 @@ export default function CardPanel({ card: start, groups, ensureConsent, onSave, 
           )}
         </Alert>
       )}
-      <Box sx={{ display: "flex", gap: 1.25, justifyContent: "flex-end" }}>
-        <Button variant="outlined" onClick={onCancel} sx={{ borderWidth: 2 }}>
-          {t("builder.cancel")}
-        </Button>
-        <Button variant="contained" onClick={save} disabled={!!busy}>
-          {t("builder.saveCard")}
-        </Button>
-      </Box>
-    </Box>
+      {children}
+    </FamilyShell>
   );
 }
