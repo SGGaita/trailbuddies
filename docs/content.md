@@ -1,5 +1,7 @@
 # Content: writing, reviewing and publishing units
 
+First launch of the Sprint 6 units, step by step (Vercel, review, pictures, packs): see [launch-content-guide.md](launch-content-guide.md).
+
 Units are JSON in `packages/content/src/units/<subject>/<unit>.json`, each with an asset manifest beside it (`<unit>.assets.json`). The catalogue (`packages/content/src/catalogue.json`) lists every unit and its status.
 
 ## Statuses
