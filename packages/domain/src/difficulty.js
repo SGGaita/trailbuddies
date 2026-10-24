@@ -66,4 +66,20 @@ export function effectiveLevel(setting, band, results) {
 }
 
 /** Text for grown-ups, e.g. "Level 2 · 3 choices". */
+/** Words for each setting in the grown-up zone (ADP-02). */
+export const SETTING_NAMES = { auto: "Auto", 1: "Locked: easier", 2: "Locked: just right", 3: "Locked: harder" };
+
+/**
+ * A learner's setting for one subject (ADP-02): a per-subject lock wins over the learner-wide
+ * setting, which wins over auto.
+ * @param {{ difficulty?: DifficultySetting, levels?: Record<string, DifficultySetting> }} learner
+ * @param {string} subjectId
+ * @returns {DifficultySetting}
+ */
+export function settingFor(learner, subjectId) {
+  const own = learner.levels?.[subjectId];
+  if (own && DIFFICULTY_SETTINGS.includes(own) && own !== "auto") return own;
+  return DIFFICULTY_SETTINGS.includes(learner.difficulty) ? learner.difficulty : "auto";
+}
+
 export const describeLevel = (/** @type {Level} */ level) => `Level ${level} · ${choicesFor(level)} choices`;
