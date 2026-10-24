@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Validates every content file in this package. `--prod` also fails on unapproved assets.
+// Validates every content file in this package. `--prod` also fails on any unapproved asset
+// in a unit that ships to production (CNT-03).
 // Exit code 1 on any error, so CI blocks the pull request.
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, relative, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validate, matchesCatalogue, unapprovedAssets } from "@trailbuddies/content-schema";
+import { validate, matchesCatalogue } from "@trailbuddies/content-schema";
 import { unitsIndex } from "./units-index.js";
+import { loadContent, productionProblems } from "./packs.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const prod = process.argv.includes("--prod");
@@ -38,13 +40,16 @@ for (const f of unitFiles) {
   else {
     const m = read(assets);
     const ar = validate("assets", m);
-    report(assets, ar.valid ? (prod ? unapprovedAssets(m) : []) : ar.errors);
+    report(assets, ar.valid ? [] : ar.errors);
   }
 }
 for (const s of cat.subjects)
   for (const u of s.units)
     if ((u.status === "ready" || u.status === "draft") && !seen.has(u.id))
       report(catFile, [`unit "${u.id}" is ${u.status} but has no content file`]);
+
+// CNT-03: a production build may only ship approved assets in approved ("ready") units.
+if (prod) report(join(root, "units"), productionProblems(loadContent(root)));
 
 const indexFile = join(root, "units", "all.js");
 if (!existsSync(indexFile) || readFileSync(indexFile, "utf8") !== unitsIndex())

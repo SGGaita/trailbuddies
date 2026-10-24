@@ -10,7 +10,8 @@ const QUICK = new Set(["explorer", "voyager", "trailblazer"]);
  * @param {string} band
  * @returns {{ speak: boolean, ms: number }} whether the buddy speaks its praise, and how long before moving on
  */
-export const celebrationFor = (band) => (QUICK.has(band) ? { speak: false, ms: 500 } : { speak: true, ms: 1100 });
+export const celebrationFor = (band) =>
+  QUICK.has(band) ? { speak: false, ms: 500 } : { speak: true, ms: 1100 };
 
 /** Local calendar day, e.g. "2026-10-23". */
 export const dayKey = (d = new Date()) =>

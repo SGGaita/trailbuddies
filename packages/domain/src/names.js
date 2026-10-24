@@ -4,6 +4,9 @@
  * @param {string} typed
  */
 export function firstNameOnly(typed) {
-  const words = String(typed || "").trim().split(/\s+/).filter(Boolean);
+  const words = String(typed || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   return { name: words[0] || "", trimmed: words.length > 1 };
 }

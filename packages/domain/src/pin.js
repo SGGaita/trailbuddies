@@ -7,7 +7,10 @@
 const ITERATIONS = 150_000;
 
 const b64 = (/** @type {Uint8Array} */ bytes) =>
-  btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 
 /** @param {string} pin @param {string} salt @param {number} iterations */
 async function derive(pin, salt, iterations) {

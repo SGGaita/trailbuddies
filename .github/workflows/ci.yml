@@ -28,6 +28,8 @@ jobs:
         run: pnpm test
       - name: Validate content
         run: pnpm content:validate
+      - name: Production content gate (approved units and assets only)
+        run: pnpm content validate --prod && pnpm content packs:build --channel production --release 0000.00.0 --out /tmp/packs
       - name: Build web app
         run: pnpm --filter @trailbuddies/web build
       - name: Install Playwright browser

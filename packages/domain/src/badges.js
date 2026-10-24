@@ -11,7 +11,9 @@ import { goalDaysWithin } from "./streak.js";
  */
 export function badgeStats(s) {
   const lessons = s.results.filter((r) => r.kind === "lesson");
-  const threeStar = Object.entries(s.progress).filter(([id, st]) => !id.endsWith("-trophy") && st >= 3).length;
+  const threeStar = Object.entries(s.progress).filter(
+    ([id, st]) => !id.endsWith("-trophy") && st >= 3,
+  ).length;
   // Comebacks: items missed at some point that were later right first time twice running.
   const byItem = {};
   for (const a of [...s.answers].sort((x, y) => x.at - y.at)) (byItem[a.itemId] ||= []).push(a.firstTry);
@@ -53,7 +55,10 @@ export function ruleMet(rule, stats, s) {
     case "count":
       return (stats[rule.metric] || 0) >= rule.n;
     case "streak":
-      return goalDaysWithin(s.byDay || {}, { goal: s.goal, window: rule.window || rule.days, now: s.now }) >= rule.days;
+      return (
+        goalDaysWithin(s.byDay || {}, { goal: s.goal, window: rule.window || rule.days, now: s.now }) >=
+        rule.days
+      );
     case "mastery":
       return rule.items.every((id) => s.mastery?.[id]?.mastered);
     case "combo":

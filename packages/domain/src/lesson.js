@@ -37,10 +37,22 @@ import { choicesFor } from "./difficulty.js";
  * @property {Step[]} steps
  */
 
-export const EXERCISE_TYPES = ["listen-tap", "name-it", "count", "match", "compare", "sequence", "odd-one-out", "sort", "case-match", "build-word"];
+export const EXERCISE_TYPES = [
+  "listen-tap",
+  "name-it",
+  "count",
+  "match",
+  "compare",
+  "sequence",
+  "odd-one-out",
+  "sort",
+  "case-match",
+  "build-word",
+];
 const NUMBER_ONLY = new Set(["count", "compare", "sequence"]);
 const isNumber = (/** @type {Item} */ it) => typeof it.number === "number";
-const isLetter = (/** @type {Item} */ it) => typeof it.letter === "string" && !(it.tags || []).includes("word");
+const isLetter = (/** @type {Item} */ it) =>
+  typeof it.letter === "string" && !(it.tags || []).includes("word");
 const isWord = (/** @type {Item} */ it) => (it.tags || []).includes("word");
 /** Items of the same kind (letters with letters, words with words) so choices make sense. */
 const kindOf = (/** @type {Item} */ it) => (isWord(it) ? "word" : isLetter(it) ? "letter" : "other");
@@ -91,8 +103,14 @@ function targetQueue(focus, review, pool, r) {
 }
 
 function distractors(target, pool, all, n, r, same = (a, b) => a.id === b.id) {
-  const fromPool = shuffle(pool.filter((i) => !same(i, target)), r);
-  const extra = shuffle(all.filter((i) => !same(i, target) && !fromPool.includes(i)), r);
+  const fromPool = shuffle(
+    pool.filter((i) => !same(i, target)),
+    r,
+  );
+  const extra = shuffle(
+    all.filter((i) => !same(i, target) && !fromPool.includes(i)),
+    r,
+  );
   return [...fromPool, ...extra].slice(0, n);
 }
 
@@ -131,7 +149,15 @@ export function buildExercise(cfg, ctx) {
     const n = optionCount(cfg, level, kin.length);
     const options = shuffle([target, ...distractors(target, kin, sameKind(all, target), n - 1, r)], r);
     if (type === "listen-tap") {
-      return { id, type, prompt: cfg.prompt || `Tap ${target.label}!`, say: `Tap ${words(target)}!`, target, options, itemIds: [target.id] };
+      return {
+        id,
+        type,
+        prompt: cfg.prompt || `Tap ${target.label}!`,
+        say: `Tap ${words(target)}!`,
+        target,
+        options,
+        itemIds: [target.id],
+      };
     }
     const prompt = isNumber(target) ? `Find the group of ${target.label}.` : `What is this?`;
     const say = isNumber(target) ? `Which group has ${words(target)}?` : `What is this?`;
@@ -143,8 +169,21 @@ export function buildExercise(cfg, ctx) {
     if (!isNumber(target)) target = pick(numbers, r);
     const n = optionCount(cfg, level, numbers.length);
     const options = shuffle([target, ...distractors(target, numbers, all.filter(isNumber), n - 1, r)], r);
-    const emoji = pick(all.filter((i) => i.emoji), r)?.emoji || "⭐";
-    return { id, type, prompt: cfg.prompt || "How many? Tap each one to count.", say: "How many are there? Tap each one to count.", target, options, itemIds: [target.id], extra: { emoji } };
+    const emoji =
+      pick(
+        all.filter((i) => i.emoji),
+        r,
+      )?.emoji || "⭐";
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || "How many? Tap each one to count.",
+      say: "How many are there? Tap each one to count.",
+      target,
+      options,
+      itemIds: [target.id],
+      extra: { emoji },
+    };
   }
 
   if (type === "match") {
@@ -154,31 +193,66 @@ export function buildExercise(cfg, ctx) {
     const items = shuffle([first, ...distractors(first, kin, sameKind(all, first), pairs - 1, r)], r);
     const right = shuffle(items, r);
     const prompt = isNumber(first) ? "Match each group to its number." : "Match each picture to its name.";
-    return { id, type, prompt: cfg.prompt || prompt, say: prompt, items, options: right, itemIds: items.map((i) => i.id) };
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || prompt,
+      say: prompt,
+      items,
+      options: right,
+      itemIds: items.map((i) => i.id),
+    };
   }
 
   if (type === "compare") {
     const a = next();
     const a2 = isNumber(a) ? a : pick(numbers, r);
-    const b = pick(numbers.filter((i) => i.number !== a2.number), r);
+    const b = pick(
+      numbers.filter((i) => i.number !== a2.number),
+      r,
+    );
     const ask = band === "seedling" || r() < 0.5 ? "more" : "fewer";
     const shown = shuffle([a2, b], r);
     const target = ask === "more" ? (a2.number > b.number ? a2 : b) : a2.number < b.number ? a2 : b;
-    const emoji = pick(all.filter((i) => i.emoji), r)?.emoji || "⭐";
+    const emoji =
+      pick(
+        all.filter((i) => i.emoji),
+        r,
+      )?.emoji || "⭐";
     const [big, small] = a2.number > b.number ? [a2.number, b.number] : [b.number, a2.number];
     // LES-06: after a right answer the buddy counts both groups.
     const explain = {
       event: ask === "more" ? "lesson.explain-compare" : "lesson.explain-compare-fewer",
       vars: { a: shown[0].number, b: shown[1].number, big, small },
     };
-    return { id, type, prompt: cfg.prompt || `Which has ${ask}?`, say: `Which group has ${ask}?`, target, options: shown, itemIds: [a2.id, b.id], extra: { ask, emoji }, explain };
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || `Which has ${ask}?`,
+      say: `Which group has ${ask}?`,
+      target,
+      options: shown,
+      itemIds: [a2.id, b.id],
+      extra: { ask, emoji },
+      explain,
+    };
   }
 
   if (type === "sequence") {
     const k = clamp(optionCount(cfg, level, numbers.length) + 1, 3, numbers.length);
-    const chosen = shuffle(numbers, r).slice(0, k).sort((x, y) => x.number - y.number);
+    const chosen = shuffle(numbers, r)
+      .slice(0, k)
+      .sort((x, y) => x.number - y.number);
     const say = cfg.prompt || "Put the numbers in order, starting with the smallest.";
-    return { id, type, prompt: say, say, items: chosen, options: shuffle(chosen, r), itemIds: chosen.map((i) => i.id) };
+    return {
+      id,
+      type,
+      prompt: say,
+      say,
+      items: chosen,
+      options: shuffle(chosen, r),
+      itemIds: chosen.map((i) => i.id),
+    };
   }
 
   if (type === "odd-one-out" && numbers.length < 2) {
@@ -187,8 +261,17 @@ export function buildExercise(cfg, ctx) {
     const base = groupOf(target, groups);
     const sameCount = level >= 2 ? 3 : 2;
     const inBase = all.filter((i) => groupOf(i, groups)?.id === base.id);
-    const same = [target, ...shuffle(inBase.filter((i) => i.id !== target.id), r)].slice(0, sameCount);
-    const others = all.filter((i) => { const g = groupOf(i, groups); return g && g.id !== base.id; });
+    const same = [
+      target,
+      ...shuffle(
+        inBase.filter((i) => i.id !== target.id),
+        r,
+      ),
+    ].slice(0, sameCount);
+    const others = all.filter((i) => {
+      const g = groupOf(i, groups);
+      return g && g.id !== base.id;
+    });
     const odd = pick(others, r);
     const oddGroup = groupOf(odd, groups);
     const options = shuffle([...same, odd], r);
@@ -201,17 +284,30 @@ export function buildExercise(cfg, ctx) {
       options,
       itemIds: [...same.map((i) => i.id), odd.id],
       extra: { mode: "category", answer: odd.id },
-      explain: { event: "lesson.explain-odd", vars: { odd: words(odd), where: oddGroup.say || oddGroup.label, others: base.say || base.label } },
+      explain: {
+        event: "lesson.explain-odd",
+        vars: { odd: words(odd), where: oddGroup.say || oddGroup.label, others: base.say || base.label },
+      },
     };
   }
 
   if (type === "odd-one-out") {
     const target = next();
     const base = isNumber(target) ? target : pick(numbers, r);
-    const odd = pick(numbers.filter((i) => i.number !== base.number), r);
+    const odd = pick(
+      numbers.filter((i) => i.number !== base.number),
+      r,
+    );
     const n = clamp(optionCount(cfg, level, 4), 3, 4);
-    const emojis = shuffle(all.filter((i) => i.emoji).map((i) => i.emoji), r);
-    const groups = Array.from({ length: n - 1 }, (_, i) => ({ id: `same-${i}`, count: base.number, emoji: emojis[i % emojis.length] || "⭐" }));
+    const emojis = shuffle(
+      all.filter((i) => i.emoji).map((i) => i.emoji),
+      r,
+    );
+    const groups = Array.from({ length: n - 1 }, (_, i) => ({
+      id: `same-${i}`,
+      count: base.number,
+      emoji: emojis[i % emojis.length] || "⭐",
+    }));
     const oddGroup = { id: "odd", count: odd.number, emoji: emojis[(n - 1) % emojis.length] || "⭐" };
     return {
       id,
@@ -232,7 +328,15 @@ export function buildExercise(cfg, ctx) {
     const pairs = matchPairs(level, letters.length, all.filter(isLetter).length);
     const items = shuffle([first, ...distractors(first, letters, all.filter(isLetter), pairs - 1, r)], r);
     const prompt = "Match the big and small letters.";
-    return { id, type, prompt: cfg.prompt || prompt, say: prompt, items, options: shuffle(items, r), itemIds: items.map((i) => i.id) };
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || prompt,
+      say: prompt,
+      items,
+      options: shuffle(items, r),
+      itemIds: items.map((i) => i.id),
+    };
   }
 
   if (type === "build-word") {
@@ -244,7 +348,10 @@ export function buildExercise(cfg, ctx) {
       return { id: `${target.id}-${i}`, letter: ch, label: ch, say: it ? words(it) : ch };
     };
     const slots = [...target.label.toLowerCase()].map(tileFor);
-    const spare = shuffle(unitLetters.filter((l) => !target.label.includes(l.letter)), r)
+    const spare = shuffle(
+      unitLetters.filter((l) => !target.label.includes(l.letter)),
+      r,
+    )
       .slice(0, clamp(level - 1, 0, 2))
       .map((l, i) => ({ id: `${target.id}-x${i}`, letter: l.letter, label: l.letter, say: words(l) }));
     return {
@@ -265,15 +372,39 @@ export function buildExercise(cfg, ctx) {
     // LES-08: drop each item in the right basket; 2 baskets at level 1, up to 4 above.
     const binCount = clamp(level + 1, 2, Math.min(4, groupIds.length));
     const first = nextOf((i) => groupOf(i, groups), grouped);
-    const binIds = [groupOf(first, groups).id, ...shuffle(groupIds.filter((g) => g !== groupOf(first, groups).id), r)].slice(0, binCount);
+    const binIds = [
+      groupOf(first, groups).id,
+      ...shuffle(
+        groupIds.filter((g) => g !== groupOf(first, groups).id),
+        r,
+      ),
+    ].slice(0, binCount);
     const bins = groups.filter((g) => binIds.includes(g.id));
     const candidates = grouped.filter((i) => binIds.includes(groupOf(i, groups).id));
     const total = clamp(level + 3, binCount * 1 + 1, Math.min(6, candidates.length));
-    const oneEach = binIds.map((b) => (b === groupOf(first, groups).id ? first : pick(candidates.filter((i) => groupOf(i, groups).id === b), r)));
-    const rest = shuffle(candidates.filter((i) => !oneEach.includes(i)), r).slice(0, Math.max(0, total - oneEach.length));
+    const oneEach = binIds.map((b) =>
+      b === groupOf(first, groups).id
+        ? first
+        : pick(
+            candidates.filter((i) => groupOf(i, groups).id === b),
+            r,
+          ),
+    );
+    const rest = shuffle(
+      candidates.filter((i) => !oneEach.includes(i)),
+      r,
+    ).slice(0, Math.max(0, total - oneEach.length));
     const items = shuffle([...oneEach, ...rest], r).map((i) => ({ ...i, bin: groupOf(i, groups).id }));
     const prompt = "Put each one where it belongs.";
-    return { id, type, prompt: cfg.prompt || prompt, say: prompt, bins, items, itemIds: items.map((i) => i.id) };
+    return {
+      id,
+      type,
+      prompt: cfg.prompt || prompt,
+      say: prompt,
+      bins,
+      items,
+      itemIds: items.map((i) => i.id),
+    };
   }
 
   throw new Error(`Unknown exercise type: ${cfg.type}`);
@@ -306,9 +437,28 @@ export function buildLesson(unit, index, { level, band, r }) {
   const steps = [];
   if (focus.length) steps.push(introStep(cfg.id, focus));
   cfg.exercises.forEach((ex, i) =>
-    steps.push(buildExercise(ex, { id: `${cfg.id}-ex${i + 1}`, next, pool, all: unit.items, level, band, r, groups: unit.groups })),
+    steps.push(
+      buildExercise(ex, {
+        id: `${cfg.id}-ex${i + 1}`,
+        next,
+        pool,
+        all: unit.items,
+        level,
+        band,
+        r,
+        groups: unit.groups,
+      }),
+    ),
   );
-  return { id: cfg.id, unitId: unit.id, subjectId: unit.subject, kind: "lesson", title: cfg.title, level, steps };
+  return {
+    id: cfg.id,
+    unitId: unit.id,
+    subjectId: unit.subject,
+    kind: "lesson",
+    title: cfg.title,
+    level,
+    steps,
+  };
 }
 
 /**
@@ -318,13 +468,28 @@ export function buildLesson(unit, index, { level, band, r }) {
  * @returns {Lesson}
  */
 export function buildTrophy(unit, { level, band, r, length = 6 }) {
-  const types = [...new Set(unit.lessons.flatMap((l) => l.exercises.map((e) => e.type)))].filter((t) => EXERCISE_TYPES.includes(t));
+  const types = [...new Set(unit.lessons.flatMap((l) => l.exercises.map((e) => e.type)))].filter((t) =>
+    EXERCISE_TYPES.includes(t),
+  );
   const order = shuffle(types, r);
   const pool = unit.items;
   const next = targetQueue([], [], pool, r);
   const id = `${unit.id}-trophy`;
-  const steps = Array.from({ length }, (_, i) => buildExercise({ type: order[i % order.length] }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups }));
-  return { id, unitId: unit.id, subjectId: unit.subject, kind: "trophy", title: `${unit.title} trophy`, level, steps };
+  const steps = Array.from({ length }, (_, i) =>
+    buildExercise(
+      { type: order[i % order.length] },
+      { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups },
+    ),
+  );
+  return {
+    id,
+    unitId: unit.id,
+    subjectId: unit.subject,
+    kind: "trophy",
+    title: `${unit.title} trophy`,
+    level,
+    steps,
+  };
 }
 
 /**
@@ -336,7 +501,10 @@ export function buildTrophy(unit, { level, band, r, length = 6 }) {
  */
 export function buildReview(units, itemIds, { level, band, r, max = 5 }) {
   const all = units.flatMap((u) => u.items);
-  const due = itemIds.map((id) => all.find((i) => i.id === id)).filter(Boolean).slice(0, max);
+  const due = itemIds
+    .map((id) => all.find((i) => i.id === id))
+    .filter(Boolean)
+    .slice(0, max);
   if (!due.length) return null;
   const unit = units.find((u) => u.items.some((i) => i.id === due[0].id));
   const pool = all.filter((i) => units.some((u) => u.id === unit.id && u.items.includes(i)));
@@ -344,7 +512,12 @@ export function buildReview(units, itemIds, { level, band, r, max = 5 }) {
   const next = () => queue.shift() || pick(due, r);
   const types = ["listen-tap", "count", "listen-tap", "name-it", "count"];
   const id = `${unit.subject}-review`;
-  const steps = due.map((it, i) => buildExercise({ type: isNumber(it) ? types[i % types.length] : "listen-tap" }, { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups }));
+  const steps = due.map((it, i) =>
+    buildExercise(
+      { type: isNumber(it) ? types[i % types.length] : "listen-tap" },
+      { id: `${id}-ex${i + 1}`, next, pool, all: pool, level, band, r, groups: unit.groups },
+    ),
+  );
   return { id, unitId: unit.id, subjectId: unit.subject, kind: "review", title: "Review", level, steps };
 }
 

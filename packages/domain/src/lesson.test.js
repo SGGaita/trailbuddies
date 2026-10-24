@@ -1,5 +1,14 @@
 import { rng, shuffle } from "./random.js";
-import { buildLesson, buildTrophy, buildReview, buildExercise, optionCount, introducedUpTo, questionSteps, EXERCISE_TYPES } from "./lesson.js";
+import {
+  buildLesson,
+  buildTrophy,
+  buildReview,
+  buildExercise,
+  optionCount,
+  introducedUpTo,
+  questionSteps,
+  EXERCISE_TYPES,
+} from "./lesson.js";
 
 const n = (id, number, emoji) => ({ id, label: String(number), say: id, number, emoji });
 const unit = {
@@ -8,13 +17,58 @@ const unit = {
   title: "Counting 1 to 5",
   items: [n("one", 1, "🥭"), n("two", 2, "🐥"), n("three", 3, "🎈"), n("four", 4, "🐞"), n("five", 5, "⭐")],
   lessons: [
-    { id: "counting-1-5-1", title: "Meet 1, 2 and 3", focus: ["one", "two", "three"], exercises: [{ type: "listen-tap", choices: 2 }, { type: "count" }, { type: "listen-tap", choices: 3 }, { type: "match" }, { type: "count" }] },
-    { id: "counting-1-5-2", title: "Count to 3", focus: [], review: ["one", "two", "three"], exercises: [{ type: "count" }, { type: "compare" }, { type: "name-it", choices: 3 }] },
-    { id: "counting-1-5-3", title: "Meet 4 and 5", focus: ["four", "five"], review: ["three"], exercises: [{ type: "sequence" }, { type: "odd-one-out", choices: 3 }, { type: "listen-tap", choices: 3 }] },
+    {
+      id: "counting-1-5-1",
+      title: "Meet 1, 2 and 3",
+      focus: ["one", "two", "three"],
+      exercises: [
+        { type: "listen-tap", choices: 2 },
+        { type: "count" },
+        { type: "listen-tap", choices: 3 },
+        { type: "match" },
+        { type: "count" },
+      ],
+    },
+    {
+      id: "counting-1-5-2",
+      title: "Count to 3",
+      focus: [],
+      review: ["one", "two", "three"],
+      exercises: [{ type: "count" }, { type: "compare" }, { type: "name-it", choices: 3 }],
+    },
+    {
+      id: "counting-1-5-3",
+      title: "Meet 4 and 5",
+      focus: ["four", "five"],
+      review: ["three"],
+      exercises: [
+        { type: "sequence" },
+        { type: "odd-one-out", choices: 3 },
+        { type: "listen-tap", choices: 3 },
+      ],
+    },
   ],
   checkpoint: { review: 4 },
 };
-const words = { id: "pets", subject: "animals", title: "Pets", items: [{ id: "dog", label: "dog" }, { id: "cat", label: "cat" }, { id: "fish", label: "fish" }], lessons: [{ id: "pets-1", title: "Pets", focus: ["dog", "cat", "fish"], exercises: [{ type: "count" }, { type: "compare" }, { type: "match" }] }], checkpoint: { review: 2 } };
+const words = {
+  id: "pets",
+  subject: "animals",
+  title: "Pets",
+  items: [
+    { id: "dog", label: "dog" },
+    { id: "cat", label: "cat" },
+    { id: "fish", label: "fish" },
+  ],
+  lessons: [
+    {
+      id: "pets-1",
+      title: "Pets",
+      focus: ["dog", "cat", "fish"],
+      exercises: [{ type: "count" }, { type: "compare" }, { type: "match" }],
+    },
+  ],
+  checkpoint: { review: 2 },
+};
 const opts = (seed = 1, level = 2) => ({ level, band: "sprout", r: rng(seed) });
 
 test("seeded random is reproducible", () => {
@@ -26,7 +80,12 @@ test("seeded random is reproducible", () => {
 test("same seed, same lesson; other seeds vary the order", () => {
   expect(buildLesson(unit, 0, opts(42))).toEqual(buildLesson(unit, 0, opts(42)));
   const orders = new Set();
-  for (let seed = 1; seed < 20; seed++) orders.add(buildLesson(unit, 0, opts(seed)).steps.map((s) => s.target?.id).join(","));
+  for (let seed = 1; seed < 20; seed++)
+    orders.add(
+      buildLesson(unit, 0, opts(seed))
+        .steps.map((s) => s.target?.id)
+        .join(","),
+    );
   expect(orders.size).toBeGreaterThan(1);
 });
 
@@ -34,7 +93,13 @@ test("lesson starts with an intro of the new items, then one step per exercise",
   const l = buildLesson(unit, 0, opts());
   expect(l.steps[0]).toMatchObject({ type: "intro", itemIds: ["one", "two", "three"] });
   expect(questionSteps(l)).toHaveLength(5);
-  expect(l).toMatchObject({ id: "counting-1-5-1", unitId: "counting-1-5", subjectId: "numbers", kind: "lesson", level: 2 });
+  expect(l).toMatchObject({
+    id: "counting-1-5-1",
+    unitId: "counting-1-5",
+    subjectId: "numbers",
+    kind: "lesson",
+    level: 2,
+  });
 });
 
 test("review-only lessons have no intro", () => {
@@ -43,7 +108,9 @@ test("review-only lessons have no intro", () => {
 
 test("every focus item is asked about at least once", () => {
   for (let seed = 1; seed < 30; seed++) {
-    const asked = new Set(buildLesson(unit, 0, opts(seed)).steps.flatMap((s) => (s.type === "intro" ? [] : s.itemIds)));
+    const asked = new Set(
+      buildLesson(unit, 0, opts(seed)).steps.flatMap((s) => (s.type === "intro" ? [] : s.itemIds)),
+    );
     for (const f of ["one", "two", "three"]) expect(asked.has(f)).toBe(true);
   }
 });
@@ -97,7 +164,18 @@ test("count, compare, sequence and odd-one-out produce answerable specs", () => 
 
 test("seedlings are only asked which has more", () => {
   for (let seed = 1; seed < 20; seed++) {
-    const cmp = buildExercise({ type: "compare" }, { id: "x", next: () => unit.items[1], pool: unit.items, all: unit.items, level: 2, band: "seedling", r: rng(seed) });
+    const cmp = buildExercise(
+      { type: "compare" },
+      {
+        id: "x",
+        next: () => unit.items[1],
+        pool: unit.items,
+        all: unit.items,
+        level: 2,
+        band: "seedling",
+        r: rng(seed),
+      },
+    );
     expect(cmp.extra.ask).toBe("more");
   }
 });
@@ -108,12 +186,21 @@ test("number-only exercises fall back to listen-tap for word units", () => {
 });
 
 test("unknown exercise types are rejected; every Sprint 1 type is buildable", () => {
-  const ctx = { id: "x", next: () => unit.items[2], pool: unit.items, all: unit.items, level: 2, band: "sprout", r: rng(3) };
+  const ctx = {
+    id: "x",
+    next: () => unit.items[2],
+    pool: unit.items,
+    all: unit.items,
+    level: 2,
+    band: "sprout",
+    r: rng(3),
+  };
   expect(() => buildExercise({ type: "juggle" }, ctx)).toThrow(/Unknown exercise type/);
   const numberTypes = EXERCISE_TYPES.filter((t) => !["sort", "case-match", "build-word"].includes(t));
   for (const t of numberTypes) expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe(t);
   // letter and category types need letters or groups; with numbers they fall back to listen-tap
-  for (const t of ["sort", "case-match", "build-word"]) expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe("listen-tap");
+  for (const t of ["sort", "case-match", "build-word"])
+    expect(buildExercise({ type: t }, { ...ctx, r: rng(3) }).type).toBe("listen-tap");
 });
 
 test("trophy mixes the unit's exercise types across all items", () => {
