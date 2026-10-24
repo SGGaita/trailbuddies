@@ -26,6 +26,7 @@ def lesson_out(c: CustomLesson) -> dict:
         "cards": c.cards,
         "assigned": c.assigned,
         "version": c.version,
+        "options": c.options or {},
         "updated_at": aware(c.updated_at).isoformat(),
     }
 
@@ -67,6 +68,7 @@ def put_lesson(
         "cards": [c.model_dump(exclude_none=True) for c in body.cards],
         "assigned": list(dict.fromkeys(body.assigned)),
         "version": body.version,
+        "options": body.options.model_dump(exclude_none=True),
     }
     c = db.get(CustomLesson, lesson_id)
     if c and c.family_id != family_id:

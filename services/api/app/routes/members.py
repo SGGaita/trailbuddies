@@ -6,7 +6,7 @@ import secrets
 from datetime import timedelta
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
@@ -117,7 +117,9 @@ def remove_member(
 
 
 @router.post("/invites/accept")
-def accept(body: VerifyIn, response: Response, db: DbSession = Depends(get_session)) -> dict:
+def accept(
+    body: VerifyIn, request: Request, response: Response, db: DbSession = Depends(get_session)
+) -> dict:
     """Accept an invitation: joins the family and signs in as the invited address."""
     inv = db.scalar(select(Invite).where(Invite.token_hash == hash_token(body.token)))
     if not inv or inv.accepted_at or aware(inv.expires_at) <= utcnow():
@@ -130,5 +132,5 @@ def accept(body: VerifyIn, response: Response, db: DbSession = Depends(get_sessi
         db.add(FamilyMember(family_id=inv.family_id, user_id=user.id, role=inv.role))
     inv.accepted_at = utcnow()
     db.commit()
-    start_session(db, user, response)
+    start_session(db, user, response, request)
     return {"family_id": inv.family_id, "role": inv.role}

@@ -65,6 +65,16 @@ class LocalStorage:
     def delete(self, media_id: str) -> None:
         self.path(media_id).unlink(missing_ok=True)
 
+    # Content packs (CNT-02) live beside the media under packs/.
+    def put_key(self, key: str, data: bytes) -> None:
+        p = self.root / key
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(data)
+
+    def get_key(self, key: str) -> bytes | None:
+        p = self.root / key
+        return p.read_bytes() if p.exists() else None
+
 
 class S3Storage:
     def __init__(self, s: Settings):
@@ -117,6 +127,16 @@ class S3Storage:
 
     def delete(self, media_id: str) -> None:
         self.client.delete_object(Bucket=self.bucket, Key=_key(media_id))
+
+    def put_key(self, key: str, data: bytes) -> None:
+        self._ensure_bucket()
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType="application/json")
+
+    def get_key(self, key: str) -> bytes | None:
+        try:
+            return self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
+        except self.client.exceptions.NoSuchKey:
+            return None
 
 
 @lru_cache

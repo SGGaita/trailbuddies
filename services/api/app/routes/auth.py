@@ -5,7 +5,7 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session as DbSession
@@ -71,15 +71,17 @@ def magic_link(body: MagicLinkIn, tasks: BackgroundTasks, db: DbSession = Depend
 
 
 @router.post("/auth/verify")
-def verify(body: VerifyIn, response: Response, db: DbSession = Depends(get_session)) -> dict:
+def verify(
+    body: VerifyIn, request: Request, response: Response, db: DbSession = Depends(get_session)
+) -> dict:
     row = db.scalar(select(LoginToken).where(LoginToken.token_hash == hash_token(body.token)))
     if not row or row.used or aware(row.expires_at) <= utcnow():
         raise HTTPException(400, "This link has expired or was already used. Ask for a new one.")
     row.used = True
     db.commit()
     user, new = user_for_email(db, row.email)
-    start_session(db, user, response)
-    return {"user": UserOut.model_validate(user, from_attributes=True), "new": new}
+    start_session(db, user, response, request)
+    return {"user": UserOut.of(user), "new": new}
 
 
 @router.get("/auth/google/start")
@@ -123,6 +125,7 @@ def google_identity(code: str) -> dict:
 
 @router.get("/auth/google/callback")
 def google_callback(
+    request: Request,
     code: str = "",
     state: str = "",
     tb_oauth_state: str | None = Cookie(default=None),
@@ -138,12 +141,19 @@ def google_callback(
         return fail
     if info.get("aud") != s.google_client_id or str(info.get("email_verified")).lower() != "true":
         return fail
-    user, _ = user_for_email(db, info["email"])
+    # ONB-03: one account per person. A linked Google account signs in to its own account; the
+    # first Google sign-in with an email that already has an account links the two.
+    sub = str(info.get("sub") or "")[:64] or None
+    user = db.scalar(select(User).where(User.google_sub == sub)) if sub else None
+    if not user:
+        user, _ = user_for_email(db, info["email"])
+        if sub and not user.google_sub:
+            user.google_sub = sub
     if not user.name and info.get("given_name"):
         user.name = str(info["given_name"])[:120]
-        db.commit()
+    db.commit()
     r = RedirectResponse(f"{s.web_url}/auth/done", status_code=302)
-    start_session(db, user, r)
+    start_session(db, user, r, request)
     r.delete_cookie(STATE_COOKIE)
     return r
 
@@ -167,14 +177,14 @@ def logout_all(response: Response, user: User = Depends(current_user), db: DbSes
 
 @router.get("/me")
 def me(user: User = Depends(current_user), db: DbSession = Depends(get_session)) -> dict:
-    return {"user": UserOut.model_validate(user, from_attributes=True), "families": families_for(db, user)}
+    return {"user": UserOut.of(user), "families": families_for(db, user)}
 
 
 @router.patch("/me")
 def update_me(body: MeIn, user: User = Depends(current_user), db: DbSession = Depends(get_session)) -> dict:
     user.name = body.name.strip()
     db.commit()
-    return {"user": UserOut.model_validate(user, from_attributes=True)}
+    return {"user": UserOut.of(user)}
 
 
 __all__ = ["router", "COOKIE"]
