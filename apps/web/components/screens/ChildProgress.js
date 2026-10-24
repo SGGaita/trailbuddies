@@ -55,7 +55,8 @@ export default function ChildProgress() {
   const { items, titles } = lookups(lessons);
   const hard = hardItems(l.mastery).filter((h) => items.has(h.itemId));
   const recent = recentLessons(l.results, 10);
-  const max = Math.max(30, ...l.week);
+  // Scale to the week's busiest day (at least 5 min) so a light week still reads.
+  const max = Math.max(5, ...l.week);
   const today = new Date().getDay();
   const badges = l.badges.map((id) => builtInBadges.find((b) => b.id === id)).filter(Boolean);
   const titleOf = (r) =>
@@ -85,7 +86,7 @@ export default function ChildProgress() {
           display: "grid",
           gap: 1.75,
           gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-          alignItems: "start",
+          alignItems: "stretch",
         }}
       >
         <Card sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -96,7 +97,7 @@ export default function ChildProgress() {
           <Box
             role="img"
             aria-label={`Minutes: ${l.week.join(", ")}`}
-            sx={{ display: "flex", alignItems: "flex-end", gap: 1, height: 120 }}
+            sx={{ display: "flex", alignItems: "flex-end", gap: 1, flex: 1, minHeight: 140 }}
           >
             {l.week.map((m, i) => (
               <Box
@@ -114,10 +115,9 @@ export default function ChildProgress() {
                 <Box
                   sx={{
                     width: "100%",
-                    maxWidth: 34,
-                    height: `${Math.max(4, (m / max) * 90)}%`,
+                    height: `${Math.max(3, (m / max) * 100)}%`,
                     borderRadius: "6px 6px 2px 2px",
-                    bgcolor: i === 6 ? colors.sun.main : colors.leaf.main,
+                    bgcolor: i === 6 ? colors.leaf.main : colors.sky.main,
                   }}
                 />
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: "text.secondary" }}>
@@ -211,7 +211,28 @@ export default function ChildProgress() {
           })}
         </Card>
 
-        <Card sx={{ p: 2, display: "flex", flexDirection: "column", gap: 0.75 }}>
+        <Card sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography sx={{ fontWeight: 800 }}>{t("progress.badges")}</Typography>
+            <Typography sx={{ color: "text.secondary" }}>
+              {t("progress.badgesEarned", { n: badges.length })}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            {badges.length ? (
+              badges.map((b) => (
+                <Box key={b.id} title={b.name} role="img" aria-label={b.name}>
+                  <BadgeArt badge={b} size={52} />
+                </Box>
+              ))
+            ) : (
+              <Typography sx={{ color: "text.secondary" }}>{t("progress.badgesNone")}</Typography>
+            )}
+          </Box>
+        </Card>
+        <Card
+          sx={{ p: 2, display: "flex", flexDirection: "column", gap: 0.75, gridColumn: { md: "1 / -1" } }}
+        >
           <Typography sx={{ fontWeight: 800 }}>{t("progress.recent")}</Typography>
           {recent.length === 0 && (
             <Typography sx={{ color: "text.secondary" }}>{t("progress.recentNone")}</Typography>
@@ -250,24 +271,6 @@ export default function ChildProgress() {
                 </Box>
               </Box>
             ))}
-          </Box>
-        </Card>
-
-        <Card sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography sx={{ fontWeight: 800 }}>{t("progress.badges")}</Typography>
-            <Typography sx={{ color: "text.secondary" }}>{badges.length}</Typography>
-          </Box>
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {badges.length ? (
-              badges.map((b) => (
-                <Box key={b.id} title={b.name} role="img" aria-label={b.name}>
-                  <BadgeArt badge={b} size={52} />
-                </Box>
-              ))
-            ) : (
-              <Typography sx={{ color: "text.secondary" }}>{t("progress.badgesNone")}</Typography>
-            )}
           </Box>
         </Card>
       </Box>

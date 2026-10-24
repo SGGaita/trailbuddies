@@ -34,18 +34,25 @@ const navItem = (active, layout) => ({
 
 /**
  * Grown-up zone frame. Phone: bottom tabs. Tablet: icon rail. Desktop: full sidebar.
- * @param {{ title: string, sub?: string, back?: string, right?: React.ReactNode, active?: string, family?: { parent: string, plan: string }, wide?: boolean, children: React.ReactNode }} props
+ * `foot` is the screen's main action, pinned in a white bar at the bottom like the prototype's
+ * `pw-foot`; `footNote` is a short line under it (e.g. "Add 3 more cards"). `onBack` replaces
+ * the `back` link when going back is a step inside the screen.
+ * @param {{ title: string, sub?: string, back?: string, onBack?: () => void, right?: React.ReactNode, active?: string, family?: { parent: string, plan: string }, wide?: boolean, foot?: React.ReactNode, footNote?: React.ReactNode, children: React.ReactNode }} props
  */
 export default function FamilyShell({
   title,
   sub,
   back,
+  onBack,
   right,
   active = "/family",
   family,
   wide = false,
+  foot,
+  footNote,
   children,
 }) {
+  const column = { maxWidth: wide ? "none" : 720, mx: wide ? 0 : "auto" };
   return (
     <Box sx={{ minHeight: "100dvh", display: "flex", bgcolor: "background.default" }}>
       <Box
@@ -140,10 +147,9 @@ export default function FamilyShell({
             zIndex: 5,
           }}
         >
-          {back && (
+          {(back || onBack) && (
             <IconButton
-              component={Link}
-              href={back}
+              {...(onBack ? { onClick: onBack } : { component: Link, href: back })}
               aria-label="Back"
               sx={{ border: `1.5px solid ${colors.line}`, color: "text.primary" }}
             >
@@ -164,8 +170,9 @@ export default function FamilyShell({
         <Box component="main" sx={{ flex: 1, px: { xs: 2.25, sm: 4.25 }, py: 3 }}>
           <Box
             sx={{
-              maxWidth: wide ? 1100 : 720,
-              mx: "auto",
+              // Wide pages (home, progress) fill the main area like the prototype;
+              // form pages stay a readable centred column.
+              ...column,
               display: "flex",
               flexDirection: "column",
               gap: 1.75,
@@ -174,43 +181,79 @@ export default function FamilyShell({
             {children}
           </Box>
         </Box>
-        <Box
-          component="nav"
-          aria-label="Grown-up zone"
-          sx={{
-            display: { xs: "flex", sm: "none" },
-            position: "sticky",
-            bottom: 0,
-            bgcolor: "background.paper",
-            borderTop: `1px solid ${colors.line}`,
-            pt: 0.75,
-            pb: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
-          }}
-        >
-          {FAMILY_NAV.map((n) => (
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 5 }}>
+          {foot && (
             <Box
-              key={n.href}
-              component={Link}
-              href={n.href}
-              aria-current={active === n.href ? "page" : undefined}
+              data-testid="family-foot"
               sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 0.4,
-                fontSize: 12,
-                fontWeight: 800,
-                textDecoration: "none",
-                color: active === n.href ? "primary.main" : "text.secondary",
-                minHeight: 48,
-                justifyContent: "center",
+                bgcolor: "background.paper",
+                borderTop: `1px solid ${colors.line}`,
+                px: { xs: 2.25, sm: 4.25 },
+                py: 1.75,
               }}
             >
-              <Icon name={n.icon} size={24} />
-              {t(n.key)}
+              <Box
+                sx={{
+                  ...column,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: 1.25,
+                  "& > .MuiButton-root": {
+                    flex: { xs: 1, sm: "none" },
+                    minWidth: { sm: 220 },
+                    minHeight: 52,
+                  },
+                }}
+              >
+                {foot}
+                {footNote && (
+                  <Typography
+                    sx={{ width: "100%", textAlign: "right", color: "text.secondary", fontSize: 13 }}
+                  >
+                    {footNote}
+                  </Typography>
+                )}
+              </Box>
             </Box>
-          ))}
+          )}
+          <Box
+            component="nav"
+            aria-label="Grown-up zone"
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              bgcolor: "background.paper",
+              borderTop: `1px solid ${colors.line}`,
+              pt: 0.75,
+              pb: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+            }}
+          >
+            {FAMILY_NAV.map((n) => (
+              <Box
+                key={n.href}
+                component={Link}
+                href={n.href}
+                aria-current={active === n.href ? "page" : undefined}
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.4,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  color: active === n.href ? "primary.main" : "text.secondary",
+                  minHeight: 48,
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name={n.icon} size={24} />
+                {t(n.key)}
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -43,7 +43,15 @@ const theme = createTheme({
   components: {
     MuiButton: {
       defaultProps: { disableElevation: true },
-      styleOverrides: { root: { borderRadius: 16, minHeight: 48, paddingInline: 20, fontSize: "1rem" } },
+      styleOverrides: {
+        root: { borderRadius: 16, minHeight: 48, paddingInline: 20, fontSize: "1rem" },
+        // Prototype `.btn.ghost`: a solid 2px dark-green outline, not MUI's faded one.
+        outlinedPrimary: {
+          borderWidth: 2,
+          borderColor: colors.leaf.deep,
+          "&:hover": { borderWidth: 2, borderColor: colors.leaf.deep },
+        },
+      },
     },
     MuiCard: {
       defaultProps: { variant: "outlined" },

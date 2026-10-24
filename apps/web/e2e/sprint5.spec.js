@@ -44,7 +44,11 @@ async function answerStep(page) {
   if (await page.getByRole("heading", { level: 1, name: DONE }).isVisible()) return "done";
   const go = page.getByRole("button", { name: "Let's play!" });
   if (await go.isVisible()) return go.click().then(() => "intro");
-  if (await page.locator('[data-answer="yes"]').isVisible()) return page.locator('[data-answer="yes"]').click().then(() => "choice");
+  if (await page.locator('[data-answer="yes"]').isVisible())
+    return page
+      .locator('[data-answer="yes"]')
+      .click()
+      .then(() => "choice");
   if (await page.locator("[data-home]").first().isVisible()) {
     const n = await page.locator("[data-home]").count();
     for (let i = 0; i < n; i++) {
@@ -56,7 +60,9 @@ async function answerStep(page) {
     return "jigsaw";
   }
   if (await page.locator('[data-side="l"]').first().isVisible()) {
-    for (const id of await page.locator('[data-side="l"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-pair")))) {
+    for (const id of await page
+      .locator('[data-side="l"]')
+      .evaluateAll((els) => els.map((e) => e.getAttribute("data-pair")))) {
       await page.locator(`[data-side="l"][data-pair="${id}"]`).click();
       await page.locator(`[data-side="r"][data-pair="${id}"]`).click();
     }
@@ -95,7 +101,7 @@ async function libraryCard(page, query, name, group) {
   await page.getByLabel("Search pictures").fill(query);
   await page.getByRole("button", { name: query, exact: true }).click();
   await page.getByLabel("Name on the card").fill(name);
-  if (group) await page.getByLabel("Group, for sorting (optional)").fill(group);
+  if (group) await page.getByLabel("Group, for sorting games (optional)").fill(group);
   await page.getByRole("button", { name: "Save card" }).click();
 }
 
@@ -112,9 +118,17 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
   await page.getByLabel("Lesson name").fill("Our Pets");
   // A photo: cropped, resized and stripped of its GPS data on the device.
   await page.getByRole("button", { name: "Add a card" }).click();
-  await page.getByTestId("photo-input").setInputFiles({ name: "dog.jpg", mimeType: "image/jpeg", buffer: PHOTO });
+  await page
+    .getByTestId("photo-input")
+    .setInputFiles({ name: "dog.jpg", mimeType: "image/jpeg", buffer: PHOTO });
   await expect(page.getByText("Ready · location data removed")).toBeVisible();
   await page.getByLabel("Name on the card").fill("Simba the dog");
+  await page.getByLabel("A fun fact (optional)").fill("Simba loves chasing balls.");
+  await page.getByRole("button", { name: "home", exact: true }).click();
+  await expect(page.getByRole("button", { name: "home", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   // Hold to record (the test browser has a fake microphone).
   const mic = page.getByRole("button", { name: "Hold to record the name" });
   await mic.hover();
@@ -138,21 +152,27 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
             const bytes = new Uint8Array(await photo.blob.arrayBuffer());
             const text = new TextDecoder("latin1").decode(bytes);
             const img = await createImageBitmap(photo.blob);
-            resolve({ exif: text.includes("Exif"), w: img.width, h: img.height, voice: all.result.some((m) => m.kind === "voice") });
+            resolve({
+              exif: text.includes("Exif"),
+              w: img.width,
+              h: img.height,
+              voice: all.result.some((m) => m.kind === "voice"),
+            });
           };
         };
       }),
   );
   expect(stripped).toEqual({ exif: false, w: 600, h: 600, voice: true });
+  await expect(page.getByText("Your voice · home · Simba loves chasing balls.")).toBeVisible();
   await libraryCard(page, "giraffe", "Giraffe");
   await expect(page.getByText("Add 1 more card")).toBeVisible();
   await libraryCard(page, "cat", "Tom the cat");
   await expect(page.getByText("Your voice", { exact: false }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   // Sort needs groups (BLD-04 scenario 2).
   await expect(page.getByText("Give the cards at least 2 groups")).toBeVisible();
-  await page.getByRole("radio", { name: /Sort them/ }).click();
-  await expect(page.getByRole("button", { name: "Choose who gets it" })).toBeDisabled();
+  await page.getByRole("radio", { name: /Sort into groups/ }).click();
+  await expect(page.getByRole("button", { name: "Publish to …" })).toBeDisabled();
   await page.getByRole("radio", { name: /Learn the names/ }).click();
   await page.getByRole("button", { name: "Zawadi" }).click();
   await page.getByRole("button", { name: "Amani" }).click();
@@ -167,11 +187,21 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
   await expect(page.getByRole("heading", { level: 1, name: DONE })).toBeVisible();
   expect((await events(page)).length).toBe(before);
   await page.getByRole("link", { name: "Back to the builder" }).click();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
-  await page.getByRole("button", { name: "Give it to Zawadi & Amani" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
+  await page.getByRole("button", { name: "Publish to Zawadi & Amani" }).click();
   await expect(page.getByRole("heading", { name: "“Our Pets” is ready" })).toBeVisible();
   await page.getByRole("link", { name: "Done" }).click();
   await expect(page.getByRole("link", { name: /Our Pets/ })).toContainText("For Zawadi, Amani");
+  const pets = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("trailbuddies-family-v3")).state.lessons.find(
+      (l) => l.title === "Our Pets",
+    ),
+  );
+  expect(pets.cards[0]).toMatchObject({
+    label: "Simba the dog",
+    group: "home",
+    fact: "Simba loves chasing balls.",
+  });
 
   // Zawadi sees it on Family Island, glowing (MAP-06, BLD-08).
   await as(page, "Zawadi", { fresh: false });
@@ -184,7 +214,9 @@ test("Grace builds a lesson from photos, pictures and her voice, previews it and
   await playThrough(page);
   await page.getByRole("link", { name: "Back to Family Island" }).click();
   await expect(page.locator('[data-new="yes"]')).toHaveCount(1);
-  const done = (await events(page)).filter((e) => e.type === "lesson_completed" && e.data.lessonId.startsWith("custom-"));
+  const done = (await events(page)).filter(
+    (e) => e.type === "lesson_completed" && e.data.lessonId.startsWith("custom-"),
+  );
   expect(done).toHaveLength(1);
 });
 
@@ -197,10 +229,12 @@ test("editing a played lesson keeps progress; new cards appear next time (BLD-09
   await libraryCard(page, "sun", "Sun", "Outside");
   await libraryCard(page, "spoon", "Spoon", "Inside");
   await expect(page.getByText("Cards (8)")).toBeVisible();
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
-  await page.getByRole("button", { name: /Give it to/ }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
+  await page.getByRole("button", { name: /Publish to/ }).click();
   await page.getByRole("link", { name: "Done" }).click();
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("trailbuddies-family-v3")).state.lessons);
+  const saved = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("trailbuddies-family-v3")).state.lessons,
+  );
   const house = saved.find((l) => l.id === "demo-house");
   expect(house.cards.slice(0, 6).map((c) => c.id)).toEqual(["h1", "h2", "h3", "h4", "h5", "h6"]);
   expect(house.version).toBe(2);
@@ -209,23 +243,27 @@ test("editing a played lesson keeps progress; new cards appear next time (BLD-09
   await expect(page.locator('[data-new="no"]')).toHaveCount(1); // still played, stars kept
 });
 
-test("a picture puzzle: a jigsaw of the photo, then the grown-up's question (GAM-02)", async ({ page }, testInfo) => {
+test("a picture puzzle: a jigsaw of the photo, then the grown-up's question (GAM-02)", async ({
+  page,
+}, testInfo) => {
   await demo(page);
   await page.goto("/family/create/lesson");
   await passGate(page);
   await page.getByLabel("Lesson name").fill("Who's this?");
   await page.getByRole("button", { name: "Add a card" }).click();
-  await page.getByTestId("photo-input").setInputFiles({ name: "dog.jpg", mimeType: "image/jpeg", buffer: PHOTO });
+  await page
+    .getByTestId("photo-input")
+    .setInputFiles({ name: "dog.jpg", mimeType: "image/jpeg", buffer: PHOTO });
   await expect(page.getByText("Ready · location data removed")).toBeVisible();
   await page.getByLabel("Name on the card").fill("Simba");
   await page.getByRole("button", { name: "Save card" }).click();
   await libraryCard(page, "cat", "Tom");
   await libraryCard(page, "rabbit", "Bun");
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   await page.getByRole("radio", { name: /Picture puzzle/ }).click();
   await page.getByLabel("Question after the puzzle").fill("Who is this?");
   await page.getByRole("button", { name: "Zawadi" }).click();
-  await page.getByRole("button", { name: "Give it to Zawadi" }).click();
+  await page.getByRole("button", { name: "Publish to Zawadi" }).click();
   await page.getByRole("link", { name: "Done" }).click();
   await as(page, "Zawadi", { fresh: false });
   await page.goto("/play/more/island");
@@ -246,7 +284,10 @@ test("the parent dashboard and a child's progress (PAR-01, PAR-02)", async ({ pa
   await expect(page.getByText(/This week: \d+ min · \d+ lessons/).first()).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "s5-home");
-  await page.getByRole("link", { name: /Zawadi/ }).first().click();
+  await page
+    .getByRole("link", { name: /Zawadi/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/family\/progress\?learner=zawadi$/);
   await expect(page.getByText("Minutes this week")).toBeVisible();
   await expect(page.getByRole("progressbar", { name: /Numbers: \d+ of \d+/ })).toBeVisible();
@@ -255,6 +296,14 @@ test("the parent dashboard and a child's progress (PAR-01, PAR-02)", async ({ pa
   await expect(page.getByText(/Right first time 0 of 2 \(0%\)/)).toBeVisible();
   await expect(page.getByText(/Tip: practise it together/)).toBeVisible();
   await expect(page.locator("ol > li")).toHaveCount(6);
+  // Full width like the prototype; on two columns, Minutes and Subjects share a row height.
+  const [mins, subs] = await Promise.all(
+    ["Minutes this week", "Subjects"].map((h) =>
+      page.locator(".MuiCard-root").filter({ hasText: h }).first().boundingBox(),
+    ),
+  );
+  if (mins.x !== subs.x) expect(Math.abs(mins.height - subs.height)).toBeLessThan(2);
+  await expect(page.getByText(/^\d+ earned$/)).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "s5-progress");
 });
@@ -266,14 +315,19 @@ test("the time limit ends a lesson after the current activity; bedtime leaves on
   await demo(page);
   await page.goto("/family/settings");
   await passGate(page);
-  await page.getByRole("group", { name: "Screen-time limit" }).getByRole("button", { name: "20 min" }).click();
+  await page
+    .getByRole("group", { name: "Screen-time limit" })
+    .getByRole("button", { name: "20 min" })
+    .click();
   await as(page, "Zawadi", { fresh: false }); // 12 minutes today
   await page.goto("/play/lesson/counting-1-5/1");
   await page.getByRole("button", { name: "Let's play!" }).click();
   await page.clock.fastForward("10:00");
   await page.locator('[data-answer="yes"]').click(); // the activity finishes…
   await expect(page.getByRole("heading", { name: "Time for a rest!" })).toBeVisible({ timeout: 8000 }); // …then the break
-  const answered = (await events(page)).filter((e) => e.type === "item_answered" && e.data.lessonId === "counting-1-5-1");
+  const answered = (await events(page)).filter(
+    (e) => e.type === "item_answered" && e.data.lessonId === "counting-1-5-1",
+  );
   expect(answered.length).toBeGreaterThanOrEqual(1);
   await shot(page, testInfo, "s5-rest");
 });
@@ -295,7 +349,12 @@ test("at bedtime the buddy sleeps and only the grown-ups button works", async ({
 test("voice speed: slow makes all speech slower (PAR-05)", async ({ page }) => {
   await page.addInitScript(() => {
     window.__rates = [];
-    const fake = { speak: (u) => window.__rates.push(u.rate), cancel() {}, getVoices: () => [], addEventListener() {} };
+    const fake = {
+      speak: (u) => window.__rates.push(u.rate),
+      cancel() {},
+      getVoices: () => [],
+      addEventListener() {},
+    };
     Object.defineProperty(window, "speechSynthesis", { value: fake });
   });
   await as(page, "Zawadi");
@@ -340,9 +399,9 @@ test("offline: a photo card works at once, waits to upload, and uploads on Retry
   await page.getByRole("button", { name: "Save card" }).click();
   await libraryCard(page, "cat", "Tom");
   await libraryCard(page, "cow", "Daisy");
-  await page.getByRole("button", { name: "Next: choose how to play" }).click();
+  await page.getByRole("button", { name: "Next: choose a game" }).click();
   await page.getByRole("button", { name: "Wanjiru" }).click();
-  await page.getByRole("button", { name: "Give it to Wanjiru" }).click();
+  await page.getByRole("button", { name: "Publish to Wanjiru" }).click();
   await page.getByRole("link", { name: "Done" }).click();
   await expect(page.getByText("1 item waiting to upload")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Our dog", { exact: true }).first()).toBeVisible();

@@ -163,7 +163,7 @@ def lesson(**over):
         "title": "  Our   Pets ",
         "template": "learn",
         "cards": [
-            {"id": "k1", "label": "Simba the dog", "emoji": "🐕", "group": "Pets"},
+            {"id": "k1", "label": "Simba the dog", "emoji": "🐕", "group": "Pets", "fact": " Loves  balls. "},
             {"id": "k2", "label": "Daisy the cow", "photo": M1, "voice": M2, "group": "Farm"},
             {"id": "k3", "label": "Kuku the hen", "emoji": "🐔"},
         ],
@@ -181,6 +181,7 @@ def test_lessons_save_list_and_newest_edit_wins_keeping_card_ids(client, outbox,
     saved = r.json()
     assert saved["title"] == "Our Pets" and saved["question"] is None and saved["version"] == 1
     assert [c["id"] for c in saved["cards"]] == ["k1", "k2", "k3"]
+    assert saved["cards"][0]["fact"] == "Loves balls." and "fact" not in saved["cards"][2]
     # An older edit arriving late is kept aside, not applied.
     late = client.put(
         f"/families/{fid}/lessons/{L1}", json=lesson(title="Old", updated_at="2029-12-31T10:00:00Z")
@@ -206,6 +207,8 @@ def test_lesson_rules(client, outbox, storage):
     dup = lesson(cards=[{"id": "k1", "label": "a"}, {"id": "k1", "label": "b"}])
     assert client.put(f"/families/{fid}/lessons/{L1}", json=dup).status_code == 422
     assert client.put(f"/families/{fid}/lessons/not-a-ulid", json=lesson()).status_code == 422
+    long_fact = lesson(cards=[{"id": "k1", "label": "a", "fact": "x" * 121}])
+    assert client.put(f"/families/{fid}/lessons/{L1}", json=long_fact).status_code == 422
     too_many = lesson(cards=[{"id": f"c{i}", "label": f"Card {i}"} for i in range(13)])
     assert client.put(f"/families/{fid}/lessons/{L1}", json=too_many).status_code == 422
     puzzle = client.put(

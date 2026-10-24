@@ -97,6 +97,13 @@ test("parent home", async ({ page }, testInfo) => {
   for (const name of ["Zawadi", "Amani", "Joseph"])
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
   await noSideScroll(page);
+  // The content column fills the main area (no centred 1100px cap), like the prototype.
+  const fill = await page.locator("main").evaluate((m) => {
+    const cs = getComputedStyle(m);
+    const inner = m.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return m.firstElementChild.getBoundingClientRect().width / inner;
+  });
+  expect(fill).toBeGreaterThan(0.99);
   await shot(page, testInfo, "5-family");
   await page.getByRole("link", { name: "Settings" }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/family\/settings$/);
