@@ -79,6 +79,8 @@ export function buildPacks(content, { channel, release }) {
       schema: "pack/1",
       subject: { ...subject, units: subject.units.filter((e) => ships.some((s) => s.entry.id === e.id)) },
       units: ships.map((s) => s.unit),
+      // Which illustrations each unit may show (the image files ship with the web app).
+      assets: Object.fromEntries(ships.map((s) => [s.unit.id, s.assets])),
     };
     const hash = hashOf(body);
     const text = JSON.stringify({ ...body, release, hash });

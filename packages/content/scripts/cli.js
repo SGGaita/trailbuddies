@@ -5,12 +5,16 @@
 //     units:index                       rebuild src/units/all.js after adding a unit
 //     packs:build --channel <production|preview> --release <yyyy.mm.n> [--out dist/packs]
 //     assets:prompts <subject>/<unit>   write prompts/<unit>.md, the illustration briefs
+//     assets:import <folder>            bring generated pictures in (512 px WebP, status "reviewed")
+//     assets:approve <unit>             approve a unit's reviewed pictures after checking them
+//     unit:ready <unit> | unit:draft <unit>   publish a reviewed unit to children, or take it back
 //     audio:normalise [dir]             trim silence and normalise loudness (needs ffmpeg)
 import { writeFileSync, mkdirSync, renameSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadContent, buildPacks, promptSheet, walk } from "./packs.js";
+import { importImages, approveAssets, setUnitStatus } from "./assets.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkg = join(here, "..");
@@ -63,6 +67,28 @@ else if (cmd === "packs:build") {
   const file = join(dir, `${unitId}.md`);
   writeFileSync(file, promptSheet(found.unit));
   console.log(`✓ ${found.unit.items.length} briefs in ${file}`);
+} else if (cmd === "assets:import") {
+  if (!args[0]) fail("give the folder with the pictures, e.g. pnpm content assets:import C:\\Users\\you\\Downloads\\animals");
+  const sharp = (await import("sharp")).default;
+  const { done, unknown } = await importImages(args[0], { sharp });
+  done.forEach((d) => console.log(`  ✓ ${d}`));
+  unknown.forEach((n) => console.log(`  ? ${n}: no asset with that name (use the asset id, e.g. img-goat.png)`));
+  console.log(`✓ ${done.length} picture(s) imported. Check them with pnpm dev, then: pnpm content assets:approve <unit>`);
+} else if (cmd === "assets:approve") {
+  try {
+    const { approved, missing } = approveAssets(args[0]);
+    console.log(`✓ ${approved.length} picture(s) approved in ${args[0]}`);
+    if (missing.length) console.log(`  Still to make: ${missing.join(", ")}`);
+  } catch (e) {
+    fail(e.message);
+  }
+} else if (cmd === "unit:ready" || cmd === "unit:draft") {
+  try {
+    setUnitStatus(args[0], cmd === "unit:ready" ? "ready" : "draft");
+    console.log(`✓ ${args[0]} is now ${cmd === "unit:ready" ? "ready: children will see it in production" : "a draft again"}`);
+  } catch (e) {
+    fail(e.message);
+  }
 } else if (cmd === "audio:normalise") {
   const dir = args[0] || join(pkg, "audio");
   if (spawnSync("ffmpeg", ["-version"]).status !== 0)
@@ -86,7 +112,7 @@ else if (cmd === "packs:build") {
   }
   console.log(`✓ ${clips.length} clip(s) trimmed and normalised in ${dir}`);
 } else {
-  const help = readFileSync(join(here, "cli.js"), "utf8").split("\n").slice(1, 9);
+  const help = readFileSync(join(here, "cli.js"), "utf8").split("\n").slice(1, 11);
   console.log(help.map((l) => l.replace(/^\/\/ ?/, "")).join("\n"));
   process.exit(cmd ? 1 : 0);
 }

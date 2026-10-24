@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import { useMediaUrl } from "@/lib/media";
 import { hasArt } from "@/lib/itemArt";
 import ItemArt from "@/components/art/ItemArt";
+import UnitImage from "@/components/art/UnitImage";
 
 /**
  * A grown-up's photo (from this device, or a short-lived link to the family's copy).
@@ -35,11 +36,13 @@ export default function MediaImage({ id, alt = "", sx }) {
 }
 
 /**
- * An item's picture: a grown-up's photo when it has one, a drawn colour or shape, otherwise
+ * An item's picture: a grown-up's photo when it has one, an approved illustration, a drawn
+ * colour or shape, otherwise
  * its emoji (or its word when it has no picture at all, with `fallback`).
  */
 export function ItemFace({ it, sx, fallback = false }) {
   if (it.photo) return <MediaImage id={it.photo} sx={sx} />;
+  if (it.imageSrc) return <UnitImage it={it} />;
   if (hasArt(it)) return <ItemArt it={it} />;
   return it.emoji || (fallback ? it.label : null);
 }

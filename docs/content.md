@@ -22,6 +22,9 @@ Run these from the repo root:
 | `pnpm content validate --prod` | Also fails on any unapproved asset in a `ready` unit (CNT-03) |
 | `pnpm content units:index` | Rebuilds `src/units/all.js` after you add a unit file |
 | `pnpm content assets:prompts animals/farm-animals` | Writes `packages/content/prompts/farm-animals.md`, an illustration brief per item |
+| `pnpm content assets:import <folder>` | Brings generated pictures in: each file named `img-<item>.png` (or `<item>.png`) becomes a 512 px WebP at its asset path in `apps/web/public/art/units/`, marked `reviewed` |
+| `pnpm content assets:approve <unit>` | Approves a unit's reviewed pictures once you've checked them in the app |
+| `pnpm content unit:ready <unit>` | Publishes a reviewed unit to children (refuses if a picture isn't approved); `unit:draft` takes it back |
 | `pnpm content audio:normalise <folder>` | Trims silence and normalises loudness of every clip (needs ffmpeg) |
 | `pnpm content packs:build --channel production --release 2027.03.1` | Builds one pack per subject plus a manifest in `packages/content/dist/packs` |
 
@@ -33,8 +36,8 @@ Run these from the repo root:
    - every word is spelt the way children are taught
    - the pictures match the words
    - each lesson builds on the one before
-3. For units with illustrations (the animal units), generate the images from the prompt sheet. Save them at the paths in the `.assets.json`, then set each asset's `review_status` to `approved`.
-4. Set the unit's `status` to `ready` in both the unit file and `catalogue.json`. Then run `pnpm content validate --prod`.
+3. For units with illustrations (the animal units), generate the images from the prompt sheet and save each as `img-<item>.png`. Run `pnpm content assets:import <folder>` and look at them in the app; pictures marked `reviewed` show in development and previews only. Then run `pnpm content assets:approve <unit>`.
+4. Run `pnpm content unit:ready <unit>`, which sets the status in both the unit file and the catalogue. Then run `pnpm content validate --prod`.
 
 ## Publishing new lessons without an app release (CNT-02)
 

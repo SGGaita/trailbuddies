@@ -26,6 +26,63 @@ import moreShapes from "./shapes/more-shapes.json" with { type: "json" };
 import bigSmallShapes from "./shapes/big-small-shapes.json" with { type: "json" };
 import shapesAroundUs from "./shapes/shapes-around-us.json" with { type: "json" };
 import sidesAndCorners from "./shapes/sides-and-corners.json" with { type: "json" };
+import counting15Assets from "./numbers/counting-1-5.assets.json" with { type: "json" };
+import counting610Assets from "./numbers/counting-6-10.assets.json" with { type: "json" };
+import numberShapes010Assets from "./numbers/number-shapes-0-10.assets.json" with { type: "json" };
+import moreLessSameAssets from "./numbers/more-less-same.assets.json" with { type: "json" };
+import numbers1120Assets from "./numbers/numbers-11-20.assets.json" with { type: "json" };
+import lettersAEAssets from "./language/letters-a-e.assets.json" with { type: "json" };
+import letterSounds1Assets from "./language/letter-sounds-1.assets.json" with { type: "json" };
+import letterSounds2Assets from "./language/letter-sounds-2.assets.json" with { type: "json" };
+import upperLowerAssets from "./language/upper-lower.assets.json" with { type: "json" };
+import blendingCvcAssets from "./language/blending-cvc.assets.json" with { type: "json" };
+import whereAnimalsLiveAssets from "./animals/where-animals-live.assets.json" with { type: "json" };
+import animalSoundsAssets from "./animals/animal-sounds.assets.json" with { type: "json" };
+import domesticAnimalsAssets from "./animals/domestic-animals.assets.json" with { type: "json" };
+import farmAnimalsAssets from "./animals/farm-animals.assets.json" with { type: "json" };
+import animalPatternsAssets from "./animals/animal-patterns.assets.json" with { type: "json" };
+import wildAnimalsAssets from "./animals/wild-animals.assets.json" with { type: "json" };
+import redYellowBlueAssets from "./colours/red-yellow-blue.assets.json" with { type: "json" };
+import moreColoursAssets from "./colours/more-colours.assets.json" with { type: "json" };
+import coloursOfThingsAssets from "./colours/colours-of-things.assets.json" with { type: "json" };
+import sameDifferentColourAssets from "./colours/same-different-colour.assets.json" with { type: "json" };
+import mixingColoursAssets from "./colours/mixing-colours.assets.json" with { type: "json" };
+import circleSquareTriangleAssets from "./shapes/circle-square-triangle.assets.json" with { type: "json" };
+import moreShapesAssets from "./shapes/more-shapes.assets.json" with { type: "json" };
+import bigSmallShapesAssets from "./shapes/big-small-shapes.assets.json" with { type: "json" };
+import shapesAroundUsAssets from "./shapes/shapes-around-us.assets.json" with { type: "json" };
+import sidesAndCornersAssets from "./shapes/sides-and-corners.assets.json" with { type: "json" };
 
 /** @type {any[]} */
 export const ALL_UNITS = [counting15, counting610, numberShapes010, moreLessSame, numbers1120, lettersAE, letterSounds1, letterSounds2, upperLower, blendingCvc, whereAnimalsLive, animalSounds, domesticAnimals, farmAnimals, animalPatterns, wildAnimals, redYellowBlue, moreColours, coloursOfThings, sameDifferentColour, mixingColours, circleSquareTriangle, moreShapes, bigSmallShapes, shapesAroundUs, sidesAndCorners];
+
+/** Each unit's asset manifest (images and recordings with their review status), by unit id. */
+/** @type {Record<string, any>} */
+export const ALL_ASSETS = {
+  "counting-1-5": counting15Assets,
+  "counting-6-10": counting610Assets,
+  "number-shapes-0-10": numberShapes010Assets,
+  "more-less-same": moreLessSameAssets,
+  "numbers-11-20": numbers1120Assets,
+  "letters-a-e": lettersAEAssets,
+  "letter-sounds-1": letterSounds1Assets,
+  "letter-sounds-2": letterSounds2Assets,
+  "upper-lower": upperLowerAssets,
+  "blending-cvc": blendingCvcAssets,
+  "where-animals-live": whereAnimalsLiveAssets,
+  "animal-sounds": animalSoundsAssets,
+  "domestic-animals": domesticAnimalsAssets,
+  "farm-animals": farmAnimalsAssets,
+  "animal-patterns": animalPatternsAssets,
+  "wild-animals": wildAnimalsAssets,
+  "red-yellow-blue": redYellowBlueAssets,
+  "more-colours": moreColoursAssets,
+  "colours-of-things": coloursOfThingsAssets,
+  "same-different-colour": sameDifferentColourAssets,
+  "mixing-colours": mixingColoursAssets,
+  "circle-square-triangle": circleSquareTriangleAssets,
+  "more-shapes": moreShapesAssets,
+  "big-small-shapes": bigSmallShapesAssets,
+  "shapes-around-us": shapesAroundUsAssets,
+  "sides-and-corners": sidesAndCornersAssets,
+};
