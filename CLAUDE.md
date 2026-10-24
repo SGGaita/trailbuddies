@@ -9,7 +9,7 @@
 ## Where things go
 
 - No business logic in screens. Lesson generation, difficulty, mastery, rewards, badge rules and sync live in `packages/` and are pure JS with Jest tests.
-- Content is data: units are JSON validated against `packages/content-schema`.
+- Content is data: units are JSON validated against `packages/content-schema`. New units start as `draft` (shown in development and previews only) and become `ready` once reviewed; see `docs/content.md`. Run `pnpm content units:index` after adding a unit file.
 - Every screen works on every device its app supports (development plan §3.4): learner tablet/phone/web, parent phone/tablet/web, teacher web/tablet. The prototype in `prototype/` is the reference for layout and behaviour.
 
 ## Shapes and corners (match the prototype)
@@ -23,7 +23,7 @@
 
 ## Commands
 
-- `pnpm install` · `pnpm dev` (web on :3000) · `pnpm lint` · `pnpm test` · `pnpm content:validate`
+- `pnpm install` · `pnpm dev` (web on :3000) · `pnpm lint` · `pnpm test` · `pnpm content:validate` · `pnpm content <command>` (content CLI)
 - `pnpm --filter @trailbuddies/web build` then `pnpm --filter @trailbuddies/web e2e` (phone, tablet, desktop screenshots)
 - API: `cd services/api && pip install -r requirements-dev.txt && ruff check . && pytest`; migrations with `alembic revision --autogenerate` then review the file
 - Stack: `docker compose -f infra/docker-compose.yml --env-file infra/.env up -d`

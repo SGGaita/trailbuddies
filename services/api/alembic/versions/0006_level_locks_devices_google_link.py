@@ -23,6 +23,22 @@ def upgrade() -> None:
     with op.batch_alter_table("consents", schema=None) as batch_op:
         batch_op.add_column(sa.Column("region", sa.String(length=32), nullable=True))
 
+    # Consents already given were under the family's country's rules at the time.
+    regions = {
+        "KE": "kenya-dpa",
+        "UG": "uganda-dppa",
+        "TZ": "tanzania-pdpa",
+        "NG": "nigeria-ndpa",
+        "ZA": "south-africa-popia",
+        "GB": "uk-gdpr",
+        "US": "us-coppa",
+    }
+    cases = " ".join(f"WHEN '{c}' THEN '{r}'" for c, r in regions.items())
+    op.execute(
+        "UPDATE consents SET region = (SELECT CASE families.country "
+        f"{cases} ELSE 'strict' END FROM families WHERE families.id = consents.family_id)"
+    )
+
     with op.batch_alter_table("custom_lessons", schema=None) as batch_op:
         batch_op.add_column(sa.Column("options", sa.JSON(), nullable=False, server_default="{}"))
 

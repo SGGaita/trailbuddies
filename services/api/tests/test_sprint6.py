@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import update
 
 from app.devices import device_name
-from app.models import Family
+from app.models import Consent, Family
 from app.packs import publish
 from app.regions import region_for
 from app.settings import Settings
@@ -188,3 +188,12 @@ def test_published_packs_are_served_without_sign_in(client, storage, tmp_path):
     assert r.status_code == 200 and "immutable" in r.headers["cache-control"]
     assert client.get("/content/packs/..%2Fsecret.json").status_code == 404
     assert client.get("/content/manifest?channel=staging").status_code == 422
+
+
+def test_a_consent_saved_before_regions_still_asks_again_after_a_move(client, outbox, engine):
+    fam = family_with_consent(client, outbox)  # Kenya
+    with engine.begin() as db:
+        db.execute(update(Consent).values(region=None))
+    client.patch(f"/families/{fam['id']}", json={"country": "US", "updated_at": LATER})
+    r = client.put(f"/families/{fam['id']}/learners/{LEARNER}", json=learner_body())
+    assert r.status_code == 403

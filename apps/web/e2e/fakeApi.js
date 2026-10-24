@@ -200,7 +200,11 @@ export async function fakeApi(context, srv) {
       const f = srv.families[m[1]];
       if (Date.parse(body.updated_at) > Date.parse(f.updated_at)) {
         if (body.settings) f.settings = body.settings;
-        if (body.country) f.country = body.country.toUpperCase();
+        if (body.country) {
+          const c = srv.consents[f.id];
+          if (c && !c.region) c.region = countryRules(f.country).region;
+          f.country = body.country.toUpperCase();
+        }
         if (body.clear_pin) f.pin = null;
         else if (body.pin) f.pin = body.pin;
         f.updated_at = body.updated_at;

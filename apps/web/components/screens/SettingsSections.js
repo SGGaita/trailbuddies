@@ -265,7 +265,7 @@ export function SubjectLocks({ learner, disabled }) {
           value={levels[s.id] || "auto"}
           onChange={(e) => set(s.id, e.target.value)}
           disabled={disabled}
-          slotProps={{ htmlInput: { "aria-label": `${s.name} level for ${learner.name}` } }}
+          slotProps={{ select: { "aria-label": `${s.name} level for ${learner.name}` } }}
           sx={{ minWidth: 150, flex: { xs: "1 1 140px", sm: "0 0 auto" } }}
         >
           {DIFFICULTY_SETTINGS.map((d) => (

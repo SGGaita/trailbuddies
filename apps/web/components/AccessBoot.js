@@ -27,7 +27,21 @@ export default function AccessBoot() {
     return () => mq?.removeEventListener?.("change", apply);
   }, [calm]);
 
-  useEffect(() => onSpeech(setLine), []);
+  // A caption stays up long enough to read, even when the voice is quick (or missing).
+  useEffect(() => {
+    let since = 0;
+    let timer = null;
+    return onSpeech((text) => {
+      clearTimeout(timer);
+      if (text) {
+        since = Date.now();
+        setLine(text);
+      } else {
+        const left = Math.max(0, 2500 - (Date.now() - since));
+        timer = setTimeout(() => setLine(null), left);
+      }
+    });
+  }, []);
 
   if (!captions || !line) return null;
   return (

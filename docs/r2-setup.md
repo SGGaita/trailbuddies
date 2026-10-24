@@ -155,6 +155,10 @@ If something fails, see the troubleshooting table.
 | Photos stay "waiting to upload" | Open the browser's network tab. Usually it's CORS (above). Press **Retry** on the banner after fixing it. |
 | A photo is rejected for location data | Working as intended (SAF-02): the server refuses photos that still carry GPS data. The app strips it first, so this only happens with a modified client. |
 
+## Content packs
+
+The same bucket holds the published content packs under `packs/` (CNT-02). They contain only lesson content, never family data. Publish them from the API with `python -m app.packs publish <folder>`; see `docs/content.md`.
+
 ## Staging (when you add it)
 
 Make a second bucket, `trailbuddies-media-staging`, with its own token scoped to that bucket and its own CORS origins (the staging web address and Vercel preview URLs). Point the staging API's `TB_S3_BUCKET` and keys at it. Never let staging and production share a bucket or a token.

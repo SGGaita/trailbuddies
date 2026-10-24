@@ -191,6 +191,10 @@ def patch_family(
         if body.name is not None:
             fam.name = body.name.strip()
         if body.country is not None:
+            # Consents given before regions were recorded were under the old country's rules.
+            c = latest_consent(db, family_id)
+            if c and not c.region:
+                c.region = region_for(fam.country)
             fam.country = FamilyIn(name=fam.name, country=body.country).country
         if body.settings is not None:
             fam.settings = body.settings.model_dump()
