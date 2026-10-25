@@ -6,23 +6,31 @@ const PLACES = [
   {
     id: "numbers",
     file: "number-mountain",
-    spots: ["Number five", "Number six", "Number seven", "Number eight", "Number ten"],
+    spots: ["Number one", "Number two", "Number three"],
   },
   {
     id: "language",
     file: "letter-forest",
     spots: ["Letter A", "Letter B", "Letter C", "Small letter a", "Small letter b"],
   },
-  { id: "animals", file: "animal-safari", spots: ["Elephant", "Giraffe", "Zebra"] },
+  { id: "animals", file: "animal-safari", spots: ["Elephant", "Giraffe", "Zebra", "Sun"] },
+  {
+    id: "colours",
+    file: "colour-garden",
+    spots: ["Red", "Yellow", "Blue", "Green", "Purple", "Orange", "Rainbow"],
+  },
+  { id: "shapes", file: "shape-town", spots: ["Triangle", "Circle", "Square", "Rectangle", "Star"] },
 ];
+// Family & Class Island has art on the map only (it has no trail).
+const MAP_ONLY = ["family-island"];
 
 test("place art on the map", async ({ page }) => {
   watchErrors(page);
   await demo(page);
   await page.getByRole("button", { name: /Zawadi/ }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
-  for (const p of PLACES) {
-    const art = page.locator(`img[src="/art/${p.file}-sm.webp"]`).filter({ visible: true });
+  for (const file of [...PLACES.map((p) => p.file), ...MAP_ONLY]) {
+    const art = page.locator(`img[src="/art/${file}-sm.webp"]`).filter({ visible: true });
     await expect(art).toHaveCount(1);
     await expect.poll(() => art.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0);
   }
