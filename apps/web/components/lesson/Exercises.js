@@ -3,6 +3,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Icon from "@/components/Icon";
+import { SoundIcon } from "@/components/art/UiIcon";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { speak } from "@/lib/speech";
@@ -231,7 +232,7 @@ export function NameIt(props) {
       aria-label={`Hear ${o.label}`}
       sx={{ width: 48, height: 48, border: `3px solid ${colors.leaf.deep}`, color: colors.leaf.deep }}
     >
-      <Icon name="speak" size={22} />
+      <SoundIcon size={30} />
     </IconButton>
   );
   return (

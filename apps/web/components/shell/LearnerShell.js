@@ -8,6 +8,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { totalStars } from "@trailbuddies/domain";
 import Icon from "@/components/Icon";
+import UiIcon from "@/components/art/UiIcon";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import { Coin } from "@/components/Coins";
 
@@ -16,11 +17,11 @@ const STRIP = { goal: colors.leaf.main, rest: colors.sky.soft, missed: colors.sa
 
 export const LEARNER_NAV = [
   { href: "/play/map", icon: "map", key: "nav.map", phoneOnly: true },
-  { href: "/play/more/games", icon: "game", key: "nav.games" },
-  { href: "/play/more/shop", icon: "shop", key: "nav.shop" },
-  { href: "/play/more/room", icon: "room", key: "nav.room" },
-  { href: "/play/more/badges", icon: "badge", key: "nav.badges" },
-  { href: "/play/more/wishes", icon: "wish", key: "nav.wishes" },
+  { href: "/play/more/games", icon: "game", art: "games", key: "nav.games" },
+  { href: "/play/more/shop", icon: "shop", art: "shop", key: "nav.shop" },
+  { href: "/play/more/room", icon: "room", art: "room", key: "nav.room" },
+  { href: "/play/more/badges", icon: "badge", art: "badges", key: "nav.badges" },
+  { href: "/play/more/wishes", icon: "wish", art: "wishes", key: "nav.wishes" },
 ];
 
 /**
@@ -236,7 +237,11 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
                   bgcolor: active === n.href ? colors.leaf.soft : "background.paper",
                 }}
               >
-                <Icon name={n.icon} size={30} />
+                {n.art ? (
+                  <UiIcon name={n.art} on={active === n.href} size={40} />
+                ) : (
+                  <Icon name={n.icon} size={30} />
+                )}
                 {t(n.key)}
               </Box>
             ))}
@@ -279,7 +284,11 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
                 justifyContent: "center",
               }}
             >
-              <Icon name={n.icon} size={26} />
+              {n.art ? (
+                <UiIcon name={n.art} on={active === n.href} size={30} />
+              ) : (
+                <Icon name={n.icon} size={26} />
+              )}
               {n.key === "nav.room" ? "Room" : t(n.key)}
             </Box>
           ))}
