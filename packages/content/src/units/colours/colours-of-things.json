@@ -4,7 +4,7 @@
   "subject": "colours",
   "title": "Colours of things",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "Name the colour of everyday things around us.",
   "requires": [
     "red-yellow-blue"

@@ -4,7 +4,7 @@
   "subject": "shapes",
   "title": "Big and small shapes",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "The same shape can be big or small.",
   "requires": [
     "circle-square-triangle"

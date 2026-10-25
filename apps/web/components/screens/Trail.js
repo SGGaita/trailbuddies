@@ -19,7 +19,7 @@ import { playSound } from "@/lib/sounds";
 import { readMemory, writeMemory } from "@/lib/memory";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
-import NumberMountain, { NUMBER_MOUNTAIN_SRC } from "@/components/art/NumberMountain";
+import SubjectArt, { SUBJECT_ART, artWidth } from "@/components/art/SubjectArt";
 import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
@@ -138,7 +138,7 @@ export default function Trail({ subjectId }) {
   if (rest) return <RestScreen reason={rest} learner={learner} />;
 
   const sp = subjectProgress(units, learner.progress);
-  const mountain = subjectId === "numbers";
+  const art = SUBJECT_ART[subjectId];
   const unit = currentUnit(units, learner.progress, start) || units[0];
   const content = getUnit(unit.id);
 
@@ -218,10 +218,15 @@ export default function Trail({ subjectId }) {
               </Button>
             </Box>
           )}
-          {mountain && (
-            <Box sx={{ maxWidth: { xs: 420, sm: 520 }, mx: "auto", pt: { xs: 1.5, sm: 2.5 } }}>
-              <NumberMountain peaks band={learner.band} buddy={learner.buddy} />
-            </Box>
+          {art && (
+            <SubjectArt
+              id={subjectId}
+              spots
+              band={learner.band}
+              buddy={learner.buddy}
+              width={{ xs: artWidth(subjectId, 200), sm: artWidth(subjectId, 260) }}
+              sx={{ mx: "auto", mt: { xs: 1.5, sm: 2.5 } }}
+            />
           )}
           <Box
             sx={{
@@ -230,12 +235,12 @@ export default function Trail({ subjectId }) {
               maxWidth: W,
               mx: "auto",
               aspectRatio: `${W} / ${trail.height}`,
-              ...(mountain && {
+              ...(art && {
                 "&::before": {
                   content: '""',
                   position: "absolute",
                   inset: 0,
-                  backgroundImage: `url(${NUMBER_MOUNTAIN_SRC})`,
+                  backgroundImage: `url(${art.src})`,
                   backgroundRepeat: "repeat-y",
                   backgroundSize: "100% auto",
                   backgroundPosition: "center 40px",
@@ -329,7 +334,10 @@ export default function Trail({ subjectId }) {
                 >
                   {node.kind === "trophy" ? "🏆" : node.kind === "review" ? "🔁" : node.n}
                   {node.stars ? (
-                    <Box component="small" sx={{ fontSize: 11, color: node.bronze ? BRONZE : colors.sun.deep }}>
+                    <Box
+                      component="small"
+                      sx={{ fontSize: 11, color: node.bronze ? BRONZE : colors.sun.deep }}
+                    >
                       {"★".repeat(node.stars)}
                     </Box>
                   ) : node.state === "next" ? (
@@ -397,11 +405,7 @@ export default function Trail({ subjectId }) {
           <Button variant="contained" onClick={goNext}>
             {t("trail.next")}
           </Button>
-          <Button
-            variant="outlined"
-            sx={{ borderWidth: 2 }}
-            onClick={goPlace}
-          >
+          <Button variant="outlined" sx={{ borderWidth: 2 }} onClick={goPlace}>
             {t("trail.showWhatYouKnow")}
           </Button>
           <Box sx={{ flex: 1 }} />

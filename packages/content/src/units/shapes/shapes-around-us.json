@@ -4,7 +4,7 @@
   "subject": "shapes",
   "title": "Shapes around us",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Find circles, rectangles, triangles and more in the world around us.",
   "requires": [
     "more-shapes"

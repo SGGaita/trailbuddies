@@ -4,7 +4,7 @@
   "subject": "shapes",
   "title": "More shapes",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "Rectangles, stars, hearts, ovals and diamonds.",
   "requires": [
     "circle-square-triangle"

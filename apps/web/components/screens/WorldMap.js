@@ -25,7 +25,7 @@ import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
 import Island from "@/components/art/Island";
-import NumberMountain from "@/components/art/NumberMountain";
+import SubjectArt, { SUBJECT_ART, artWidth } from "@/components/art/SubjectArt";
 import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
@@ -187,8 +187,8 @@ export default function WorldMap() {
                     <Chip size="small" label="Favourite" color="secondary" />
                   ) : null}
                 </Box>
-                {s.id === "numbers" ? (
-                  <NumberMountain small width="min(240px, 100%)" />
+                {SUBJECT_ART[s.id] ? (
+                  <SubjectArt id={s.id} small width={artWidth(s.id, 120)} />
                 ) : (
                   <Island kind={s.island} width="min(180px, 100%)" height={120} />
                 )}
@@ -310,8 +310,8 @@ export default function WorldMap() {
               opacity: first && s.id !== "numbers" ? 0.55 : 1,
             }}
           >
-            {s.id === "numbers" ? (
-              <NumberMountain small width={110} />
+            {SUBJECT_ART[s.id] ? (
+              <SubjectArt id={s.id} small width={110} height={72} />
             ) : (
               <Island kind={s.island} width={88} height={62} />
             )}

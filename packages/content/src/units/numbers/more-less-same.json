@@ -4,7 +4,7 @@
   "subject": "numbers",
   "title": "More, less, same",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "Compare two groups: which has more, which has fewer, and when they are the same.",
   "requires": [
     "counting-1-5"

@@ -4,7 +4,7 @@
   "subject": "language",
   "title": "Blending c-a-t",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Blend three sounds into a word: c-a-t, cat!",
   "requires": [
     "letter-sounds-1"

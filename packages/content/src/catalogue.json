@@ -25,21 +25,21 @@
           "id": "number-shapes-0-10",
           "title": "Number shapes 0 to 10",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 5
         },
         {
           "id": "more-less-same",
           "title": "More, less, same",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 5
         },
         {
           "id": "numbers-11-20",
           "title": "Numbers 11 to 20",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 6
         }
       ]
@@ -61,28 +61,28 @@
           "id": "letter-sounds-1",
           "title": "Letter sounds: s a t p i n",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 6
         },
         {
           "id": "letter-sounds-2",
           "title": "Letter sounds: m d g o c k",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 6
         },
         {
           "id": "upper-lower",
           "title": "Big and small letters",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "blending-cvc",
           "title": "Blending c-a-t",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 5
         }
       ]
@@ -147,35 +147,35 @@
           "id": "red-yellow-blue",
           "title": "Red, yellow, blue",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "more-colours",
           "title": "More colours",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 5
         },
         {
           "id": "colours-of-things",
           "title": "Colours of things",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "same-different-colour",
           "title": "Same and different",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "mixing-colours",
           "title": "Mixing colours",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         }
       ]
@@ -190,35 +190,35 @@
           "id": "circle-square-triangle",
           "title": "Circle, square, triangle",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "more-shapes",
           "title": "More shapes",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "big-small-shapes",
           "title": "Big and small shapes",
           "band": "seedling",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         },
         {
           "id": "shapes-around-us",
           "title": "Shapes around us",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 5
         },
         {
           "id": "sides-and-corners",
           "title": "Sides and corners",
           "band": "sprout",
-          "status": "draft",
+          "status": "ready",
           "lessons": 4
         }
       ]

@@ -43,6 +43,10 @@ const EXTRAS = [
   "/sounds/done.wav",
   "/art/number-mountain.webp",
   "/art/number-mountain-sm.webp",
+  "/art/letter-forest.webp",
+  "/art/letter-forest-sm.webp",
+  "/art/animal-safari.webp",
+  "/art/animal-safari-sm.webp",
   // Approved unit illustrations that are in this build, so lessons look right offline.
   ...Object.values(ALL_ASSETS)
     .flatMap((m) => m.assets)

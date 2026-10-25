@@ -4,7 +4,7 @@
   "subject": "colours",
   "title": "Same and different",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "Spot the same colour, and the one that's different.",
   "requires": [
     "more-colours"

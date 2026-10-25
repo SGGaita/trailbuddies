@@ -4,7 +4,7 @@
   "subject": "numbers",
   "title": "Numbers 11 to 20",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Teen numbers as ten and some more, up to twenty.",
   "requires": [
     "counting-6-10"

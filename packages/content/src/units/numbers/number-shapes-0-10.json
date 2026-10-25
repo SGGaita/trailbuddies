@@ -4,7 +4,7 @@
   "subject": "numbers",
   "title": "Number shapes 0 to 10",
   "band": "seedling",
-  "status": "draft",
+  "status": "ready",
   "summary": "Zero, and seeing small numbers at a glance: dice dots and ten frames up to 10.",
   "requires": [
     "counting-6-10"

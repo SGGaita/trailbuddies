@@ -4,7 +4,7 @@
   "subject": "shapes",
   "title": "Sides and corners",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Count the sides and corners of a shape.",
   "requires": [
     "more-shapes"

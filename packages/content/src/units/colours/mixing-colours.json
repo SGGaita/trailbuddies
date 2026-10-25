@@ -4,7 +4,7 @@
   "subject": "colours",
   "title": "Mixing colours",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Mix two colours to make a new one: red and yellow make orange.",
   "requires": [
     "more-colours"

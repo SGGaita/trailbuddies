@@ -4,7 +4,7 @@
   "subject": "language",
   "title": "Letter sounds: m d g o c k",
   "band": "sprout",
-  "status": "draft",
+  "status": "ready",
   "summary": "Six more letter sounds and the words they help us read.",
   "requires": [
     "letter-sounds-1"
