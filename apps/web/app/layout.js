@@ -30,9 +30,12 @@ export const metadata = {
   applicationName: "Trailbuddies",
   appleWebApp: { capable: true, title: "Trailbuddies", statusBarStyle: "default" },
   icons: {
+    // Browser tab: the round Numbers Mountain icon. Installed app: the rounded-square one.
     icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-48.png", sizes: "48x48", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
     ],
     apple: "/icons/apple-touch-icon.png",
   },

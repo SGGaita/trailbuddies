@@ -132,5 +132,10 @@ test("service worker and manifest are served", async ({ request }) => {
   expect(sw.ok()).toBeTruthy();
   expect(await sw.text()).toContain("/play/trail/numbers");
   const m = await request.get("/manifest.webmanifest");
-  expect((await m.json()).name).toBe("Trailbuddies");
+  const manifest = await m.json();
+  expect(manifest.name).toBe("Trailbuddies");
+  // App icons: every size the manifest lists is served, including the maskable one.
+  expect(manifest.icons.map((i) => i.purpose || "any")).toContain("maskable");
+  for (const icon of [...manifest.icons, { src: "/favicon.ico" }, { src: "/icons/apple-touch-icon.png" }])
+    expect((await request.get(icon.src)).ok(), icon.src).toBeTruthy();
 });
