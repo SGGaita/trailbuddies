@@ -26,9 +26,18 @@ test("ready units always play; drafts only outside production", () => {
   expect(playableUnits("numbers", { drafts: false }).map((u) => u.id)).toEqual([
     "counting-1-5",
     "counting-6-10",
+    "number-shapes-0-10",
+    "more-less-same",
+    "numbers-11-20",
   ]);
   expect(playableUnits("animals", { drafts: false }).map((u) => u.id)).toEqual(["where-animals-live"]);
-  expect(playableUnits("colours", { drafts: false })).toEqual([]);
+  expect(playableUnits("colours", { drafts: false }).map((u) => u.id)).toEqual([
+    "red-yellow-blue",
+    "more-colours",
+    "colours-of-things",
+    "same-different-colour",
+    "mixing-colours",
+  ]);
   // Tests run as development: drafts play, in catalogue order (CNT-04).
   expect(SHOW_DRAFTS).toBe(true);
   expect(getUnit("farm-animals").status).toBe("draft");
