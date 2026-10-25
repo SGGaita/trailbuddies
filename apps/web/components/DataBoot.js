@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useFamily } from "@/lib/store";
 import { refreshAccount, syncNow } from "@/lib/account";
 import { installStoredPacks, syncPacks } from "@/lib/packs";
+import { startErrorReports } from "@/lib/errors";
+import { APP_VERSION } from "@/lib/version";
 
 const EVERY_MS = 60_000;
 
@@ -15,6 +17,11 @@ export default function DataBoot() {
   useEffect(() => {
     let timer = null;
     const boot = async () => {
+      startErrorReports();
+      const st = useFamily.getState();
+      // OFF-06: a family that used an earlier version sees "What's new"; a new one doesn't.
+      if (!st.seenVersion) st.markSeen(st.mode ? "0.6.0" : APP_VERSION);
+      st.dropOverdue();
       // Downloaded content packs first, so every screen renders with them (OFF-02).
       await installStoredPacks();
       const s = useFamily.getState();

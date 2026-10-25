@@ -202,3 +202,4 @@ export function searchLibrary(query) {
   const byTag = all.filter((p) => !byName.includes(p) && p.tags.some((t) => t.startsWith(q)));
   return [...byName, ...byTag];
 }
+export { LEGAL } from "./legal/en.js";

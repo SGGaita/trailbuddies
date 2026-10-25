@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session as DbSession
 from ..db import get_session, utcnow
 from ..ids import is_ulid
 from ..models import CustomLesson, Learner, User
+from ..privacy import claim_media, media_ids, release_media
 from ..schemas import CustomLessonIn
 from ..security import aware, current_user, membership
 from .families import keep, require_consent
@@ -90,6 +91,7 @@ def put_lesson(
         for k, v in fields.items():
             setattr(c, k, v)
         c.updated_at = body.updated_at
+    claim_media(db, family_id, media_ids(c.cards))
     db.commit()
     return lesson_out(c)
 
@@ -104,5 +106,9 @@ def delete_lesson(
     if not c or c.family_id != family_id:
         raise HTTPException(404, "Lesson not found")
     keep(db, family_id, "lesson", lesson_id, lesson_out(c), "deleted")
+    used = media_ids(c.cards)
     db.delete(c)
+    db.flush()
+    # SAF-05: its photos and clips are deleted 30 days later unless another lesson uses them.
+    release_media(db, family_id, used)
     db.commit()

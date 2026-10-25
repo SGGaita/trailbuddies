@@ -1,6 +1,7 @@
 "use client";
 import { createClient, ApiError } from "@trailbuddies/api-client";
 import { createSyncer, newer } from "@trailbuddies/sync";
+import { consentState } from "@trailbuddies/domain";
 import { useFamily, onLocalChange, dbName } from "./store";
 import { familyDb, outbox, cursor, saveEvents, loadEvents, pendingCount, forget } from "./db";
 import { uploadMedia, refreshUploadStatus } from "./media";
@@ -24,6 +25,7 @@ export const learnerToApi = (l) => ({
   difficulty: l.difficulty || "auto",
   levels: l.levels || {},
   wish: l.wish || null,
+  removing_at: l.removing_at || null,
   updated_at: l.updated_at,
 });
 export const learnerFromApi = (a) => ({
@@ -38,6 +40,7 @@ export const learnerFromApi = (a) => ({
   difficulty: a.difficulty,
   levels: a.levels || {},
   wish: a.wish ?? null,
+  removing_at: a.removing_at || null,
   updated_at: a.updated_at,
 });
 
@@ -108,8 +111,8 @@ async function pushLessons() {
 function applyMe(me) {
   const s = get();
   const fam = me.families[0] || null;
-  const local = new Map(s.learners.map((l) => [l.id, l]));
-  const learners = (fam?.learners || [])
+  const local = new Map([...s.learners, ...s.removing].map((l) => [l.id, l]));
+  const all = (fam?.learners || [])
     .filter((a) => !s.removed.includes(a.id))
     .map((a) => {
       const remote = learnerFromApi(a);
@@ -118,7 +121,10 @@ function applyMe(me) {
       return mine?.dirty ? newer(remote, mine) : remote;
     });
   // Learners made on this device that the server hasn't seen yet.
-  for (const l of local.values()) if (l.dirty) learners.push(l);
+  for (const l of local.values()) if (l.dirty) all.push(l);
+  // FAM-03: learners being removed stay out of the children's screens for the undo window.
+  const learners = all.filter((l) => !l.removing_at);
+  const removing = all.filter((l) => l.removing_at);
   const keepLocalFamily = s.family?.dirty && fam && newer(fam, s.family) === s.family;
   const family = fam
     ? keepLocalFamily
@@ -130,6 +136,9 @@ function applyMe(me) {
           device_limit: fam.device_limit,
           region: fam.region,
           country: fam.country,
+          flags: fam.flags || {},
+          cohorts: fam.cohorts || [],
+          deletion: fam.deletion || null,
         }
       : {
           id: fam.id,
@@ -142,6 +151,9 @@ function applyMe(me) {
           role: fam.role,
           pin: fam.pin,
           consent: fam.consent,
+          flags: fam.flags || {},
+          cohorts: fam.cohorts || [],
+          deletion: fam.deletion || null,
           updated_at: fam.updated_at,
           parent: me.user.name || "",
         }
@@ -152,6 +164,7 @@ function applyMe(me) {
     family: family && { ...family, parent: me.user.name || "" },
     settings: keepLocalFamily ? s.settings : fam ? fam.settings : s.settings,
     learners,
+    removing,
     waiting: [],
     activeId: learners.some((l) => l.id === s.activeId) ? s.activeId : null,
   });
@@ -240,7 +253,7 @@ async function pushProfiles() {
     }
     useFamily.setState((st) => ({ removed: st.removed.filter((x) => x !== id) }));
   }
-  for (const l of s.learners.filter((x) => x.dirty && !x.overLimit)) {
+  for (const l of [...s.learners, ...s.removing].filter((x) => x.dirty && !x.overLimit)) {
     try {
       await api.putLearner(fam.id, l.id, learnerToApi(l));
     } catch (e) {
@@ -253,11 +266,8 @@ async function pushProfiles() {
       }
       throw e;
     }
-    useFamily.setState((st) => ({
-      learners: st.learners.map((x) =>
-        x.id === l.id && x.updated_at === l.updated_at ? { ...x, dirty: false } : x,
-      ),
-    }));
+    const clean = (x) => (x.id === l.id && x.updated_at === l.updated_at ? { ...x, dirty: false } : x);
+    useFamily.setState((st) => ({ learners: st.learners.map(clean), removing: st.removing.map(clean) }));
   }
 }
 
@@ -269,6 +279,14 @@ let queued = null;
 export async function syncNow() {
   const s = get();
   if (s.mode !== "account" || !s.family?.id || !s.family.consent) return;
+  // ONB-06b: nothing about the children leaves the device until a signed form is approved.
+  if (consentState(s.family.consent) !== "approved") {
+    await refreshAccount();
+    if (consentState(get().family?.consent) !== "approved") {
+      useFamily.setState({ sync: { ...get().sync, state: "waiting-consent" } });
+      return;
+    }
+  }
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
     useFamily.setState({ sync: { ...s.sync, state: "offline" } });
     return;
@@ -344,3 +362,18 @@ export async function changeCountry(country) {
 export const listDevices = () => api.devices(get().family.id);
 /** FAM-08: sign out one device. */
 export const signOutDevice = (id) => api.signOutDevice(get().family.id, id);
+
+/** SAF-03: build the export and email the link; returns it (also listed in Settings). */
+export const requestExport = () => api.requestExport(get().family.id);
+export const listExports = () => api.exports(get().family.id);
+
+/** SAF-04: email the owner a link to confirm deleting the family. */
+export const requestDeletion = () => api.requestDeletion(get().family.id);
+/** SAF-04: keep the family after all. */
+export async function undoDeletion() {
+  await api.undoDeletion(get().family.id);
+  await refreshAccount();
+}
+
+/** Closed beta: grown-ups' feedback (names of children are replaced on the server too). */
+export const sendFeedback = (body) => api.sendFeedback(get().family.id, body);

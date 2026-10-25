@@ -153,6 +153,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "name",
       "outfit",
       "placement",
+      "removing_at",
       "updated_at",
       "wish",
     ].sort(),

@@ -4,7 +4,18 @@ profiles owned by a family (concept report §4.2)."""
 
 from datetime import datetime
 
-from sqlalchemy import JSON, BigInteger, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base, Timestamped, utcnow
@@ -42,6 +53,18 @@ class Family(Timestamped, Base):
         "The PIN itself never reaches the server.",
     )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    cohorts: Mapped[list] = mapped_column(
+        JSON, default=list, server_default="[]", doc="feature-flag groups, e.g. ['beta'] (OPS-06)"
+    )
+    active_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utcnow,
+        server_default=func.now(),
+        doc="last time a grown-up opened the app (SAF-05 inactivity rule)",
+    )
+    retention_notice: Mapped[str | None] = mapped_column(
+        String(8), nullable=True, doc="inactivity warning already sent: first (23 months) or final"
+    )
     members: Mapped[list["FamilyMember"]] = relationship(
         back_populates="family", cascade="all, delete-orphan"
     )
@@ -85,6 +108,9 @@ class Learner(Timestamped, Base):
     wish: Mapped[str | None] = mapped_column(
         String(32), nullable=True, doc="shop item the learner is saving for"
     )
+    removing_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="removal asked for; deleted 7 days later (FAM-03)"
+    )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     family: Mapped[Family] = relationship(back_populates="learners")
 
@@ -106,6 +132,16 @@ class Consent(Base):
     region: Mapped[str | None] = mapped_column(
         String(32), nullable=True, doc="privacy rules the consent was given under (ONB-05)"
     )
+    status: Mapped[str] = mapped_column(
+        String(12),
+        default="approved",
+        server_default="approved",
+        doc="approved, or pending until a signed US form is reviewed (ONB-06b)",
+    )
+    evidence: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, doc="signed form: parent's name, typed signature, relationship, date"
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     given_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -198,6 +234,12 @@ class MediaAsset(Base):
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    released_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+        doc="no lesson uses it any more; deleted from storage 30 days later (SAF-05)",
+    )
 
 
 class CustomLesson(Base):
@@ -220,3 +262,83 @@ class CustomLesson(Base):
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class FamilyDeletion(Base):
+    """SAF-04: a request to delete the whole family. Confirmed from a link sent by email, then
+    kept for a 7-day undo window before everything is deleted."""
+
+    __tablename__ = "family_deletions"
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), primary_key=True)
+    requested_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    token_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    purge_after: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+
+
+class DataExport(Base):
+    """SAF-03: a ZIP of everything held about a family, downloadable for 7 days."""
+
+    __tablename__ = "data_exports"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    requested_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    status: Mapped[str] = mapped_column(String(12), default="ready", doc="ready or failed")
+    bytes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class FeatureFlag(Base):
+    """OPS-06: a feature that ships dark and is turned on for everyone, some cohorts or some families."""
+
+    __tablename__ = "feature_flags"
+    key: Mapped[str] = mapped_column(String(48), primary_key=True)
+    description: Mapped[str] = mapped_column(String(200), default="")
+    everyone: Mapped[bool] = mapped_column(Boolean, default=False)
+    cohorts: Mapped[list] = mapped_column(JSON, default=list)
+    families: Mapped[list] = mapped_column(JSON, default=list)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class BetaCode(Base):
+    """An invite code for the closed beta. Using it puts the family in the code's cohort."""
+
+    __tablename__ = "beta_codes"
+    code: Mapped[str] = mapped_column(String(16), primary_key=True)
+    cohort: Mapped[str] = mapped_column(String(32), default="beta")
+    max_uses: Mapped[int] = mapped_column(Integer, default=1)
+    uses: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[str] = mapped_column(String(120), default="", doc="who it was for; no child data")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Feedback(Base):
+    """Feedback from a grown-up (beta). Children's names are replaced before it is stored."""
+
+    __tablename__ = "feedback"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(String(12), doc="idea, problem or praise")
+    message: Mapped[str] = mapped_column(Text)
+    screen: Mapped[str] = mapped_column(String(80), default="")
+    version: Mapped[str] = mapped_column(String(32), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class ErrorReport(Base):
+    """SAF-07 option 2: our own error log, instead of Sentry. Scrubbed, kept 30 days."""
+
+    __tablename__ = "error_reports"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source: Mapped[str] = mapped_column(String(8), doc="web or api")
+    release: Mapped[str] = mapped_column(String(32), default="")
+    screen: Mapped[str] = mapped_column(String(80), default="")
+    message: Mapped[str] = mapped_column(String(500))
+    stack: Mapped[str] = mapped_column(Text, default="")
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

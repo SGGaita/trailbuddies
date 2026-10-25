@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useEffect, useMemo, useState } from "react";
 import { ulid } from "@trailbuddies/sync";
-import { normaliseLesson, nextVersion } from "@trailbuddies/domain";
+import { normaliseLesson, nextVersion, overdueRemovals, flagOn, DEMO_FLAGS } from "@trailbuddies/domain";
 import { seedFamily } from "./seed";
 import { learnerView } from "./learner";
 import { familyDb, loadEvents, saveEvents } from "./db";
@@ -50,6 +50,8 @@ const empty = () => ({
   activeId: /** @type {string | null} */ (null),
   /** Learners removed on this device that the server still has. */
   removed: /** @type {string[]} */ ([]),
+  /** Learners being removed: kept for a 7-day undo (FAM-03), hidden from the children. */
+  removing: /** @type {any[]} */ ([]),
   /** Custom lessons from the Lesson Builder (BLD-01..09). */
   lessons: /** @type {any[]} */ ([]),
   /** Lessons deleted on this device that the server still has. */
@@ -84,6 +86,7 @@ export const useFamily = create(
       /** Content packs on this device (OFF-02): see lib/packs.js. */
       packs: { release: null, cached: {}, ready: [], noRoom: [], waiting: false, unused: [], checkedAt: 0 },
       gateUntil: 0,
+      seenVersion: /** @type {string | null} */ (null),
 
       /** Load the demo family into its own database (never uploaded). */
       startDemo: async () => {
@@ -169,6 +172,35 @@ export const useFamily = create(
         }));
         afterChange();
       },
+      /** FAM-03: remove a learner after a 7-day undo window. @param {string} id */
+      scheduleRemoval: (id) => {
+        const l = get().learners.find((x) => x.id === id);
+        if (!l) return;
+        const at = now();
+        set((s) => ({
+          learners: s.learners.filter((x) => x.id !== id),
+          removing: [...s.removing, { ...l, removing_at: at, updated_at: at, dirty: true }],
+          activeId: s.activeId === id ? null : s.activeId,
+        }));
+        afterChange();
+      },
+      /** FAM-03: bring a learner back during the undo window. @param {string} id */
+      undoRemoval: (id) => {
+        const l = get().removing.find((x) => x.id === id);
+        if (!l) return;
+        set((s) => ({
+          removing: s.removing.filter((x) => x.id !== id),
+          learners: [...s.learners, { ...l, removing_at: null, updated_at: now(), dirty: true }],
+        }));
+        afterChange();
+      },
+      /** Forget learners whose undo window ended (the server deletes its copy the same night). */
+      dropOverdue: () => {
+        const gone = overdueRemovals(get().removing).map((l) => l.id);
+        if (gone.length) set((s) => ({ removing: s.removing.filter((l) => !gone.includes(l.id)) }));
+      },
+      /** OFF-06: the app version whose "What's new" the grown-ups have seen. @param {string} v */
+      markSeen: (v) => set({ seenVersion: v }),
       /** @param {string} learnerId @param {"auto" | "1" | "2" | "3"} difficulty */
       setDifficulty: (learnerId, difficulty) => get().updateLearner(learnerId, { difficulty }),
       /**
@@ -226,10 +258,14 @@ export const useFamily = create(
         waiting,
         activeId,
         removed,
+        removing,
         lessons,
         removedLessons,
+        seenVersion,
       }) => ({
         removed,
+        removing,
+        seenVersion,
         lessons,
         removedLessons,
         mode,
@@ -280,4 +316,9 @@ export function useLearners() {
     () => learners.map((l) => learnerView(l, events, new Date(), { goal })),
     [learners, events, goal],
   );
+}
+
+/** OPS-06: is a feature flag on for this family? The demo family shows the beta tools. */
+export function useFlag(key) {
+  return useFamily((s) => flagOn(s.mode === "demo" ? DEMO_FLAGS : s.family?.flags, key));
 }

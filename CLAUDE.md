@@ -27,12 +27,14 @@
 - `pnpm --filter @trailbuddies/web build` then `pnpm --filter @trailbuddies/web e2e` (phone, tablet, desktop screenshots)
 - API: `cd services/api && pip install -r requirements-dev.txt && ruff check . && pytest`; migrations with `alembic revision --autogenerate` then review the file
 - Stack: `docker compose -f infra/docker-compose.yml --env-file infra/.env up -d`
+- Production: Vercel (web + API services, `vercel.json`) and Supabase, see `docs/vercel-supabase.md` and ADR 0006. The API never runs migrations on Vercel; `.github/workflows/migrate.yml` does. Admin tasks: `python -m app.admin --help`.
 
 ## Child-safety rules
 
 - Never add a third-party analytics or ad SDK.
 - Never log a child's name, photo URL or audio URL.
 - Every upload path strips EXIF. Free-text inputs only in grown-up screens.
+- Error reports go through `scrubText`/`scrubEvent` (`packages/domain/src/scrub.js`) or `app/scrub.py`. No Sentry Session Replay, tracing or DOM breadcrumbs.
 
 ## Definition of done
 

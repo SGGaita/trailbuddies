@@ -17,6 +17,8 @@ coverage/
 playwright-report/
 test-results/
 apps/web/e2e/screenshots/
+apps/web/lighthouse/
+apps/web/.lighthouseci/
 .venv/
 *.db
 

@@ -12,6 +12,7 @@ import { buddySays, economy } from "@trailbuddies/content";
 import { startLadder, answer, lessonOutcome, celebrationFor, restReason } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
+import { setSalvage, clearSalvageSoon } from "@/lib/salvage";
 import { payable, badgeEvents } from "@/lib/rewards";
 import { speak, stop, registerTextClip, clearTextClips } from "@/lib/speech";
 import { mediaUrl } from "@/lib/media";
@@ -30,6 +31,15 @@ import LessonProgress from "./LessonProgress";
 const EXPLAIN_MS = 3400;
 
 /** True when e2e tests asked for answer hints in the DOM (never set in normal use). */
+/** e2e only: "tb_crash" in sessionStorage breaks the lesson after its first step (OFF-07 test). */
+function readCrash() {
+  try {
+    return readE2E() && sessionStorage.getItem("tb_crash") === "1";
+  } catch {
+    return false;
+  }
+}
+
 function readE2E() {
   try {
     return localStorage.getItem("tb_e2e") === "1";
@@ -79,6 +89,7 @@ function Player({ where, learner }) {
       band: learner.band,
       startedAt: Date.now(),
       e2e: readE2E(),
+      crash: readCrash(),
     };
   });
   useEffect(() => {
@@ -100,6 +111,7 @@ function Player({ where, learner }) {
 
   const lesson = plan.lesson;
   const step = lesson?.steps[index];
+  if (plan.crash && index > 0) throw new Error(`e2e crash for ${learner.name}`);
   const fb = feedback && step && feedback.stepId === step.id ? feedback : null;
   const bubble = fb?.bubble ?? step?.prompt ?? "";
   const mood = fb?.mood ?? "happy";
@@ -180,6 +192,13 @@ function Player({ where, learner }) {
     const events = completionEvents(learner.id, lesson, { ...o, complete: false }, { durationSec: 0 });
     if (events.length) record(events);
   };
+
+  // OFF-07: if something breaks, the error screen keeps the answers given so far.
+  useEffect(() => {
+    const fn = outcome ? null : keepAnswers;
+    setSalvage(fn);
+    return () => clearSalvageSoon(fn);
+  });
 
   const advance = () => {
     if (index + 1 >= lesson.steps.length) return finish();

@@ -275,6 +275,11 @@ test("country rules, devices and Google (ONB-05, FAM-08, ONB-03)", async ({ brow
   await country.getByRole("button", { name: "Save country" }).click();
   await expect(page).toHaveURL(/\/start\/consent$/);
   await page.getByLabel(/I'm this child's parent or legal guardian/).check();
+  // ONB-06b: the US needs a signed form, reviewed by a person (see sprint7.spec.js).
+  await page.getByLabel("Your full name", { exact: true }).fill("Grace Wanjiru");
+  await page.getByLabel("Type your full name again to sign").fill("Grace Wanjiru");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page.getByRole("heading", { name: "Thank you! We're checking your form" })).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).not.toHaveURL(/\/start\/consent$/);
   expect(srv.families.F1.country).toBe("US");

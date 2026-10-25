@@ -17,6 +17,7 @@ from ..models import LoginToken, Session, User
 from ..schemas import MagicLinkIn, MeIn, UserOut, VerifyIn
 from ..security import COOKIE, aware, current_user, end_session, hash_token, start_session
 from ..settings import get_settings
+from ..tasks import later
 from .families import families_for
 
 router = APIRouter()
@@ -66,7 +67,7 @@ def magic_link(body: MagicLinkIn, tasks: BackgroundTasks, db: DbSession = Depend
             )
         )
         db.commit()
-        tasks.add_task(send_magic_link, email, f"{s.web_url}/auth/verify?{urlencode({'token': token})}")
+        later(tasks, send_magic_link, email, f"{s.web_url}/auth/verify?{urlencode({'token': token})}")
     return {"sent": True}
 
 

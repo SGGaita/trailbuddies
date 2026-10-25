@@ -25,6 +25,11 @@ export function newServer() {
     devices: {}, // session id -> { name, last_seen_at }
     manifest: {}, // channel -> published manifest (CNT-02)
     packs: {}, // file -> pack
+    exports: [], // SAF-03
+    deletions: {}, // family -> { token, purge_after }
+    flags: {}, // family -> { key: bool } (OPS-06)
+    feedback: [],
+    errors: [], // SAF-07 own log
     seq: 0,
   };
 }
@@ -43,6 +48,9 @@ const familyOut = (srv, fam, role = "owner") => ({
   device_limit: deviceLimit(fam.plan),
   region: countryRules(fam.country).region,
   consent: srv.consents[fam.id] || null,
+  cohorts: fam.cohorts || [],
+  flags: { "beta-feedback": false, "beta-faq": false, ...(srv.flags[fam.id] || {}) },
+  deletion: srv.deletions[fam.id]?.purge_after ? { purge_after: srv.deletions[fam.id].purge_after } : null,
   learners: Object.values(srv.learners)
     .filter((l) => l.family_id === fam.id)
     .map(({ family_id: _f, ...l }) => l),
@@ -168,6 +176,17 @@ export async function fakeApi(context, srv) {
       sessionId = null;
       return json(route, 200, { ok: true });
     }
+    // No sign-in needed: the emailed deletion link (SAF-04) and error reports (SAF-07).
+    if (path === "/families/deletion/confirm" && method === "POST") {
+      const entry = Object.entries(srv.deletions).find(([, d]) => d.token === body.token);
+      if (!entry) return json(route, 404, { detail: "This link has expired. You can ask again in Settings." });
+      entry[1].purge_after = new Date(Date.now() + 7 * 86_400_000).toISOString();
+      return json(route, 200, { purge_after: entry[1].purge_after });
+    }
+    if (path === "/errors" && method === "POST") {
+      srv.errors.push(body);
+      return json(route, 204);
+    }
     if (!user) return json(route, 401, { detail: "Not signed in" });
 
     if (path === "/auth/logout-all") {
@@ -214,14 +233,57 @@ export async function fakeApi(context, srv) {
     }
     m = path.match(/^\/families\/([^/]+)\/consents$/);
     if (m) {
+      const region = countryRules(srv.families[m[1]].country).region;
+      // ONB-06b: US families sign a form that a person reviews.
+      if (region === "us-coppa" && !body.form)
+        return json(route, 422, { detail: { code: "signed_form_needed", message: "Please sign the consent form." } });
       srv.consents[m[1]] = {
         policy_version: body.policy_version,
         scopes: body.scopes,
-        method: "checkbox",
-        region: countryRules(srv.families[m[1]].country).region,
+        method: body.form ? "signed_form" : "checkbox",
+        status: body.form ? "pending" : "approved",
+        evidence: body.form || null,
+        region,
         given_at: new Date().toISOString(),
       };
       return json(route, 201, srv.consents[m[1]]);
+    }
+    // SAF-03 export, SAF-04 deletion, OPS-06 flags, beta feedback, SAF-07 errors.
+    m = path.match(/^\/families\/([^/]+)\/exports$/);
+    if (m && method === "POST") {
+      const e = { id: `X${srv.exports.length + 1}`, status: "ready", bytes: 1234, expires_at: "2030-01-08T00:00:00Z" };
+      srv.exports.push(e);
+      srv.sent.push({ to: user.email, kind: "export", id: e.id });
+      return json(route, 201, e);
+    }
+    if (m && method === "GET") return json(route, 200, { exports: srv.exports });
+    m = path.match(/^\/families\/([^/]+)\/deletion$/);
+    if (m && method === "POST") {
+      if (role !== "owner") return json(route, 403, { detail: "Only the family's owner can delete the family" });
+      const token = `delete-${m[1]}-abcdefghijklmnop`;
+      srv.deletions[m[1]] = { token };
+      srv.sent.push({ to: user.email, kind: "delete", token });
+      return json(route, 202, { sent: true });
+    }
+    m = path.match(/^\/families\/([^/]+)\/deletion\/undo$/);
+    if (m && method === "POST") {
+      delete srv.deletions[m[1]];
+      return json(route, 204);
+    }
+    m = path.match(/^\/families\/([^/]+)\/flags$/);
+    if (m) return json(route, 200, { cohorts: srv.families[m[1]].cohorts || [], flags: familyOut(srv, srv.families[m[1]]).flags });
+    m = path.match(/^\/families\/([^/]+)\/beta$/);
+    if (m && method === "POST") {
+      if (body.code !== "TB-BETA22") return json(route, 404, { detail: "That invite code can't be used. Check it or ask us for a new one." });
+      const f = srv.families[m[1]];
+      f.cohorts = ["beta"];
+      srv.flags[f.id] = { "beta-feedback": true, "beta-faq": true };
+      return json(route, 200, { cohorts: f.cohorts, flags: familyOut(srv, f).flags });
+    }
+    m = path.match(/^\/families\/([^/]+)\/feedback$/);
+    if (m && method === "POST") {
+      srv.feedback.push(body);
+      return json(route, 201, body);
     }
     m = path.match(/^\/families\/([^/]+)\/members$/);
     if (m)
@@ -275,8 +337,10 @@ export async function fakeApi(context, srv) {
       // ONB-05: a country with different privacy rules needs consent again.
       if (srv.consents[m[1]]?.region && srv.consents[m[1]].region !== countryRules(srv.families[m[1]].country).region)
         return json(route, 403, { detail: "Your country's privacy rules changed. Please agree again." });
+      if (srv.consents[m[1]]?.status === "pending")
+        return json(route, 403, { detail: "Your signed consent form is waiting for review" });
       const cur = srv.learners[m[2]];
-      const count = Object.values(srv.learners).filter((l) => l.family_id === m[1]).length;
+      const count = Object.values(srv.learners).filter((l) => l.family_id === m[1] && !l.removing_at).length;
       const limit = LIMITS[srv.families[m[1]].plan] ?? 1;
       if (!cur && count >= limit)
         return json(route, 402, {
@@ -351,6 +415,8 @@ export async function fakeApi(context, srv) {
     }
     if (path === "/sync/events" && method === "POST") {
       if (role === "viewer") return forbidViewer();
+      if (srv.consents[body.family_id]?.status === "pending")
+        return json(route, 403, { detail: "Your signed consent form is waiting for review" });
       const accepted = [];
       for (const e of body.events) {
         if (!srv.events.some((x) => x.id === e.id))

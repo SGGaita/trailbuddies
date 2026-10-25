@@ -161,6 +161,15 @@
     ],
     "island.hello": [
       "Here are lessons from your family!"
+    ],
+    "calm.offline": [
+      "This one needs the internet. Let's play something else!"
+    ],
+    "calm.oops": [
+      "Oops, let's try that again!"
+    ],
+    "calm.lost": [
+      "Hmm, I can't find that page. Let's go back to the map!"
     ]
   }
 }

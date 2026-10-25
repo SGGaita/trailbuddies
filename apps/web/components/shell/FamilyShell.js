@@ -7,6 +7,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import Icon from "@/components/Icon";
 import Buddy from "@/components/art/Buddy";
+import FeedbackButton from "@/components/FeedbackButton";
 
 export const FAMILY_NAV = [
   { href: "/family", icon: "home", key: "nav.home" },
@@ -166,6 +167,7 @@ export default function FamilyShell({
             {sub && <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{sub}</Typography>}
           </Box>
           {right}
+          <FeedbackButton />
         </Box>
         <Box component="main" sx={{ flex: 1, px: { xs: 2.25, sm: 4.25 }, py: 3 }}>
           <Box

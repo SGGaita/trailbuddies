@@ -1,7 +1,9 @@
 """Settings from environment variables (see .env.example at the repo root)."""
 
+import os
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,6 +57,28 @@ class Settings(BaseSettings):
     s3_region: str = "auto"
     s3_access_key: str = ""
     s3_secret_key: str = ""
+
+    # Hosting (ADR 0006). On Vercel (VERCEL=1) there is no background worker or local disk:
+    # emails are sent inside the request, jobs run from Vercel Cron and media must be "s3".
+    serverless: bool = Field(default_factory=lambda: bool(os.environ.get("VERCEL")))
+    # Vercel Cron sends "Authorization: Bearer <CRON_SECRET>". Not TB_-prefixed: Vercel names it.
+    cron_secret: str = Field(default_factory=lambda: os.environ.get("CRON_SECRET", ""))
+
+    # Errors (SAF-07): "sentry" when a DSN is set, otherwise our own scrubbed log ("own"), or "off".
+    errors: str = ""
+    sentry_dsn: str = ""
+    release: str = Field(default_factory=lambda: os.environ.get("VERCEL_GIT_COMMIT_SHA", "")[:12])
+
+    # Closed beta: when true, a new family needs an invite code (POST /families invite_code).
+    beta_code_required: bool = False
+    # Where "a US consent form is waiting for review" emails go (ONB-06b). Empty: log only.
+    review_email: str = ""
+
+    @property
+    def error_backend(self) -> str:
+        if self.errors in {"sentry", "own", "off"}:
+            return self.errors
+        return "sentry" if self.sentry_dsn else "own"
 
     @property
     def google_enabled(self) -> bool:

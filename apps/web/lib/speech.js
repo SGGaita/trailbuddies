@@ -1,6 +1,7 @@
 // Speech service. Recorded clips (buddy lines, content words, a parent's own voice)
 // play when one exists; otherwise the device voice says the text. Ported from Martha's
 // Learning Corner. Clips arrive with the voice packs (Sprint 6) and parent recordings (Sprint 5).
+import { chooseClip } from "@trailbuddies/domain";
 import { useFamily } from "./store";
 
 let voice = null;
@@ -59,6 +60,12 @@ const textClips = new Map();
 export const registerTextClip = (text, url) => textClips.set(text.trim().toLowerCase(), url);
 export const clearTextClips = () => textClips.clear();
 
+/**
+ * LES-18: which recording to play. A grown-up's own recording wins over a voice pack clip,
+ * and either wins over the device voice. @param {string} text @param {string} [clip]
+ */
+export const clipFor = (text, clip) => chooseClip(text, clip, { parent: textClips, pack: clips });
+
 export function stop() {
   token++;
   emit(null);
@@ -115,7 +122,7 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
     setTimeout(finish, Math.max(1600, text.length * 110));
   };
 
-  const url = (clip && clips.get(clip)) || textClips.get(text.trim().toLowerCase());
+  const url = clipFor(text, clip);
   if (url) {
     try {
       audio = new Audio(url);

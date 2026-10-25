@@ -1,10 +1,10 @@
 """Request and response shapes. Children's data is minimal by design: a first name or
 nickname, birth month and year, and app choices (colour, buddy, interests, levels)."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 AvatarColor = Literal["coral", "sky", "leaf", "berry", "sun", "night"]
 BuddyId = Literal["zip", "tumi", "juma", "kiki"]
@@ -78,6 +78,7 @@ class Pin(Strict):
 class FamilyIn(Strict):
     name: str = Field(min_length=1, max_length=120)
     country: str = Field(min_length=2, max_length=2)
+    invite_code: str | None = Field(default=None, max_length=16)
 
     @field_validator("country")
     @classmethod
@@ -96,10 +97,27 @@ class FamilyPatch(Strict):
     updated_at: datetime = Field(description="device time of the edit; last edit wins")
 
 
+class SignedForm(Strict):
+    """ONB-06b: the signed consent form for US families (COPPA). Reviewed by a person."""
+
+    parent_name: str = Field(min_length=3, max_length=120)
+    signature: str = Field(min_length=3, max_length=120, description="the parent types their full name")
+    relationship: Literal["parent", "guardian"]
+    signed_on: date
+
+    @model_validator(mode="after")
+    def signature_matches(self):
+        norm = lambda v: " ".join(v.lower().split())  # noqa: E731
+        if norm(self.signature) != norm(self.parent_name):
+            raise ValueError("the signature must be the parent's full name")
+        return self
+
+
 class ConsentIn(Strict):
     policy_version: str = Field(max_length=32)
     scopes: dict[str, bool]
     agreed: Literal[True]
+    form: SignedForm | None = None
 
 
 class LearnerIn(Strict):
@@ -116,6 +134,9 @@ class LearnerIn(Strict):
         default_factory=dict, max_length=12, description="per-subject level lock (ADP-02)"
     )
     wish: str | None = Field(default=None, max_length=32, description="shop item the learner is saving for")
+    removing_at: datetime | None = Field(
+        default=None, description="removal asked for (FAM-03); null undoes it"
+    )
     updated_at: datetime
 
     @field_validator("name")
@@ -208,3 +229,26 @@ class CustomLessonIn(Strict):
     updated_at: datetime
 
     _clean = field_validator("title", "question")(lambda v: _one_line(v))
+
+
+class CodeIn(Strict):
+    code: str = Field(min_length=4, max_length=16)
+
+
+class FeedbackIn(Strict):
+    kind: Literal["idea", "problem", "praise"]
+    message: str = Field(min_length=3, max_length=1000)
+    screen: str = Field(default="", max_length=80, pattern=r"^[a-z0-9/_\-\[\]]*$")
+    version: str = Field(default="", max_length=32)
+
+
+class ErrorIn(Strict):
+    source: Literal["web"] = "web"
+    release: str = Field(default="", max_length=32)
+    screen: str = Field(default="", max_length=80)
+    message: str = Field(min_length=1, max_length=2000)
+    stack: str = Field(default="", max_length=8000)
+
+
+class TokenIn(Strict):
+    token: str = Field(min_length=10, max_length=128)
