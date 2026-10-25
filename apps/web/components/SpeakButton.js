@@ -1,7 +1,7 @@
 "use client";
 import IconButton from "@mui/material/IconButton";
 import { colors } from "@trailbuddies/tokens";
-import Icon from "@/components/Icon";
+import { SoundIcon } from "@/components/art/UiIcon";
 import { speak } from "@/lib/speech";
 import { useFamily } from "@/lib/store";
 
@@ -21,7 +21,7 @@ export default function SpeakButton({ text, size = 56 }) {
         flex: "none",
       }}
     >
-      <Icon name="speak" size={size * 0.46} />
+      <SoundIcon size={size * 0.62} />
     </IconButton>
   );
 }

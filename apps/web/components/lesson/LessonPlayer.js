@@ -19,6 +19,7 @@ import { playSound } from "@/lib/sounds";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Icon from "@/components/Icon";
+import { SoundIcon } from "@/components/art/UiIcon";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
 import { EXERCISES } from "./Exercises";
@@ -356,7 +357,7 @@ function Player({ where, learner }) {
               bgcolor: "background.paper",
             }}
           >
-            <Icon name="speak" size={24} />
+            <SoundIcon size={{ xs: 30, sm: 34 }} />
           </IconButton>
         </Box>
 

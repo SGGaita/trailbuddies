@@ -24,6 +24,7 @@ import LessonProgress from "@/components/lesson/LessonProgress";
 import Buddy from "@/components/art/Buddy";
 import Bubble from "@/components/Bubble";
 import Icon from "@/components/Icon";
+import { SoundIcon } from "@/components/art/UiIcon";
 import Loading from "@/components/Loading";
 
 /**
@@ -46,7 +47,9 @@ function Gone({ back }) {
   const router = useRouter();
   return (
     <Box sx={{ p: 4, textAlign: "center" }}>
-      <Button onClick={() => router.replace(back.includes("{subject}") ? "/play" : back)}>{t("start.continue")}</Button>
+      <Button onClick={() => router.replace(back.includes("{subject}") ? "/play" : back)}>
+        {t("start.continue")}
+      </Button>
     </Box>
   );
 }
@@ -173,7 +176,7 @@ function Quiz({ learner, subject, back }) {
               bgcolor: "background.paper",
             }}
           >
-            <Icon name="speak" size={24} />
+            <SoundIcon size={32} />
           </IconButton>
         </Box>
         <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
