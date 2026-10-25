@@ -210,7 +210,7 @@ export default function WorldMap() {
             sx={PLACE_SX}
           >
             <Box sx={{ height: 22 }}>{newChip}</Box>
-            <Island kind="family" width="min(180px, 100%)" height={120} />
+            <SubjectArt id="family" small width={artWidth("family", 120)} />
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
               {t("map.familyIsland")}
             </Typography>
@@ -349,7 +349,7 @@ export default function WorldMap() {
             color: "text.primary",
           }}
         >
-          <Island kind="family" width={88} height={62} />
+          <SubjectArt id="family" small width={110} height={72} />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
               {t("map.familyIsland")}

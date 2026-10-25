@@ -8,7 +8,30 @@ describe("CNT-02 content packs", () => {
     const prod = buildPacks(content, { channel: "production", release: "2027.03.1" });
     const prev = buildPacks(content, { channel: "preview", release: "2027.03.1" });
     const units = (b) => b.manifest.packs.flatMap((p) => p.units);
-    expect(units(prod)).toEqual(["counting-1-5", "counting-6-10", "letters-a-e", "where-animals-live"]);
+    // Every reviewed unit ships; the animal units still in draft (all but where-animals-live) do not.
+    expect(units(prod)).toEqual([
+      "counting-1-5",
+      "counting-6-10",
+      "number-shapes-0-10",
+      "more-less-same",
+      "numbers-11-20",
+      "letters-a-e",
+      "letter-sounds-1",
+      "letter-sounds-2",
+      "upper-lower",
+      "blending-cvc",
+      "where-animals-live",
+      "red-yellow-blue",
+      "more-colours",
+      "colours-of-things",
+      "same-different-colour",
+      "mixing-colours",
+      "circle-square-triangle",
+      "more-shapes",
+      "big-small-shapes",
+      "shapes-around-us",
+      "sides-and-corners",
+    ]);
     expect(units(prev)).toHaveLength(26);
     expect(prev.manifest).toMatchObject({ schema: "packs/1", release: "2027.03.1", channel: "preview" });
   });
@@ -59,7 +82,13 @@ describe("installing a downloaded pack", () => {
     const extra = { id: "numbers-extra", title: "Extra", band: "sprout", status: "ready", lessons: 1 };
     const ok = installPack({
       schema: "pack/1",
-      subject: { id: "numbers", units: [{ id: "counting-1-5", title: "Counting 1 to 5", band: "seedling", status: "ready", lessons: 6 }, extra] },
+      subject: {
+        id: "numbers",
+        units: [
+          { id: "counting-1-5", title: "Counting 1 to 5", band: "seedling", status: "ready", lessons: 6 },
+          extra,
+        ],
+      },
       units: [unit],
     });
     expect(ok).toBe(true);

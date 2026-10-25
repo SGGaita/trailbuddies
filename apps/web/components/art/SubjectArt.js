@@ -7,7 +7,8 @@ import { playSound } from "@/lib/sounds";
 
 /**
  * Painted artwork for a subject place: the world map tile, the trail header and the trail
- * backdrop. `ratio` is width / height of the image. Each spot is a tap target on the trail
+ * backdrop. The pictures are used as supplied (1536 x 1024 with their own transparency), so
+ * `ratio` is width / height of the image. Each spot is a tap target on the trail
  * header, placed as % of the artwork (x, y = centre, w = diameter as % of the width).
  * @type {Record<string, { src: string, small: string, ratio: number, spots: { say: string, label: string, x: number, y: number, w: number }[] }>}
  */
@@ -15,36 +16,68 @@ export const SUBJECT_ART = {
   numbers: {
     src: "/art/number-mountain.webp",
     small: "/art/number-mountain-sm.webp",
-    ratio: 1621 / 781,
+    ratio: 1536 / 1024,
     spots: [
-      { say: "six", label: "Number six", x: 12.5, y: 72, w: 13 },
-      { say: "eight", label: "Number eight", x: 28.8, y: 62, w: 16 },
-      { say: "ten", label: "Number ten", x: 49.2, y: 35, w: 20 },
-      { say: "seven", label: "Number seven", x: 69.8, y: 66, w: 16 },
-      { say: "five", label: "Number five", x: 88.8, y: 74, w: 13 },
+      { say: "one", label: "Number one", x: 52.4, y: 14.7, w: 11.9 },
+      { say: "two", label: "Number two", x: 38.4, y: 43.5, w: 13.4 },
+      { say: "three", label: "Number three", x: 68.8, y: 52.3, w: 12.6 },
     ],
   },
   language: {
     src: "/art/letter-forest.webp",
     small: "/art/letter-forest-sm.webp",
-    ratio: 1425 / 1014,
+    ratio: 1536 / 1024,
     spots: [
-      { say: "A", label: "Letter A", x: 18.7, y: 35.5, w: 15 },
-      { say: "B", label: "Letter B", x: 49.6, y: 23.7, w: 15 },
-      { say: "C", label: "Letter C", x: 80.8, y: 39.4, w: 14 },
-      { say: "small a", label: "Small letter a", x: 37.3, y: 48.3, w: 9 },
-      { say: "small b", label: "Small letter b", x: 65.8, y: 53.3, w: 9 },
+      { say: "A", label: "Letter A", x: 21.5, y: 35.2, w: 13.9 },
+      { say: "B", label: "Letter B", x: 50.1, y: 23.5, w: 13.9 },
+      { say: "C", label: "Letter C", x: 79.1, y: 39.0, w: 13.0 },
+      { say: "small a", label: "Small letter a", x: 38.7, y: 47.8, w: 8.3 },
+      { say: "small b", label: "Small letter b", x: 65.1, y: 52.8, w: 8.3 },
     ],
   },
   animals: {
     src: "/art/animal-safari.webp",
     small: "/art/animal-safari-sm.webp",
-    ratio: 1421 / 990,
+    ratio: 1536 / 1024,
     spots: [
-      { say: "elephant", label: "Elephant", x: 31, y: 50, w: 22 },
-      { say: "giraffe", label: "Giraffe", x: 69.7, y: 24.5, w: 12 },
-      { say: "zebra", label: "Zebra", x: 75, y: 54, w: 15 },
+      { say: "elephant", label: "Elephant", x: 32.5, y: 50.0, w: 20.4 },
+      { say: "giraffe", label: "Giraffe", x: 68.3, y: 25.3, w: 11.1 },
+      { say: "zebra", label: "Zebra", x: 73.2, y: 53.9, w: 13.9 },
+      { say: "sun", label: "Sun", x: 82.7, y: 14.6, w: 12 },
     ],
+  },
+  colours: {
+    src: "/art/colour-garden.webp",
+    small: "/art/colour-garden-sm.webp",
+    ratio: 1536 / 1024,
+    spots: [
+      { say: "red", label: "Red", x: 22.1, y: 42.5, w: 19.4 },
+      { say: "yellow", label: "Yellow", x: 36.5, y: 32.3, w: 18.4 },
+      { say: "blue", label: "Blue", x: 49.9, y: 50.2, w: 17.4 },
+      { say: "green", label: "Green", x: 62.1, y: 37.6, w: 16.5 },
+      { say: "purple", label: "Purple", x: 79.4, y: 33.7, w: 16.5 },
+      { say: "orange", label: "Orange", x: 76.5, y: 54.0, w: 16.5 },
+      { say: "rainbow", label: "Rainbow", x: 51.9, y: 15.2, w: 19.4 },
+    ],
+  },
+  shapes: {
+    src: "/art/shape-town.webp",
+    small: "/art/shape-town-sm.webp",
+    ratio: 1536 / 1024,
+    spots: [
+      { say: "triangle", label: "Triangle", x: 21.5, y: 36.1, w: 14.4 },
+      { say: "circle", label: "Circle", x: 36.2, y: 35.7, w: 8.6 },
+      { say: "square", label: "Square", x: 69.6, y: 24.0, w: 5.8 },
+      { say: "rectangle", label: "Rectangle", x: 58.9, y: 48.9, w: 9.6 },
+      { say: "star", label: "Star", x: 78.1, y: 58.6, w: 11.5 },
+    ],
+  },
+  // Family & Class Island has no trail, so its art is only on the map.
+  family: {
+    src: "/art/family-island.webp",
+    small: "/art/family-island-sm.webp",
+    ratio: 1536 / 1024,
+    spots: [],
   },
 };
 
