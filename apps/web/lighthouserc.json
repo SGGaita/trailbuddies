@@ -47,7 +47,7 @@
         "total-blocking-time": [
           "error",
           {
-            "maxNumericValue": 700,
+            "maxNumericValue": 900,
             "aggregationMethod": "median-run"
           }
         ],
@@ -76,6 +76,6 @@
       "target": "filesystem",
       "outputDir": "./lighthouse"
     },
-    "_comment": "Budgets guard against regressions from the Sprint 7 baseline (perf 0.71-0.90, LCP 1.4-4.4 s, TBT 0.2-0.55 s, 300-340 KB JS on 4x throttled mobile). Targets for launch: perf 0.8, LCP 3.5 s, TBT 400 ms."
+    "_comment": "Budgets guard against regressions from the Sprint 7 baseline (perf 0.71-0.90, LCP 1.4-4.4 s, TBT 0.2-0.55 s locally, 0.79 s on GitHub runners, 300-340 KB JS on 4x throttled mobile). Targets for launch: perf 0.8, LCP 3.5 s, TBT 400 ms."
   }
 }
