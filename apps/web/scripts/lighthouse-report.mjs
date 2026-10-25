@@ -1,5 +1,6 @@
 // Turns Lighthouse CI assertion results into GitHub annotations, so budget misses show on the
-// PR (job logs aren't easy to read). Exits 1 only when LH_BLOCK=1.
+// PR (job logs aren't easy to read). Exits 1 when LH_BLOCK=1 and an "error"-level budget is
+// missed; "warn"-level ones (noisy on shared runners, like total blocking time) only warn.
 import { existsSync, readFileSync } from "node:fs";
 
 const file = ".lighthouseci/assertion-results.json";
@@ -11,4 +12,5 @@ for (const r of fails) {
   console.log(`::warning title=Lighthouse budget::${where} ${r.auditProperty ? `${r.auditId}:${r.auditProperty}` : r.auditId} ${r.operator} ${r.expected}, found ${found}`);
 }
 console.log(fails.length ? `${fails.length} budget(s) missed` : "All Lighthouse budgets met");
-if (fails.length && process.env.LH_BLOCK === "1") process.exit(1);
+const blocking = fails.filter((r) => r.level === "error");
+if (blocking.length && process.env.LH_BLOCK === "1") process.exit(1);
