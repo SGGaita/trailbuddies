@@ -1,20 +1,17 @@
-"""Background worker (arq on Redis): a heartbeat and clean-up jobs. Media processing and
-weekly digests arrive in Sprint 5; account retention (24 months inactive) in Sprint 7.
+"""Background worker for Docker and a VPS (arq on Redis): a heartbeat and the nightly privacy
+job. On Vercel there is no worker: Vercel Cron calls GET /cron/daily instead (routes/ops.py).
 
 Run: arq app.worker.WorkerSettings
 """
 
-from datetime import timedelta
-
 from arq.connections import RedisSettings
 from arq.cron import cron
-from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from .db import get_engine, utcnow
-from .models import EditHistory, Invite, LoginToken
-from .routes.families import HISTORY_DAYS
+from .privacy import daily
 from .settings import get_settings
+from .storage import get_storage
 
 
 async def heartbeat(ctx) -> str:
@@ -22,16 +19,9 @@ async def heartbeat(ctx) -> str:
 
 
 def purge(engine=None, now=None) -> dict:
-    """Delete edit history older than 30 days, used or expired sign-in links, and old invitations."""
-    now = now or utcnow()
+    """The nightly job: retention rules, deletions after their undo window, old links."""
     with Session(engine or get_engine()) as db:
-        h = db.execute(
-            delete(EditHistory).where(EditHistory.kept_at < now - timedelta(days=HISTORY_DAYS))
-        ).rowcount
-        t = db.execute(delete(LoginToken).where(LoginToken.expires_at < now - timedelta(days=1))).rowcount
-        i = db.execute(delete(Invite).where(Invite.expires_at < now - timedelta(days=30))).rowcount
-        db.commit()
-    return {"history": h, "tokens": t, "invites": i}
+        return daily(db, get_storage(), now or utcnow())
 
 
 async def purge_job(ctx) -> dict:

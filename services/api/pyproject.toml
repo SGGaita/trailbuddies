@@ -13,3 +13,8 @@ pythonpath = ["."]
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI's dependency injection uses calls in argument defaults by design.
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+# Vercel (ADR 0006): the API is the "api" service in the root vercel.json, at /api/*.
+# Python version: .python-version (3.12). Dependencies: requirements.txt.
+[tool.vercel]
+entrypoint = "app.main:app"

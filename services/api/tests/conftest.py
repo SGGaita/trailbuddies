@@ -5,7 +5,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app import models  # noqa: F401 - register tables
+from app import (
+    mailer,
+    models,  # noqa: F401 - register tables
+)
 from app.db import Base, get_session
 from app.main import create_app
 from app.routes import auth as auth_routes
@@ -26,6 +29,10 @@ def outbox(monkeypatch):
     sent = []
     monkeypatch.setattr(auth_routes, "send_magic_link", lambda to, link: sent.append((to, link)))
     monkeypatch.setattr(member_routes, "send_invite", lambda to, link, *_: sent.append((to, link)))
+    # Every other email (exports, deletion, retention, consent review) goes through send_notice.
+    monkeypatch.setattr(
+        mailer, "send_notice", lambda to, subject, lines, link="", label="": sent.append((to, link, subject))
+    )
     return sent
 
 

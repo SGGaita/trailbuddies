@@ -66,7 +66,7 @@ class LocalStorage:
         self.path(media_id).unlink(missing_ok=True)
 
     # Content packs (CNT-02) live beside the media under packs/.
-    def put_key(self, key: str, data: bytes) -> None:
+    def put_key(self, key: str, data: bytes, content_type: str = "application/json") -> None:
         p = self.root / key
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes(data)
@@ -74,6 +74,13 @@ class LocalStorage:
     def get_key(self, key: str) -> bytes | None:
         p = self.root / key
         return p.read_bytes() if p.exists() else None
+
+    def delete_key(self, key: str) -> None:
+        (self.root / key).unlink(missing_ok=True)
+
+    def key_download_url(self, key: str, filename: str) -> str | None:
+        """None: the API streams the file itself (see routes/privacy.py)."""
+        return None
 
 
 class S3Storage:
@@ -128,9 +135,23 @@ class S3Storage:
     def delete(self, media_id: str) -> None:
         self.client.delete_object(Bucket=self.bucket, Key=_key(media_id))
 
-    def put_key(self, key: str, data: bytes) -> None:
+    def put_key(self, key: str, data: bytes, content_type: str = "application/json") -> None:
         self._ensure_bucket()
-        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType="application/json")
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType=content_type)
+
+    def delete_key(self, key: str) -> None:
+        self.client.delete_object(Bucket=self.bucket, Key=key)
+
+    def key_download_url(self, key: str, filename: str) -> str | None:
+        return self.public.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.bucket,
+                "Key": key,
+                "ResponseContentDisposition": f'attachment; filename="{filename}"',
+            },
+            ExpiresIn=self.ttl,
+        )
 
     def get_key(self, key: str) -> bytes | None:
         try:

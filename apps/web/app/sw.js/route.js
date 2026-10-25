@@ -107,8 +107,14 @@ function worker(BUILD_ID, PAGES, EXTRAS) {
     );
   }
 
+  // OFF-06: the first version takes over straight away; a later one waits until the app
+  // next starts (RegisterSW sends SKIP_WAITING then), so it never swaps code mid-lesson.
   self.addEventListener("install", (e) => {
-    e.waitUntil(precacheAll().then(() => self.skipWaiting()));
+    e.waitUntil(precacheAll().then(() => (self.registration.active ? undefined : self.skipWaiting())));
+  });
+
+  self.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
   });
 
   self.addEventListener("activate", (e) => {

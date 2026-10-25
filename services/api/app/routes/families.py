@@ -1,14 +1,19 @@
 """Families, consent and learner profiles. Profile edits carry the device's edit time and
 the newest edit wins, so two devices editing offline settle the same way everywhere."""
 
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
+from .. import mailer
 from ..db import get_session, utcnow
 from ..devices import device_limit
+from ..flags import code_usable, flags_for, redeem
 from ..ids import is_ulid, ulid
-from ..models import Consent, EditHistory, Event, Family, FamilyMember, Learner, Session, User
+from ..models import Consent, EditHistory, Family, FamilyDeletion, FamilyMember, Learner, Session, User
+from ..privacy import UNDO_DAYS, purge_learner, touch_family
 from ..regions import region_for
 from ..schemas import ConsentIn, FamilyIn, FamilyPatch, FamilySettings, LearnerIn
 from ..security import aware, current_user, membership
@@ -96,6 +101,10 @@ def learner_out(lr: Learner) -> dict:
         "difficulty": lr.difficulty,
         "levels": lr.levels or {},
         "wish": lr.wish,
+        "removing_at": aware(lr.removing_at).isoformat() if lr.removing_at else None,
+        "purge_after": aware(lr.removing_at + timedelta(days=UNDO_DAYS)).isoformat()
+        if lr.removing_at
+        else None,
         "updated_at": aware(lr.updated_at).isoformat(),
     }
 
@@ -108,6 +117,7 @@ def latest_consent(db: DbSession, family_id: str) -> Consent | None:
 
 def family_out(db: DbSession, fam: Family, role: str) -> dict:
     c = latest_consent(db, fam.id)
+    gone = db.get(FamilyDeletion, fam.id)
     return {
         "id": fam.id,
         "name": fam.name,
@@ -120,10 +130,16 @@ def family_out(db: DbSession, fam: Family, role: str) -> dict:
         "settings": FamilySettings(**(fam.settings or {})).model_dump(),
         "pin": fam.pin,
         "updated_at": aware(fam.updated_at).isoformat(),
+        "cohorts": fam.cohorts or [],
+        "flags": flags_for(db, fam),
+        "deletion": {"purge_after": aware(gone.purge_after).isoformat()}
+        if gone and gone.purge_after
+        else None,
         "consent": {
             "policy_version": c.policy_version,
             "scopes": c.scopes,
             "method": c.method,
+            "status": c.status or "approved",
             "region": c.region or region_for(fam.country),
             "given_at": aware(c.given_at).isoformat(),
         }
@@ -140,6 +156,8 @@ def families_for(db: DbSession, user: User) -> list[dict]:
         .where(FamilyMember.user_id == user.id)
         .order_by(Family.created_at)
     ).all()
+    for fam, _ in rows:
+        touch_family(db, fam)
     return [family_out(db, fam, role) for fam, role in rows]
 
 
@@ -152,14 +170,23 @@ def policy() -> dict:
 def create_family(
     body: FamilyIn, user: User = Depends(current_user), db: DbSession = Depends(get_session)
 ) -> dict:
+    s = get_settings()
+    if body.invite_code and not code_usable(db, body.invite_code):
+        raise HTTPException(403, {"code": "invite_invalid", "message": "That invite code can't be used."})
+    if s.beta_code_required and not body.invite_code:
+        raise HTTPException(403, {"code": "invite_needed", "message": "Trailbuddies is in a closed beta."})
     fam = Family(
         id=ulid(),
         name=body.name.strip(),
         country=body.country,
         settings=FamilySettings().model_dump(),
-        plan=get_settings().default_plan,
+        plan=s.default_plan,
         updated_at=utcnow(),
+        active_at=utcnow(),
+        cohorts=[],
     )
+    if body.invite_code:
+        redeem(db, fam, body.invite_code)
     db.add(fam)
     db.add(FamilyMember(family_id=fam.id, user_id=user.id, role="owner"))
     db.commit()
@@ -219,24 +246,60 @@ def give_consent(
         raise HTTPException(422, f"Required: {', '.join(missing)}")
     scopes = {k: bool(body.scopes.get(k)) for k in POLICY["scopes"]}
     region = region_for(db.get(Family, family_id).country)
+    method, status, evidence = "checkbox", "approved", None
+    if region in SIGNED_FORM_REGIONS:
+        # ONB-06b (COPPA): a signed form, reviewed by a person before anything syncs.
+        if not body.form:
+            raise HTTPException(
+                422, {"code": "signed_form_needed", "message": "Please sign the consent form."}
+            )
+        method, status = "signed_form", "pending"
+        evidence = {**body.form.model_dump(mode="json"), "signed_by_user": user.id}
     db.add(
         Consent(
             family_id=family_id,
             user_id=user.id,
             policy_version=body.policy_version,
             scopes=scopes,
-            method="checkbox",
+            method=method,
             region=region,
+            status=status,
+            evidence=evidence,
         )
     )
     db.commit()
-    return {"policy_version": body.policy_version, "scopes": scopes, "method": "checkbox", "region": region}
+    if status == "pending":
+        review = get_settings().review_email
+        if review:
+            mailer.send_notice(
+                review,
+                "A US consent form is waiting for review",
+                [
+                    f"Family {family_id} signed the consent form.",
+                    "Review it with: python -m app.admin consents",
+                ],
+            )
+    return {
+        "policy_version": body.policy_version,
+        "scopes": scopes,
+        "method": method,
+        "status": status,
+        "region": region,
+    }
+
+
+# Regions where a checkbox isn't enough and a signed form is reviewed by a person.
+SIGNED_FORM_REGIONS = {"us-coppa"}
 
 
 def require_consent(db: DbSession, family_id: str) -> None:
     c = latest_consent(db, family_id)
     if not c or c.policy_version != get_settings().policy_version:
         raise HTTPException(403, "A grown-up needs to agree to the privacy summary first")
+    if (c.status or "approved") == "pending":
+        raise HTTPException(403, "Your signed consent form is waiting for review")
+    if c.status == "rejected":
+        raise HTTPException(403, "Please sign the consent form again")
     # ONB-05: after moving to a country with different privacy rules, consent is asked again.
     if c.region and c.region != region_for(db.get(Family, family_id).country):
         raise HTTPException(403, "Your country's privacy rules changed. Please agree again.")
@@ -259,9 +322,15 @@ def put_learner(
     if lr and lr.family_id != family_id:
         raise HTTPException(404, "Learner not found")
     fields = body.model_dump(exclude={"updated_at"})
+    if fields["removing_at"] and aware(fields["removing_at"]) > utcnow():
+        fields["removing_at"] = utcnow()  # a device clock ahead must not shorten the undo window
     if not lr:
         fam = db.get(Family, family_id)
-        count = len(db.scalars(select(Learner.id).where(Learner.family_id == family_id)).all())
+        count = len(
+            db.scalars(
+                select(Learner.id).where(Learner.family_id == family_id, Learner.removing_at.is_(None))
+            ).all()
+        )
         limit = PLAN_LIMITS.get(fam.plan, 1)
         if count >= limit:
             raise HTTPException(
@@ -294,8 +363,7 @@ def delete_learner(
     if not lr or lr.family_id != family_id:
         raise HTTPException(404, "Learner not found")
     # Explicit, so it never depends on the database enforcing ON DELETE CASCADE.
-    db.execute(delete(Event).where(Event.learner_id == learner_id))
-    db.delete(lr)
+    purge_learner(db, learner_id)
     db.commit()
 
 

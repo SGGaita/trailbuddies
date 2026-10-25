@@ -1,0 +1,81 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "pnpm start -p 3300",
+      "startServerReadyPattern": "Ready",
+      "url": [
+        "http://localhost:3300/start",
+        "http://localhost:3300/start/account",
+        "http://localhost:3300/privacy"
+      ],
+      "numberOfRuns": 2,
+      "settings": {
+        "throttlingMethod": "simulate",
+        "throttling": {
+          "cpuSlowdownMultiplier": 4
+        },
+        "skipAudits": [
+          "uses-http2",
+          "bf-cache"
+        ],
+        "chromeFlags": "--no-sandbox --headless=new"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": [
+          "error",
+          {
+            "minScore": 0.65,
+            "aggregationMethod": "median-run"
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 0.9,
+            "aggregationMethod": "median-run"
+          }
+        ],
+        "largest-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 5000,
+            "aggregationMethod": "median-run"
+          }
+        ],
+        "total-blocking-time": [
+          "warn",
+          {
+            "maxNumericValue": 600,
+            "aggregationMethod": "median-run"
+          }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          {
+            "maxNumericValue": 0.1,
+            "aggregationMethod": "median-run"
+          }
+        ],
+        "resource-summary:script:size": [
+          "error",
+          {
+            "maxNumericValue": 400000
+          }
+        ],
+        "resource-summary:total:size": [
+          "error",
+          {
+            "maxNumericValue": 600000
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lighthouse"
+    },
+    "_comment": "Budgets guard against regressions from the Sprint 7 baseline (perf 0.71-0.90, LCP 1.4-4.4 s, TBT 0.2-0.55 s locally but 0.79-1.16 s on shared GitHub runners, so TBT only warns, 300-340 KB JS on 4x throttled mobile). Targets for launch: perf 0.8, LCP 3.5 s, TBT 400 ms."
+  }
+}

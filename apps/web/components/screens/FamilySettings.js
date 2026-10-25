@@ -22,6 +22,7 @@ import { getSubjects, getReadyUnits } from "@trailbuddies/content";
 import { DIFFICULTY_SETTINGS, describeLevel } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import { api, signOut, signOutEverywhere, syncNow } from "@/lib/account";
+import { LearnersSection, PrivacySection, BetaSection } from "./PrivacySettings";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
@@ -330,6 +331,7 @@ export default function FamilySettings() {
         <DevicesSection />
         <OfflineSection />
         <GrownUpsSection />
+        <LearnersSection disabled={viewer} />
         <Section title={t("settings.difficulty")} sub={t("settings.difficultySub")}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {learners.map((l) => (
@@ -386,6 +388,8 @@ export default function FamilySettings() {
             </Box>
           )}
         </Section>
+        <PrivacySection />
+        <BetaSection />
       </Box>
     </FamilyShell>
   );

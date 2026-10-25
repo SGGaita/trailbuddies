@@ -18,6 +18,7 @@ import Buddy from "@/components/art/Buddy";
 import { Star, Gem } from "@/components/Coins";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
+import WhatsNew from "@/components/WhatsNew";
 
 const BAND = {
   seedling: "Seedling",
@@ -61,6 +62,7 @@ export default function ParentHome() {
         </IconButton>
       }
     >
+      <WhatsNew />
       {s.waiting.length > 0 && (
         <Card
           sx={{

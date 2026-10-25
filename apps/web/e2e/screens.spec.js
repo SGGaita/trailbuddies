@@ -59,7 +59,16 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await page.getByRole("button", { name: "Not now" }).click();
 
   // Sprint 6 drafts (shown outside production) fill the rest of the trail, locked until reached.
-  await expect(page.getByText("Number shapes 0 to 10 · locked")).toBeVisible();
+  // MAP-05: stones further down are mounted as the trail scrolls to them.
+  const far = page.getByText("Number shapes 0 to 10 · locked");
+  for (let i = 0; i < 30 && !(await far.isVisible()); i++) {
+    await page.locator("[data-stones]").evaluate((el) => {
+      el.parentElement.scrollBy(0, 400);
+      window.scrollBy(0, 400);
+    });
+    await page.waitForTimeout(150);
+  }
+  await expect(far).toBeVisible();
 });
 
 test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {

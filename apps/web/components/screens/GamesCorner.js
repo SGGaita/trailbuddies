@@ -171,7 +171,7 @@ const tile = (open) => ({
   border: `2px solid ${colors.line}`,
   bgcolor: open ? "background.paper" : colors.sand,
   cursor: "pointer",
-  opacity: open ? 1 : 0.75,
+  // Locked tiles look different by background and the lock, never by fading the text (ACC-07).
 });
 
 function TopicFace({ tp, locked = false }) {

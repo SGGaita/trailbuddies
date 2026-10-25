@@ -283,7 +283,9 @@ The worker uses the API's image, so rebuild `api` and restart both.
 | Run a one-off command in a fresh container | `dc run --rm api python -c "print('hi')"` |
 | Scale a service | `dc up -d --scale worker=2` |
 
-## 11. On the VPS (production)
+## 11. On the VPS (fallback only)
+
+Production now runs on Vercel and Supabase ([vercel-supabase.md](vercel-supabase.md), ADR 0006). This section stays for a self-hosted fallback.
 
 The VPS runs Linux, so the commands there use a bash shell.
 

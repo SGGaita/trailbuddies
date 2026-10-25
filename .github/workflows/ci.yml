@@ -36,6 +36,21 @@ jobs:
         run: pnpm --filter @trailbuddies/web exec playwright install --with-deps chromium
       - name: End-to-end at phone, tablet and desktop sizes
         run: pnpm --filter @trailbuddies/web e2e
+      - name: Lighthouse budgets (mobile, 4x CPU throttling)
+        working-directory: apps/web
+        # Misses show as PR warnings and fail the job (budgets tuned to GitHub runners, Sprint 7).
+        env:
+          LH_BLOCK: "1"
+        run: |
+          npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.json || true
+          node scripts/lighthouse-report.mjs
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: apps/web/lighthouse
+          if-no-files-found: ignore
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

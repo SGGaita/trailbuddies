@@ -10,8 +10,8 @@ import Dialog from "@mui/material/Dialog";
 import Snackbar from "@mui/material/Snackbar";
 import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubject, getUnit, getReadyUnits, buddyLine, buddySays } from "@trailbuddies/content";
-import { layoutTrail, pathData, subjectProgress, currentUnit, newlyOpened } from "@trailbuddies/domain";
+import { getSubject, getSubjects, getUnit, getReadyUnits, buddyLine, buddySays } from "@trailbuddies/content";
+import { layoutTrail, pathData, subjectProgress, currentUnit, newlyOpened, nodesNear } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits, lessonHref } from "@/lib/trail";
 import { speak } from "@/lib/speech";
@@ -24,6 +24,8 @@ import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
 import RestScreen, { useRest } from "@/components/RestScreen";
 import { useSpokenPrompt } from "@/lib/nonReader";
+import { useOnline } from "@/lib/online";
+import CalmError from "@/components/CalmError";
 
 const W = 600; // virtual layout width; the trail scales to the screen
 const ITEM_PREVIEW = 8;
@@ -109,6 +111,44 @@ export default function Trail({ subjectId }) {
     if (ready && nextRef.current) nextRef.current.scrollIntoView({ block: "center" });
   }, [ready]);
 
+  // MAP-05: only stones near the screen are mounted, so long trails stay smooth on budget
+  // tablets. `win` is the visible part of the trail in layout units (null until measured).
+  const scrollRef = useRef(/** @type {HTMLElement | null} */ (null));
+  const trailRef = useRef(/** @type {HTMLElement | null} */ (null));
+  const [win, setWin] = useState(/** @type {{ top: number, bottom: number } | null} */ (null));
+  const trailHeight = trail.height;
+  useEffect(() => {
+    if (!ready) return undefined;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const sc = scrollRef.current;
+      const tr = trailRef.current;
+      if (!sc || !tr || !tr.offsetHeight) return;
+      const scale = tr.offsetHeight / trailHeight;
+      const box = tr.getBoundingClientRect();
+      const view = sc.getBoundingClientRect();
+      const top = (Math.max(0, view.top) - box.top) / scale;
+      const bottom = (Math.min(window.innerHeight, view.bottom) - box.top) / scale;
+      setWin((w) => (w && Math.abs(w.top - top) < 40 && Math.abs(w.bottom - bottom) < 40 ? w : { top, bottom }));
+    };
+    const soon = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    soon();
+    window.addEventListener("scroll", soon, true);
+    window.addEventListener("resize", soon);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", soon, true);
+      window.removeEventListener("resize", soon);
+    };
+  }, [ready, trailHeight]);
+  // A locked stone points at its trophy: scroll there once it's mounted.
+  useEffect(() => {
+    if (pointAt) trophyRefs.current[pointAt]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [pointAt]);
+
   const memKey = learner ? `${learner.id}:${subjectId}` : "";
   const openUnits = trail.nodes.filter((n) => n.kind === "banner" && n.state === "open").map((n) => n.unitId);
   const fresh = learner && memory ? newlyOpened(openUnits, memory.open[memKey] ?? null) : [];
@@ -132,12 +172,30 @@ export default function Trail({ subjectId }) {
     if (ready && memKey) celebrateUnlock();
   }, [ready, memKey, freshKey]);
 
+  const online = useOnline();
   const rest = useRest(learner);
   useSpokenPrompt(ready && learner && !rest ? buddyLine("trail.start") : "", learner?.band);
   if (!ready || !learner || !subject) return <Loading />;
   if (rest) return <RestScreen reason={rest} learner={learner} />;
+  // OFF-07: a subject with nothing on this device yet needs the internet: offer the others.
+  if (!online && !getReadyUnits(subjectId).length) {
+    const here = getSubjects().filter((s) => s.id !== subjectId && getReadyUnits(s.id).length);
+    return (
+      <CalmError line="calm.offline">
+        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center", maxWidth: 560 }}>
+          {here.map((s) => (
+            <Button key={s.id} variant="contained" size="large" onClick={() => router.push(`/play/trail/${s.id}`)}>
+              {s.place}
+            </Button>
+          ))}
+        </Box>
+      </CalmError>
+    );
+  }
 
   const sp = subjectProgress(units, learner.progress);
+  const keep = [trail.next?.id, pointAt].filter(Boolean);
+  const shown = nodesNear(trail.nodes, { ...(win || { top: 0, bottom: 1600 }), margin: 600, keep });
   const art = SUBJECT_ART[subjectId];
   const unit = currentUnit(units, learner.progress, start) || units[0];
   const content = getUnit(unit.id);
@@ -151,7 +209,6 @@ export default function Trail({ subjectId }) {
       if (before) {
         const tid = `${before.id}-trophy`;
         setPointAt(tid);
-        trophyRefs.current[tid]?.scrollIntoView({ block: "center", behavior: "smooth" });
       }
       return say(buddySays("trail.locked", { buddy: learner.buddy }));
     }
@@ -193,6 +250,7 @@ export default function Trail({ subjectId }) {
             overflowY: "auto",
             px: 1,
           }}
+          ref={scrollRef}
         >
           {firstVisit && (
             <Box
@@ -229,6 +287,8 @@ export default function Trail({ subjectId }) {
             />
           )}
           <Box
+            ref={trailRef}
+            data-stones={trail.nodes.length}
             sx={{
               position: "relative",
               width: "100%",
@@ -276,7 +336,7 @@ export default function Trail({ subjectId }) {
                 strokeLinejoin="round"
               />
             </svg>
-            {trail.nodes.map((node) => {
+            {shown.map((node) => {
               const pos = { left: `${(node.x / W) * 100}%`, top: `${(node.y / trail.height) * 100}%` };
               if (node.kind === "banner")
                 return (

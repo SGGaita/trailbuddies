@@ -16,6 +16,7 @@ from ..models import Family, FamilyMember, Invite, User
 from ..schemas import InviteIn, VerifyIn
 from ..security import aware, current_user, hash_token, membership, start_session
 from ..settings import get_settings
+from ..tasks import later
 from .auth import user_for_email
 
 router = APIRouter()
@@ -81,7 +82,7 @@ def invite(
     db.commit()
     fam = db.get(Family, family_id)
     link = f"{s.web_url}/invite?{urlencode({'token': token})}"
-    tasks.add_task(send_invite, email, link, user.name or "A parent", fam.name, body.role)
+    later(tasks, send_invite, email, link, user.name or "A parent", fam.name, body.role)
     return {"id": inv.id, "email": email, "role": body.role, "expires_at": aware(inv.expires_at).isoformat()}
 
 

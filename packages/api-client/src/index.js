@@ -112,6 +112,27 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     contentManifest: (channel) => request(`/content/manifest?channel=${encodeURIComponent(channel)}`),
     /** @param {string} file a pack's file name from the manifest */
     contentPack: (file) => request(`/content/packs/${encodeURIComponent(file)}`),
+    /** SAF-03: exports still downloadable. @param {string} familyId */
+    exports: (familyId) => request(`${fam(familyId)}/exports`),
+    /** SAF-03: build the ZIP and email the link. @param {string} familyId */
+    requestExport: (familyId) => post(`${fam(familyId)}/exports`),
+    /** SAF-04: email the owner a link to confirm. @param {string} familyId */
+    requestDeletion: (familyId) => post(`${fam(familyId)}/deletion`),
+    /** SAF-04: the emailed link. @param {string} token */
+    confirmDeletion: (token) => post("/families/deletion/confirm", { token }),
+    /** SAF-04: keep the family after all. @param {string} familyId */
+    undoDeletion: (familyId) => post(`${fam(familyId)}/deletion/undo`),
+    /** OPS-06 @param {string} familyId */
+    flags: (familyId) => request(`${fam(familyId)}/flags`),
+    /** Closed beta: join with an invite code. @param {string} familyId @param {string} code */
+    joinBeta: (familyId, code) => post(`${fam(familyId)}/beta`, { code }),
+    /**
+     * Grown-ups' feedback (beta). @param {string} familyId
+     * @param {{ kind: "idea" | "problem" | "praise", message: string, screen?: string, version?: string }} body
+     */
+    sendFeedback: (familyId, body) => post(`${fam(familyId)}/feedback`, body),
+    /** SAF-07 option 2: a scrubbed error report. @param {object} report */
+    reportError: (report) => post("/errors", report),
     /** @param {string} familyId @param {number} after */
     pullEvents: (familyId, after = 0) =>
       request(`/sync/events?family_id=${encodeURIComponent(familyId)}&after=${after}`),

@@ -89,3 +89,15 @@ def send_invite(to: str, link: str, inviter: str, family: str, role: str) -> Non
         + _button(link, "Accept the invitation")
         + f"<p>The link works for {days} days.</p>",
     )
+
+
+def send_notice(to: str, subject: str, lines: list[str], link: str = "", label: str = "") -> None:
+    """A plain notice (exports, deletion, retention warnings, consent review). ``lines`` are
+    plain text (escaped here for the HTML part)."""
+    if _unconfigured(link or subject):
+        return
+    text = "Hello!\n\n" + "\n\n".join(lines) + (f"\n\n{link}" if link else "") + "\n\nThe Trailbuddies team"
+    body = "<p>Hello!</p>" + "".join(f"<p>{html.escape(x)}</p>" for x in lines)
+    if link:
+        body += _button(html.escape(link, quote=True), html.escape(label or "Open Trailbuddies"))
+    _send(to, subject, text, body + "<p>The Trailbuddies team</p>")

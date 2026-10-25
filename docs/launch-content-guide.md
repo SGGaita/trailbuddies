@@ -1,13 +1,13 @@
-# Getting the Sprint 6 content live
+# Getting the content live
 
 Four jobs, in this order:
 
-1. Put the web app on Vercel, with previews for reviewing and production for children.
-2. Review the 22 draft units and mark each one `ready`.
-3. Make the 36 animal pictures, bring them in and approve them.
+1. Put the app on Vercel: the web app and the API in one project, the database on Supabase (Frankfurt).
+2. Review the draft units and mark each one `ready`.
+3. Make the animal pictures, bring them in and approve them (planned for Sprint 24, issue #252).
 4. Publish the content packs to R2.
 
-The API isn't on the VPS yet, so this guide does everything that's possible now. The production steps that wait for the VPS are marked **later**.
+**What changed (Sprint 7):** the API no longer waits for a VPS. It runs on Vercel next to the web app, at `/api`, and the database is on Supabase. [vercel-supabase.md](vercel-supabase.md) has every step; Step 1 below is the short version.
 
 Commands are for Windows, run from `C:\projects\trailbuddies`. Where cmd and PowerShell differ, both are shown.
 
@@ -28,40 +28,35 @@ pnpm install
 
 ---
 
-## Step 1. Put the web app on Vercel
+## Step 1. Put the app on Vercel and Supabase
 
-### 1a. Import the project (once)
+Follow [vercel-supabase.md](vercel-supabase.md). In short:
 
-1. Sign in at vercel.com with GitHub. Choose **Add New… → Project** and pick `SGGaita/trailbuddies`.
-2. **Root Directory:** `apps/web`. Vercel detects Next.js and pnpm. Leave the build and install commands as they are.
-3. Expand **Environment Variables** and add one for **Production only** (untick Preview and Development):
+1. **Supabase:** a Pro project in **Central EU (Frankfurt)**. Save the transaction pooler (port 6543) and session pooler (port 5432) connection strings in the password manager.
+2. **Tables:** run `alembic upgrade head` once from your PC with `TB_MIGRATE_DATABASE_URL` set to the session pooler. After that, GitHub Actions runs new migrations when you approve them.
+3. **Vercel:** one project with Root Directory = the **repository root**. The root `vercel.json` defines the `web` and `api` services, the Frankfurt region (`fra1`) and the nightly cron job.
+4. **Environment variables (Production):** the table in [vercel-supabase.md, Step 4b](vercel-supabase.md#4b-environment-variables), including:
 
    | Name | Value | Environments |
    |---|---|---|
-   | `NEXT_PUBLIC_TB_CHANNEL` | `production` | Production |
+   | `NEXT_PUBLIC_TB_CHANNEL` | `production` | Production only |
+   | `TB_DATABASE_URL` | Supabase transaction pooler (port 6543) | Production |
+   | `TB_MEDIA_BACKEND` and the `TB_S3_` values | R2 ([r2-setup.md](r2-setup.md)) | Production |
 
-   Leave it unset for Preview, so previews show drafts for review and production hides them.
-4. Click **Deploy**.
+   Leave `NEXT_PUBLIC_TB_CHANNEL` unset for Preview, so previews show drafts for review and production hides them. `TB_API_URL` isn't needed: `/api/*` goes straight to the API.
+5. **Check:** `https://<your domain>/api/health` shows `"status":"ok"`.
 
-Already imported the project? Add the variable under **Project → Settings → Environment Variables**, then choose **Deployments → … → Redeploy** on the latest production deployment. `NEXT_PUBLIC_` values are built into the app, so they only take effect after a new build.
+`NEXT_PUBLIC_` values are built into the app, so after changing one choose **Deployments → … → Redeploy**.
 
-### 1b. What works before the API is live
-
-- **The demo family** ("Try the demo family") plays fully, offline too.
-- **Sign-in, sync, the Lesson Builder and content packs** need the API. Add this variable once the API is on the VPS (**later**):
-
-  | Name | Value | Environments |
-  |---|---|---|
-  | `TB_API_URL` | `https://api.trailbuddies.africa` (your API domain) | Production and Preview |
-
-### 1c. Previews are for reviewing
+### Previews are for reviewing
 
 - Every branch you push gets its own preview URL, and so does every pull request. Its `/review` page lists every unit, drafts included.
 - Keep **Settings → Deployment Protection → Vercel Authentication** on for previews. Drafts are then only visible to people signed in to your Vercel team.
+- Don't give previews the production database. See "Previews" in [vercel-supabase.md, Step 4b](vercel-supabase.md#4b-environment-variables).
 - The Hobby plan is for non-commercial use. Move to Pro before charging families.
 
 **Check it worked:**
-- Open the production URL and go to Numbers Mountain in the demo. Units such as *Number shapes 0 to 10* show as **coming soon**.
+- Open the production URL and go to Numbers Mountain in the demo. Units that aren't `ready` show as **coming soon**.
 - On a preview URL, the same units are playable.
 
 ---
@@ -210,7 +205,7 @@ Upscale and download each picture.
 
 Packs let new or updated lessons reach devices without an app release. They only include `ready` units, so publish after Steps 2 and 3, and again whenever units change.
 
-Your API isn't on the VPS yet, so publish from your PC straight to R2. Devices start fetching the packs once the API is live and `TB_API_URL` is set (**later**).
+Publish from your PC straight to R2. Devices fetch the packs through `https://<your domain>/api/content/...`.
 
 ### 4a. Build the packs
 
@@ -266,9 +261,9 @@ You should see one `uploaded <subject>.<hash>.json` line per subject, then `uplo
 
 Close the terminal afterwards so the keys don't linger.
 
-### 4c. Check it from a device (later, once the API is live)
+### 4c. Check it from a device
 
-1. Open `https://<your API domain>/content/manifest?channel=production`. It should list your packs and release.
+1. Open `https://<your domain>/api/content/manifest?channel=production`. It should list your packs and release.
 2. Sign in on a device, open **Settings → Play without internet**, and tap **Download now**. Each subject shows ✓.
 
 ---
@@ -276,11 +271,11 @@ Close the terminal afterwards so the keys don't linger.
 ## Order at a glance
 
 1. Merge #246, then `git pull` and `pnpm install`.
-2. Vercel: import the project with Root Directory `apps/web` and `NEXT_PUBLIC_TB_CHANNEL=production` for Production only.
+2. Supabase (Frankfurt) and Vercel (Root Directory = repository root), as in [vercel-supabase.md](vercel-supabase.md).
 3. Review the 17 units without pictures, run `unit:ready` on each, then open a PR.
 4. Make the 36 animal pictures, then `assets:import`, check them in `/review`, `assets:approve` and `unit:ready`, then open a PR.
 5. Run `packs:build` and `app.packs publish` to R2.
-6. **Later**, with the API on the VPS: set `TB_API_URL` on Vercel, then check the manifest and downloads.
+6. Check `/api/content/manifest` and **Download now** on a device.
 
 ## Sources
 

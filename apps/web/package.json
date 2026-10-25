@@ -1,6 +1,6 @@
 {
   "name": "@trailbuddies/web",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,7 @@
     "@emotion/styled": "11.14.0",
     "@mui/material": "9.5.0",
     "@mui/material-nextjs": "9.5.0",
+    "@sentry/browser": "11.5.0",
     "@trailbuddies/api-client": "workspace:*",
     "@trailbuddies/content": "workspace:*",
     "@trailbuddies/domain": "workspace:*",
@@ -29,6 +30,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.56.0",
     "eslint": "^9.39.0",
     "eslint-config-next": "16.4.1"

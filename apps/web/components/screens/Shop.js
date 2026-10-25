@@ -191,7 +191,7 @@ export default function Shop() {
                   setTab(k);
                   setTryOn(null);
                 }}
-                sx={{ borderRadius: 999, borderWidth: 2, minHeight: 40 }}
+                sx={{ borderRadius: 999, borderWidth: 2, minHeight: 48 }}
               >
                 {k === "mine" ? t("shop.wardrobe") : t(`shop.slot.${k}`)}
               </Button>
