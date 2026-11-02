@@ -8,7 +8,7 @@ import { ALL_UNITS, ALL_ASSETS } from "./units/all.js";
 import buddyEn from "./buddy/en.json" with { type: "json" };
 import zipEn from "./buddy/en.zip.json" with { type: "json" };
 import tumiEn from "./buddy/en.tumi.json" with { type: "json" };
-import jumaEn from "./buddy/en.juma.json" with { type: "json" };
+import jumaEn from "./buddy/en.jumbo.json" with { type: "json" };
 import kikiEn from "./buddy/en.kiki.json" with { type: "json" };
 import builtInBadges from "./badges/built-in.json" with { type: "json" };
 import economy from "./economy.json" with { type: "json" };

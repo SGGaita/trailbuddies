@@ -1,10 +1,10 @@
 {
   "schema": "buddy-script/1",
-  "buddy": "juma",
+  "buddy": "jumbo",
   "lang": "en",
   "events": {
     "buddy.intro": [
-      "Hello! I'm Juma the elephant. I never forget a thing!"
+      "Hello! I'm Jumbo the elephant. I never forget a thing!"
     ],
     "lesson.correct": [
       "Trumpet time! That's right!",
