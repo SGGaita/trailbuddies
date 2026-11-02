@@ -8,8 +8,8 @@ import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { buddySays, economy } from "@trailbuddies/content";
-import { startLadder, answer, lessonOutcome, celebrationFor, restReason } from "@trailbuddies/domain";
+import { buddySays, economy, UNITS } from "@trailbuddies/content";
+import { startLadder, answer, lessonOutcome, celebrationFor, restReason, soundLines } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
 import { setSalvage, clearSalvageSoon } from "@/lib/salvage";
@@ -136,20 +136,22 @@ function Player({ where, learner }) {
 
   useEffect(() => stop, []);
 
-  // A grown-up's recordings say the card words in their own voice (BLD-01).
+  // A grown-up's recordings say the card words in their own voice (BLD-01), and the letter
+  // sounds they recorded play wherever this lesson says one (LES-19).
   useEffect(() => {
-    if (!plan.custom) return undefined;
     let live = true;
     const made = [];
-    plan.custom.cards
-      .filter((c) => c.voice)
-      .forEach((c) =>
-        mediaUrl(c.voice).then((url) => {
-          if (!live || !url) return;
-          made.push(url);
-          registerTextClip(c.label, url);
-        }),
-      );
+    const clips = [
+      ...(plan.custom?.cards || []).filter((c) => c.voice).map((c) => ({ text: c.label, media: c.voice })),
+      ...soundLines(Object.values(UNITS), useFamily.getState().sounds || {}),
+    ];
+    clips.forEach((c) =>
+      mediaUrl(c.media).then((url) => {
+        if (!live || !url) return;
+        made.push(url);
+        registerTextClip(c.text, url);
+      }),
+    );
     return () => {
       live = false;
       clearTextClips();

@@ -131,6 +131,15 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
      * @param {{ kind: "idea" | "problem" | "praise", message: string, screen?: string, version?: string }} body
      */
     sendFeedback: (familyId, body) => post(`${fam(familyId)}/feedback`, body),
+    /** FAM-05: a fresh link for an invitation. @param {string} familyId @param {number} inviteId */
+    resendInvite: (familyId, inviteId) => post(`${fam(familyId)}/invites/${inviteId}/resend`),
+    /** LES-19 @param {string} familyId */
+    sounds: (familyId) => request(`${fam(familyId)}/sounds`),
+    /** LES-19: link a recorded clip to a sound, or null for the device voice. */
+    putSound: (familyId, sound, mediaId) =>
+      request(`${fam(familyId)}/sounds/${encodeURIComponent(sound)}`, { method: "PUT", json: { media_id: mediaId } }),
+    /** HLP-02 @param {{ topic?: string, subject: string, message: string, diagnostics?: object | null }} body */
+    contactSupport: (body) => post("/support", body),
     /** SAF-07 option 2: a scrubbed error report. @param {object} report */
     reportError: (report) => post("/errors", report),
     /** @param {string} familyId @param {number} after */

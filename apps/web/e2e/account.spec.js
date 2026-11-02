@@ -152,6 +152,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "levels",
       "name",
       "outfit",
+      "picture_lock",
       "placement",
       "removing_at",
       "updated_at",

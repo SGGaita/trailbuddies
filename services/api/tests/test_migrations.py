@@ -49,6 +49,7 @@ def test_upgrade_creates_tables_and_downgrade_removes_them(tmp_path):
         "levels",
         "wish",
         "removing_at",
+        "picture_lock",
         "created_at",
         "updated_at",
     }

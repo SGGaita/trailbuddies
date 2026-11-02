@@ -49,6 +49,7 @@ const familyOut = (srv, fam, role = "owner") => ({
   region: countryRules(fam.country).region,
   consent: srv.consents[fam.id] || null,
   cohorts: fam.cohorts || [],
+  sounds: fam.sounds || {},
   flags: { "beta-feedback": false, "beta-faq": false, ...(srv.flags[fam.id] || {}) },
   deletion: srv.deletions[fam.id]?.purge_after ? { purge_after: srv.deletions[fam.id].purge_after } : null,
   learners: Object.values(srv.learners)
@@ -67,6 +68,7 @@ const defaultSettings = () => ({
   breaks: 0,
   captions: true,
   calm: "device",
+  emails: { digest: true, badges: false, wishes: false },
 });
 
 /**
@@ -163,7 +165,7 @@ export async function fakeApi(context, srv) {
     }
     if (path === "/invites/accept" && method === "POST") {
       const inv = srv.invites[body.token];
-      if (!inv || inv.accepted)
+      if (!inv || inv.accepted || inv.expired || inv.dead)
         return json(route, 400, { detail: "This invitation has expired or was already used." });
       inv.accepted = true;
       const [u] = userFor(inv.email);
@@ -292,9 +294,52 @@ export async function fakeApi(context, srv) {
           .filter((x) => x.family === m[1])
           .map((x) => ({ user_id: x.user, ...srv.users[x.user], role: x.role, you: x.user === userId })),
         invites: Object.values(srv.invites)
-          .filter((i) => i.family === m[1] && !i.accepted)
+          .filter((i) => i.family === m[1] && !i.accepted && !i.expired && !i.dead)
           .map((i) => ({ id: i.id, email: i.email, role: i.role, expires_at: "2030-01-01T00:00:00Z" })),
+        // FAM-05: the invitation log, newest first.
+        history: Object.values(srv.invites)
+          .filter((i) => i.family === m[1] && !i.dead)
+          .reverse()
+          .map((i) => ({
+            id: i.id,
+            email: i.email,
+            role: i.role,
+            invited_by: "Grace",
+            status: i.accepted ? "accepted" : i.expired ? "expired" : "pending",
+            created_at: "2026-10-01T10:00:00Z",
+            resent_at: i.resent_at || null,
+            accepted_at: i.accepted ? "2026-10-02T10:00:00Z" : null,
+          })),
       });
+    m = path.match(/^\/families\/([^/]+)\/invites\/(\d+)\/resend$/);
+    if (m && method === "POST") {
+      const entry = Object.entries(srv.invites).find(([, i]) => i.id === Number(m[2]));
+      if (!entry) return json(route, 404, { detail: "Invitation not found" });
+      const [oldToken, inv] = entry;
+      const token = `${oldToken}-r${Date.now()}`;
+      srv.invites[oldToken] = { ...inv, dead: true }; // the old link stops working
+      srv.invites[token] = { ...inv, expired: false, resent_at: new Date().toISOString() };
+      srv.sent.push({ to: inv.email, token, kind: "invite" });
+      return json(route, 200, { id: inv.id, status: "pending" });
+    }
+    // LES-19 letter sounds, HLP-02 support.
+    m = path.match(/^\/families\/([^/]+)\/sounds\/([a-z]+)$/);
+    if (m && method === "PUT") {
+      if (role === "viewer") return forbidViewer();
+      const f = srv.families[m[1]];
+      f.sounds = { ...(f.sounds || {}) };
+      if (body.media_id) {
+        if (!srv.media[body.media_id]) return json(route, 422, { detail: "Record the sound first" });
+        f.sounds[m[2]] = body.media_id;
+      } else delete f.sounds[m[2]];
+      return json(route, 200, { sounds: f.sounds });
+    }
+    if (path === "/support" && method === "POST") {
+      const ref = `TB-${"ABCDE".slice(0, 5)}`;
+      srv.support = [...(srv.support || []), { ...body, ref }];
+      srv.sent.push({ to: user.email, kind: "support", ref });
+      return json(route, 201, { ref });
+    }
     m = path.match(/^\/families\/([^/]+)\/invites$/);
     if (m && method === "POST") {
       if (role === "viewer") return forbidViewer();

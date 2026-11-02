@@ -23,11 +23,12 @@ async function derive(pin, salt, iterations) {
 
 /**
  * @param {string} pin
+ * @param {number} [iterations] fewer for a child's picture password (pictures.js)
  * @returns {Promise<{ salt: string, hash: string, iterations: number }>}
  */
-export async function hashPin(pin) {
+export async function hashPin(pin, iterations = ITERATIONS) {
   const salt = b64(globalThis.crypto.getRandomValues(new Uint8Array(16)));
-  return { salt, hash: await derive(pin, salt, ITERATIONS), iterations: ITERATIONS };
+  return { salt, hash: await derive(pin, salt, iterations), iterations };
 }
 
 /**

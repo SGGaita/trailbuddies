@@ -11,6 +11,7 @@ import { t } from "@trailbuddies/i18n";
 import { economy, buddyLine } from "@trailbuddies/content";
 import { createEvent } from "@trailbuddies/sync";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
+import { canEdit } from "@/lib/account";
 import { speak } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import { OUTFITS } from "@/lib/art";
@@ -71,6 +72,7 @@ export default function Shop() {
   const router = useRouter();
   const [tab, setTab] = useState("hat");
   const [tryOn, setTryOn] = useState(/** @type {string | null} */ (null));
+  const editable = useFamily(canEdit);
   const [dialog, setDialog] = useState(/** @type {null | "buy" | "need"} */ (null));
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
@@ -165,10 +167,13 @@ export default function Shop() {
                   <Button variant="contained" onClick={wear}>
                     {wearing ? t("shop.takeOff") : t("shop.wear")}
                   </Button>
-                ) : (
+                ) : editable ? (
                   <Button variant="contained" color="secondary" onClick={buy}>
                     {t("shop.buyFor", { price: sel.price })}
                   </Button>
+                ) : (
+                  // FAM-06: a view-only carer's device can't spend a child's treasures.
+                  <Typography sx={{ fontWeight: 700, textAlign: "center" }}>{t("shop.viewerOnly")}</Typography>
                 )}
               </>
             ) : (

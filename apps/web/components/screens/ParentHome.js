@@ -19,6 +19,7 @@ import { Star, Gem } from "@/components/Coins";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import WhatsNew from "@/components/WhatsNew";
+import FirstSteps from "@/components/FirstSteps";
 
 const BAND = {
   seedling: "Seedling",
@@ -54,7 +55,7 @@ export default function ParentHome() {
       right={
         <IconButton
           component={Link}
-          href="/family/settings"
+          href="/family/help"
           aria-label="Help"
           sx={{ border: `1.5px solid ${colors.line}`, color: "text.primary" }}
         >
@@ -63,6 +64,7 @@ export default function ParentHome() {
       }
     >
       <WhatsNew />
+      <FirstSteps />
       {s.waiting.length > 0 && (
         <Card
           sx={{

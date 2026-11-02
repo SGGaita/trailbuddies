@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS = {
   breaks: 0,
   captions: true,
   calm: "device",
+  emails: { digest: true, badges: false, wishes: false },
 };
 
 const empty = () => ({
@@ -56,6 +57,12 @@ const empty = () => ({
   lessons: /** @type {any[]} */ ([]),
   /** Lessons deleted on this device that the server still has. */
   removedLessons: /** @type {string[]} */ ([]),
+  /** LES-19: letter-sound recordings, sound id -> media id (the family's, on every device). */
+  sounds: /** @type {Record<string, string>} */ ({}),
+  /** Sound changes made on this device that the server doesn't have yet (null = device voice). */
+  soundEdits: /** @type {Record<string, string | null>} */ ({}),
+  /** Grown-up tips dismissed on this device (ONB-12). */
+  tips: /** @type {Record<string, boolean>} */ ({}),
 });
 
 /** Called after local changes so account mode can sync (set by lib/account.js). */
@@ -199,6 +206,18 @@ export const useFamily = create(
         const gone = overdueRemovals(get().removing).map((l) => l.id);
         if (gone.length) set((s) => ({ removing: s.removing.filter((l) => !gone.includes(l.id)) }));
       },
+      /** LES-19: use a recording for a sound, or null for the device voice. */
+      setSound: (sound, mediaId) => {
+        set((s) => {
+          const sounds = { ...s.sounds };
+          if (mediaId) sounds[sound] = mediaId;
+          else delete sounds[sound];
+          return { sounds, soundEdits: s.mode === "account" ? { ...s.soundEdits, [sound]: mediaId } : s.soundEdits };
+        });
+        afterChange();
+      },
+      /** @param {string} name */
+      dismissTip: (name) => set((s) => ({ tips: { ...s.tips, [name]: true } })),
       /** OFF-06: the app version whose "What's new" the grown-ups have seen. @param {string} v */
       markSeen: (v) => set({ seenVersion: v }),
       /** @param {string} learnerId @param {"auto" | "1" | "2" | "3"} difficulty */
@@ -262,7 +281,13 @@ export const useFamily = create(
         lessons,
         removedLessons,
         seenVersion,
+        sounds,
+        soundEdits,
+        tips,
       }) => ({
+        sounds,
+        soundEdits,
+        tips,
         removed,
         removing,
         seenVersion,

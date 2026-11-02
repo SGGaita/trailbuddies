@@ -102,6 +102,7 @@ def learner_out(lr: Learner) -> dict:
         "levels": lr.levels or {},
         "wish": lr.wish,
         "removing_at": aware(lr.removing_at).isoformat() if lr.removing_at else None,
+        "picture_lock": lr.picture_lock,
         "purge_after": aware(lr.removing_at + timedelta(days=UNDO_DAYS)).isoformat()
         if lr.removing_at
         else None,
@@ -131,6 +132,7 @@ def family_out(db: DbSession, fam: Family, role: str) -> dict:
         "pin": fam.pin,
         "updated_at": aware(fam.updated_at).isoformat(),
         "cohorts": fam.cohorts or [],
+        "sounds": fam.sounds or {},
         "flags": flags_for(db, fam),
         "deletion": {"purge_after": aware(gone.purge_after).isoformat()}
         if gone and gone.purge_after

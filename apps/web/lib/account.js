@@ -26,6 +26,7 @@ export const learnerToApi = (l) => ({
   levels: l.levels || {},
   wish: l.wish || null,
   removing_at: l.removing_at || null,
+  picture_lock: l.picture_lock || null,
   updated_at: l.updated_at,
 });
 export const learnerFromApi = (a) => ({
@@ -41,6 +42,7 @@ export const learnerFromApi = (a) => ({
   levels: a.levels || {},
   wish: a.wish ?? null,
   removing_at: a.removing_at || null,
+  picture_lock: a.picture_lock || null,
   updated_at: a.updated_at,
 });
 
@@ -158,7 +160,14 @@ function applyMe(me) {
           parent: me.user.name || "",
         }
     : null;
+  // LES-19: the family's recordings, with changes from this device that haven't synced yet.
+  const sounds = { ...(fam?.sounds || {}) };
+  for (const [k, v] of Object.entries(s.soundEdits || {})) {
+    if (v) sounds[k] = v;
+    else delete sounds[k];
+  }
   useFamily.setState({
+    sounds,
     mode: "account",
     user: me.user,
     family: family && { ...family, parent: me.user.name || "" },
@@ -271,6 +280,27 @@ async function pushProfiles() {
   }
 }
 
+/** LES-19: send letter-sound changes once their clips have uploaded. */
+async function pushSounds() {
+  const s = get();
+  const fam = s.family;
+  if (!fam?.id || fam.role === "viewer") return;
+  for (const [sound, media] of Object.entries(s.soundEdits || {})) {
+    try {
+      await api.putSound(fam.id, sound, media);
+    } catch (e) {
+      // The clip hasn't reached the server yet (offline, or waiting to upload): try next sync.
+      if (e instanceof ApiError && e.status === 422) continue;
+      throw e;
+    }
+    useFamily.setState((st) => {
+      const soundEdits = { ...st.soundEdits };
+      if (soundEdits[sound] === media) delete soundEdits[sound];
+      return { soundEdits };
+    });
+  }
+}
+
 let syncer = null;
 let syncerFor = null;
 let queued = null;
@@ -310,6 +340,7 @@ export async function syncNow() {
     await pushProfiles();
     // Photos and clips first, then the lessons that use them (a card works locally meanwhile).
     await uploadMedia(api);
+    await pushSounds();
     await pushLessons();
     // Carers only read: their devices pull progress but never upload.
     if (get().family?.role === "viewer") await syncer.pull();

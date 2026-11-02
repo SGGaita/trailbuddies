@@ -17,6 +17,7 @@ Keep every password, key, token and connection string in the password manager. P
 | Database | Supabase, Pro, `eu-central-1` (Frankfurt) | The API uses the transaction pooler (port 6543) |
 | Migrations | GitHub Actions, "Migrate production database" | Uses the session pooler (port 5432) |
 | Nightly privacy job | Vercel Cron, 03:15 UTC | Calls `/api/cron/daily` with `CRON_SECRET` |
+| Weekly badge email and metrics | Vercel Cron, Sunday 17:00 UTC | Calls `/api/cron/weekly` (evening in East and West Africa, afternoon in the UK) |
 | Photos, clips, packs, exports | Cloudflare R2 | `TB_MEDIA_BACKEND=s3` is required on Vercel |
 
 The root `vercel.json` already describes the two services, the Frankfurt region and the cron job.
@@ -113,6 +114,7 @@ The root `vercel.json` defines both services, so the project's Root Directory mu
 | `CRON_SECRET` 🔒 | a long random value (Vercel sends it to the cron route) |
 | `TB_BETA_CODE_REQUIRED` | `true` (new families need an invite code) |
 | `TB_REVIEW_EMAIL` | where "a US consent form is waiting" emails go |
+| `TB_SUPPORT_EMAIL` | where Contact support messages go (they're also stored: `python -m app.admin support`) |
 | `NEXT_PUBLIC_TB_CHANNEL` | `production` |
 | `TB_SENTRY_DSN` 🔒, `NEXT_PUBLIC_SENTRY_DSN` 🔒 | optional: Sentry project DSNs (see [monitoring.md](monitoring.md)) |
 
@@ -134,7 +136,7 @@ A long random value: in PowerShell, `[Convert]::ToBase64String((1..48 | % { Get-
    - `"database":"unavailable"`: check `TB_DATABASE_URL` uses port 6543 and `postgresql+psycopg://`.
    - `"media":"misconfigured"`: set `TB_MEDIA_BACKEND=s3`.
 2. Make invite codes for the first families (Step 6), then sign up on a phone with one. The sign-in email should arrive within a minute.
-3. **Vercel → Settings → Cron Jobs**: `/api/cron/daily` is listed. Click **Run** once; the function log shows a line of counts such as `{"history": 0, ...}`.
+3. **Vercel → Settings → Cron Jobs**: `/api/cron/daily` and `/api/cron/weekly` are listed. Click **Run** once; the function log shows a line of counts such as `{"history": 0, ...}`.
 4. `https://<your domain>/api/content/manifest?channel=production` lists your packs once they're published ([launch-content-guide.md](launch-content-guide.md), Step 4).
 
 ## Step 6. Admin tasks from your PC
@@ -167,6 +169,9 @@ python -m app.admin consents
 | Grown-ups' feedback | `python -m app.admin feedback --days 7` |
 | Our own error log | `python -m app.admin errors --days 1` |
 | Run the nightly job now | `python -m app.admin daily` |
+| Send the weekly emails and compute metrics now | `python -m app.admin weekly` |
+| Product metrics, newest week first | `python -m app.admin metrics --weeks 8` (add `--json` for a dashboard) |
+| Contact-support messages | `python -m app.admin support --days 7` |
 
 Approving or rejecting a consent emails the parent, so set the `TB_SMTP_` variables in that terminal too, or the email is only written to the log.
 
