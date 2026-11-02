@@ -22,7 +22,7 @@ export default function BetaHelp() {
   if (!ready) return <Loading />;
   if (!on)
     return (
-      <Placeholder area="family" href="/family/help" title={t("beta.faqTitle")} sprint="—" story="OPS-06" />
+      <Placeholder area="family" href="/family/help/beta" title={t("beta.faqTitle")} sprint="—" story="OPS-06" />
     );
   return (
     <FamilyShell
@@ -30,7 +30,7 @@ export default function BetaHelp() {
       sub={t("beta.faqSub")}
       family={family}
       active="/family/settings"
-      back="/family/settings"
+      back="/family/help"
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {Array.from({ length: FAQ_COUNT }, (_, i) => i + 1).map((n) => (

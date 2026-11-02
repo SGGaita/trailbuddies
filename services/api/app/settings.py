@@ -73,6 +73,8 @@ class Settings(BaseSettings):
     beta_code_required: bool = False
     # Where "a US consent form is waiting for review" emails go (ONB-06b). Empty: log only.
     review_email: str = ""
+    # Where "Contact support" messages go (HLP-02). Empty: stored only (python -m app.admin support).
+    support_email: str = ""
 
     @property
     def error_backend(self) -> str:

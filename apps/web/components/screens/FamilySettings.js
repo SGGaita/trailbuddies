@@ -19,10 +19,11 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { getSubjects, getReadyUnits } from "@trailbuddies/content";
-import { DIFFICULTY_SETTINGS, describeLevel } from "@trailbuddies/domain";
+import { DIFFICULTY_SETTINGS, describeLevel, formatDate } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import { api, signOut, signOutEverywhere, syncNow } from "@/lib/account";
 import { LearnersSection, PrivacySection, BetaSection } from "./PrivacySettings";
+import { EmailsSection, SoundsSection } from "./FamilySections";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
@@ -255,6 +256,34 @@ function GrownUpsSection() {
           </Box>
         ))}
       </Box>
+      {(data?.history || []).length > 0 && (
+        <Box component="details" sx={{ mt: 1.5 }} data-testid="invite-log">
+          <Box component="summary" sx={{ cursor: "pointer", fontWeight: 800, minHeight: 48, display: "flex", alignItems: "center" }}>
+            {t("invites.log")}
+          </Box>
+          <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1 }}>
+            {data.history.map((h) => (
+              <Box component="li" key={h.id} sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                <Typography sx={{ flex: 1, minWidth: 200, fontSize: 14 }}>
+                  {t("invites.entry", {
+                    email: h.email,
+                    role: t(`settings.role.${h.role}`),
+                    by: h.invited_by,
+                    date: formatDate(h.resent_at || h.created_at, family.country),
+                  })}{" "}
+                  <b>{t(`invites.status.${h.status}`)}</b>
+                  {h.accepted_at ? ` ${formatDate(h.accepted_at, family.country)}` : ""}
+                </Typography>
+                {manager && (h.status === "expired" || h.status === "cancelled") && (
+                  <Button size="small" variant="outlined" onClick={() => act(() => api.resendInvite(id, h.id))}>
+                    {t("invites.resend")}
+                  </Button>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )}
       {error && (
         <Alert severity="warning" sx={{ mt: 1.5 }}>
           {error}
@@ -388,6 +417,8 @@ export default function FamilySettings() {
             </Box>
           )}
         </Section>
+        <SoundsSection />
+        <EmailsSection disabled={viewer} />
         <PrivacySection />
         <BetaSection />
       </Box>

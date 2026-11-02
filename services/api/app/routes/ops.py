@@ -8,7 +8,9 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
+from ..metrics import store_weeks
 from ..models import ErrorReport
+from ..notify import weekly_digest
 from ..privacy import daily
 from ..schemas import ErrorIn
 from ..scrub import scrub_text
@@ -19,6 +21,12 @@ router = APIRouter()
 ERRORS_PER_HOUR = 300
 
 
+def cron_allowed(authorization: str) -> None:
+    secret = get_settings().cron_secret
+    if not secret or not secrets.compare_digest(authorization, f"Bearer {secret}"):
+        raise HTTPException(401, "Not allowed")
+
+
 @router.get("/cron/daily")
 def cron_daily(
     authorization: str = Header(default=""),
@@ -26,10 +34,18 @@ def cron_daily(
     storage=Depends(get_storage),
 ) -> dict:
     """Vercel Cron calls this once a day with "Authorization: Bearer $CRON_SECRET"."""
-    secret = get_settings().cron_secret
-    if not secret or not secrets.compare_digest(authorization, f"Bearer {secret}"):
-        raise HTTPException(401, "Not allowed")
+    cron_allowed(authorization)
     return daily(db, storage)
+
+
+@router.get("/cron/weekly")
+def cron_weekly(authorization: str = Header(default=""), db: DbSession = Depends(get_session)) -> dict:
+    """Sunday 17:00 UTC (evening in East and West Africa and Europe): the weekly badge email
+    (BDG-06) and last week's product metrics (OPS-07)."""
+    cron_allowed(authorization)
+    sent = weekly_digest(db)
+    weeks = store_weeks(db)
+    return {"digests": sent, "metrics_weeks": [w.isoformat() for w in weeks]}
 
 
 @router.post("/errors", status_code=204)

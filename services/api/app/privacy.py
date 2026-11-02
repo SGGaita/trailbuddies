@@ -38,6 +38,7 @@ from .models import (
     LoginToken,
     MediaAsset,
     Session,
+    SupportTicket,
     User,
 )
 from .security import aware
@@ -83,7 +84,7 @@ def release_media(db: DbSession, family_id: str, ids: set[str], now: datetime | 
     """A lesson was deleted: its photos and clips that no other lesson uses start their 30 days."""
     if not ids:
         return 0
-    still = set()
+    still = set((db.scalar(select(Family.sounds).where(Family.id == family_id)) or {}).values())
     for cards in db.scalars(select(CustomLesson.cards).where(CustomLesson.family_id == family_id)):
         still |= media_ids(cards)
     gone = ids - still
@@ -151,6 +152,7 @@ def family_record(db: DbSession, fam: Family) -> dict:
                     "levels",
                     "wish",
                     "removing_at",
+                    "picture_lock",
                     "created_at",
                     "updated_at",
                 ],
@@ -181,6 +183,11 @@ def family_record(db: DbSession, fam: Family) -> dict:
             _row(f, ["kind", "message", "screen", "created_at"])
             for f in db.scalars(select(Feedback).where(Feedback.family_id == fid))
         ],
+        "support": [
+            _row(t, ["ref", "topic", "subject", "message", "diagnostics", "created_at"])
+            for t in db.scalars(select(SupportTicket).where(SupportTicket.family_id == fid))
+        ],
+        "letter_sounds": fam.sounds or {},
     }
 
 

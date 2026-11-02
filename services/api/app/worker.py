@@ -9,6 +9,8 @@ from arq.cron import cron
 from sqlalchemy.orm import Session
 
 from .db import get_engine, utcnow
+from .metrics import store_weeks
+from .notify import weekly_digest
 from .privacy import daily
 from .settings import get_settings
 from .storage import get_storage
@@ -28,9 +30,19 @@ async def purge_job(ctx) -> dict:
     return purge()
 
 
+async def weekly_job(ctx) -> dict:
+    """Sunday 17:00 UTC: weekly badge email and product metrics (same as /cron/weekly)."""
+    with Session(get_engine()) as db:
+        return {"digests": weekly_digest(db), "metrics": [str(w) for w in store_weeks(db)]}
+
+
 class WorkerSettings:
-    functions = [heartbeat, purge_job]
-    cron_jobs = [cron(heartbeat, minute={0, 30}), cron(purge_job, hour={3}, minute={15})]
+    functions = [heartbeat, purge_job, weekly_job]
+    cron_jobs = [
+        cron(heartbeat, minute={0, 30}),
+        cron(purge_job, hour={3}, minute={15}),
+        cron(weekly_job, weekday={6}, hour={17}, minute={0}),
+    ]
     redis_settings = RedisSettings.from_dsn(get_settings().redis_url)
     # Refresh the Redis health key often so `arq --check` (the compose healthcheck)
     # recovers within 30 s of a Redis restart instead of arq's default hour.

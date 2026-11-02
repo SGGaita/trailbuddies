@@ -23,6 +23,7 @@ import {
 import { useFamily, useFlag } from "@/lib/store";
 import { requestExport, requestDeletion, undoDeletion, api } from "@/lib/account";
 import LearnerAvatar from "@/components/LearnerAvatar";
+import { PictureLockSetup } from "@/components/PictureLock";
 import { Frame } from "./SettingsSections";
 
 const MONTHS = [
@@ -195,6 +196,8 @@ export function LearnersSection({ disabled }) {
   const country = useFamily((s) => s.family?.country);
   const [edit, setEdit] = useState(null);
   const [remove, setRemove] = useState(null);
+  const [lockFor, setLockFor] = useState(null);
+  const updateLearner = useFamily((s) => s.updateLearner);
   const row = {
     display: "flex",
     alignItems: "center",
@@ -213,8 +216,25 @@ export function LearnersSection({ disabled }) {
             <Typography sx={{ fontWeight: 800 }}>{l.name}</Typography>
             <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
               {MONTHS[(l.birth?.month || 1) - 1]} {l.birth?.year}
+              {l.picture_lock ? ` · ${t("pictures.on")}` : ""}
             </Typography>
           </Box>
+          <Button
+            disabled={disabled}
+            onClick={() => setLockFor(l)}
+            aria-label={t(l.picture_lock ? "pictures.resetFor" : "pictures.setFor", { name: l.name })}
+          >
+            {l.picture_lock ? t("pictures.reset") : t("pictures.set")}
+          </Button>
+          {l.picture_lock && (
+            <Button
+              disabled={disabled}
+              onClick={() => updateLearner(l.id, { picture_lock: null })}
+              aria-label={t("pictures.offFor", { name: l.name })}
+            >
+              {t("pictures.off")}
+            </Button>
+          )}
           <Button
             variant="outlined"
             sx={{ borderWidth: 2 }}
@@ -252,6 +272,16 @@ export function LearnersSection({ disabled }) {
         </Box>
       ))}
       {edit && <EditLearner learner={edit} onClose={() => setEdit(null)} />}
+      {lockFor && (
+        <PictureLockSetup
+          learner={lockFor}
+          onClose={() => setLockFor(null)}
+          onSave={(lock) => {
+            updateLearner(lockFor.id, { picture_lock: lock });
+            setLockFor(null);
+          }}
+        />
+      )}
       {remove && <RemoveLearner learner={remove} onClose={() => setRemove(null)} />}
     </Frame>
   );
@@ -438,7 +468,7 @@ export function BetaSection() {
         {faq && (
           <Button
             component={Link}
-            href="/family/help"
+            href="/family/help/beta"
             variant="outlined"
             sx={{ borderWidth: 2, alignSelf: "flex-start" }}
           >

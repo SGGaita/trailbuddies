@@ -30,3 +30,6 @@ export * from "./flags.js";
 export * from "./release.js";
 export * from "./virtual.js";
 export * from "./voice.js";
+export * from "./pictures.js";
+export * from "./sounds.js";
+export * from "./firstSteps.js";

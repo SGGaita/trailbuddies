@@ -203,3 +203,4 @@ export function searchLibrary(query) {
   return [...byName, ...byTag];
 }
 export { LEGAL } from "./legal/en.js";
+export { HELP_TOPICS, HELP_ARTICLES, searchHelp, helpFor } from "./help/en.js";

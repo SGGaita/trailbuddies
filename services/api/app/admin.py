@@ -13,11 +13,15 @@
     python -m app.admin feedback [--days 7]         grown-ups' feedback
     python -m app.admin errors [--days 1]           our own error log (when not using Sentry)
     python -m app.admin daily                       run the nightly privacy job now
+    python -m app.admin weekly                      send the weekly badge emails and compute metrics now
+    python -m app.admin metrics [--weeks 8] [--json] product metrics (OPS-07), newest week first
+    python -m app.admin support [--days 7]          messages sent with Contact support
 
 Prints no children's data: families are shown by id, feedback has names replaced already.
 """
 
 import argparse
+import json
 import sys
 from datetime import timedelta
 
@@ -27,7 +31,19 @@ from sqlalchemy.orm import Session
 from . import mailer
 from .db import get_engine, utcnow
 from .flags import KNOWN, new_code, set_flag
-from .models import BetaCode, Consent, ErrorReport, Family, FeatureFlag, Feedback, User
+from .metrics import store_weeks
+from .models import (
+    BetaCode,
+    Consent,
+    ErrorReport,
+    Family,
+    FeatureFlag,
+    Feedback,
+    SupportTicket,
+    User,
+    WeeklyMetric,
+)
+from .notify import weekly_digest
 from .privacy import daily
 from .settings import get_settings
 from .storage import get_storage
@@ -122,6 +138,45 @@ def _errors(db: Session, a) -> None:
         print(f"{n:5}x  last {last:%m-%d %H:%M}  {screen or '-':24} {message}")
 
 
+METRIC_COLUMNS = [
+    ("families_new", "new fam"),
+    ("activation_rate", "activated"),
+    ("active_families", "act fam"),
+    ("active_learners", "learners"),
+    ("lessons", "lessons"),
+    ("lessons_per_learner", "per lrn"),
+    ("minutes", "minutes"),
+    ("retention_rate", "kept"),
+]
+
+
+def _metrics(db: Session, a) -> None:
+    if not db.scalar(select(func.count()).select_from(WeeklyMetric)):
+        store_weeks(db)
+    rows = db.scalars(select(WeeklyMetric).order_by(WeeklyMetric.week_start.desc()).limit(a.weeks)).all()
+    if a.json:
+        print(json.dumps([{"week": r.week_start.isoformat(), **r.data} for r in rows], indent=2))
+        return
+    print("week        " + " ".join(f"{label:>9}" for _, label in METRIC_COLUMNS))
+    for r in rows:
+        cells = []
+        for key, _ in METRIC_COLUMNS:
+            v = r.data.get(key)
+            cells.append(f"{'-' if v is None else (f'{v:.0%}' if key.endswith('rate') else v):>9}")
+        print(f"{r.week_start}  " + " ".join(cells))
+
+
+def _support(db: Session, a) -> None:
+    since = utcnow() - timedelta(days=a.days)
+    for t in db.scalars(
+        select(SupportTicket).where(SupportTicket.created_at > since).order_by(SupportTicket.created_at)
+    ):
+        print(f"{t.ref} {t.created_at:%Y-%m-%d %H:%M} {t.topic:8} {t.subject}")
+        print(f"    {t.message[:300]}")
+        if t.diagnostics:
+            print(f"    diagnostics: {t.diagnostics}")
+
+
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(prog="python -m app.admin", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -148,10 +203,19 @@ def main(argv=None) -> None:
     e = sub.add_parser("errors")
     e.add_argument("--days", type=int, default=1)
     sub.add_parser("daily")
+    sub.add_parser("weekly")
+    mt = sub.add_parser("metrics")
+    mt.add_argument("--weeks", type=int, default=8)
+    mt.add_argument("--json", action="store_true")
+    sp = sub.add_parser("support")
+    sp.add_argument("--days", type=int, default=7)
     a = p.parse_args(argv)
     with Session(get_engine()) as db:
         if a.cmd == "daily":
             print(daily(db, get_storage()))
+            return
+        if a.cmd == "weekly":
+            print({"digests": weekly_digest(db), "metrics": [str(w) for w in store_weeks(db)]})
             return
         {
             "flags": _flags,
@@ -160,6 +224,8 @@ def main(argv=None) -> None:
             "consents": _consents,
             "feedback": _feedback,
             "errors": _errors,
+            "metrics": _metrics,
+            "support": _support,
         }[a.cmd](db, a)
 
 

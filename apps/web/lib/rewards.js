@@ -27,7 +27,8 @@ export function badgeEvents(profile, allEvents, added, { goal, now = new Date() 
   const view = learnerView(profile, [...allEvents, ...added], now, { goal });
   const earned = newBadges(builtInBadges, { ...view, now });
   const events = earned.flatMap((b) => [
-    createEvent("badge_awarded", profile.id, { badgeId: b.id, tier: b.tier }, now),
+    // The name travels with the event so the weekly email (BDG-06) can say which badge it was.
+    createEvent("badge_awarded", profile.id, { badgeId: b.id, tier: b.tier, name: b.name }, now),
     createEvent(
       "treasure_earned",
       profile.id,

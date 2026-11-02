@@ -9,7 +9,20 @@ from sqlalchemy.orm import Session
 
 from . import __version__
 from .db import get_session
-from .routes import auth, beta, content, families, lessons, media, members, ops, privacy, sync
+from .routes import (
+    auth,
+    beta,
+    content,
+    families,
+    lessons,
+    media,
+    members,
+    ops,
+    privacy,
+    sounds,
+    support,
+    sync,
+)
 from .scrub import scrub_sentry_event
 from .settings import Settings, get_settings
 
@@ -87,6 +100,8 @@ def create_app() -> FastAPI:
         privacy.router,
         beta.router,
         ops.router,
+        sounds.router,
+        support.router,
     ):
         app.include_router(r)
 

@@ -3,7 +3,7 @@
 // gets a fresh cache version.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { getSubjects, ALL_ASSETS, ART_BASE } from "@trailbuddies/content";
+import { getSubjects, ALL_ASSETS, ART_BASE, HELP_ARTICLES } from "@trailbuddies/content";
 import { PLAY_MORE, FAMILY, TEACH } from "@/lib/placeholders";
 
 export const dynamic = "force-static";
@@ -27,6 +27,14 @@ const PAGES = [
   "/family/create/preview",
   "/family/progress",
   "/family",
+  // HLP-01: help works offline.
+  "/family/help",
+  "/family/help/beta",
+  "/family/help/contact",
+  ...HELP_ARTICLES.map((a) => `/family/help/${a.id}`),
+  "/family/sounds",
+  "/privacy",
+  "/terms",
   ...Object.keys(FAMILY).map((k) => `/family/${k}`),
   "/teach",
   ...Object.keys(TEACH).map((k) => `/teach/${k}`),

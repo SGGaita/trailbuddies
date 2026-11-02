@@ -2,12 +2,13 @@
 never collide (development plan §4.3). Children never have accounts: they are learner
 profiles owned by a family (concept report §4.2)."""
 
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     JSON,
     BigInteger,
     Boolean,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -65,6 +66,18 @@ class Family(Timestamped, Base):
     retention_notice: Mapped[str | None] = mapped_column(
         String(8), nullable=True, doc="inactivity warning already sent: first (23 months) or final"
     )
+    sounds: Mapped[dict] = mapped_column(
+        JSON,
+        default=dict,
+        server_default="{}",
+        doc="a grown-up's letter-sound recordings, sound id -> voice media id (LES-19)",
+    )
+    badge_mail_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="last 'new badge' email (PAR-07), at most hourly"
+    )
+    digest_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="last weekly badge digest (BDG-06)"
+    )
     members: Mapped[list["FamilyMember"]] = relationship(
         back_populates="family", cascade="all, delete-orphan"
     )
@@ -110,6 +123,11 @@ class Learner(Timestamped, Base):
     )
     removing_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, doc="removal asked for; deleted 7 days later (FAM-03)"
+    )
+    picture_lock: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        doc="optional picture password (FAM-02): {salt, hash, iterations, hint}, hashed on the device",
     )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     family: Mapped[Family] = relationship(back_populates="learners")
@@ -217,6 +235,8 @@ class Invite(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    resent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class MediaAsset(Base):
@@ -342,3 +362,30 @@ class ErrorReport(Base):
     message: Mapped[str] = mapped_column(String(500))
     stack: Mapped[str] = mapped_column(Text, default="")
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class SupportTicket(Base):
+    """HLP-02: a message to support from a grown-up. Diagnostics carry no child data."""
+
+    __tablename__ = "support_tickets"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ref: Mapped[str] = mapped_column(String(12), unique=True, doc="shown to the grown-up, e.g. TB-4F7K2")
+    family_id: Mapped[str | None] = mapped_column(
+        ForeignKey("families.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    topic: Mapped[str] = mapped_column(String(16))
+    subject: Mapped[str] = mapped_column(String(120))
+    message: Mapped[str] = mapped_column(Text)
+    diagnostics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    status: Mapped[str] = mapped_column(String(12), default="open", server_default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class WeeklyMetric(Base):
+    """OPS-07: product numbers for one week (Monday to Sunday), aggregates only."""
+
+    __tablename__ = "weekly_metrics"
+    week_start: Mapped[date] = mapped_column(Date, primary_key=True)
+    data: Mapped[dict] = mapped_column(JSON)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

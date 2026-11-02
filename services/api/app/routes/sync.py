@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
 from ..models import Event, Learner, User
+from ..notify import badges_earned
 from ..schemas import EventsIn
 from ..security import aware, current_user, membership
 from .families import require_consent
@@ -36,7 +37,7 @@ def push(body: EventsIn, user: User = Depends(current_user), db: DbSession = Dep
     learners = set(db.scalars(select(Learner.id).where(Learner.family_id == body.family_id)))
     ids = [e.id for e in body.events]
     existing = set(db.scalars(select(Event.id).where(Event.id.in_(ids)))) if ids else set()
-    accepted, rejected = [], []
+    accepted, rejected, fresh = [], [], []
     for e in body.events:
         if e.learnerId not in learners:
             rejected.append({"id": e.id, "reason": "unknown learner"})
@@ -45,7 +46,7 @@ def push(body: EventsIn, user: User = Depends(current_user), db: DbSession = Dep
             rejected.append({"id": e.id, "reason": "data too large"})
             continue
         if e.id not in existing:
-            db.add(
+            fresh.append(
                 Event(
                     id=e.id,
                     family_id=body.family_id,
@@ -56,9 +57,11 @@ def push(body: EventsIn, user: User = Depends(current_user), db: DbSession = Dep
                     received_at=utcnow(),
                 )
             )
+            db.add(fresh[-1])
             existing.add(e.id)
         accepted.append(e.id)
     db.commit()
+    badges_earned(db, body.family_id, fresh)  # PAR-07, when the family turned it on
     return {"accepted": accepted, "rejected": rejected}
 
 

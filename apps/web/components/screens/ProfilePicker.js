@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -15,6 +15,7 @@ import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
+import { PictureLockDialog } from "@/components/PictureLock";
 
 const BAND_NAMES = {
   seedling: "Seedling",
@@ -32,13 +33,17 @@ export default function ProfilePicker() {
   // Back with the children: the grown-up zone needs the gate again.
   useEffect(() => lockGate(), [lockGate]);
   const setActive = useFamily((s) => s.setActive);
+  const voice = useFamily((s) => s.settings.voice);
   const router = useRouter();
+  // FAM-02: a learner with a picture password taps their pictures first.
+  const [locked, setLocked] = useState(/** @type {any} */ (null));
   if (!ready) return <Loading />;
 
-  const pick = (l) => {
+  const open = (l) => {
     setActive(l.id);
     router.push("/play/map");
   };
+  const pick = (l) => (l.picture_lock ? setLocked(l) : open(l));
 
   return (
     <Box
@@ -97,6 +102,7 @@ export default function ProfilePicker() {
               component="button"
               type="button"
               onClick={() => pick(l)}
+              data-locked={l.picture_lock ? "yes" : undefined}
               sx={{
                 border: `3px solid ${colors.line}`,
                 bgcolor: "background.paper",
@@ -137,9 +143,9 @@ export default function ProfilePicker() {
           );
         })}
       </Box>
-      <Typography sx={{ color: "text.secondary", fontSize: 14, textAlign: "center" }}>
-        Picture passwords, teen sign-in and class sign-in arrive in Sprint 2.
-      </Typography>
+      {locked && (
+        <PictureLockDialog learner={locked} voice={voice} onOpen={() => open(locked)} onClose={() => setLocked(null)} />
+      )}
     </Box>
   );
 }

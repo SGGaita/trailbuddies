@@ -48,6 +48,14 @@ class Bedtime(Strict):
     end: str = Field(default="06:30", pattern=r"^\d{2}:\d{2}$")
 
 
+class Emails(Strict):
+    """Emails to parents (PAR-07, BDG-06). Wish emails start with the wishes feature (S11)."""
+
+    digest: bool = Field(default=True, description="weekly badge digest, Sunday evening")
+    badges: bool = Field(default=False, description="an email when a child earns a badge")
+    wishes: bool = Field(default=False, description="an email when a child asks for a wish")
+
+
 class FamilySettings(Strict):
     goal: int = Field(default=2, ge=1, le=5, description="lessons a day")
     limit: int = Field(default=20, ge=0, le=180, description="minutes a day; 0 = no limit")
@@ -65,6 +73,7 @@ class FamilySettings(Strict):
     calm: Literal["device", "on", "off"] = Field(
         default="device", description="reduced motion: follow the device, or always on/off (ACC-02)"
     )
+    emails: Emails = Emails()
 
 
 class Pin(Strict):
@@ -120,6 +129,18 @@ class ConsentIn(Strict):
     form: SignedForm | None = None
 
 
+Picture = Literal["apple", "banana", "cat", "dog", "fish", "star", "sun", "moon", "flower"]
+
+
+class PictureLock(Strict):
+    """FAM-02: hashed on the device (PBKDF2, like the PIN); the hint is the first picture."""
+
+    salt: str = Field(max_length=64)
+    hash: str = Field(max_length=128)
+    iterations: int = Field(ge=1000, le=1_000_000)
+    hint: Picture
+
+
 class LearnerIn(Strict):
     name: str = Field(min_length=1, max_length=40)
     birth_year: int = Field(ge=1900)
@@ -137,6 +158,7 @@ class LearnerIn(Strict):
     removing_at: datetime | None = Field(
         default=None, description="removal asked for (FAM-03); null undoes it"
     )
+    picture_lock: PictureLock | None = None
     updated_at: datetime
 
     @field_validator("name")
@@ -252,3 +274,14 @@ class ErrorIn(Strict):
 
 class TokenIn(Strict):
     token: str = Field(min_length=10, max_length=128)
+
+
+class SoundIn(Strict):
+    media_id: str | None = _ulid(default=None)
+
+
+class SupportIn(Strict):
+    topic: Literal["start", "lessons", "rewards", "privacy", "billing", "offline", "other"] = "other"
+    subject: str = Field(min_length=3, max_length=120)
+    message: str = Field(min_length=10, max_length=4000)
+    diagnostics: dict[str, str | int | list[str]] | None = Field(default=None, max_length=12)

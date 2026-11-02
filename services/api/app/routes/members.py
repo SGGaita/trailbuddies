@@ -33,8 +33,19 @@ def members(family_id: str, user: User = Depends(current_user), db: DbSession = 
     ).all()
     pending = db.scalars(
         select(Invite).where(
-            Invite.family_id == family_id, Invite.accepted_at.is_(None), Invite.expires_at > utcnow()
+            Invite.family_id == family_id,
+            Invite.accepted_at.is_(None),
+            Invite.cancelled_at.is_(None),
+            Invite.expires_at > utcnow(),
         )
+    ).all()
+    # FAM-05: every invitation is logged (kept until 30 days after it expires, see privacy.purge).
+    log = db.execute(
+        select(Invite, User.name, User.email)
+        .join(User, User.id == Invite.invited_by)
+        .where(Invite.family_id == family_id)
+        .order_by(Invite.created_at.desc())
+        .limit(30)
     ).all()
     return {
         "members": [
@@ -45,6 +56,32 @@ def members(family_id: str, user: User = Depends(current_user), db: DbSession = 
             {"id": i.id, "email": i.email, "role": i.role, "expires_at": aware(i.expires_at).isoformat()}
             for i in pending
         ],
+        "history": [invite_log(i, name or email.split("@")[0]) for i, name, email in log],
+    }
+
+
+def invite_status(i: Invite) -> str:
+    if i.accepted_at:
+        return "accepted"
+    if i.cancelled_at:
+        return "cancelled"
+    if aware(i.expires_at) <= utcnow():
+        return "expired"
+    return "pending"
+
+
+def invite_log(i: Invite, by: str) -> dict:
+    when = lambda d: aware(d).isoformat() if d else None  # noqa: E731
+    return {
+        "id": i.id,
+        "email": i.email,
+        "role": i.role,
+        "invited_by": by,
+        "status": invite_status(i),
+        "created_at": when(i.created_at),
+        "resent_at": when(i.resent_at),
+        "accepted_at": when(i.accepted_at),
+        "expires_at": when(i.expires_at),
     }
 
 
@@ -94,8 +131,36 @@ def cancel_invite(
     inv = db.get(Invite, invite_id)
     if m.role not in MANAGERS or not inv or inv.family_id != family_id:
         raise HTTPException(404, "Invitation not found")
-    db.delete(inv)
+    inv.cancelled_at = utcnow()  # kept in the log
     db.commit()
+
+
+@router.post("/families/{family_id}/invites/{invite_id}/resend")
+def resend_invite(
+    family_id: str,
+    invite_id: int,
+    tasks: BackgroundTasks,
+    user: User = Depends(current_user),
+    db: DbSession = Depends(get_session),
+) -> dict:
+    """FAM-05: an invitation that ran out (or got lost) gets a fresh link for another 7 days."""
+    m = membership(db, user, family_id)
+    inv = db.get(Invite, invite_id)
+    if m.role not in MANAGERS or not inv or inv.family_id != family_id:
+        raise HTTPException(404, "Invitation not found")
+    if inv.accepted_at:
+        raise HTTPException(409, "That invitation was already accepted")
+    s = get_settings()
+    token = secrets.token_urlsafe(32)
+    inv.token_hash = hash_token(token)
+    inv.expires_at = utcnow() + timedelta(days=s.invite_days)
+    inv.resent_at = utcnow()
+    inv.cancelled_at = None
+    db.commit()
+    fam = db.get(Family, family_id)
+    link = f"{s.web_url}/invite?{urlencode({'token': token})}"
+    later(tasks, send_invite, inv.email, link, user.name or "A parent", fam.name, inv.role)
+    return invite_log(inv, user.name or user.email.split("@")[0])
 
 
 @router.delete("/families/{family_id}/members/{user_id}", status_code=204)
@@ -123,7 +188,7 @@ def accept(
 ) -> dict:
     """Accept an invitation: joins the family and signs in as the invited address."""
     inv = db.scalar(select(Invite).where(Invite.token_hash == hash_token(body.token)))
-    if not inv or inv.accepted_at or aware(inv.expires_at) <= utcnow():
+    if not inv or inv.accepted_at or inv.cancelled_at or aware(inv.expires_at) <= utcnow():
         raise HTTPException(400, "This invitation has expired or was already used. Ask for a new one.")
     user, _ = user_for_email(db, inv.email)
     exists = db.scalar(

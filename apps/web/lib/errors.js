@@ -21,6 +21,15 @@ const names = () => {
   return [...(s.learners || []), ...(s.removing || [])].map((l) => l.name).filter(Boolean);
 };
 
+/** HLP-02: the last few error codes on this device (type and screen only), for diagnostics. */
+const recent = [];
+const remember = (error) => {
+  const name = (error && error.name) || "Error";
+  recent.unshift(`${name} @ ${scrubPath(typeof location === "undefined" ? "" : location.pathname)}`);
+  recent.length = Math.min(recent.length, 5);
+};
+export const recentErrors = () => [...recent];
+
 let sentry = null;
 let started = false;
 let sent = 0;
@@ -28,6 +37,7 @@ const seen = new Set();
 const MAX_PER_PAGE = 10;
 
 async function own(error, screen) {
+  remember(error);
   if (sent >= MAX_PER_PAGE) return;
   const message = scrubText(error?.message || String(error), names(), 500) || "Error";
   const key = message + screen;
@@ -75,6 +85,9 @@ export async function startErrorReports() {
 /** Report an error a screen caught (error boundaries). @param {unknown} error */
 export function reportError(error) {
   if (ERROR_BACKEND === "off" || typeof window === "undefined") return;
-  if (sentry) sentry.captureException(error);
+  if (sentry) {
+    remember(error);
+    sentry.captureException(error);
+  }
   else own(error, location.pathname);
 }

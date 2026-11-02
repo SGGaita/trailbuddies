@@ -1,7 +1,7 @@
-import BetaHelp from "@/components/screens/BetaHelp";
+import HelpCentre from "@/components/screens/HelpCentre";
 
-export const metadata = { title: "Beta questions · Trailbuddies" };
+export const metadata = { title: "Help · Trailbuddies" };
 
 export default function HelpPage() {
-  return <BetaHelp />;
+  return <HelpCentre />;
 }
