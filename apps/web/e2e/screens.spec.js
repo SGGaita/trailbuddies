@@ -76,12 +76,12 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
   await page.getByRole("button", { name: /Amani/ }).click(); // Amani has no buddy yet
   await expect(page).toHaveURL(/\/play\/buddies$/);
   await expect(page.getByRole("heading", { name: "Meet the buddies" })).toBeVisible();
-  await page.getByRole("button", { name: "Say hello to Juma the elephant" }).click();
+  await page.getByRole("button", { name: "Say hello to Jumbo the elephant" }).click();
   await expect(page.locator('[data-mood="wave"]')).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "7-buddies");
-  await page.getByRole("button", { name: "Pick Juma" }).click();
-  await page.getByRole("button", { name: "Yes, Juma!" }).click();
+  await page.getByRole("button", { name: "Pick Jumbo" }).click();
+  await page.getByRole("button", { name: "Yes, Jumbo!" }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
   await expect(
     page
@@ -90,7 +90,7 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
       .first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: "Juma the elephant" }).filter({ visible: true }).first(),
+    page.getByRole("img", { name: "Jumbo the elephant" }).filter({ visible: true }).first(),
   ).toHaveAttribute("data-mood", "point");
 });
 

@@ -8,7 +8,7 @@ import { ALL_UNITS, ALL_ASSETS } from "./units/all.js";
 import buddyEn from "./buddy/en.json" with { type: "json" };
 import zipEn from "./buddy/en.zip.json" with { type: "json" };
 import tumiEn from "./buddy/en.tumi.json" with { type: "json" };
-import jumaEn from "./buddy/en.jumbo.json" with { type: "json" };
+import jumboEn from "./buddy/en.jumbo.json" with { type: "json" };
 import kikiEn from "./buddy/en.kiki.json" with { type: "json" };
 import builtInBadges from "./badges/built-in.json" with { type: "json" };
 import economy from "./economy.json" with { type: "json" };
@@ -117,7 +117,7 @@ export function lessonIds(entry) {
 }
 
 /** Buddy script table (BUD-08): lines by language, buddy and event. Writers add lines in JSON. */
-const SCRIPTS = { en: { all: buddyEn, zip: zipEn, tumi: tumiEn, juma: jumaEn, kiki: kikiEn } };
+const SCRIPTS = { en: { all: buddyEn, zip: zipEn, tumi: tumiEn, jumbo: jumboEn, kiki: kikiEn } };
 
 /** Warnings for missing lines, in development only. */
 const warn = (msg) => {

@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 AvatarColor = Literal["coral", "sky", "leaf", "berry", "sun", "night"]
-BuddyId = Literal["zip", "tumi", "juma", "kiki"]
+BuddyId = Literal["zip", "tumi", "jumbo", "kiki"]
 Difficulty = Literal["auto", "1", "2", "3"]
 Role = Literal["owner", "parent", "carer", "viewer"]
 EventType = Literal[
@@ -168,6 +168,12 @@ class LearnerIn(Strict):
         if not v:
             raise ValueError("name is required")
         return v
+
+    @field_validator("buddy", mode="before")
+    @classmethod
+    def renamed_buddy(cls, v):
+        """Juma the elephant is now Jumbo (Sprint 9); apps from before the rename still send 'juma'."""
+        return "jumbo" if v == "juma" else v
 
     @field_validator("birth_year")
     @classmethod

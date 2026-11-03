@@ -25,8 +25,8 @@ export const BUDDIES = {
     neckY: 146,
     headW: 110,
   },
-  juma: {
-    name: "Juma",
+  jumbo: {
+    name: "Jumbo",
     kind: "elephant",
     line: "Hello! I never forget a word.",
     color: "#8e9cab",
@@ -96,7 +96,7 @@ export function buddyBody(id, mood) {
     <path d="M38 120 q-6 ${mood === "cheer" ? -50 : 30} 16 ${mood === "cheer" ? -60 : 50}" stroke="#8f5f36" stroke-width="12" fill="none" stroke-linecap="round"/>
     <path d="M162 120 q6 ${mood === "cheer" ? -50 : 30} -16 ${mood === "cheer" ? -60 : 50}" stroke="#8f5f36" stroke-width="12" fill="none" stroke-linecap="round"/>
     <path d="M80 202 l-6 10 M86 203 v10 M120 202 l6 10 M114 203 v10" stroke="#f0a020" stroke-width="5" stroke-linecap="round"/>`;
-  if (id === "juma")
+  if (id === "jumbo")
     return `
     <ellipse cx="100" cy="178" rx="52" ry="30" fill="#7d8b99"/>
     <circle cx="42" cy="98" r="40" fill="#b6c2cd" stroke="#6f7d8a" stroke-width="4"/><circle cx="158" cy="98" r="40" fill="#b6c2cd" stroke="#6f7d8a" stroke-width="4"/>

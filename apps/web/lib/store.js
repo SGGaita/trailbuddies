@@ -267,7 +267,16 @@ export const useFamily = create(
     {
       name: "trailbuddies-family-v3",
       storage: safeStorage,
-      version: 3,
+      version: 4,
+      // v4 (Sprint 9): Juma the elephant is now Jumbo.
+      migrate: (state, version) => {
+        if (version < 4 && state) {
+          const rename = (l) => (l.buddy === "juma" ? { ...l, buddy: "jumbo" } : l);
+          state.learners = (state.learners || []).map(rename);
+          state.removing = (state.removing || []).map(rename);
+        }
+        return state;
+      },
       partialize: ({
         mode,
         user,

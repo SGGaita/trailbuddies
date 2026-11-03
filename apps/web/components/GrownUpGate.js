@@ -110,7 +110,7 @@ function Gate() {
           textAlign: "center",
         }}
       >
-        <Buddy id="juma" mood="think" size={80} />
+        <Buddy id="jumbo" mood="think" size={80} />
         <Typography variant="h5" component="h1">
           {t("gate.title")}
         </Typography>

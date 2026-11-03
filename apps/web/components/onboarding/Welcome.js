@@ -32,7 +32,7 @@ export default function Welcome() {
           borderRadius: 4.5,
         }}
       >
-        {["zip", "tumi", "juma", "kiki"].map((b) => (
+        {["zip", "tumi", "jumbo", "kiki"].map((b) => (
           <Buddy key={b} id={b} size={72} mood="cheer" />
         ))}
       </Box>
