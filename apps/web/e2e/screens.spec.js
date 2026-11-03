@@ -117,11 +117,13 @@ test("parent home", async ({ page }, testInfo) => {
 });
 
 test("teacher and placeholder screens", async ({ page }, testInfo) => {
-  await page.goto("/teach");
-  await expect(page.getByRole("heading", { level: 1, name: "Good morning" })).toBeVisible();
+  // Teacher home is real since Sprint 9 (sprint9.spec.js); later teacher screens are placeholders.
+  await demo(page);
+  await page.goto("/teach/assign");
+  await passGate(page);
+  await expect(page.getByRole("heading", { level: 1, name: "Assign work" })).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "6-teach");
-  await demo(page);
   await page.goto("/play/more/room");
   await expect(page.getByRole("heading", { name: "Treasure room" }).first()).toBeVisible();
   await noSideScroll(page);
