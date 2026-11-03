@@ -39,8 +39,10 @@ export const DEFAULT_SETTINGS = {
 };
 
 const empty = () => ({
-  /** @type {null | "demo" | "account"} */
+  /** @type {null | "demo" | "account" | "class"} "class": a class playing on the teacher's device (S9) */
   mode: null,
+  /** The signed-in grown-up's teacher side (ONB-13): school and classes, from /me. */
+  teacher: /** @type {any} */ (null),
   /** @type {null | { id: string, email: string, name: string }} */
   user: null,
   /** @type {any} */
@@ -293,7 +295,9 @@ export const useFamily = create(
         sounds,
         soundEdits,
         tips,
+        teacher,
       }) => ({
+        teacher,
         sounds,
         soundEdits,
         tips,

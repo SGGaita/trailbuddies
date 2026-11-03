@@ -78,10 +78,10 @@ describe("ONB-12 first steps", () => {
     expect(card.links.map((l) => [l.id, l.ready])).toEqual([
       ["lesson", true],
       ["badge", false],
-      ["class", false],
+      ["class", true],
       ["help", true],
     ]);
     expect(firstStepsCard([{ lessons: 1, stars: 3 }], { dismissed: true })).toBeNull();
-    expect(firstStepsCard([{ lessons: 1 }], {}, { classes: true }).links[2].ready).toBe(true);
+    expect(firstStepsCard([{ lessons: 1 }], {}, { "badge-studio": true }).links[1].ready).toBe(true);
   });
 });

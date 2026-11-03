@@ -13,12 +13,13 @@ from sqlalchemy.orm import Session as DbSession
 from ..db import get_session, utcnow
 from ..ids import ulid
 from ..mailer import send_magic_link
-from ..models import LoginToken, Session, User
+from ..models import LoginToken, Session, Teacher, User
 from ..schemas import MagicLinkIn, MeIn, UserOut, VerifyIn
 from ..security import COOKIE, aware, current_user, end_session, hash_token, start_session
 from ..settings import get_settings
 from ..tasks import later
 from .families import families_for
+from .teach import teacher_out
 
 router = APIRouter()
 
@@ -178,7 +179,12 @@ def logout_all(response: Response, user: User = Depends(current_user), db: DbSes
 
 @router.get("/me")
 def me(user: User = Depends(current_user), db: DbSession = Depends(get_session)) -> dict:
-    return {"user": UserOut.of(user), "families": families_for(db, user)}
+    t = db.get(Teacher, user.id)
+    return {
+        "user": UserOut.of(user),
+        "families": families_for(db, user),
+        "teacher": teacher_out(db, t) if t else None,
+    }
 
 
 @router.patch("/me")

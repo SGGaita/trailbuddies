@@ -25,6 +25,7 @@
     "@trailbuddies/tokens": "workspace:*",
     "dexie": "4.2.1",
     "next": "16.4.1",
+    "qrcode": "1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zustand": "^5.0.8"

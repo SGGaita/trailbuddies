@@ -140,6 +140,39 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
       request(`${fam(familyId)}/sounds/${encodeURIComponent(sound)}`, { method: "PUT", json: { media_id: mediaId } }),
     /** HLP-02 @param {{ topic?: string, subject: string, message: string, diagnostics?: object | null }} body */
     contactSupport: (body) => post("/support", body),
+    // --- Teachers and classes (Sprint 9) ---
+    /** ONB-13 @param {{ school_name: string, join_school?: string }} body */
+    becomeTeacher: (body) => post("/teacher", body),
+    teacher: () => request("/teacher"),
+    /** HLP-03 @param {Record<string, boolean>} tips */
+    teacherTips: (tips) => request("/teacher/tips", { method: "PATCH", json: tips }),
+    /** CLS-06 @param {string} schoolId @param {{ name: string, role: string }} body */
+    schoolConsent: (schoolId, body) => post(`/schools/${encodeURIComponent(schoolId)}/consent`, { ...body, agreed: true }),
+    /** CLS-01 @param {{ name: string, year_group?: string, band: string }} body */
+    createClass: (body) => post("/classes", body),
+    /** @param {string} classId */
+    getClass: (classId) => request(`/classes/${encodeURIComponent(classId)}`),
+    newJoinCode: (classId) => post(`/classes/${encodeURIComponent(classId)}/code`),
+    /** CLS-02 @param {string} classId @param {{ first_name: string, initial?: string | null }[]} students */
+    addStudents: (classId, students) => post(`/classes/${encodeURIComponent(classId)}/students`, { students }),
+    editStudent: (classId, studentId, body) =>
+      request(`/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}`, { method: "PATCH", json: body }),
+    removeStudent: (classId, studentId) =>
+      request(`/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}`, { method: "DELETE" }),
+    /** CLS-05 */
+    studentProgress: (classId, studentId) =>
+      request(`/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}/progress`),
+    /** Class play sync: the same shapes as pushEvents/pullEvents, keyed by class. */
+    pushClassEvents: (classId, events) => post(`/classes/${encodeURIComponent(classId)}/events`, { events }),
+    pullClassEvents: (classId, after = 0) => request(`/classes/${encodeURIComponent(classId)}/events?after=${after}`),
+    /** CLS-04 @param {string} code */
+    joinPreview: (code) => request(`/join/${encodeURIComponent(code)}`),
+    links: (familyId) => request(`${fam(familyId)}/links`),
+    /** @param {string} familyId @param {{ code: string, student_id: string, learner_id: string, scope?: "class" | "all" }} body */
+    link: (familyId, body) => post(`${fam(familyId)}/links`, body),
+    setLinkScope: (familyId, studentId, scope) =>
+      request(`${fam(familyId)}/links/${encodeURIComponent(studentId)}`, { method: "PATCH", json: { scope } }),
+    unlink: (familyId, studentId) => request(`${fam(familyId)}/links/${encodeURIComponent(studentId)}`, { method: "DELETE" }),
     /** SAF-07 option 2: a scrubbed error report. @param {object} report */
     reportError: (report) => post("/errors", report),
     /** @param {string} familyId @param {number} after */

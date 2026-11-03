@@ -37,6 +37,11 @@ const PAGES = [
   "/terms",
   ...Object.keys(FAMILY).map((k) => `/family/${k}`),
   "/teach",
+  "/teach/start",
+  "/teach/class",
+  "/teach/letters",
+  "/family/classes",
+  "/family/join",
   ...Object.keys(TEACH).map((k) => `/teach/${k}`),
 ];
 const EXTRAS = [

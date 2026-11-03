@@ -168,6 +168,7 @@ function applyMe(me) {
   }
   useFamily.setState({
     sounds,
+    teacher: me.teacher || null,
     mode: "account",
     user: me.user,
     family: family && { ...family, parent: me.user.name || "" },
@@ -227,7 +228,7 @@ export async function signOut() {
 
 /** Where a grown-up should be in onboarding, or null when set up. */
 export function setupStep(s, policyVersion) {
-  if (s.mode === "demo") return null;
+  if (s.mode === "demo" || s.mode === "class") return null;
   if (s.mode !== "account") return "/start";
   if (!s.user) return "/start"; // signed out (here or from another device): back to the welcome
   if (!s.family) return "/start/about";
@@ -307,6 +308,7 @@ let queued = null;
 
 /** Push profile edits and events, pull other devices' events. Safe to call often. */
 export async function syncNow() {
+  if (get().mode === "class") return syncClass();
   const s = get();
   if (s.mode !== "account" || !s.family?.id || !s.family.consent) return;
   // ONB-06b: nothing about the children leaves the device until a signed form is approved.
@@ -360,6 +362,36 @@ export async function syncNow() {
     });
   }
   await refreshUploadStatus();
+}
+
+let classSyncer = null;
+let classSyncerFor = null;
+
+/** Class play on a teacher's device (S9): the class's own events, kept apart from any family. */
+async function syncClass() {
+  const s = get();
+  const classId = s.family?.classId;
+  if (!classId || (typeof navigator !== "undefined" && navigator.onLine === false)) return;
+  const db = familyDb(dbName(s));
+  if (classSyncerFor !== classId) {
+    classSyncerFor = classId;
+    classSyncer = createSyncer({
+      api: { pushEvents: api.pushClassEvents, pullEvents: api.pullClassEvents },
+      familyId: classId,
+      outbox: outbox(db),
+      cursor: cursor(db),
+      onPulled: async (events) => {
+        await saveEvents(db, events, 1);
+        useFamily.setState({ events: await loadEvents(db) });
+      },
+    });
+  }
+  try {
+    await classSyncer.syncOnce();
+    useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
+  } catch {
+    useFamily.setState({ sync: { ...get().sync, state: "offline", pending: await pendingCount(db) } });
+  }
 }
 
 /** A grown-up pressed Retry on the "waiting to upload" banner (BLD-16). */

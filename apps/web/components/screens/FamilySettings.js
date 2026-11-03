@@ -23,7 +23,7 @@ import { DIFFICULTY_SETTINGS, describeLevel, formatDate } from "@trailbuddies/do
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import { api, signOut, signOutEverywhere, syncNow } from "@/lib/account";
 import { LearnersSection, PrivacySection, BetaSection } from "./PrivacySettings";
-import { EmailsSection, SoundsSection } from "./FamilySections";
+import { EmailsSection, SoundsSection, ClassesSection } from "./FamilySections";
 import FamilyShell from "@/components/shell/FamilyShell";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
@@ -417,6 +417,7 @@ export default function FamilySettings() {
             </Box>
           )}
         </Section>
+        <ClassesSection />
         <SoundsSection />
         <EmailsSection disabled={viewer} />
         <PrivacySection />

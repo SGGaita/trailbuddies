@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session as DbSession
 from . import mailer
 from .db import utcnow
 from .models import (
+    ClassStudent,
     Consent,
     CustomLesson,
     DataExport,
@@ -39,6 +40,7 @@ from .models import (
     MediaAsset,
     Session,
     SupportTicket,
+    Teacher,
     User,
 )
 from .security import aware
@@ -188,6 +190,14 @@ def family_record(db: DbSession, fam: Family) -> dict:
             for t in db.scalars(select(SupportTicket).where(SupportTicket.family_id == fid))
         ],
         "letter_sounds": fam.sounds or {},
+        "class_links": [
+            _row(c, ["first_name", "initial", "class_id", "scope", "linked_at"])
+            for c in db.scalars(
+                select(ClassStudent)
+                .join(Learner, Learner.id == ClassStudent.learner_id)
+                .where(Learner.family_id == fid)
+            )
+        ],
     }
 
 
@@ -239,6 +249,13 @@ def export_key(export_id: str) -> str:
 
 
 def purge_learner(db: DbSession, learner_id: str) -> None:
+    # A class roster entry stays (it's the teacher's), but no longer points at this child.
+    _x(
+        db,
+        update(ClassStudent)
+        .where(ClassStudent.learner_id == learner_id)
+        .values(learner_id=None, scope="class"),
+    )
     _x(db, delete(Event).where(Event.learner_id == learner_id))
     _x(db, delete(EditHistory).where(EditHistory.entity == "learner", EditHistory.entity_id == learner_id))
     _x(db, delete(Learner).where(Learner.id == learner_id))
@@ -252,6 +269,11 @@ def purge_family(db: DbSession, storage, family_id: str) -> None:
     for eid in db.scalars(select(DataExport.id).where(DataExport.family_id == family_id)):
         _quiet(storage.delete_key, export_key(eid))
     users = set(db.scalars(select(FamilyMember.user_id).where(FamilyMember.family_id == family_id)))
+    for lid in db.scalars(select(Learner.id).where(Learner.family_id == family_id)).all():
+        _x(
+            db,
+            update(ClassStudent).where(ClassStudent.learner_id == lid).values(learner_id=None, scope="class"),
+        )
     for model in (
         Event,
         Learner,
@@ -268,7 +290,10 @@ def purge_family(db: DbSession, storage, family_id: str) -> None:
     _x(db, delete(FamilyMember).where(FamilyMember.family_id == family_id))
     _x(db, delete(Family).where(Family.id == family_id))
     for uid in users:
-        if not db.scalar(select(func.count()).select_from(FamilyMember).where(FamilyMember.user_id == uid)):
+        teaches = db.get(Teacher, uid)  # a teacher keeps their account and classes
+        if not teaches and not db.scalar(
+            select(func.count()).select_from(FamilyMember).where(FamilyMember.user_id == uid)
+        ):
             email = db.scalar(select(User.email).where(User.id == uid))
             _x(db, delete(Session).where(Session.user_id == uid))
             _x(db, delete(LoginToken).where(LoginToken.email == email))

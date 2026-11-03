@@ -30,6 +30,11 @@ export function newServer() {
     flags: {}, // family -> { key: bool } (OPS-06)
     feedback: [],
     errors: [], // SAF-07 own log
+    teachers: {}, // user id -> { school_id, tips } (S9)
+    schools: {},
+    classes: {},
+    students: {}, // roster entries
+    classEvents: [],
     seq: 0,
   };
 }
@@ -57,6 +62,51 @@ const familyOut = (srv, fam, role = "owner") => ({
     .map(({ family_id: _f, ...l }) => l),
 });
 
+const studentOut = (x) => ({
+  id: x.id,
+  first_name: x.first_name,
+  initial: x.initial,
+  avatar_color: x.avatar_color,
+  pictures: x.pictures,
+  linked: Boolean(x.learner_id),
+  scope: x.scope,
+});
+const classOut = (srv, id, roster = false) => {
+  const c = srv.classes[id];
+  const rows = Object.values(srv.students).filter((x) => x.class_id === id);
+  return {
+    id,
+    name: c.name,
+    year_group: c.year_group || "",
+    band: c.band,
+    join_code: c.join_code,
+    students: rows.length,
+    ...(roster ? { roster: rows.map(studentOut) } : {}),
+  };
+};
+const teacherOut = (srv, uid) => {
+  const t = srv.teachers[uid];
+  return {
+    school: t.school_id ? srv.schools[t.school_id] : null,
+    classes: Object.values(srv.classes).filter((c) => c.teacher === uid).map((c) => classOut(srv, c.id)),
+    tips: t.tips,
+  };
+};
+const linkOut = (srv, x) => {
+  const c = srv.classes[x.class_id];
+  return {
+    student_id: x.id,
+    learner_id: x.learner_id,
+    roster_name: x.initial ? `${x.first_name} ${x.initial}.` : x.first_name,
+    class: c.name,
+    year_group: c.year_group || "",
+    teacher: srv.users[c.teacher]?.name || "Your child's teacher",
+    school: srv.schools[c.school_id]?.name || null,
+    scope: x.scope,
+    linked_at: "2026-11-01T10:00:00Z",
+  };
+};
+
 const defaultSettings = () => ({
   goal: 2,
   limit: 20,
@@ -79,6 +129,7 @@ const defaultSettings = () => ({
 export async function fakeApi(context, srv) {
   let sessionId = null;
   let m0;
+  let m;
   const signIn = (uid, ua) => {
     sessionId = `S${Object.keys(srv.sessions).length + 1}-${Math.random().toString(36).slice(2)}`;
     srv.sessions[sessionId] = uid;
@@ -197,7 +248,130 @@ export async function fakeApi(context, srv) {
       return json(route, 200, { ok: true });
     }
     if (path === "/me" && method === "GET")
-      return json(route, 200, { user, families: fam ? [familyOut(srv, fam, role)] : [] });
+      return json(route, 200, {
+        user,
+        families: fam ? [familyOut(srv, fam, role)] : [],
+        teacher: srv.teachers[userId] ? teacherOut(srv, userId) : null,
+      });
+    // --- Teachers and classes (S9), mirroring services/api/app/routes/teach.py and links.py ---
+    if (path === "/teacher" && method === "POST") {
+      const domain = user.email.split("@")[1];
+      const existing = Object.values(srv.schools).find((x) => x.domain === domain);
+      const t = srv.teachers[userId] || { school_id: null, tips: {} };
+      srv.teachers[userId] = t;
+      if (body.join_school) t.school_id = body.join_school;
+      else if (existing && !t.school_id && !body.separate)
+        return json(route, 201, { ...teacherOut(srv, userId), offer: existing });
+      else if (!t.school_id) {
+        const sid = `SC${Object.keys(srv.schools).length + 1}`;
+        srv.schools[sid] = { id: sid, name: body.school_name, domain: existing || domain === "gmail.com" ? null : domain, consent: null };
+        t.school_id = sid;
+      }
+      return json(route, 201, teacherOut(srv, userId));
+    }
+    if (path === "/teacher/tips" && method === "PATCH") {
+      Object.assign(srv.teachers[userId].tips, body);
+      return json(route, 200, { tips: srv.teachers[userId].tips });
+    }
+    m = path.match(/^\/schools\/([^/]+)\/consent$/);
+    if (m && method === "POST") {
+      srv.schools[m[1]].consent = { at: new Date().toISOString(), name: body.name, role: body.role };
+      return json(route, 200, srv.schools[m[1]]);
+    }
+    if (path === "/classes" && method === "POST") {
+      const id = `01JC${String(Object.keys(srv.classes).length + 1).padStart(22, "0")}`;
+      srv.classes[id] = { id, teacher: userId, school_id: srv.teachers[userId].school_id, ...body, join_code: `ABC${234 + Object.keys(srv.classes).length}`.slice(0, 6) };
+      return json(route, 201, classOut(srv, id, true));
+    }
+    m = path.match(/^\/classes\/([^/]+)$/);
+    if (m && method === "GET") return srv.classes[m[1]] ? json(route, 200, classOut(srv, m[1], true)) : json(route, 404, { detail: "Class not found" });
+    m = path.match(/^\/classes\/([^/]+)\/code$/);
+    if (m && method === "POST") {
+      srv.classes[m[1]].join_code = "NEWC0D".replace("0", "2");
+      return json(route, 200, classOut(srv, m[1], true));
+    }
+    m = path.match(/^\/classes\/([^/]+)\/students$/);
+    if (m && method === "POST") {
+      const roster = Object.values(srv.students).filter((x) => x.class_id === m[1]);
+      const nm = (x) => `${x.first_name} ${x.initial || ""}`.trim().toLowerCase();
+      const all = [...roster, ...body.students].map(nm);
+      const clashes = [...new Set(body.students.map(nm).filter((n) => all.filter((x) => x === n).length > 1))];
+      if (clashes.length)
+        return json(route, 422, { detail: { code: "same_name", names: clashes, message: "Add an initial to tell these children apart." } });
+      const pics = ["cat", "sun", "moon"];
+      const added = body.students.map((x, i) => {
+        const id = `01JS${String(Object.keys(srv.students).length + 1).padStart(22, "0")}`;
+        srv.students[id] = { id, class_id: m[1], first_name: x.first_name, initial: x.initial || null, avatar_color: ["coral", "sky", "leaf"][i % 3], pictures: pics, learner_id: null, scope: "class" };
+        return studentOut(srv.students[id]);
+      });
+      return json(route, 201, { added, ...classOut(srv, m[1], true) });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/students\/([^/]+)\/progress$/);
+    if (m) {
+      const st = srv.students[m[2]];
+      srv.teachers[userId].tips.viewed = true;
+      const sum = (rows) => {
+        const lessons = rows.filter((e) => e.type === "lesson_completed" && e.data.subjectId !== "family");
+        const subjects = {};
+        for (const e of lessons) {
+          const x = (subjects[e.data.subjectId] ||= { lessons: 0, stars: 0 });
+          x.lessons += 1;
+          x.stars += e.data.stars || 0;
+        }
+        return { lessons: lessons.length, stars: lessons.reduce((n, e) => n + (e.data.stars || 0), 0), badges: 0, subjects };
+      };
+      const home = st.learner_id ? sum(srv.events.filter((e) => e.learnerId === st.learner_id)) : null;
+      if (home && st.scope !== "all") delete home.subjects;
+      return json(route, 200, { student: studentOut(st), class: sum(srv.classEvents.filter((e) => e.learnerId === st.id)), home });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/events$/);
+    if (m && method === "POST") {
+      const accepted = [];
+      const rejected = [];
+      const school = srv.schools[srv.classes[m[1]].school_id];
+      for (const e of body.events) {
+        const st = srv.students[e.learnerId];
+        if (!st?.learner_id && !school?.consent) {
+          rejected.push({ id: e.id, reason: "school_consent" });
+          continue;
+        }
+        if (!srv.classEvents.some((x) => x.id === e.id)) srv.classEvents.push({ ...e, seq: ++srv.seq, class_id: m[1] });
+        accepted.push(e.id);
+      }
+      return json(route, 200, { accepted, rejected });
+    }
+    if (m && method === "GET") {
+      const after = Number(url.searchParams.get("after") || 0);
+      const events = srv.classEvents.filter((e) => e.class_id === m[1] && e.seq > after).map(({ class_id: _c, ...e }) => e);
+      return json(route, 200, { events, cursor: events.length ? events.at(-1).seq : after, more: false });
+    }
+    m = path.match(/^\/join\/([^/]+)$/);
+    if (m) {
+      const c = Object.values(srv.classes).find((x) => x.join_code === m[1].toUpperCase());
+      if (!c) return json(route, 404, { detail: { code: "bad_code", message: "We couldn't find that class code." } });
+      return json(route, 200, {
+        class: { name: c.name, year_group: c.year_group, teacher: srv.users[c.teacher]?.name || "Your child's teacher", school: srv.schools[c.school_id]?.name },
+        students: Object.values(srv.students).filter((x) => x.class_id === c.id && !x.learner_id).map((x) => ({ id: x.id, name: x.initial ? `${x.first_name} ${x.initial}.` : x.first_name })),
+      });
+    }
+    m = path.match(/^\/families\/([^/]+)\/links$/);
+    if (m && method === "GET") return json(route, 200, { links: Object.values(srv.students).filter((x) => x.learner_id && srv.learners[x.learner_id]?.family_id === m[1]).map((x) => linkOut(srv, x)) });
+    if (m && method === "POST") {
+      if (role === "viewer") return forbidViewer();
+      const st = srv.students[body.student_id];
+      st.learner_id = body.learner_id;
+      st.scope = body.scope || "class";
+      return json(route, 201, linkOut(srv, st));
+    }
+    m = path.match(/^\/families\/([^/]+)\/links\/([^/]+)$/);
+    if (m && method === "PATCH") {
+      srv.students[m[2]].scope = body.scope;
+      return json(route, 200, linkOut(srv, srv.students[m[2]]));
+    }
+    if (m && method === "DELETE") {
+      Object.assign(srv.students[m[2]], { learner_id: null, scope: "class" });
+      return json(route, 204);
+    }
     if (path === "/me" && method === "PATCH") {
       user.name = body.name;
       return json(route, 200, { user });
@@ -216,7 +390,7 @@ export async function fakeApi(context, srv) {
       srv.members.push({ family: f.id, user: userId, role: "owner" });
       return json(route, 201, familyOut(srv, f));
     }
-    let m = path.match(/^\/families\/([^/]+)$/);
+    m = path.match(/^\/families\/([^/]+)$/);
     if (m && method === "PATCH") {
       if (role === "viewer") return forbidViewer();
       const f = srv.families[m[1]];
