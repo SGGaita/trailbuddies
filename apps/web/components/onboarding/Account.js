@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,10 +11,21 @@ import { t } from "@trailbuddies/i18n";
 import { api } from "@/lib/account";
 import OnboardingShell from "./OnboardingShell";
 
+const noSubscribe = () => () => {};
+const teacherIntent = () => {
+  try {
+    return localStorage.getItem("tb_intent") === "teacher";
+  } catch {
+    return false;
+  }
+};
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Step 2: email magic link, or Google when it's set up. */
 export default function Account() {
+  // ONB-01: teacher wording when they came from "I'm a teacher" (false while pre-rendering).
+  const teacher = useSyncExternalStore(noSubscribe, teacherIntent, () => false);
   const params = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -64,7 +75,12 @@ export default function Account() {
     );
 
   return (
-    <OnboardingShell step={2} title={t("start.accountTitle")} sub={t("start.accountSub")} back="/start">
+    <OnboardingShell
+      step={2}
+      title={teacher ? t("teach.accountTitle") : t("start.accountTitle")}
+      sub={teacher ? t("teach.accountSub") : t("start.accountSub")}
+      back="/start"
+    >
       {error && <Alert severity="warning">{error}</Alert>}
       <Box
         component="form"

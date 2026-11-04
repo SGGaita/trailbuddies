@@ -78,7 +78,7 @@ describe("buddy script table", () => {
   test("variety: never the same line twice in a row", () => {
     let last = null;
     for (let i = 0; i < 40; i++) {
-      const line = buddySays("lesson.correct", { buddy: "juma", last });
+      const line = buddySays("lesson.correct", { buddy: "jumbo", last });
       expect(line).not.toBe(last);
       last = line;
     }

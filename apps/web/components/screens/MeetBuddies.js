@@ -16,7 +16,7 @@ import Bubble from "@/components/Bubble";
 import Loading from "@/components/Loading";
 
 /** Buddies children can pick now; others show as "coming soon" (BUD-01). All four are live. */
-export const LIVE_BUDDIES = ["zip", "tumi", "juma", "kiki"];
+export const LIVE_BUDDIES = ["zip", "tumi", "jumbo", "kiki"];
 
 /**
  * C02 Meet the buddies (BUD-01): tap a buddy and it waves and says hello in its own

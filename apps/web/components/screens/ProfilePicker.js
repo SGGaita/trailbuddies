@@ -34,6 +34,8 @@ export default function ProfilePicker() {
   useEffect(() => lockGate(), [lockGate]);
   const setActive = useFamily((s) => s.setActive);
   const voice = useFamily((s) => s.settings.voice);
+  // Class play (S9): the grown-ups' button goes back to the class.
+  const classId = useFamily((s) => (s.mode === "class" ? s.family?.classId : null));
   const router = useRouter();
   // FAM-02: a learner with a picture password taps their pictures first.
   const [locked, setLocked] = useState(/** @type {any} */ (null));
@@ -66,7 +68,12 @@ export default function ProfilePicker() {
         >
           {t("app.name")}
         </Typography>
-        <Button component={Link} href="/family" variant="outlined" sx={{ borderWidth: 2 }}>
+        <Button
+          component={Link}
+          href={classId ? `/teach/class?id=${classId}` : "/family"}
+          variant="outlined"
+          sx={{ borderWidth: 2 }}
+        >
           {t("learner.grownUps")}
         </Button>
       </Box>

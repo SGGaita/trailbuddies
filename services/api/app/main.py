@@ -15,6 +15,7 @@ from .routes import (
     content,
     families,
     lessons,
+    links,
     media,
     members,
     ops,
@@ -22,6 +23,7 @@ from .routes import (
     sounds,
     support,
     sync,
+    teach,
 )
 from .scrub import scrub_sentry_event
 from .settings import Settings, get_settings
@@ -102,6 +104,8 @@ def create_app() -> FastAPI:
         ops.router,
         sounds.router,
         support.router,
+        teach.router,
+        links.router,
     ):
         app.include_router(r)
 

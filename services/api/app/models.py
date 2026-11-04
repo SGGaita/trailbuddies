@@ -389,3 +389,93 @@ class WeeklyMetric(Base):
     week_start: Mapped[date] = mapped_column(Date, primary_key=True)
     data: Mapped[dict] = mapped_column(JSON)
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class School(Base):
+    """A school (ONB-13). Made by its first teacher; later teachers with the same email domain
+    are offered to join. Licences arrive with payments (S22)."""
+
+    __tablename__ = "schools"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    domain: Mapped[str | None] = mapped_column(String(120), unique=True, nullable=True, index=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # CLS-06: the school authorises use for pupils whose parents haven't signed up.
+    consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    consent_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    consent_evidence: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, doc="who agreed for the school: name, role, terms version"
+    )
+
+
+class Teacher(Base):
+    """A grown-up who teaches (ONB-13). The same sign-in can also belong to a family."""
+
+    __tablename__ = "teachers"
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    school_id: Mapped[str | None] = mapped_column(
+        ForeignKey("schools.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    tips: Mapped[dict] = mapped_column(
+        JSON, default=dict, server_default="{}", doc="first-week checklist progress (HLP-03)"
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SchoolClass(Base):
+    """A class (CLS-01) with a join code parents use to link their child."""
+
+    __tablename__ = "classes"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    teacher_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    school_id: Mapped[str | None] = mapped_column(
+        ForeignKey("schools.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    name: Mapped[str] = mapped_column(String(60))
+    year_group: Mapped[str] = mapped_column(String(30), default="")
+    band: Mapped[str] = mapped_column(String(12))
+    join_code: Mapped[str] = mapped_column(String(6), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ClassStudent(Base):
+    """A child on a class roster (CLS-02). First name and an initial only: no birth date, no
+    surname. Linked to a family's learner when a parent joins with the class code (CLS-04)."""
+
+    __tablename__ = "class_students"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    first_name: Mapped[str] = mapped_column(String(40))
+    initial: Mapped[str | None] = mapped_column(String(1), nullable=True)
+    avatar_color: Mapped[str] = mapped_column(String(16), default="leaf")
+    pictures: Mapped[list] = mapped_column(
+        JSON, default=list, doc="the child's 3-picture password for class play; the teacher can see it"
+    )
+    learner_id: Mapped[str | None] = mapped_column(
+        ForeignKey("learners.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    scope: Mapped[str] = mapped_column(
+        String(8), default="class", server_default="class", doc="class or all (CLS-05)"
+    )
+    linked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    linked_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ClassEvent(Base):
+    """Progress from class play, kept apart from the family's (the parent chose separate
+    histories). Same shape as Event so the app's sync code works for both."""
+
+    __tablename__ = "class_events"
+    seq: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
+    )
+    id: Mapped[str] = mapped_column(ULID, unique=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    student_id: Mapped[str] = mapped_column(ForeignKey("class_students.id", ondelete="CASCADE"), index=True)
+    type: Mapped[str] = mapped_column(String(32))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    data: Mapped[dict] = mapped_column(JSON, default=dict)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

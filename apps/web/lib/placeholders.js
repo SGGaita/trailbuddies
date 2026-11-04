@@ -7,7 +7,6 @@ export const FAMILY = {
   rewards: { title: "Wishes & awards", sprint: "Phase 2 (Sprint 11)", story: "BST-04, BST-05" },
 };
 export const TEACH = {
-  class: { title: "Class & roster", sprint: "Phase 2 (Sprint 9)", story: "CLS-02, CLS-03" },
   assign: { title: "Assign work", sprint: "Phase 2 (Sprint 10)", story: "ASN-01" },
   progress: { title: "Class progress", sprint: "Phase 2 (Sprint 10)", story: "ASN-02, ASN-03" },
   badges: { title: "Class badges", sprint: "Phase 2 (Sprint 11)", story: "BDG-04" },

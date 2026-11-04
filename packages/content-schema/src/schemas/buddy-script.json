@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "properties": {
     "schema": { "const": "buddy-script/1" },
-    "buddy": { "enum": ["zip", "tumi", "juma", "kiki", "all"] },
+    "buddy": { "enum": ["zip", "tumi", "jumbo", "kiki", "all"] },
     "lang": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
     "events": {
       "type": "object",

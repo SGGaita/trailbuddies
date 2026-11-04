@@ -37,12 +37,12 @@ const voiceScale = () => useFamily.getState().settings?.voice_rate || 1;
 
 /**
  * Each buddy's own voice until recorded voice packs exist (BUD-01): device voice with
- * its own pitch and speed. Zip the robot is quick and high, Juma the elephant slow and low.
+ * its own pitch and speed. Zip the robot is quick and high, Jumbo the elephant slow and low.
  */
 export const BUDDY_VOICES = {
   zip: { pitch: 1.45, rate: 1.08 },
   tumi: { pitch: 0.95, rate: 0.92 },
-  juma: { pitch: 0.7, rate: 0.88 },
+  jumbo: { pitch: 0.7, rate: 0.88 },
   kiki: { pitch: 1.2, rate: 0.85 },
 };
 

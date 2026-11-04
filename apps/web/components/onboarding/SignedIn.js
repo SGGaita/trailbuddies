@@ -17,6 +17,15 @@ function landing() {
     s.setPin(null);
   }
   s.unlockGate(); // just proved they own the email
+  // ONB-13: teachers go to their own side (and finish sign-up there first).
+  let teacherIntent = false;
+  try {
+    teacherIntent = localStorage.getItem("tb_intent") === "teacher";
+  } catch {
+    /* no storage */
+  }
+  if (teacherIntent && !s.teacher) return "/teach/start";
+  if (s.teacher && !s.family) return "/teach";
   return setupStep(s) || "/play";
 }
 

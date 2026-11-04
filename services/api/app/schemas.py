@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 AvatarColor = Literal["coral", "sky", "leaf", "berry", "sun", "night"]
-BuddyId = Literal["zip", "tumi", "juma", "kiki"]
+BuddyId = Literal["zip", "tumi", "jumbo", "kiki"]
 Difficulty = Literal["auto", "1", "2", "3"]
 Role = Literal["owner", "parent", "carer", "viewer"]
 EventType = Literal[
@@ -169,6 +169,12 @@ class LearnerIn(Strict):
             raise ValueError("name is required")
         return v
 
+    @field_validator("buddy", mode="before")
+    @classmethod
+    def renamed_buddy(cls, v):
+        """Juma the elephant is now Jumbo (Sprint 9); apps from before the rename still send 'juma'."""
+        return "jumbo" if v == "juma" else v
+
     @field_validator("birth_year")
     @classmethod
     def not_future(cls, v: int) -> int:
@@ -285,3 +291,70 @@ class SupportIn(Strict):
     subject: str = Field(min_length=3, max_length=120)
     message: str = Field(min_length=10, max_length=4000)
     diagnostics: dict[str, str | int | list[str]] | None = Field(default=None, max_length=12)
+
+
+ClassBand = Literal["seedling", "sprout", "explorer", "voyager"]
+Scope = Literal["class", "all"]
+
+
+class TeacherIn(Strict):
+    school_name: str = Field(min_length=2, max_length=120)
+    join_school: str | None = Field(default=None, description="an offered school id to join instead")
+    separate: bool = Field(default=False, description="decline the offer: a school of my own")
+
+
+class ClassIn(Strict):
+    name: str = Field(min_length=1, max_length=60)
+    year_group: str = Field(default="", max_length=30)
+    band: ClassBand
+
+    _clean = field_validator("name", "year_group")(lambda v: " ".join(v.split()))
+
+
+class StudentIn(Strict):
+    first_name: str = Field(min_length=1, max_length=40)
+    initial: str | None = Field(default=None, min_length=1, max_length=1, pattern=r"^[A-Za-z]$")
+
+    @field_validator("first_name")
+    @classmethod
+    def first_name_only(cls, v: str) -> str:
+        v = " ".join(v.split())
+        if not v or " " in v:
+            raise ValueError("first name only")
+        return v
+
+    @field_validator("initial")
+    @classmethod
+    def upper(cls, v):
+        return v.upper() if v else v
+
+
+class StudentsIn(Strict):
+    students: list[StudentIn] = Field(min_length=1, max_length=40)
+
+
+class StudentPatch(Strict):
+    first_name: str | None = Field(default=None, min_length=1, max_length=40)
+    initial: str | None = Field(default=None, max_length=1)
+    new_pictures: bool = False
+
+
+class SchoolConsentIn(Strict):
+    name: str = Field(min_length=3, max_length=120)
+    role: str = Field(min_length=2, max_length=60, description="e.g. head teacher, class teacher")
+    agreed: Literal[True]
+
+
+class LinkIn(Strict):
+    code: str = Field(min_length=6, max_length=12)
+    student_id: str = Field(min_length=26, max_length=26)
+    learner_id: str = Field(min_length=26, max_length=26)
+    scope: Scope = "class"
+
+
+class ScopeIn(Strict):
+    scope: Scope
+
+
+class ClassEventsIn(Strict):
+    events: list[EventIn] = Field(max_length=500)

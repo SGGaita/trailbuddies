@@ -21,7 +21,7 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "back"]
  */
 export default function GrownUpGate({ children, setup = true }) {
   const ready = useHydrated();
-  const guarded = useSetupGuard();
+  const guarded = useSetupGuard({ off: !setup });
   const open = useFamily((s) => s.gateUntil > Date.now());
   if (!ready || (setup && !guarded)) return <Loading />;
   if (open) return children;
@@ -110,7 +110,7 @@ function Gate() {
           textAlign: "center",
         }}
       >
-        <Buddy id="juma" mood="think" size={80} />
+        <Buddy id="jumbo" mood="think" size={80} />
         <Typography variant="h5" component="h1">
           {t("gate.title")}
         </Typography>

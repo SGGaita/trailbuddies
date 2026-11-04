@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -14,7 +13,15 @@ import OnboardingShell from "./OnboardingShell";
 export default function Welcome() {
   const router = useRouter();
   const startDemo = useFamily((s) => s.startDemo);
-  const [teacher, setTeacher] = useState(false);
+  // ONB-01/13: remember the teacher path through the email sign-in.
+  const asTeacher = () => {
+    try {
+      localStorage.setItem("tb_intent", "teacher");
+    } catch {
+      /* fine: they can choose again after signing in */
+    }
+    router.push("/start/account?as=teacher");
+  };
   const demo = async () => {
     await startDemo();
     router.push("/play");
@@ -32,21 +39,27 @@ export default function Welcome() {
           borderRadius: 4.5,
         }}
       >
-        {["zip", "tumi", "juma", "kiki"].map((b) => (
+        {["zip", "tumi", "jumbo", "kiki"].map((b) => (
           <Buddy key={b} id={b} size={72} mood="cheer" />
         ))}
       </Box>
-      <Button variant="contained" size="large" onClick={() => router.push("/start/account")}>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          try {
+            localStorage.removeItem("tb_intent");
+          } catch {
+            /* fine */
+          }
+          router.push("/start/account");
+        }}
+      >
         {t("start.parent")}
       </Button>
-      <Button variant="outlined" size="large" sx={{ borderWidth: 2 }} onClick={() => setTeacher(true)}>
+      <Button variant="outlined" size="large" sx={{ borderWidth: 2 }} onClick={asTeacher}>
         {t("start.teacher")}
       </Button>
-      {teacher && (
-        <Typography role="status" sx={{ color: "text.secondary", textAlign: "center" }}>
-          {t("start.teacherSoon")}
-        </Typography>
-      )}
       <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 1 }}>
         <Button onClick={() => router.push("/start/account")}>{t("start.haveAccount")}</Button>
         <Button onClick={demo}>{t("start.demo")}</Button>

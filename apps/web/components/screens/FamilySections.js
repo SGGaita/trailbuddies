@@ -59,3 +59,14 @@ export function SoundsSection() {
     </Frame>
   );
 }
+
+/** CLS-04, PAR-08: classes the family's children are linked to. */
+export function ClassesSection() {
+  return (
+    <Frame title={t("classes.title")} sub={t("classes.sectionSub")}>
+      <Button component={Link} href="/family/classes" variant="outlined" sx={{ borderWidth: 2 }}>
+        {t("classes.open")}
+      </Button>
+    </Frame>
+  );
+}

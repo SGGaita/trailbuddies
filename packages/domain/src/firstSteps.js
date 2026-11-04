@@ -3,7 +3,7 @@
 /**
  * @param {{ lessons: number, stars: number }[]} learners each learner's totals
  * @param {{ dismissed?: boolean }} tips
- * @param {Record<string, boolean>} flags feature flags (badge-studio, classes)
+ * @param {Record<string, boolean>} flags feature flags (badge-studio)
  */
 export function firstStepsCard(learners, tips, flags = {}) {
   const lessons = learners.reduce((n, l) => n + (l.lessons || 0), 0);
@@ -14,7 +14,7 @@ export function firstStepsCard(learners, tips, flags = {}) {
     links: [
       { id: "lesson", href: "/family/create", ready: true },
       { id: "badge", href: "/family/rewards", ready: Boolean(flags["badge-studio"]) },
-      { id: "class", href: "/family/settings", ready: Boolean(flags.classes) },
+      { id: "class", href: "/family/classes", ready: true }, // CLS-04, Sprint 9
       { id: "help", href: "/family/help", ready: true },
     ],
   };

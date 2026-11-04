@@ -41,7 +41,7 @@ export default function Placeholder({ area, title, sprint, href, story }) {
         maxWidth: 720,
       }}
     >
-      <Buddy id={area === "teach" ? "juma" : "zip"} size={110} mood="think" />
+      <Buddy id={area === "teach" ? "jumbo" : "zip"} size={110} mood="think" />
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <Typography variant="h5" component="h2">
           {title}
