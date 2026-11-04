@@ -20,6 +20,8 @@ export const colors = {
   muted: "#6b6955",
   warn: { main: "#a85d12", soft: "#fdeedd" },
   bad: { main: "#b3261e", soft: "#fbe9e7" },
+  /** Bright celebration green (badge screen). White text only on `main` and darker. */
+  cheer: { bright: "#58cc02", main: "#46a302", deep: "#2f7d0a" },
   night: { bg: "#1c1f26", raised: "#272b34", fg: "#eef0f4", muted: "#a7acb8" },
 };
 

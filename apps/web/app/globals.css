@@ -154,6 +154,53 @@ a {
 .badge-fly {
   animation: badgefly 0.6s ease-in forwards;
 }
+/* BDG-03 badge celebration: slow sun rays behind the badge and falling confetti (prototype C13). */
+.badge-rays {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  width: min(140vw, 1100px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 255, 255, 0.16) 0deg 9deg, transparent 9deg 24deg);
+  mask-image: radial-gradient(circle, #000 12%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 62%);
+  animation: rays 40s linear infinite;
+}
+@keyframes rays {
+  to {
+    rotate: 360deg;
+  }
+}
+.conf {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.conf i {
+  position: absolute;
+  top: -30px;
+  width: 12px;
+  height: 18px;
+  border-radius: 3px;
+  opacity: 0;
+  animation: fall 2.6s linear forwards;
+}
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0;
+  }
+}
 /* ACC-02 calm mode: celebrations and movement become a short fade. It follows the device's
    reduced-motion setting unless a grown-up turns it on or off (html[data-calm]). */
 @keyframes calmfade {
@@ -177,6 +224,10 @@ html[data-calm="1"] .shake,
 html[data-calm="1"] .buddy * {
   animation: none !important;
 }
+html[data-calm="1"] .conf,
+html[data-calm="1"] .badge-rays {
+  display: none;
+}
 html[data-calm="1"] .glow {
   animation: none !important;
   box-shadow: 0 0 0 5px rgba(240, 180, 41, 0.55) !important;
@@ -186,6 +237,10 @@ html[data-calm="1"] * {
   scroll-behavior: auto !important;
 }
 @media (prefers-reduced-motion: reduce) {
+  html:not([data-calm="0"]) .conf,
+  html:not([data-calm="0"]) .badge-rays {
+    display: none;
+  }
   html:not([data-calm="0"]) * {
     animation-duration: 0.3s !important;
     animation-iteration-count: 1 !important;
