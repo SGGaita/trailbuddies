@@ -71,7 +71,7 @@ alembic upgrade head
 alembic current
 ```
 
-`alembic current` should print the newest number in `services/api/alembic/versions` followed by `(head)` (today `0009 (head)`). Close the terminal afterwards. No `.venv` yet? Run `py -3.12 -m venv .venv`, activate it, then `pip install -r requirements.txt`.
+`alembic current` should print the newest number in `services/api/alembic/versions` followed by `(head)` (today `0010 (head)`). Close the terminal afterwards. No `.venv` yet? Run `py -3.12 -m venv .venv`, activate it, then `pip install -r requirements.txt`.
 
 ## Step 3. Let GitHub run future migrations
 

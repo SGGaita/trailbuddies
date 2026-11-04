@@ -35,6 +35,7 @@ import { speak } from "@/lib/speech";
 import { readMemory, writeMemory } from "@/lib/memory";
 import { SavingGoal } from "@/components/screens/Shop";
 import { OUTFITS } from "@/lib/art";
+import { useTeacherWork } from "@/lib/classWork";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 // Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
@@ -86,6 +87,7 @@ function greetingOf(learner, greetedOn) {
 export default function WorldMap() {
   const ready = useHydrated();
   const learner = useLearner();
+  const work = useTeacherWork(learner);
   const goal = useFamily((s) => s.settings.goal);
   const router = useRouter();
   const noBuddy = ready && learner && !learner.buddy;
@@ -139,6 +141,22 @@ export default function WorldMap() {
       color="secondary"
       label={t("island.newCount", { n: fresh })}
       data-testid="island-new"
+    />
+  ) : null;
+
+  // MAP-06b: a "From your teacher" signpost while there's work to do, the soonest due first.
+  const todo = work.filter((a) => !a.status.done).length;
+  const signpost = todo ? (
+    <Chip
+      size="small"
+      label={`📌 ${todo === 1 ? t("map.fromTeacher") : t("map.fromTeacherN", { n: todo })}`}
+      data-testid="teacher-signpost"
+      sx={{
+        bgcolor: colors.sky.soft,
+        color: colors.sky.deep,
+        fontWeight: 800,
+        border: `2px solid ${colors.sky.main}`,
+      }}
     />
   ) : null;
 
@@ -209,7 +227,12 @@ export default function WorldMap() {
             onClick={hear("island", t("map.familyIsland"))}
             sx={PLACE_SX}
           >
-            <Box sx={{ height: 22 }}>{newChip}</Box>
+            <Box
+              sx={{ minHeight: 22, display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center" }}
+            >
+              {signpost}
+              {newChip}
+            </Box>
             <SubjectArt id="family" small width={artWidth("family", 120)} />
             <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
               {t("map.familyIsland")}
@@ -356,7 +379,10 @@ export default function WorldMap() {
             </Typography>
             <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("map.familyIslandSub")}</Typography>
           </Box>
-          {newChip}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+            {signpost}
+            {newChip}
+          </Box>
         </Box>
         <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

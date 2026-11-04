@@ -462,6 +462,9 @@ class ClassStudent(Base):
     linked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     linked_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    help_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="CRM-02: tapped 'Ask my teacher' on a class tablet"
+    )
 
 
 class ClassEvent(Base):
@@ -479,3 +482,58 @@ class ClassEvent(Base):
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     data: Mapped[dict] = mapped_column(JSON, default=dict)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ClassGroup(Base):
+    """A group within a class, like 'Readers' or 'Starters' (CLS-07), for assigning work."""
+
+    __tablename__ = "class_groups"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(30))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ClassGroupMember(Base):
+    __tablename__ = "class_group_members"
+    group_id: Mapped[str] = mapped_column(ForeignKey("class_groups.id", ondelete="CASCADE"), primary_key=True)
+    student_id: Mapped[str] = mapped_column(
+        ForeignKey("class_students.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+
+
+class Assignment(Base):
+    """Work a teacher set (ASN-01): a built-in unit or a copy of one of their own Lesson Builder
+    lessons, for the class, a group or chosen children, with an optional due date. Removing it
+    hides it everywhere; the children's answers stay in their histories."""
+
+    __tablename__ = "assignments"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(8), doc="unit or custom")
+    unit_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    lesson: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, doc="custom: a copy of the teacher's lesson when it was assigned"
+    )
+    lesson_family_id: Mapped[str | None] = mapped_column(
+        ForeignKey("families.id", ondelete="SET NULL"), nullable=True, doc="whose photos and clips it uses"
+    )
+    title: Mapped[str] = mapped_column(String(80))
+    target: Mapped[dict] = mapped_column(JSON, default=dict, doc="{type: class|group|students, ...}")
+    due_on: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ClassroomDevice(Base):
+    """A shared tablet or lab computer set to a class (CRM-01). The id is made on the device.
+    The teacher can see and remove them; a removed device leaves classroom mode at its next sync."""
+
+    __tablename__ = "classroom_devices"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    label: Mapped[str] = mapped_column(String(60))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

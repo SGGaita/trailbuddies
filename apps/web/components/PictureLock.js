@@ -94,10 +94,12 @@ const Dots = ({ n }) => (
 /**
  * FAM-02: a child opens their profile by tapping their 3 pictures in order. After 3 wrong tries
  * the first picture glows as a hint; a grown-up can reset it in Settings.
- * @param {{ learner: any, voice: boolean, onOpen: () => void, onClose: () => void }} props
+ * @param {{ learner: any, voice: boolean, onOpen: () => void, onClose: () => void, onAskTeacher?: null | (() => Promise<any>) }} props
  */
-export function PictureLockDialog({ learner, voice, onOpen, onClose }) {
+export function PictureLockDialog({ learner, voice, onOpen, onClose, onAskTeacher = null }) {
   const [seq, setSeq] = useState(/** @type {string[]} */ ([]));
+  // CRM-02: on a classroom device a child who forgot their pictures can ask the teacher.
+  const [asked, setAsked] = useState(/** @type {null | "asked" | "offline"} */ (null));
   const [wrong, setWrong] = useState(0);
   const [shake, setShake] = useState(false);
   const lock = learner.picture_lock;
@@ -136,6 +138,27 @@ export function PictureLockDialog({ learner, voice, onOpen, onClose }) {
         </Typography>
       )}
       <Grid onPick={pick} glow={hint && seq.length === 0 ? hint : null} />
+      {onAskTeacher &&
+        (asked ? (
+          <Typography role="status" sx={{ fontWeight: 700, textAlign: "center" }}>
+            {asked === "asked" ? t("classroom.asked") : t("classroom.askOffline")}
+          </Typography>
+        ) : (
+          <Button
+            variant="outlined"
+            sx={{ borderWidth: 2 }}
+            onClick={async () => {
+              const ok = await onAskTeacher().then(
+                () => true,
+                () => false,
+              );
+              setAsked(ok ? "asked" : "offline");
+              say(ok ? t("classroom.asked") : t("classroom.askOffline"));
+            }}
+          >
+            {t("classroom.ask")}
+          </Button>
+        ))}
       <Button variant="outlined" sx={{ borderWidth: 2 }} onClick={onClose}>
         {t("common.notNow")}
       </Button>

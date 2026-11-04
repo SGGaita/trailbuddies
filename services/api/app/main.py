@@ -12,6 +12,7 @@ from .db import get_session
 from .routes import (
     auth,
     beta,
+    classwork,
     content,
     families,
     lessons,
@@ -106,6 +107,7 @@ def create_app() -> FastAPI:
         support.router,
         teach.router,
         links.router,
+        classwork.router,
     ):
         app.include_router(r)
 

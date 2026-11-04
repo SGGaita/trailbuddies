@@ -34,3 +34,4 @@ export * from "./pictures.js";
 export * from "./sounds.js";
 export * from "./firstSteps.js";
 export * from "./classes.js";
+export * from "./assignments.js";

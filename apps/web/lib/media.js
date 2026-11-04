@@ -11,6 +11,7 @@ import {
 } from "@trailbuddies/domain";
 import { useFamily, dbName } from "./store";
 import { familyDb } from "./db";
+import { assignmentMediaPath } from "./classWork";
 
 /**
  * Grown-ups' photos and voice clips (BLD-01, BLD-15, BLD-16, SAF-02).
@@ -266,10 +267,7 @@ export function useMediaUrl(id) {
     getMedia(id).then((e) => {
       if (!live) return;
       if (e?.blob) url = URL.createObjectURL(e.blob);
-      else {
-        const s = useFamily.getState();
-        url = s.mode === "account" && s.family?.id ? `/api/families/${s.family.id}/media/${id}` : null;
-      }
+      else url = serverUrl(id);
       setState({ id, url });
     });
     return () => {
@@ -284,6 +282,13 @@ export function useMediaUrl(id) {
 export async function mediaUrl(id) {
   const e = await getMedia(id);
   if (e?.blob) return URL.createObjectURL(e.blob);
+  return serverUrl(id);
+}
+
+/** The server's copy: a teacher's assigned lesson opens through its assignment (S10). */
+function serverUrl(id) {
+  const viaWork = assignmentMediaPath(id);
+  if (viaWork) return viaWork;
   const s = useFamily.getState();
   return s.mode === "account" && s.family?.id ? `/api/families/${s.family.id}/media/${id}` : null;
 }

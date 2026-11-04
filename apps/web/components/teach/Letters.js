@@ -145,6 +145,7 @@ export default function Letters() {
             <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
               <li>{t("teach.letterSee1")}</li>
               <li>{t("teach.letterSee2")}</li>
+              <li>{t("teach.letterSeeWork")}</li>
               <li>{t("teach.letterSee3")}</li>
               <li>{t("teach.letterSee4")}</li>
             </Box>

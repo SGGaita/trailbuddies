@@ -35,6 +35,9 @@ export function newServer() {
     classes: {},
     students: {}, // roster entries
     classEvents: [],
+    groups: {}, // S10: id -> { id, class_id, name, student_ids }
+    assignments: {}, // S10
+    classDevices: {}, // S10: id -> { id, class_id, label, removed }
     seq: 0,
   };
 }
@@ -70,6 +73,7 @@ const studentOut = (x) => ({
   pictures: x.pictures,
   linked: Boolean(x.learner_id),
   scope: x.scope,
+  help: Boolean(x.help),
 });
 const classOut = (srv, id, roster = false) => {
   const c = srv.classes[id];
@@ -81,14 +85,75 @@ const classOut = (srv, id, roster = false) => {
     band: c.band,
     join_code: c.join_code,
     students: rows.length,
-    ...(roster ? { roster: rows.map(studentOut) } : {}),
+    ...(roster
+      ? {
+          roster: rows.map(studentOut),
+          groups: groupsOf(srv, id),
+          devices: Object.values(srv.classDevices)
+            .filter((d) => d.class_id === id && !d.removed)
+            .map(({ id: did, label }) => ({
+              id: did,
+              label,
+              created_at: "2026-11-04T08:00:00Z",
+              last_seen_at: "2026-11-04T08:00:00Z",
+            })),
+        }
+      : {}),
   };
+};
+// S10, mirroring services/api/app/routes/classwork.py
+const groupsOf = (srv, classId) =>
+  Object.values(srv.groups)
+    .filter((g) => g.class_id === classId)
+    .map(({ id, name, student_ids }) => ({ id, name, student_ids: [...student_ids].sort() }));
+const rosterIds = (srv, classId) =>
+  Object.values(srv.students)
+    .filter((x) => x.class_id === classId)
+    .sort((a, b) => a.first_name.localeCompare(b.first_name))
+    .map((x) => x.id);
+const targetsOf = (srv, a) => {
+  const roster = rosterIds(srv, a.class_id);
+  const t = a.target;
+  const ids = new Set(
+    t.type === "group"
+      ? srv.groups[t.group_id]?.student_ids || []
+      : t.type === "students"
+        ? t.student_ids
+        : roster,
+  );
+  return roster.filter((id) => ids.has(id));
+};
+const assignmentOut = ({ class_id: _c, removed: _r, ...a }) => a;
+const openWork = (srv, classId) =>
+  Object.values(srv.assignments).filter((a) => a.class_id === classId && !a.removed);
+const unitOf = (a) => (a.kind === "custom" ? `custom-${a.lesson.id}` : a.unit_id);
+const workEvents = (srv, pairs, { home = true, key = (st) => st.id } = {}) => {
+  const out = [];
+  for (const [a, st] of pairs) {
+    const from = a.created_at.slice(0, 10);
+    const fits = (e) =>
+      ["lesson_completed", "item_answered"].includes(e.type) &&
+      e.data.unitId === unitOf(a) &&
+      e.at.slice(0, 10) >= from;
+    for (const e of srv.classEvents)
+      if (e.learnerId === st.id && fits(e)) out.push({ ...e, learnerId: key(st) });
+    if (home && st.learner_id)
+      for (const e of srv.events)
+        if (e.learnerId === st.learner_id && fits(e)) out.push({ ...e, learnerId: key(st) });
+  }
+  const seen = new Set();
+  return out
+    .filter((e) => !seen.has(e.id) && seen.add(e.id))
+    .map(({ id, type, learnerId, at, data }) => ({ id, type, learnerId, at, data }))
+    .sort((x, y) => (x.at < y.at ? -1 : 1));
 };
 const teacherOut = (srv, uid) => {
   const t = srv.teachers[uid];
   return {
     school: t.school_id ? srv.schools[t.school_id] : null,
-    classes: Object.values(srv.classes).filter((c) => c.teacher === uid).map((c) => classOut(srv, c.id)),
+    classes: Object.values(srv.classes)
+      .filter((c) => c.teacher === uid)
+      .map((c) => classOut(srv, c.id)),
     tips: t.tips,
   };
 };
@@ -181,7 +246,10 @@ export async function fakeApi(context, srv) {
       return json(route, 200, man || { schema: "packs/1", release: null, channel, packs: [] });
     }
     m0 = path.match(/^\/content\/packs\/([^/]+)$/);
-    if (m0) return srv.packs[m0[1]] ? json(route, 200, srv.packs[m0[1]]) : json(route, 404, { detail: "Pack not found" });
+    if (m0)
+      return srv.packs[m0[1]]
+        ? json(route, 200, srv.packs[m0[1]])
+        : json(route, 404, { detail: "Pack not found" });
     if (path === "/policy")
       return json(route, 200, {
         version: POLICY,
@@ -232,7 +300,8 @@ export async function fakeApi(context, srv) {
     // No sign-in needed: the emailed deletion link (SAF-04) and error reports (SAF-07).
     if (path === "/families/deletion/confirm" && method === "POST") {
       const entry = Object.entries(srv.deletions).find(([, d]) => d.token === body.token);
-      if (!entry) return json(route, 404, { detail: "This link has expired. You can ask again in Settings." });
+      if (!entry)
+        return json(route, 404, { detail: "This link has expired. You can ask again in Settings." });
       entry[1].purge_after = new Date(Date.now() + 7 * 86_400_000).toISOString();
       return json(route, 200, { purge_after: entry[1].purge_after });
     }
@@ -264,7 +333,12 @@ export async function fakeApi(context, srv) {
         return json(route, 201, { ...teacherOut(srv, userId), offer: existing });
       else if (!t.school_id) {
         const sid = `SC${Object.keys(srv.schools).length + 1}`;
-        srv.schools[sid] = { id: sid, name: body.school_name, domain: existing || domain === "gmail.com" ? null : domain, consent: null };
+        srv.schools[sid] = {
+          id: sid,
+          name: body.school_name,
+          domain: existing || domain === "gmail.com" ? null : domain,
+          consent: null,
+        };
         t.school_id = sid;
       }
       return json(route, 201, teacherOut(srv, userId));
@@ -280,11 +354,20 @@ export async function fakeApi(context, srv) {
     }
     if (path === "/classes" && method === "POST") {
       const id = `01JC${String(Object.keys(srv.classes).length + 1).padStart(22, "0")}`;
-      srv.classes[id] = { id, teacher: userId, school_id: srv.teachers[userId].school_id, ...body, join_code: `ABC${234 + Object.keys(srv.classes).length}`.slice(0, 6) };
+      srv.classes[id] = {
+        id,
+        teacher: userId,
+        school_id: srv.teachers[userId].school_id,
+        ...body,
+        join_code: `ABC${234 + Object.keys(srv.classes).length}`.slice(0, 6),
+      };
       return json(route, 201, classOut(srv, id, true));
     }
     m = path.match(/^\/classes\/([^/]+)$/);
-    if (m && method === "GET") return srv.classes[m[1]] ? json(route, 200, classOut(srv, m[1], true)) : json(route, 404, { detail: "Class not found" });
+    if (m && method === "GET")
+      return srv.classes[m[1]]
+        ? json(route, 200, classOut(srv, m[1], true))
+        : json(route, 404, { detail: "Class not found" });
     m = path.match(/^\/classes\/([^/]+)\/code$/);
     if (m && method === "POST") {
       srv.classes[m[1]].join_code = "NEWC0D".replace("0", "2");
@@ -295,13 +378,30 @@ export async function fakeApi(context, srv) {
       const roster = Object.values(srv.students).filter((x) => x.class_id === m[1]);
       const nm = (x) => `${x.first_name} ${x.initial || ""}`.trim().toLowerCase();
       const all = [...roster, ...body.students].map(nm);
-      const clashes = [...new Set(body.students.map(nm).filter((n) => all.filter((x) => x === n).length > 1))];
+      const clashes = [
+        ...new Set(body.students.map(nm).filter((n) => all.filter((x) => x === n).length > 1)),
+      ];
       if (clashes.length)
-        return json(route, 422, { detail: { code: "same_name", names: clashes, message: "Add an initial to tell these children apart." } });
+        return json(route, 422, {
+          detail: {
+            code: "same_name",
+            names: clashes,
+            message: "Add an initial to tell these children apart.",
+          },
+        });
       const pics = ["cat", "sun", "moon"];
       const added = body.students.map((x, i) => {
         const id = `01JS${String(Object.keys(srv.students).length + 1).padStart(22, "0")}`;
-        srv.students[id] = { id, class_id: m[1], first_name: x.first_name, initial: x.initial || null, avatar_color: ["coral", "sky", "leaf"][i % 3], pictures: pics, learner_id: null, scope: "class" };
+        srv.students[id] = {
+          id,
+          class_id: m[1],
+          first_name: x.first_name,
+          initial: x.initial || null,
+          avatar_color: ["coral", "sky", "leaf"][i % 3],
+          pictures: pics,
+          learner_id: null,
+          scope: "class",
+        };
         return studentOut(srv.students[id]);
       });
       return json(route, 201, { added, ...classOut(srv, m[1], true) });
@@ -318,11 +418,20 @@ export async function fakeApi(context, srv) {
           x.lessons += 1;
           x.stars += e.data.stars || 0;
         }
-        return { lessons: lessons.length, stars: lessons.reduce((n, e) => n + (e.data.stars || 0), 0), badges: 0, subjects };
+        return {
+          lessons: lessons.length,
+          stars: lessons.reduce((n, e) => n + (e.data.stars || 0), 0),
+          badges: 0,
+          subjects,
+        };
       };
       const home = st.learner_id ? sum(srv.events.filter((e) => e.learnerId === st.learner_id)) : null;
       if (home && st.scope !== "all") delete home.subjects;
-      return json(route, 200, { student: studentOut(st), class: sum(srv.classEvents.filter((e) => e.learnerId === st.id)), home });
+      return json(route, 200, {
+        student: studentOut(st),
+        class: sum(srv.classEvents.filter((e) => e.learnerId === st.id)),
+        home,
+      });
     }
     m = path.match(/^\/classes\/([^/]+)\/events$/);
     if (m && method === "POST") {
@@ -335,27 +444,174 @@ export async function fakeApi(context, srv) {
           rejected.push({ id: e.id, reason: "school_consent" });
           continue;
         }
-        if (!srv.classEvents.some((x) => x.id === e.id)) srv.classEvents.push({ ...e, seq: ++srv.seq, class_id: m[1] });
+        if (!srv.classEvents.some((x) => x.id === e.id))
+          srv.classEvents.push({ ...e, seq: ++srv.seq, class_id: m[1] });
         accepted.push(e.id);
       }
       return json(route, 200, { accepted, rejected });
     }
     if (m && method === "GET") {
       const after = Number(url.searchParams.get("after") || 0);
-      const events = srv.classEvents.filter((e) => e.class_id === m[1] && e.seq > after).map(({ class_id: _c, ...e }) => e);
+      const events = srv.classEvents
+        .filter((e) => e.class_id === m[1] && e.seq > after)
+        .map(({ class_id: _c, ...e }) => e);
       return json(route, 200, { events, cursor: events.length ? events.at(-1).seq : after, more: false });
+    }
+    // --- Sprint 10: groups, assignments, progress, classroom devices (classwork.py) ---
+    m = path.match(/^\/classes\/([^/]+)\/groups$/);
+    if (m && method === "POST") {
+      const id = `01JG${String(Object.keys(srv.groups).length + 1).padStart(22, "0")}`;
+      srv.groups[id] = { id, class_id: m[1], name: body.name.trim(), student_ids: body.student_ids || [] };
+      return json(route, 201, { groups: groupsOf(srv, m[1]) });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/groups\/([^/]+)$/);
+    if (m && method === "PATCH") {
+      Object.assign(
+        srv.groups[m[2]],
+        body.name ? { name: body.name } : {},
+        body.student_ids ? { student_ids: body.student_ids } : {},
+      );
+      return json(route, 200, { groups: groupsOf(srv, m[1]) });
+    }
+    if (m && method === "DELETE") {
+      const busy = openWork(srv, m[1]).filter((a) => a.target.type === "group" && a.target.group_id === m[2]);
+      if (busy.length)
+        return json(route, 409, {
+          detail: {
+            code: "group_has_work",
+            titles: busy.map((a) => a.title),
+            message: "Remove the work assigned to this group first.",
+          },
+        });
+      delete srv.groups[m[2]];
+      return json(route, 204);
+    }
+    m = path.match(/^\/classes\/([^/]+)\/assignments$/);
+    if (m && method === "GET")
+      return json(route, 200, {
+        assignments: openWork(srv, m[1]).map((a) => ({ ...assignmentOut(a), to: targetsOf(srv, a) })),
+        groups: groupsOf(srv, m[1]),
+      });
+    if (m && method === "POST") {
+      const id = `01JA${String(Object.keys(srv.assignments).length + 1).padStart(22, "0")}`;
+      const lesson = body.kind === "custom" ? srv.lessons[body.lesson_id] : null;
+      const a = {
+        id,
+        class_id: m[1],
+        kind: body.kind,
+        unit_id: body.kind === "unit" ? body.unit_id : null,
+        lesson: lesson ? (({ family_id: _f, ...l }) => l)(lesson) : null,
+        title: lesson ? lesson.title : body.title,
+        target: Object.fromEntries(Object.entries(body.target).filter(([, v]) => v != null)),
+        due_on: body.due_on || null,
+        created_at: new Date(Date.now() - 60_000).toISOString(),
+      };
+      srv.assignments[id] = a;
+      srv.teachers[userId].tips.assigned = true;
+      return json(route, 201, { ...assignmentOut(a), to: targetsOf(srv, a) });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/assignments\/progress$/);
+    if (m && method === "GET") {
+      const open = openWork(srv, m[1]);
+      const pairs = open.flatMap((a) => targetsOf(srv, a).map((sid) => [a, srv.students[sid]]));
+      srv.teachers[userId].tips.viewed = true;
+      return json(route, 200, {
+        assignments: open.map((a) => ({ ...assignmentOut(a), to: targetsOf(srv, a) })),
+        groups: groupsOf(srv, m[1]),
+        events: workEvents(srv, pairs),
+      });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/assignments\/([^/]+)$/);
+    if (m && method === "DELETE") {
+      srv.assignments[m[2]].removed = true;
+      return json(route, 204);
+    }
+    m = path.match(/^\/families\/([^/]+)\/assignments$/);
+    if (m && method === "GET") {
+      const out = [];
+      const pairs = [];
+      for (const st of Object.values(srv.students)) {
+        if (!st.learner_id || srv.learners[st.learner_id]?.family_id !== m[1]) continue;
+        const c = srv.classes[st.class_id];
+        for (const a of openWork(srv, st.class_id)) {
+          if (!targetsOf(srv, a).includes(st.id)) continue;
+          out.push({
+            ...assignmentOut(a),
+            learner_id: st.learner_id,
+            class_name: c.name,
+            teacher: srv.users[c.teacher]?.name || "Your child's teacher",
+          });
+          pairs.push([a, st]);
+        }
+      }
+      return json(route, 200, {
+        assignments: out,
+        events: workEvents(srv, pairs, { home: false, key: (st) => st.learner_id }),
+      });
+    }
+    m = path.match(/^\/assignments\/([^/]+)\/media\/([^/]+)$/);
+    if (m && method === "GET") {
+      const media = srv.media[m[2]];
+      if (!media?.bytes) return json(route, 404, { detail: "Not found" });
+      return route.fulfill({ status: 200, contentType: media.type, body: media.bytes });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/devices$/);
+    if (m && method === "POST") {
+      srv.classDevices[body.id] = { id: body.id, class_id: m[1], label: body.label, removed: false };
+      return json(route, 201, {
+        id: body.id,
+        label: body.label,
+        created_at: "2026-11-04T08:00:00Z",
+        last_seen_at: "2026-11-04T08:00:00Z",
+      });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/devices\/([^/]+)$/);
+    if (m && method === "GET") {
+      const d = srv.classDevices[m[2]];
+      return json(route, 200, { active: Boolean(d && d.class_id === m[1] && !d.removed) });
+    }
+    if (m && method === "DELETE") {
+      srv.classDevices[m[2]].removed = true;
+      return json(route, 204);
+    }
+    m = path.match(/^\/classes\/([^/]+)\/students\/([^/]+)\/help$/);
+    if (m && method === "POST") {
+      srv.students[m[2]].help = true;
+      return json(route, 204);
+    }
+    m = path.match(/^\/classes\/([^/]+)\/students\/([^/]+)$/);
+    if (m && method === "PATCH") {
+      const st = srv.students[m[2]];
+      if (body.help === false || body.new_pictures) st.help = false;
+      if (body.new_pictures) st.pictures = ["dog", "star", "fish"];
+      return json(route, 200, studentOut(st));
     }
     m = path.match(/^\/join\/([^/]+)$/);
     if (m) {
       const c = Object.values(srv.classes).find((x) => x.join_code === m[1].toUpperCase());
-      if (!c) return json(route, 404, { detail: { code: "bad_code", message: "We couldn't find that class code." } });
+      if (!c)
+        return json(route, 404, {
+          detail: { code: "bad_code", message: "We couldn't find that class code." },
+        });
       return json(route, 200, {
-        class: { name: c.name, year_group: c.year_group, teacher: srv.users[c.teacher]?.name || "Your child's teacher", school: srv.schools[c.school_id]?.name },
-        students: Object.values(srv.students).filter((x) => x.class_id === c.id && !x.learner_id).map((x) => ({ id: x.id, name: x.initial ? `${x.first_name} ${x.initial}.` : x.first_name })),
+        class: {
+          name: c.name,
+          year_group: c.year_group,
+          teacher: srv.users[c.teacher]?.name || "Your child's teacher",
+          school: srv.schools[c.school_id]?.name,
+        },
+        students: Object.values(srv.students)
+          .filter((x) => x.class_id === c.id && !x.learner_id)
+          .map((x) => ({ id: x.id, name: x.initial ? `${x.first_name} ${x.initial}.` : x.first_name })),
       });
     }
     m = path.match(/^\/families\/([^/]+)\/links$/);
-    if (m && method === "GET") return json(route, 200, { links: Object.values(srv.students).filter((x) => x.learner_id && srv.learners[x.learner_id]?.family_id === m[1]).map((x) => linkOut(srv, x)) });
+    if (m && method === "GET")
+      return json(route, 200, {
+        links: Object.values(srv.students)
+          .filter((x) => x.learner_id && srv.learners[x.learner_id]?.family_id === m[1])
+          .map((x) => linkOut(srv, x)),
+      });
     if (m && method === "POST") {
       if (role === "viewer") return forbidViewer();
       const st = srv.students[body.student_id];
@@ -412,7 +668,9 @@ export async function fakeApi(context, srv) {
       const region = countryRules(srv.families[m[1]].country).region;
       // ONB-06b: US families sign a form that a person reviews.
       if (region === "us-coppa" && !body.form)
-        return json(route, 422, { detail: { code: "signed_form_needed", message: "Please sign the consent form." } });
+        return json(route, 422, {
+          detail: { code: "signed_form_needed", message: "Please sign the consent form." },
+        });
       srv.consents[m[1]] = {
         policy_version: body.policy_version,
         scopes: body.scopes,
@@ -427,7 +685,12 @@ export async function fakeApi(context, srv) {
     // SAF-03 export, SAF-04 deletion, OPS-06 flags, beta feedback, SAF-07 errors.
     m = path.match(/^\/families\/([^/]+)\/exports$/);
     if (m && method === "POST") {
-      const e = { id: `X${srv.exports.length + 1}`, status: "ready", bytes: 1234, expires_at: "2030-01-08T00:00:00Z" };
+      const e = {
+        id: `X${srv.exports.length + 1}`,
+        status: "ready",
+        bytes: 1234,
+        expires_at: "2030-01-08T00:00:00Z",
+      };
       srv.exports.push(e);
       srv.sent.push({ to: user.email, kind: "export", id: e.id });
       return json(route, 201, e);
@@ -435,7 +698,8 @@ export async function fakeApi(context, srv) {
     if (m && method === "GET") return json(route, 200, { exports: srv.exports });
     m = path.match(/^\/families\/([^/]+)\/deletion$/);
     if (m && method === "POST") {
-      if (role !== "owner") return json(route, 403, { detail: "Only the family's owner can delete the family" });
+      if (role !== "owner")
+        return json(route, 403, { detail: "Only the family's owner can delete the family" });
       const token = `delete-${m[1]}-abcdefghijklmnop`;
       srv.deletions[m[1]] = { token };
       srv.sent.push({ to: user.email, kind: "delete", token });
@@ -447,10 +711,17 @@ export async function fakeApi(context, srv) {
       return json(route, 204);
     }
     m = path.match(/^\/families\/([^/]+)\/flags$/);
-    if (m) return json(route, 200, { cohorts: srv.families[m[1]].cohorts || [], flags: familyOut(srv, srv.families[m[1]]).flags });
+    if (m)
+      return json(route, 200, {
+        cohorts: srv.families[m[1]].cohorts || [],
+        flags: familyOut(srv, srv.families[m[1]]).flags,
+      });
     m = path.match(/^\/families\/([^/]+)\/beta$/);
     if (m && method === "POST") {
-      if (body.code !== "TB-BETA22") return json(route, 404, { detail: "That invite code can't be used. Check it or ask us for a new one." });
+      if (body.code !== "TB-BETA22")
+        return json(route, 404, {
+          detail: "That invite code can't be used. Check it or ask us for a new one.",
+        });
       const f = srv.families[m[1]];
       f.cohorts = ["beta"];
       srv.flags[f.id] = { "beta-feedback": true, "beta-faq": true };
@@ -554,7 +825,10 @@ export async function fakeApi(context, srv) {
     if (m && method === "PUT") {
       if (role === "viewer") return forbidViewer();
       // ONB-05: a country with different privacy rules needs consent again.
-      if (srv.consents[m[1]]?.region && srv.consents[m[1]].region !== countryRules(srv.families[m[1]].country).region)
+      if (
+        srv.consents[m[1]]?.region &&
+        srv.consents[m[1]].region !== countryRules(srv.families[m[1]].country).region
+      )
         return json(route, 403, { detail: "Your country's privacy rules changed. Please agree again." });
       if (srv.consents[m[1]]?.status === "pending")
         return json(route, 403, { detail: "Your signed consent form is waiting for review" });
@@ -603,14 +877,28 @@ export async function fakeApi(context, srv) {
       if (role === "viewer") return forbidViewer();
       const scope = body.kind === "photo" ? "photos" : "voice";
       if (!srv.consents[m[1]]?.scopes?.[scope])
-        return json(route, 403, { detail: { code: "consent_needed", scope, message: "Turn this on first." } });
-      const md = srv.media[body.id] || { family: m[1], kind: body.kind, type: body.content_type, bytes: null };
+        return json(route, 403, {
+          detail: { code: "consent_needed", scope, message: "Turn this on first." },
+        });
+      const md = srv.media[body.id] || {
+        family: m[1],
+        kind: body.kind,
+        type: body.content_type,
+        bytes: null,
+      };
       md.status = md.status === "ready" ? "ready" : "pending";
       srv.media[body.id] = md;
       return json(route, 201, {
         id: body.id,
         status: md.status,
-        upload: md.status === "ready" ? null : { url: `/api/media/blob/${body.id}?exp=1&sig=x`, method: "PUT", headers: { "Content-Type": body.content_type } },
+        upload:
+          md.status === "ready"
+            ? null
+            : {
+                url: `/api/media/blob/${body.id}?exp=1&sig=x`,
+                method: "PUT",
+                headers: { "Content-Type": body.content_type },
+              },
       });
     }
     m = path.match(/^\/families\/([^/]+)\/media\/([^/]+)\/complete$/);
@@ -629,7 +917,8 @@ export async function fakeApi(context, srv) {
     m = path.match(/^\/families\/([^/]+)\/media\/([^/]+)$/);
     if (m && method === "GET") {
       const md = srv.media[m[2]];
-      if (!md || md.family !== m[1] || md.status !== "ready") return json(route, 404, { detail: "Not found" });
+      if (!md || md.family !== m[1] || md.status !== "ready")
+        return json(route, 404, { detail: "Not found" });
       return route.fulfill({ status: 307, headers: { location: `/api/media/blob/${m[2]}?exp=1&sig=x` } });
     }
     if (path === "/sync/events" && method === "POST") {

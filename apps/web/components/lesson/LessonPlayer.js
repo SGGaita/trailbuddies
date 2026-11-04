@@ -9,9 +9,17 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { buddySays, economy, UNITS } from "@trailbuddies/content";
-import { startLadder, answer, lessonOutcome, celebrationFor, restReason, soundLines } from "@trailbuddies/domain";
+import {
+  startLadder,
+  answer,
+  lessonOutcome,
+  celebrationFor,
+  restReason,
+  soundLines,
+} from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { planLesson, completionEvents } from "@/lib/session";
+import { assignedLessons, isAssignedUnit } from "@/lib/classWork";
 import { setSalvage, clearSalvageSoon } from "@/lib/salvage";
 import { payable, badgeEvents } from "@/lib/rewards";
 import { speak, stop, registerTextClip, clearTextClips } from "@/lib/speech";
@@ -80,7 +88,10 @@ function Player({ where, learner }) {
   const settings = useFamily((s) => s.settings);
 
   const [plan] = useState(() => {
-    const p = planLesson(where, learner, Date.now(), useFamily.getState().lessons);
+    const own = useFamily.getState().lessons;
+    const p = planLesson(where, learner, Date.now(), [...own, ...assignedLessons(learner.id)], {
+      assigned: where.kind === "lesson" && isAssignedUnit(learner.id, where.unitId),
+    });
     if (p.blocked) return p;
     return {
       ...p,

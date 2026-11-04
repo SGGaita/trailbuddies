@@ -65,6 +65,16 @@ const empty = () => ({
   soundEdits: /** @type {Record<string, string | null>} */ ({}),
   /** Grown-up tips dismissed on this device (ONB-12). */
   tips: /** @type {Record<string, boolean>} */ ({}),
+  /**
+   * Work from teachers (S10, lib/classWork.js): at home, the children's assignments and their
+   * class play towards them; on a class device, the class's assignments and its play. Kept on
+   * the device so Class Island works offline (CRM-05).
+   */
+  classWork: /** @type {{ assignments: any[], events: any[], at: number }} */ ({
+    assignments: [],
+    events: [],
+    at: 0,
+  }),
 });
 
 /** Called after local changes so account mode can sync (set by lib/account.js). */
@@ -214,7 +224,10 @@ export const useFamily = create(
           const sounds = { ...s.sounds };
           if (mediaId) sounds[sound] = mediaId;
           else delete sounds[sound];
-          return { sounds, soundEdits: s.mode === "account" ? { ...s.soundEdits, [sound]: mediaId } : s.soundEdits };
+          return {
+            sounds,
+            soundEdits: s.mode === "account" ? { ...s.soundEdits, [sound]: mediaId } : s.soundEdits,
+          };
         });
         afterChange();
       },
@@ -296,7 +309,9 @@ export const useFamily = create(
         soundEdits,
         tips,
         teacher,
+        classWork,
       }) => ({
+        classWork,
         teacher,
         sounds,
         soundEdits,
