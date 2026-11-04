@@ -1,4 +1,27 @@
-# Tool settings only. Dependencies live in requirements*.txt (installed with pip).
+# Runtime dependencies are listed twice, on purpose:
+# - here, because Vercel's Python builder (uv) reads pyproject.toml first and ignores
+#   requirements.txt whenever this file exists (without this list the API deploys with no packages);
+# - in requirements.txt, for Docker, CI and the migrate workflow (pip).
+# tests/test_dependencies.py fails if the two lists drift apart. Test tools: requirements-dev.txt.
+[project]
+name = "trailbuddies-api"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.120.4",
+    "uvicorn[standard]==0.38.0",
+    "sqlalchemy==2.0.44",
+    "alembic==1.17.1",
+    "psycopg[binary]==3.2.12",
+    "pydantic-settings==2.11.0",
+    "arq==0.26.3",
+    "httpx==0.28.1",
+    "email-validator==2.3.0",
+    "pillow==13.0.0",
+    "boto3==1.43.118",
+    "sentry-sdk==2.73.0",
+]
+
 [tool.ruff]
 line-length = 110
 target-version = "py312"
@@ -15,6 +38,6 @@ pythonpath = ["."]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 
 # Vercel (ADR 0006): the API is the "api" service in the root vercel.json, at /api/*.
-# Python version: .python-version (3.12). Dependencies: requirements.txt.
+# Python version: .python-version (3.12). Dependencies: [project] above (uv).
 [tool.vercel]
 entrypoint = "app.main:app"
