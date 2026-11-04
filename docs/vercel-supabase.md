@@ -66,12 +66,12 @@ alembic current
 ```bat
 cd services\api
 .venv\Scripts\activate
-set TB_MIGRATE_DATABASE_URL=<Trailbuddies DB (session) from the password manager>
+set "TB_MIGRATE_DATABASE_URL=<Trailbuddies DB (session) from the password manager>"
 alembic upgrade head
 alembic current
 ```
 
-`alembic current` should print `0007 (head)`. Close the terminal afterwards. No `.venv` yet? Run `py -3.12 -m venv .venv`, activate it, then `pip install -r requirements.txt`.
+`alembic current` should print the newest number in `services/api/alembic/versions` followed by `(head)` (today `0009 (head)`). Close the terminal afterwards. No `.venv` yet? Run `py -3.12 -m venv .venv`, activate it, then `pip install -r requirements.txt`.
 
 ## Step 3. Let GitHub run future migrations
 
@@ -154,7 +154,7 @@ python -m app.admin flags beta-faq --cohort beta
 python -m app.admin consents
 ```
 
-(cmd: `set TB_DATABASE_URL=...` instead of `$env:...`.)
+(cmd: `set "TB_DATABASE_URL=..."` instead of `$env:...`. The `=` matters: `set NAME value` without it only prints the variable, and the command then connects to your local Docker database.)
 
 | Task | Command |
 |---|---|
@@ -189,6 +189,7 @@ Docker Compose still runs everything on your PC ([docker.md](docker.md)). The AP
 | `remaining connection slots are reserved` | Something is using the session pooler (5432) from Vercel. Switch `TB_DATABASE_URL` to 6543. |
 | Migration run fails with "could not translate host name" | The secret has the IPv6-only direct host. Use the session pooler host. |
 | Sign-in links point to localhost | Set `TB_WEB_URL` for Production and redeploy. |
+| Every `/api/...` call returns `500 FUNCTION_INVOCATION_FAILED`, and the build log says "Installing required dependencies from pyproject.toml" with no packages installed | Vercel's Python builder reads `services/api/pyproject.toml` and ignores `requirements.txt`. The runtime packages must be listed under `[project] dependencies` there too (`tests/test_dependencies.py` keeps the two lists equal). |
 | `/api/...` returns the web app's 404 page | The project's Root Directory isn't the repository root (Step 4a). |
 | A bad deploy | **Deployments**, pick the last good one, **… → Promote to Production**. The database isn't touched. |
 
