@@ -47,7 +47,7 @@ export default function Account() {
     setBusy(true);
     setError("");
     try {
-      await api.magicLink(email.trim());
+      await api.magicLink(email.trim(), teacher ? "teacher" : undefined);
       setSent(true);
     } catch (err) {
       setError(err.message || "Something went wrong. Check your connection and try again.");

@@ -68,7 +68,8 @@ def magic_link(body: MagicLinkIn, tasks: BackgroundTasks, db: DbSession = Depend
             )
         )
         db.commit()
-        later(tasks, send_magic_link, email, f"{s.web_url}/auth/verify?{urlencode({'token': token})}")
+        query = {"token": token, **({"role": "teacher"} if body.role == "teacher" else {})}
+        later(tasks, send_magic_link, email, f"{s.web_url}/auth/verify?{urlencode(query)}")
     return {"sent": True}
 
 

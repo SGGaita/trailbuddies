@@ -269,3 +269,17 @@ def test_the_migration_renames_juma_in_saved_profiles(tmp_path):
     command.upgrade(cfg, "head")
     with eng.connect() as db:
         assert db.execute(text("SELECT buddy FROM learners")).scalar() == "jumbo"
+
+
+def test_a_teachers_magic_link_says_so_whichever_browser_opens_it(client, outbox):
+    """ONB-13: the link carries role=teacher, so a mail app's browser still opens teacher set-up."""
+    assert (
+        client.post("/auth/magic-link", json={"email": "priya@stmarys.sch.ke", "role": "teacher"}).status_code
+        == 202
+    )
+    assert re.search(r"/auth/verify\?token=[^&\s]+&role=teacher", outbox[-1][1])
+    client.post("/auth/magic-link", json={"email": "grace@example.com"})
+    assert "role=" not in outbox[-1][1]
+    assert (
+        client.post("/auth/magic-link", json={"email": "x@example.com", "role": "admin"}).status_code == 422
+    )
