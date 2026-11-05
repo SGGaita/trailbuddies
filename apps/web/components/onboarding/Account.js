@@ -59,7 +59,7 @@ export default function Account() {
   if (sent)
     return (
       <OnboardingShell
-        step={2}
+        step={teacher ? undefined : 2}
         title={t("start.checkEmail")}
         sub={t("start.checkEmailSub", { email: email.trim() })}
         back="/start"
@@ -76,7 +76,7 @@ export default function Account() {
 
   return (
     <OnboardingShell
-      step={2}
+      step={teacher ? undefined : 2}
       title={teacher ? t("teach.accountTitle") : t("start.accountTitle")}
       sub={teacher ? t("teach.accountSub") : t("start.accountSub")}
       back="/start"

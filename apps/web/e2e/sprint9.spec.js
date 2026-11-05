@@ -270,3 +270,39 @@ test("a teacher's sign-in link opens teacher set-up in any browser, and parents'
   await expect(page).toHaveURL(/\/teach\/start$/);
   await expect(page.getByLabel("School name")).toBeVisible();
 });
+
+test("a teacher who went through the parent wizard to consent can still switch (ONB-13)", async ({
+  page,
+  context,
+}, testInfo) => {
+  const srv = newServer();
+  await fakeApi(context, srv);
+  await page.goto("/start");
+  await page.getByRole("button", { name: "I'm a parent or carer" }).click();
+  await expect(page.getByText(/Step 2 of 7/)).toBeVisible();
+  await page.getByLabel("Email address").fill("priya@stmarys.sch.ke");
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await verify(page, srv);
+  await expect(page).toHaveURL(/\/start\/about$/);
+  await page.getByLabel("Your first name").fill("Ms Priya");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/start\/consent$/);
+  await shot(page, testInfo, "s9-switch-from-consent");
+  await page.getByRole("button", { name: "I'm a teacher, not a parent" }).click();
+  await expect(page).toHaveURL(/\/teach\/start$/);
+  await page.getByLabel("School name").fill("St Mary's Primary");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/teach$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Hello, Ms Priya" })).toBeVisible();
+});
+
+test("the teacher's sign-in screen doesn't show the parent wizard's steps (ONB-13)", async ({
+  page,
+  context,
+}) => {
+  await fakeApi(context, newServer());
+  await page.goto("/start");
+  await page.getByRole("button", { name: "I'm a teacher" }).click();
+  await expect(page.getByRole("heading", { name: "Your teacher account" })).toBeVisible();
+  await expect(page.getByText(/Step \d of 7/)).toHaveCount(0);
+});
