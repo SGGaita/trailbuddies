@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
 from ..ids import ulid
-from ..models import ClassEvent, ClassStudent, Event, School, SchoolClass, Teacher, User
+from ..models import ClassEvent, ClassGroupMember, ClassStudent, Event, School, SchoolClass, Teacher, User
 from ..schemas import ClassEventsIn, ClassIn, SchoolConsentIn, StudentPatch, StudentsIn, TeacherIn
 from ..security import aware, current_user
 
@@ -92,6 +92,7 @@ def student_out(s: ClassStudent) -> dict:
         "pictures": s.pictures or [],
         "linked": bool(s.learner_id),
         "scope": s.scope,
+        "help": bool(s.help_at),
     }
 
 
@@ -111,6 +112,11 @@ def class_out(db: DbSession, c: SchoolClass, students: bool = False) -> dict:
             select(ClassStudent).where(ClassStudent.class_id == c.id).order_by(ClassStudent.first_name)
         )
         out["roster"] = [student_out(s) for s in rows]
+        # Sprint 10 (imported here to avoid a circular import at load time).
+        from .classwork import devices_of, groups_of
+
+        out["groups"] = groups_of(db, c.id)
+        out["devices"] = devices_of(db, c.id)
     return out
 
 
@@ -308,6 +314,9 @@ def edit_student(
         s.initial = body.initial.upper() or None
     if body.new_pictures:
         s.pictures = [secrets.choice(PICTURES) for _ in range(3)]
+        s.help_at = None
+    if body.help is False:
+        s.help_at = None
     db.commit()
     return student_out(s)
 
@@ -320,6 +329,7 @@ def remove_student(
     c = own_class(db, user, class_id)
     s = own_student(db, c, student_id)
     db.execute(ClassEvent.__table__.delete().where(ClassEvent.student_id == s.id))
+    db.execute(ClassGroupMember.__table__.delete().where(ClassGroupMember.student_id == s.id))
     db.delete(s)
     db.commit()
 

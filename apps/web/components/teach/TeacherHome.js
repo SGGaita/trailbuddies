@@ -96,6 +96,7 @@ function Checklist({ teacher }) {
       printed: teacher.tips?.printed,
       played: teacher.tips?.played,
       viewed: teacher.tips?.viewed,
+      assigned: teacher.tips?.assigned,
     })),
   });
   const done = steps.filter((s) => s.done).length;

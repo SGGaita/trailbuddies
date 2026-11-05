@@ -337,6 +337,9 @@ class StudentPatch(Strict):
     first_name: str | None = Field(default=None, min_length=1, max_length=40)
     initial: str | None = Field(default=None, max_length=1)
     new_pictures: bool = False
+    help: Literal[False] | None = Field(
+        default=None, description="false: the teacher answered 'Ask my teacher'"
+    )
 
 
 class SchoolConsentIn(Strict):
@@ -358,3 +361,67 @@ class ScopeIn(Strict):
 
 class ClassEventsIn(Strict):
     events: list[EventIn] = Field(max_length=500)
+
+
+# --- Sprint 10: groups, assignments, classroom devices ---------------------------------------
+
+
+class GroupIn(Strict):
+    """CLS-07: a group within a class."""
+
+    name: str = Field(min_length=1, max_length=30)
+    student_ids: list[str] = Field(default_factory=list, max_length=60)
+
+    _clean = field_validator("name")(lambda v: " ".join(v.split()))
+
+
+class GroupPatch(Strict):
+    name: str | None = Field(default=None, min_length=1, max_length=30)
+    student_ids: list[str] | None = Field(default=None, max_length=60)
+
+    _clean = field_validator("name")(lambda v: v if v is None else " ".join(v.split()))
+
+
+class TargetIn(Strict):
+    type: Literal["class", "group", "students"]
+    group_id: str | None = Field(default=None, max_length=26)
+    student_ids: list[str] | None = Field(default=None, max_length=60)
+
+    @model_validator(mode="after")
+    def _complete(self):
+        if self.type == "group" and not self.group_id:
+            raise ValueError("pick a group")
+        if self.type == "students" and not self.student_ids:
+            raise ValueError("pick at least one child")
+        if self.type != "group":
+            self.group_id = None
+        if self.type != "students":
+            self.student_ids = None
+        return self
+
+
+class AssignmentIn(Strict):
+    """ASN-01: a built-in unit or one of the teacher's own lessons, for the class, a group or
+    chosen children, with an optional due date."""
+
+    kind: Literal["unit", "custom"]
+    unit_id: str | None = Field(default=None, max_length=80, pattern=r"^[a-z0-9][a-z0-9-]*$")
+    title: str | None = Field(default=None, min_length=1, max_length=80, description="the unit's title")
+    lesson_id: str | None = Field(default=None, max_length=26)
+    target: TargetIn
+    due_on: date | None = None
+
+    @model_validator(mode="after")
+    def _what(self):
+        if self.kind == "unit" and not (self.unit_id and self.title):
+            raise ValueError("pick a unit")
+        if self.kind == "custom" and not self.lesson_id:
+            raise ValueError("pick a lesson")
+        return self
+
+
+class DeviceIn(Strict):
+    """CRM-01: this device becomes a classroom device. The id is made on the device."""
+
+    id: str = Field(min_length=26, max_length=26)
+    label: str = Field(min_length=1, max_length=60)

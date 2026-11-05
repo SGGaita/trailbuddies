@@ -16,9 +16,10 @@ import { trailUnits } from "./trail";
  * @param {{ kind: "lesson" | "trophy" | "review" | "custom", unitId?: string, step?: string, subjectId?: string, id?: string, preview?: boolean }} where
  * @param {any} learner learnerView
  * @param {number} seed
- * @param {any[]} [lessons] the family's custom lessons
+ * @param {any[]} [lessons] the family's custom lessons, and lessons a teacher assigned
+ * @param {{ assigned?: boolean }} [opts] `assigned`: a teacher set this unit, so its trail locks don't apply (ASN-01)
  */
-export function planLesson(where, learner, seed, lessons = []) {
+export function planLesson(where, learner, seed, lessons = [], { assigned = false } = {}) {
   const r = rng(seed);
   if (where.kind === "custom") {
     // A lesson from the Lesson Builder: for children it's assigned to, or a grown-up's preview.
@@ -49,7 +50,11 @@ export function planLesson(where, learner, seed, lessons = []) {
   const back = reviewing ? "/review" : `/play/trail/${unit.subject}`;
   const step = where.step === "trophy" ? "trophy" : Number(where.step);
   if (step !== "trophy" && !(step >= 1 && step <= unit.lessons.length)) return { blocked: back };
-  if (!reviewing && !canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject]))
+  if (
+    !reviewing &&
+    !(assigned && step !== "trophy") &&
+    !canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject])
+  )
     return { blocked: back };
   const opts = { level: learner.levelFor(unit.subject), band: learner.band, r };
   const lesson = step === "trophy" ? buildTrophy(unit, opts) : buildLesson(unit, step - 1, opts);

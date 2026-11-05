@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -24,8 +25,7 @@ import { readMemory, writeMemory } from "@/lib/memory";
 function nextStop(subjectId, progress, start) {
   const { next } = layoutTrail(trailUnits(subjectId), progress, { start });
   if (!next) return null;
-  if (next.kind === "trophy")
-    return { href: lessonHref(next.unitId, "trophy"), label: t("done.trophyNext") };
+  if (next.kind === "trophy") return { href: lessonHref(next.unitId, "trophy"), label: t("done.trophyNext") };
   if (next.n === 1) {
     const title = getUnit(next.unitId)?.title || "";
     return { href: lessonHref(next.unitId, 1), label: t("done.newUnit", { title }) };
@@ -40,6 +40,14 @@ function nextStop(subjectId, progress, start) {
 export default function LessonComplete({ lesson, outcome, learner, goal, back, preview = false }) {
   const voice = useFamily((s) => s.settings.voice);
   const breaks = useFamily((s) => s.settings.breaks);
+  // CRM-03: on a classroom device, the child is signed out after each lesson.
+  const classroom = useFamily((s) => s.mode === "class" && !!s.family?.classroom) && !preview;
+  const setActive = useFamily((s) => s.setActive);
+  const router = useRouter();
+  const nextFriend = () => {
+    setActive(null);
+    router.replace("/play");
+  };
   // BDG-03 / LES-16: new badges celebrate after the end screen has shown for a moment.
   const [celebrate, setCelebrate] = useState(false);
   const hasBadges = (outcome.badges || []).length > 0;
@@ -47,7 +55,10 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back, p
   const [stretchDue] = useState(
     () =>
       !preview &&
-      breakDue({ breaks }, minutesSinceBreak(learner.todayResults || [], readMemory().breaks[learner.id] || null)),
+      breakDue(
+        { breaks },
+        minutesSinceBreak(learner.todayResults || [], readMemory().breaks[learner.id] || null),
+      ),
   );
   const [stretch, setStretch] = useState(false);
   useEffect(() => {
@@ -179,13 +190,21 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back, p
         <Typography sx={{ fontWeight: 800, color: colors.berry.deep }}>{t("done.keptGoing")}</Typography>
       )}
       <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center", mt: 1 }}>
-        <Button component={Link} href={back} variant="outlined" size="large" sx={{ borderWidth: 2 }}>
-          {preview ? t("builder.backToBuilder") : custom ? t("done.island") : t("done.trail")}
-        </Button>
-        {next && (
-          <Button component={Link} href={next.href} variant="contained" size="large" autoFocus>
-            {next.label}
+        {classroom ? (
+          <Button variant="contained" size="large" onClick={nextFriend} autoFocus>
+            {t("classroom.allDone")}
           </Button>
+        ) : (
+          <>
+            <Button component={Link} href={back} variant="outlined" size="large" sx={{ borderWidth: 2 }}>
+              {preview ? t("builder.backToBuilder") : custom ? t("done.island") : t("done.trail")}
+            </Button>
+            {next && (
+              <Button component={Link} href={next.href} variant="contained" size="large" autoFocus>
+                {next.label}
+              </Button>
+            )}
+          </>
         )}
       </Box>
       {celebrate && (

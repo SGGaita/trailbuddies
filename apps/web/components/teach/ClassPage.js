@@ -268,7 +268,190 @@ function Progress({ cls, student, onClose }) {
   );
 }
 
-/** T02 Class roster and join code (CLS-01..06). */
+/** CLS-07: a group's name and children, chosen with toggles (works with touch, mouse and keys). */
+function GroupDialog({ cls, group, onSaved, onClose }) {
+  const [name, setName] = useState(group?.name || "");
+  const [ids, setIds] = useState(/** @type {string[]} */ (group?.student_ids || []));
+  const [error, setError] = useState("");
+  const save = async () => {
+    setError("");
+    try {
+      const body = { name: name.trim(), student_ids: ids };
+      const r = group ? await api.editGroup(cls.id, group.id, body) : await api.createGroup(cls.id, body);
+      onSaved(r.groups);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+  const remove = async () => {
+    setError("");
+    try {
+      await api.deleteGroup(cls.id, group.id);
+      onSaved((cls.groups || []).filter((g) => g.id !== group.id));
+    } catch (e) {
+      setError(e.message); // 409: "Remove the work assigned to this group first."
+    }
+  };
+  return (
+    <Dialog open onClose={onClose} aria-labelledby="group-title" slotProps={dialog}>
+      <Typography id="group-title" variant="h5" component="h2">
+        {group ? t("teach.editGroup", { name: group.name }) : t("teach.newGroup")}
+      </Typography>
+      <TextField
+        label={t("teach.groupName")}
+        placeholder={t("teach.groupNameEg")}
+        value={name}
+        onChange={(e) => setName(e.target.value.slice(0, 30))}
+      />
+      <Typography sx={{ fontWeight: 800 }} id="group-members">
+        {name.trim() ? t("teach.groupMembers", { name: name.trim() }) : t("teach.groupMembersNew")}
+      </Typography>
+      <Box role="group" aria-labelledby="group-members" sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+        {cls.roster.map((s) => {
+          const on = ids.includes(s.id);
+          return (
+            <Chip
+              key={s.id}
+              label={studentName(s)}
+              aria-pressed={on}
+              color={on ? "primary" : "default"}
+              variant={on ? "filled" : "outlined"}
+              onClick={() => setIds(on ? ids.filter((x) => x !== s.id) : [...ids, s.id])}
+            />
+          );
+        })}
+      </Box>
+      {error && <Alert severity="warning">{error}</Alert>}
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        {group && (
+          <Button color="error" onClick={remove} sx={{ mr: "auto" }}>
+            {t("teach.deleteGroup")}
+          </Button>
+        )}
+        <Button onClick={onClose}>{t("teach.cancel")}</Button>
+        <Button variant="contained" disabled={!name.trim()} onClick={save}>
+          {t("teach.saveGroup")}
+        </Button>
+      </Box>
+    </Dialog>
+  );
+}
+
+function Groups({ cls, onChange }) {
+  const [editing, setEditing] = useState(/** @type {any} */ (null));
+  const names = Object.fromEntries(cls.roster.map((s) => [s.id, studentName(s)]));
+  const groups = cls.groups || [];
+  return (
+    <Box
+      component="section"
+      id="groups"
+      aria-label={t("teach.groups")}
+      sx={{ ...card, display: "flex", flexDirection: "column", gap: 1 }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography component="h2" variant="h6" sx={{ flex: 1 }}>
+          {t("teach.groups")}
+        </Typography>
+        <Button
+          variant="outlined"
+          sx={{ borderWidth: 2 }}
+          disabled={!cls.roster.length}
+          onClick={() => setEditing({})}
+        >
+          {t("teach.newGroup")}
+        </Button>
+      </Box>
+      <Typography sx={{ color: "text.secondary", fontSize: 14 }}>{t("teach.groupsSub")}</Typography>
+      {groups.length === 0 && <Typography sx={{ color: "text.secondary" }}>{t("teach.noGroups")}</Typography>}
+      {groups.map((g) => (
+        <Box
+          key={g.id}
+          data-group={g.name}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            py: 0.75,
+            borderBottom: `1px solid ${colors.line}`,
+            "&:last-of-type": { borderBottom: 0 },
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontWeight: 800 }}>
+              {g.name}{" "}
+              <Typography component="span" sx={{ fontWeight: 400, color: "text.secondary", fontSize: 14 }}>
+                {g.student_ids.length === 1
+                  ? t("teach.oneChild")
+                  : t("teach.childrenN", { n: g.student_ids.length })}
+              </Typography>
+            </Typography>
+            <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+              {g.student_ids
+                .map((id) => names[id])
+                .filter(Boolean)
+                .join(", ")}
+            </Typography>
+          </Box>
+          <Button aria-label={t("teach.editGroup", { name: g.name })} onClick={() => setEditing(g)}>
+            {t("teach.edit")}
+          </Button>
+        </Box>
+      ))}
+      {editing && (
+        <GroupDialog
+          cls={cls}
+          group={editing.id ? editing : null}
+          onClose={() => setEditing(null)}
+          onSaved={(next) => {
+            setEditing(null);
+            onChange(next);
+          }}
+        />
+      )}
+    </Box>
+  );
+}
+
+/** CRM-02: children who tapped 'Ask my teacher' on a class tablet, with their pictures. */
+function HelpRequests({ cls, onDone }) {
+  const asking = cls.roster.filter((s) => s.help);
+  if (!asking.length) return null;
+  return (
+    <Box
+      component="section"
+      aria-label={t("teach.help")}
+      role="status"
+      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+    >
+      {asking.map((s) => (
+        <Alert
+          key={s.id}
+          severity="info"
+          icon={<Initial s={s} />}
+          action={
+            <Button color="inherit" onClick={() => onDone(s)}>
+              {t("teach.helpDone")}
+            </Button>
+          }
+          data-help={studentName(s)}
+        >
+          <Typography sx={{ fontWeight: 800 }}>{t("teach.helpSub", { name: studentName(s) })}</Typography>
+          <Box
+            sx={{ display: "flex", gap: 1, mt: 0.5 }}
+            role="img"
+            aria-label={s.pictures.map((p) => t(`pictures.${p}`)).join(", ")}
+          >
+            {s.pictures.map((p, i) => (
+              <PictureIcon key={i} id={p} size={48} />
+            ))}
+          </Box>
+        </Alert>
+      ))}
+    </Box>
+  );
+}
+
+/** T02 Class roster and join code (CLS-01..07), and children asking for their pictures (CRM-02). */
 export default function ClassPage() {
   const ready = useHydrated();
   const router = useRouter();
@@ -290,6 +473,18 @@ export default function ClassPage() {
       .then(setCls)
       .catch((e) => setError(e.message));
   }, [id, router]);
+  // CRM-02: 'Ask my teacher' shows up here within a few seconds while the page is open.
+  useEffect(() => {
+    if (!id) return undefined;
+    const poll = setInterval(() => {
+      if (document.visibilityState === "visible")
+        api
+          .getClass(id)
+          .then(setCls)
+          .catch(() => {});
+    }, 15_000);
+    return () => clearInterval(poll);
+  }, [id]);
   if (!ready || (!cls && !error)) return <Loading />;
   if (!cls)
     return (
@@ -337,6 +532,13 @@ export default function ClassPage() {
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+          <HelpRequests
+            cls={cls}
+            onDone={async (st) => {
+              await api.editStudent(cls.id, st.id, { help: false });
+              setCls(await api.getClass(cls.id));
+            }}
+          />
           {needTerms && (
             <SchoolTerms
               school={school}
@@ -413,6 +615,7 @@ export default function ClassPage() {
               ))}
             </Box>
           </Box>
+          <Groups cls={cls} onChange={(groups) => setCls({ ...cls, groups })} />
           <AddStudents
             cls={cls}
             onAdded={async (r) => {

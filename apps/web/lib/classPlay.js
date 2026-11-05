@@ -1,12 +1,18 @@
 "use client";
-import { bandBirth, makePictureLock, studentName } from "@trailbuddies/domain";
+import { bandBirth, makePictureLock, studentName, hashPin } from "@trailbuddies/domain";
+import { ulid } from "@trailbuddies/sync";
 import { useFamily, DEFAULT_SETTINGS } from "./store";
 import { api, refreshAccount, syncNow } from "./account";
 
 /**
  * "Play as class" (S9): the teacher's device becomes the class's device. The roster children
  * appear in the profile picker, open their profile with their 3 pictures, and play; their
- * progress syncs to the class (separate from any family's). Shared-tablet classroom mode is S10.
+ * progress syncs to the class (separate from any family's).
+ *
+ * Classroom mode (S10, CRM-01): the same, on a shared tablet or lab computer the teacher set to
+ * the class. The device is registered with the class (the teacher can remove it), the grown-up
+ * zone needs the classroom PIN (hashed here, never sent), children are signed out after each
+ * lesson or 3 minutes idle, and assigned work is kept on the device for when the Wi-Fi drops.
  *
  * Choices a child makes on this device (buddy, outfit) are remembered here between sessions.
  */
@@ -27,11 +33,33 @@ const writeLocal = (id, data) => {
   }
 };
 
-/** @param {string} classId */
-export async function startClassPlay(classId) {
+const DEVICE_KEY = "tb_classroom_device";
+/** This device's id for classroom mode: made once, kept across classes. */
+function deviceId() {
+  try {
+    const id = localStorage.getItem(DEVICE_KEY) || ulid();
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    return ulid();
+  }
+}
+
+/**
+ * @param {string} classId
+ * @param {{ classroom?: { label: string, pin: string } }} [opts] set this device to the class (CRM-01)
+ */
+export async function startClassPlay(classId, opts = {}) {
   if (useFamily.getState().mode === "account") await syncNow(); // the family's own changes go up first
   const before = useFamily.getState();
   const cls = await api.getClass(classId);
+  let classroom = null;
+  let pin = null;
+  if (opts.classroom) {
+    const device = await api.addDevice(classId, { id: deviceId(), label: opts.classroom.label });
+    classroom = { deviceId: device.id, label: device.label };
+    pin = await hashPin(opts.classroom.pin);
+  }
   const local = readLocal(classId);
   const now = new Date().toISOString();
   const learners = await Promise.all(
@@ -61,7 +89,10 @@ export async function startClassPlay(classId) {
       role: "owner",
       plan: "Class",
       parent: before.user?.name || "",
+      classroom,
+      pin,
     },
+    classWork: { assignments: [], events: [], at: 0 },
     settings: DEFAULT_SETTINGS,
     learners,
     activeId: null,
@@ -92,6 +123,7 @@ export async function endClassPlay() {
     events: [],
     eventsReady: false,
     activeId: null,
+    classWork: { assignments: [], events: [], at: 0 },
   });
   await refreshAccount();
   syncNow();

@@ -16,6 +16,7 @@ import SpeakButton from "@/components/SpeakButton";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
 import { PictureLockDialog } from "@/components/PictureLock";
+import { api } from "@/lib/account";
 
 const BAND_NAMES = {
   seedling: "Seedling",
@@ -36,6 +37,8 @@ export default function ProfilePicker() {
   const voice = useFamily((s) => s.settings.voice);
   // Class play (S9): the grown-ups' button goes back to the class.
   const classId = useFamily((s) => (s.mode === "class" ? s.family?.classId : null));
+  // Classroom mode (S10, CRM-01/02): the class list, compact, with 'Ask my teacher'.
+  const classroom = useFamily((s) => (s.mode === "class" && s.family?.classroom ? s.family : null));
   const router = useRouter();
   // FAM-02: a learner with a picture password taps their pictures first.
   const [locked, setLocked] = useState(/** @type {any} */ (null));
@@ -84,16 +87,31 @@ export default function ProfilePicker() {
         <Box sx={{ display: { xs: "none", sm: "block" } }}>
           <Buddy id="zip" size={110} />
         </Box>
-        <Bubble>{t("learner.whoIsPlaying")}</Bubble>
-        <SpeakButton text={t("learner.whoIsPlaying")} size={52} />
+        <Bubble>
+          {classroom ? t("classroom.whoAreYou", { name: classroom.name }) : t("learner.whoIsPlaying")}
+        </Bubble>
+        <SpeakButton
+          text={classroom ? t("classroom.whoAreYou", { name: classroom.name }) : t("learner.whoIsPlaying")}
+          size={52}
+        />
       </Box>
       <Box
         sx={{
           flex: 1,
           display: "grid",
           gap: { xs: 1.25, sm: 3 },
-          gridTemplateColumns: { xs: "1fr", sm: `repeat(${Math.min(learners.length, 3)}, minmax(0, 1fr))` },
-          alignContent: { xs: "start", sm: "stretch" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: `repeat(${Math.min(learners.length, 3)}, minmax(0, 1fr))`,
+            ...(classroom
+              ? {
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  md: "repeat(3, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))",
+                }
+              : {}),
+          },
+          alignContent: { xs: "start", sm: classroom ? "start" : "stretch" },
         }}
       >
         {learners.map((l) => {
@@ -115,15 +133,15 @@ export default function ProfilePicker() {
                 bgcolor: "background.paper",
                 borderRadius: { xs: 5.5, sm: 7.5 },
                 display: "flex",
-                flexDirection: { xs: "row", sm: "column" },
+                flexDirection: { xs: "row", sm: classroom ? "row" : "column" },
                 alignItems: "center",
-                justifyContent: { xs: "flex-start", sm: "center" },
+                justifyContent: { xs: "flex-start", sm: classroom ? "flex-start" : "center" },
                 gap: { xs: 1.75, sm: 1.5 },
-                p: { xs: 1.5, sm: 3 },
-                minHeight: { xs: 88, sm: 260 },
+                p: { xs: 1.5, sm: classroom ? 2 : 3 },
+                minHeight: { xs: 88, sm: classroom ? 96 : 260 },
                 color: "text.primary",
                 cursor: "pointer",
-                textAlign: { xs: "left", sm: "center" },
+                textAlign: { xs: "left", sm: classroom ? "left" : "center" },
                 "&:hover, &:focus-visible": { borderColor: colors.leaf.main },
               }}
             >
@@ -131,14 +149,14 @@ export default function ProfilePicker() {
                 <LearnerAvatar learner={l} size={60} />
               </Box>
               <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                <LearnerAvatar learner={l} size={140} />
+                <LearnerAvatar learner={l} size={classroom ? 70 : 140} />
               </Box>
               <Box>
                 <Typography
                   sx={{
                     fontFamily: "var(--font-display)",
                     fontWeight: 800,
-                    fontSize: { xs: 26, sm: 34 },
+                    fontSize: { xs: 26, sm: classroom ? 26 : 34 },
                     lineHeight: 1.1,
                   }}
                 >
@@ -150,8 +168,17 @@ export default function ProfilePicker() {
           );
         })}
       </Box>
+      {classroom && (
+        <Typography sx={{ color: "text.secondary", fontSize: 15 }}>{t("classroom.foot")}</Typography>
+      )}
       {locked && (
-        <PictureLockDialog learner={locked} voice={voice} onOpen={() => open(locked)} onClose={() => setLocked(null)} />
+        <PictureLockDialog
+          learner={locked}
+          voice={voice}
+          onOpen={() => open(locked)}
+          onClose={() => setLocked(null)}
+          onAskTeacher={classroom ? () => api.askTeacher(classroom.classId, locked.id) : null}
+        />
       )}
     </Box>
   );

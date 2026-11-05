@@ -30,7 +30,7 @@ export default function DataBoot() {
       if (useFamily.getState().mode === "account") {
         await refreshAccount();
         syncNow();
-      }
+      } else if (useFamily.getState().mode === "class") syncNow(); // class devices: upload what was played offline
       syncPacks();
       timer = setInterval(() => document.visibilityState === "visible" && syncNow(), EVERY_MS);
     };

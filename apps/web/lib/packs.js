@@ -4,6 +4,7 @@ import { installPack, getSubjects } from "@trailbuddies/content";
 import { activeSubjects, packPlan, unusedPacks } from "@trailbuddies/domain";
 import { api } from "./account";
 import { useFamily } from "./store";
+import { classroomPackSubjects } from "./classWork";
 
 /**
  * Content packs on this device (CNT-02, OFF-02). Downloaded packs are kept in IndexedDB and
@@ -29,7 +30,12 @@ export async function installStoredPacks() {
   try {
     const rows = await store().packs.toArray();
     rows.forEach((r) => installPack(r.pack));
-    useFamily.setState({ packs: { ...useFamily.getState().packs, cached: Object.fromEntries(rows.map((r) => [r.subject, r.hash])) } });
+    useFamily.setState({
+      packs: {
+        ...useFamily.getState().packs,
+        cached: Object.fromEntries(rows.map((r) => [r.subject, r.hash])),
+      },
+    });
   } catch {
     /* no IndexedDB (private window): use what's built in */
   }
@@ -72,8 +78,9 @@ export function wantedSubjects(learners) {
 export async function syncPacks({ force = false, learners } = {}) {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return;
   const st = useFamily.getState();
-  // The demo family has no server; its content is what's built in.
-  if (st.mode !== "account") return;
+  // The demo family has no server; its content is what's built in. Class devices (S10) keep
+  // the subjects of their assignments (CRM-05).
+  if (st.mode !== "account" && st.mode !== "class") return;
   let manifest;
   try {
     manifest = await api.contentManifest(CHANNEL);
@@ -87,7 +94,8 @@ export async function syncPacks({ force = false, learners } = {}) {
   }
   const rows = await store().packs.toArray();
   const cached = Object.fromEntries(rows.map((r) => [r.subject, r.hash]));
-  const wanted = wantedSubjects(learners || st.learners);
+  const forClass = st.mode === "class" ? classroomPackSubjects() : [];
+  const wanted = forClass.length ? forClass : wantedSubjects(learners || st.learners);
   const plan = packPlan(manifest, cached, wanted, { free: await freeBytes(), wifi: onWifi(), force });
   for (const p of plan.download) {
     try {
@@ -102,7 +110,9 @@ export async function syncPacks({ force = false, learners } = {}) {
     packs: {
       release: manifest.release,
       cached,
-      ready: Object.keys(cached).filter((s) => manifest.packs.some((p) => p.subject === s && p.hash === cached[s])),
+      ready: Object.keys(cached).filter((s) =>
+        manifest.packs.some((p) => p.subject === s && p.hash === cached[s]),
+      ),
       noRoom: plan.noRoom.map((p) => p.subject),
       waiting: plan.waiting,
       unused: unusedPacks(cached, wanted),

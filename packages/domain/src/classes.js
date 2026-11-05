@@ -68,7 +68,7 @@ export function bandBirth(band, now = new Date()) {
 
 /**
  * HLP-03: the teacher's first-week checklist. Steps tick themselves off from what exists.
- * @param {{ classes: { students: number, printed?: boolean, played?: boolean, viewed?: boolean }[] }} t
+ * @param {{ classes: { students: number, printed?: boolean, played?: boolean, viewed?: boolean, assigned?: boolean }[] }} t
  */
 export function teacherChecklist(t) {
   const cls = t.classes || [];
@@ -77,7 +77,7 @@ export function teacherChecklist(t) {
     { id: "students", done: cls.some((c) => c.students > 0) },
     { id: "letters", done: any("printed") },
     { id: "tablets", done: any("played") },
-    { id: "assign", done: false, soon: true },
+    { id: "assign", done: any("assigned") },
     { id: "progress", done: any("viewed") },
   ];
 }

@@ -173,6 +173,32 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     setLinkScope: (familyId, studentId, scope) =>
       request(`${fam(familyId)}/links/${encodeURIComponent(studentId)}`, { method: "PATCH", json: { scope } }),
     unlink: (familyId, studentId) => request(`${fam(familyId)}/links/${encodeURIComponent(studentId)}`, { method: "DELETE" }),
+    // --- Sprint 10: groups, assignments, class progress, classroom devices ---
+    /** CLS-07 @param {string} classId @param {{ name: string, student_ids?: string[] }} body */
+    createGroup: (classId, body) => post(`/classes/${encodeURIComponent(classId)}/groups`, body),
+    editGroup: (classId, groupId, body) =>
+      request(`/classes/${encodeURIComponent(classId)}/groups/${encodeURIComponent(groupId)}`, { method: "PATCH", json: body }),
+    deleteGroup: (classId, groupId) =>
+      request(`/classes/${encodeURIComponent(classId)}/groups/${encodeURIComponent(groupId)}`, { method: "DELETE" }),
+    /** ASN-01 */
+    assignments: (classId) => request(`/classes/${encodeURIComponent(classId)}/assignments`),
+    /** @param {string} classId @param {{ kind: "unit" | "custom", unit_id?: string, title?: string, lesson_id?: string, target: object, due_on?: string | null }} body */
+    assign: (classId, body) => post(`/classes/${encodeURIComponent(classId)}/assignments`, body),
+    unassign: (classId, assignmentId) =>
+      request(`/classes/${encodeURIComponent(classId)}/assignments/${encodeURIComponent(assignmentId)}`, { method: "DELETE" }),
+    /** ASN-02..04: assignments, groups and the play that counts towards them. */
+    classProgress: (classId) => request(`/classes/${encodeURIComponent(classId)}/assignments/progress`),
+    /** MAP-06b: work from the children's teachers, for Class Island at home. */
+    familyAssignments: (familyId) => request(`${fam(familyId)}/assignments`),
+    /** CRM-01 @param {string} classId @param {{ id: string, label: string }} body */
+    addDevice: (classId, body) => post(`/classes/${encodeURIComponent(classId)}/devices`, body),
+    checkDevice: (classId, deviceId) =>
+      request(`/classes/${encodeURIComponent(classId)}/devices/${encodeURIComponent(deviceId)}`),
+    removeDevice: (classId, deviceId) =>
+      request(`/classes/${encodeURIComponent(classId)}/devices/${encodeURIComponent(deviceId)}`, { method: "DELETE" }),
+    /** CRM-02: 'Ask my teacher' from a class tablet. */
+    askTeacher: (classId, studentId) =>
+      post(`/classes/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}/help`),
     /** SAF-07 option 2: a scrubbed error report. @param {object} report */
     reportError: (report) => post("/errors", report),
     /** @param {string} familyId @param {number} after */

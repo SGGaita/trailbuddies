@@ -5,6 +5,7 @@ import { consentState } from "@trailbuddies/domain";
 import { useFamily, onLocalChange, dbName } from "./store";
 import { familyDb, outbox, cursor, saveEvents, loadEvents, pendingCount, forget } from "./db";
 import { uploadMedia, refreshUploadStatus } from "./media";
+import { loadClassWork } from "./classWork";
 
 /** The API, through the web app's own /api proxy (same-origin session cookie). */
 export const api = createClient({ baseUrl: "/api" });
@@ -349,6 +350,7 @@ export async function syncNow() {
     else await syncer.syncOnce();
     applyMe(await api.me());
     applyLessons((await api.lessons(s.family.id)).lessons);
+    await loadClassWork(api); // MAP-06b: work from the children's teachers
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch (e) {
     const signedOut = e instanceof ApiError && e.status === 401;
@@ -388,6 +390,15 @@ async function syncClass() {
   }
   try {
     await classSyncer.syncOnce();
+    // CRM-01: a device the teacher removed signs out completely (its class play is uploaded
+    // above), so nobody on it can reach the teacher's screens.
+    const room = get().family?.classroom;
+    if (room && !(await api.checkDevice(classId, room.deviceId)).active) {
+      await signOut();
+      return;
+    }
+    await loadClassWork(api);
+    if (room) import("./packs").then((m) => m.syncPacks()); // CRM-05: assigned subjects stay on the device
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch {
     useFamily.setState({ sync: { ...get().sync, state: "offline", pending: await pendingCount(db) } });
