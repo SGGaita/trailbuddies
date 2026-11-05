@@ -1,19 +1,24 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import Icon from "@/components/Icon";
 import Buddy from "@/components/art/Buddy";
+import { useFamily } from "@/lib/store";
 
 export const STEPS = 7;
 
 /**
  * Onboarding frame (concept report §4.3). Phone: full screen. Tablet and desktop: a
  * centred card (22px corners) on the cream background, as in the prototype.
- * @param {{ step?: number, title: string, sub?: string, back?: string, buddy?: string, mood?: string, wide?: boolean, children: React.ReactNode }} props
+ * Family set-up steps (3 to 6) offer "I'm a teacher, not a parent", so a teacher who lands
+ * in the parent wizard (or started there by mistake) can switch at any point (ONB-13).
+ * @param {{ step?: number, title: string, sub?: string, back?: string, buddy?: string, mood?: string, wide?: boolean, teacherSwitch?: boolean, children: React.ReactNode }} props
  */
 export default function OnboardingShell({
   step,
@@ -23,8 +28,19 @@ export default function OnboardingShell({
   buddy = "zip",
   mood = "happy",
   wide = false,
+  teacherSwitch = step >= 3 && step <= 6,
   children,
 }) {
+  const router = useRouter();
+  const signedIn = useFamily((s) => s.mode === "account" && !!s.user && !s.teacher);
+  const toTeacher = () => {
+    try {
+      localStorage.setItem("tb_intent", "teacher");
+    } catch {
+      /* no storage */
+    }
+    router.push("/teach/start");
+  };
   return (
     <Box
       component="main"
@@ -115,6 +131,11 @@ export default function OnboardingShell({
           </Box>
         </Box>
         {children}
+        {teacherSwitch && signedIn && (
+          <Button variant="text" onClick={toTeacher} sx={{ alignSelf: "center" }}>
+            {t("start.teacherInstead")}
+          </Button>
+        )}
       </Box>
     </Box>
   );
