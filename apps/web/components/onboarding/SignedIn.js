@@ -46,6 +46,13 @@ export default function SignedIn({ google = false }) {
     (async () => {
       try {
         if (!google) await api.verify(params.get("token") || "");
+        // ONB-13: the link says it's for a teacher, so this works in any browser or mail app.
+        if (params.get("role") === "teacher")
+          try {
+            localStorage.setItem("tb_intent", "teacher");
+          } catch {
+            /* no storage: the teacher can still choose "I'm a teacher" later */
+          }
         const r = await signedIn();
         if (r !== "ok") throw new Error("Couldn't reach Trailbuddies. Check your connection.");
         router.replace(landing());

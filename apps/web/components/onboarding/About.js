@@ -98,6 +98,19 @@ export default function About() {
         <Button type="submit" variant="contained" size="large" disabled={busy}>
           {t("start.continue")}
         </Button>
+        <Button
+          variant="text"
+          onClick={() => {
+            try {
+              localStorage.setItem("tb_intent", "teacher");
+            } catch {
+              /* no storage */
+            }
+            router.push("/teach/start");
+          }}
+        >
+          {t("start.teacherInstead")}
+        </Button>
       </Box>
     </OnboardingShell>
   );

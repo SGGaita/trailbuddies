@@ -236,3 +236,37 @@ test("a parent links a child to a class and decides what the teacher sees (CLS-0
   await expect(page.getByText("No classes linked yet.")).toBeVisible();
   expect(srv.students["01JS0000000000000000000001"].learner_id).toBeNull();
 });
+
+test("a teacher's sign-in link opens teacher set-up in any browser, and parents' set-up has a way out (ONB-13)", async ({
+  page,
+  context,
+  browser,
+}, testInfo) => {
+  const srv = newServer();
+  await fakeApi(context, srv);
+  await page.goto("/start");
+  await page.getByRole("button", { name: "I'm a teacher" }).click();
+  await page.getByLabel("Email address").fill("priya@stmarys.sch.ke");
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect.poll(() => srv.sent.at(-1)?.role).toBe("teacher");
+  // The link opens in another browser (a phone's mail app): nothing remembered there.
+  const other = await browser.newContext({ viewport: testInfo.project.use.viewport });
+  await fakeApi(other, srv);
+  const mail = await other.newPage();
+  await mail.goto(`/auth/verify?token=${encodeURIComponent(srv.sent.at(-1).token)}&role=teacher`);
+  await expect(mail).toHaveURL(/\/teach\/start$/);
+  await expect(mail.getByLabel("School name")).toBeVisible();
+  await other.close();
+
+  // Someone who started as a parent can switch from the first family step.
+  await page.goto("/start");
+  await page.getByRole("button", { name: "I'm a parent or carer" }).click();
+  await page.getByLabel("Email address").fill("james@hill.sc.ke");
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  expect(srv.sent.at(-1).role).toBeNull();
+  await verify(page, srv);
+  await expect(page).toHaveURL(/\/start\/about$/);
+  await page.getByRole("button", { name: "I'm a teacher, not a parent" }).click();
+  await expect(page).toHaveURL(/\/teach\/start$/);
+  await expect(page.getByLabel("School name")).toBeVisible();
+});

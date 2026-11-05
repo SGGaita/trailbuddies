@@ -669,6 +669,7 @@ export default {
   "support.demo": "Sign in with an account to send a message. In the meantime, email hello@trailbuddies.africa.",
   "support.backToHelp": "Back to help",
   "teach.accountTitle": "Your teacher account",
+  "start.teacherInstead": "I'm a teacher, not a parent",
   "teach.accountSub": "Sign in with your school email. We'll send you a link: no password to remember.",
   "teach.startTitle": "Set up your teacher account",
   "teach.startSub": "Your name as the children say it, and your school.",

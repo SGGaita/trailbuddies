@@ -270,7 +270,7 @@ export async function fakeApi(context, srv) {
     if (path === "/auth/magic-link" && method === "POST") {
       const token = `token-${Object.keys(srv.tokens).length + 1}-abcdefghijklmnopqrstuvwxyz`;
       srv.tokens[token] = body.email.toLowerCase();
-      srv.sent.push({ to: body.email, token });
+      srv.sent.push({ to: body.email, token, role: body.role || null });
       return json(route, 202, { sent: true });
     }
     if (path === "/auth/verify" && method === "POST") {

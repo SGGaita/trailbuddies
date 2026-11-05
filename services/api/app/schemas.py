@@ -21,6 +21,10 @@ class Strict(BaseModel):
 
 class MagicLinkIn(Strict):
     email: EmailStr
+    role: Literal["parent", "teacher"] | None = Field(
+        default=None,
+        description="ONB-13: 'teacher' sends them to teacher set-up, whichever browser opens the link",
+    )
 
 
 class VerifyIn(Strict):

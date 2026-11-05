@@ -53,7 +53,8 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     health: () => request("/health"),
     authConfig: () => request("/auth/config"),
     /** @param {string} email */
-    magicLink: (email) => post("/auth/magic-link", { email }),
+    /** @param {string} email @param {"parent" | "teacher"} [role] teacher: the link opens teacher set-up anywhere */
+    magicLink: (email, role) => post("/auth/magic-link", role ? { email, role } : { email }),
     /** @param {string} token */
     verify: (token) => post("/auth/verify", { token }),
     logout: () => post("/auth/logout"),
