@@ -2,8 +2,11 @@
 (MAP-06b), class progress data (ASN-02..04), classroom devices (CRM-01) and 'Ask my teacher'
 (CRM-02)."""
 
+from datetime import UTC, datetime
+
 from fastapi.testclient import TestClient
 
+from app.routes import classwork
 from tests.conftest import LEARNER, POLICY, family_with_consent, learner_body, sign_in
 from tests.test_lessons_media import (
     M1,
@@ -44,6 +47,26 @@ def class_with_children(client, outbox, names=("Zawadi", "Amani", "Baraka")):
         json={"name": "Priya Shah", "role": "Class teacher", "agreed": True},
     )
     return c, {s["first_name"]: s["id"] for s in roster}
+
+
+def test_badge_wall_shows_first_earnings_this_week_and_first_names(client, outbox, monkeypatch):
+    c, ids = class_with_children(client, outbox)
+    monkeypatch.setattr(classwork, "utcnow", lambda: datetime(2026, 11, 18, tzinfo=UTC))
+    path = f"/classes/{c['id']}"
+    awards = [
+        ev(1, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-15T23:59:59Z"},
+        ev(2, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-16T01:00:00Z"},
+        ev(3, ids["Zawadi"], "badge_awarded", badgeId="new") | {"at": "2026-11-16T00:00:00Z"},
+        ev(4, ids["Zawadi"], "badge_awarded", badgeId="new") | {"at": "2026-11-17T01:00:00Z"},
+    ]
+    assert client.post(f"{path}/events", json={"events": awards}).status_code == 200
+    assert client.get(f"{path}/badge-wall").json() == {
+        "class_name": c["name"],
+        "students": [{"first_name": "Zawadi", "badge_ids": ["new"]}],
+    }
+    other = TestClient(client.app)
+    teacher(other, outbox, "james@hill.sc.ke", "Hill School")
+    assert other.get(f"{path}/badge-wall").status_code == 404
 
 
 def test_groups_hold_children_of_the_class_only(client, outbox):

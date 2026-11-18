@@ -656,6 +656,9 @@ export default function ClassPage() {
             </Button>
           </Box>
           <Box sx={{ ...card, display: "flex", flexDirection: "column", gap: 1 }}>
+            <Button component={Link} href={`/teach/badge-wall?id=${cls.id}`} variant="outlined">
+              {t("teach.badgeWall")}
+            </Button>
             <Button
               component={Link}
               href={`/teach/letters?id=${cls.id}`}
