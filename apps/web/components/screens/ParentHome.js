@@ -30,7 +30,7 @@ const BAND = {
 };
 const ACTIONS = [
   { href: "/family/create", icon: "book", label: "Make a lesson" },
-  { href: "/family/create", icon: "badge", label: "Make a badge" },
+  { href: "/family/create/badge", icon: "badge", label: "Make a badge" },
   { href: "/family/rewards", icon: "wish", label: "Wishes & awards" },
   { href: "/family/settings", icon: "plus", label: "Add a learner" },
 ];
