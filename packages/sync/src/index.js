@@ -92,7 +92,9 @@ export function deriveState(events, learnerId) {
   const progress = {};
   let treasures = 0;
   const badges = new Set();
-  const paidBadges = new Set();
+  const badgeTiers = Object.create(null);
+  const tiers = ["bronze", "silver", "gold"];
+  const paidBadges = new Map();
   /** @type {Array<{ itemId: string, firstTry: boolean, at: number }>} */
   const answers = [];
   /** @type {Array<{ lessonId: string, unitId?: string, subjectId?: string, kind: string, stars: number, hints: number, at: number, durationSec: number }>} */
@@ -126,13 +128,16 @@ export function deriveState(events, learnerId) {
       });
     } else if (e.type === "item_answered") answers.push({ itemId: d.itemId, firstTry: !!d.firstTry, at });
     else if (e.type === "treasure_earned") {
-      // A badge awarded on two devices offline pays out once.
+      let amount = d.amount || 0;
+      // Pay only up to the highest total earned for a badge, even when devices sync out of order.
       if (d.reason === "badge" && d.badgeId) {
-        if (paidBadges.has(d.badgeId)) continue;
-        paidBadges.add(d.badgeId);
+        const total = d.badgeTotal ?? amount;
+        amount = total - (paidBadges.get(d.badgeId) || 0);
+        if (amount <= 0) continue;
+        paidBadges.set(d.badgeId, total);
       }
-      treasures += d.amount || 0;
-      earnings.push({ amount: d.amount || 0, reason: d.reason || "lesson", at });
+      treasures += amount;
+      earnings.push({ amount, reason: d.reason || "lesson", at });
     } else if (e.type === "treasure_spent") {
       const amount = d.amount || 0;
       if (treasures - amount < 0) reversed.push({ id: e.id, itemId: d.itemId, amount, at });
@@ -140,11 +145,14 @@ export function deriveState(events, learnerId) {
         treasures -= amount;
         if (d.itemId && !owned.includes(d.itemId)) owned.push(d.itemId);
       }
-    } else if (e.type === "badge_awarded") badges.add(d.badgeId);
+    } else if (e.type === "badge_awarded") {
+      badges.add(d.badgeId);
+      if (tiers.indexOf(d.tier) > tiers.indexOf(badgeTiers[d.badgeId])) badgeTiers[d.badgeId] = d.tier;
+    }
     else if (e.type === "game_finished") games.push({ game: d.game, unitId: d.unitId, at });
   }
   const stars = Object.values(progress).reduce((a, b) => a + b, 0);
-  return { progress, stars, treasures, badges: [...badges], answers, results, earnings, owned, reversed, games };
+  return { progress, stars, treasures, badges: [...badges], badgeTiers, answers, results, earnings, owned, reversed, games };
 }
 
 /**

@@ -25,18 +25,27 @@ export const payable = (learner, amount, settings) => capped(amount, learner.ear
  */
 export function badgeEvents(profile, allEvents, added, { goal, now = new Date() }) {
   const view = learnerView(profile, [...allEvents, ...added], now, { goal });
-  const earned = newBadges(builtInBadges, { ...view, now });
+  const earned = newBadges(builtInBadges, { ...view, now }).map((badge) => ({
+    ...badge,
+    totalPayout: badgePayout(badge, economy.badge),
+    payout: badgePayout(badge, economy.badge) - (economy.badge[badge.previousTier] || 0),
+  }));
   const events = earned.flatMap((b) => [
     // The name travels with the event so the weekly email (BDG-06) can say which badge it was.
-    createEvent("badge_awarded", profile.id, { badgeId: b.id, tier: b.tier, name: b.name }, now),
+    createEvent(
+      "badge_awarded",
+      profile.id,
+      { badgeId: b.id, tier: b.tier, name: b.name, ...(b.previousTier && { upgrade: true }) },
+      now,
+    ),
     createEvent(
       "treasure_earned",
       profile.id,
-      { amount: badgePayout(b, economy.badge), reason: "badge", badgeId: b.id },
+      { amount: b.payout, reason: "badge", badgeId: b.id, ...(b.previousTier && { badgeTotal: b.totalPayout }) },
       now,
     ),
   ]);
-  return { badges: earned.map((b) => ({ ...b, payout: badgePayout(b, economy.badge) })), events };
+  return { badges: earned, events };
 }
 
 /**

@@ -55,9 +55,30 @@
       "type": "string",
       "maxLength": 16,
       "description": "Placeholder art until badge illustrations arrive"
+    },
+    "upgrades": {
+      "type": "object",
+      "required": ["silver", "gold"],
+      "additionalProperties": false,
+      "properties": {
+        "silver": { "$ref": "#/$defs/upgrade" },
+        "gold": { "$ref": "#/$defs/upgrade" }
+      }
     }
   },
+  "dependentSchemas": {
+    "upgrades": { "required": ["tier"], "properties": { "tier": { "const": "bronze" } } }
+  },
   "$defs": {
+    "upgrade": {
+      "type": "object",
+      "required": ["how", "rule"],
+      "additionalProperties": false,
+      "properties": {
+        "how": { "$ref": "common.json#/$defs/text" },
+        "rule": { "$ref": "#/$defs/rule" }
+      }
+    },
     "rule": {
       "oneOf": [
         {

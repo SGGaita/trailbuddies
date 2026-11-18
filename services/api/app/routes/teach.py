@@ -437,7 +437,7 @@ def summary(rows: list[tuple[str, dict]]) -> dict:
     return {
         "lessons": len(lessons),
         "stars": sum(int(d.get("stars") or 0) for d in lessons),
-        "badges": sum(1 for t, _ in rows if t == "badge_awarded"),
+        "badges": sum(1 for t, d in rows if t == "badge_awarded" and not (d or {}).get("upgrade")),
         "subjects": subjects,
     }
 

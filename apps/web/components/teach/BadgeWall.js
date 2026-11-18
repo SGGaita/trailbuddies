@@ -57,7 +57,10 @@ function ClassBadgeWall({ id }) {
   const students = (data?.students || [])
     .map((student) => ({
       ...student,
-      badges: student.badge_ids.map((badgeId) => badgeById.get(badgeId)).filter(Boolean),
+      badges: student.badge_ids
+        .map((badgeId) => badgeById.get(badgeId))
+        .filter(Boolean)
+        .map((badge) => ({ ...badge, tier: student.badge_tiers?.[badge.id] || badge.tier })),
     }))
     .filter((student) => student.badges.length);
 

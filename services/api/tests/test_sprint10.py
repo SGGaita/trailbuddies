@@ -56,13 +56,15 @@ def test_badge_wall_shows_first_earnings_this_week_and_first_names(client, outbo
     awards = [
         ev(1, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-15T23:59:59Z"},
         ev(2, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-16T01:00:00Z"},
-        ev(3, ids["Zawadi"], "badge_awarded", badgeId="new") | {"at": "2026-11-16T00:00:00Z"},
+        ev(3, ids["Zawadi"], "badge_awarded", badgeId="new", tier="bronze") | {"at": "2026-11-16T00:00:00Z"},
         ev(4, ids["Zawadi"], "badge_awarded", badgeId="new") | {"at": "2026-11-17T01:00:00Z"},
+        ev(5, ids["Zawadi"], "badge_awarded", badgeId="new", tier="silver", upgrade=True)
+        | {"at": "2026-11-17T02:00:00Z"},
     ]
     assert client.post(f"{path}/events", json={"events": awards}).status_code == 200
     assert client.get(f"{path}/badge-wall").json() == {
         "class_name": c["name"],
-        "students": [{"first_name": "Zawadi", "badge_ids": ["new"]}],
+        "students": [{"first_name": "Zawadi", "badge_ids": ["new"], "badge_tiers": {"new": "bronze"}}],
     }
     other = TestClient(client.app)
     teacher(other, outbox, "james@hill.sc.ke", "Hill School")

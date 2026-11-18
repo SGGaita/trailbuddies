@@ -66,13 +66,27 @@ export function ruleMet(rule, stats, s) {
 }
 
 /**
- * Badges newly earned now, in catalogue order.
+ * Badges and tier upgrades newly earned now, in catalogue order.
  * @param {Array<{ id: string, rule: any }>} catalogue
  * @param {any} s derived state with mastery, byDay, goal
  */
 export function newBadges(catalogue, s) {
   const stats = badgeStats(s);
-  return catalogue.filter((b) => !s.badges.includes(b.id) && ruleMet(b.rule, stats, s));
+  return catalogue.flatMap((badge) => {
+    const earned = s.badges.includes(badge.id);
+    if (!earned && !ruleMet(badge.rule, stats, s)) return [];
+    const awards = earned ? [] : [badge];
+    if (!badge.upgrades) return awards;
+    let previousTier = s.badgeTiers?.[badge.id] || badge.tier;
+    const tiers = ["bronze", "silver", "gold"];
+    for (const tier of tiers.slice(tiers.indexOf(previousTier) + 1)) {
+      const upgrade = badge.upgrades[tier];
+      if (!ruleMet(upgrade.rule, stats, s)) break;
+      awards.push({ ...badge, ...upgrade, tier, previousTier });
+      previousTier = tier;
+    }
+    return awards;
+  });
 }
 
 /** Treasures a badge pays (by tier, from the economy config). */

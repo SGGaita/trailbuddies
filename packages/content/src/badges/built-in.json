@@ -73,12 +73,16 @@
     "name": "Perfect Ten",
     "how": "Get 3 stars in 10 lessons",
     "category": "mastery",
-    "tier": "gold",
+    "tier": "bronze",
     "icon": "🏅",
     "rule": {
       "type": "count",
       "metric": "perfect-lessons",
       "n": 10
+    },
+    "upgrades": {
+      "silver": { "how": "Get 3 stars in 25 lessons", "rule": { "type": "count", "metric": "perfect-lessons", "n": 25 } },
+      "gold": { "how": "Get 3 stars in 50 lessons", "rule": { "type": "count", "metric": "perfect-lessons", "n": 50 } }
     }
   },
   {

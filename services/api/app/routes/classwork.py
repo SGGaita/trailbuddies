@@ -338,6 +338,7 @@ def badge_wall(class_id: str, user: User = Depends(current_user), db: DbSession 
     now = utcnow()
     week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     badges = {s.id: [] for s in roster}
+    tiers = {s.id: {} for s in roster}
     seen = set()
     if roster:
         rows = db.execute(
@@ -351,15 +352,28 @@ def badge_wall(class_id: str, user: User = Depends(current_user), db: DbSession 
             .order_by(ClassEvent.at, ClassEvent.id)
         )
         for student_id, data, at in rows:
+            if data.get("upgrade"):
+                continue
             badge_id = data.get("badgeId")
             if not isinstance(badge_id, str) or not badge_id or (student_id, badge_id) in seen:
                 continue
             seen.add((student_id, badge_id))
             if aware(at) >= week_start:
                 badges[student_id].append(badge_id)
+                tier = data.get("tier")
+                if tier in ("bronze", "silver", "gold"):
+                    tiers[student_id][badge_id] = tier
     return {
         "class_name": c.name,
-        "students": [{"first_name": s.first_name, "badge_ids": badges[s.id]} for s in roster if badges[s.id]],
+        "students": [
+            {
+                "first_name": s.first_name,
+                "badge_ids": badges[s.id],
+                "badge_tiers": tiers[s.id],
+            }
+            for s in roster
+            if badges[s.id]
+        ],
     }
 
 
