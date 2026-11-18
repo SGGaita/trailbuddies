@@ -62,6 +62,21 @@ describe("badge engine (BDG-01, BDG-02)", () => {
     const progress = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`u-${i + 1}`, 3]));
     expect(newBadges(badges, { ...base, progress, stars: 30, badges: ["first-steps"] }).map((b) => b.id)).toContain("perfect-ten");
   });
+  test("Perfect Ten upgrades at 25 and 50 and preserves historical gold awards", () => {
+    const perfectTen = badges.filter((b) => b.id === "perfect-ten");
+    const awards = (n, tier) => newBadges(perfectTen, {
+      ...base,
+      progress: Object.fromEntries(Array.from({ length: n }, (_, i) => [`lesson-${i}`, 3])),
+      badges: tier ? ["perfect-ten"] : [],
+      badgeTiers: { "perfect-ten": tier },
+    });
+    expect(awards(10)[0].tier).toBe("bronze");
+    expect(awards(24, "bronze")).toEqual([]);
+    expect(awards(25, "bronze")).toMatchObject([{ tier: "silver", previousTier: "bronze" }]);
+    expect(awards(50, "silver")).toMatchObject([{ tier: "gold", previousTier: "silver" }]);
+    expect(awards(50, "bronze").map((b) => b.tier)).toEqual(["silver", "gold"]);
+    expect(awards(50, "gold")).toEqual([]);
+  });
   test("effort, comeback, streak, exploration and completion rules", () => {
     const s = {
       ...base,

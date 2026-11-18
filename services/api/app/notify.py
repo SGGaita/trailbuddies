@@ -23,7 +23,9 @@ def emails_for(fam: Family):
 
 
 def badge_name(data: dict) -> str:
-    return data.get("name") or str(data.get("badgeId", "a badge")).replace("-", " ").capitalize()
+    name = data.get("name") or str(data.get("badgeId", "a badge")).replace("-", " ").capitalize()
+    tier = data.get("tier")
+    return f"{name} ({tier})" if data.get("upgrade") and tier in ("silver", "gold") else name
 
 
 def badges_earned(db: DbSession, family_id: str, events: list[Event]) -> None:

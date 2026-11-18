@@ -31,9 +31,12 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
   const [i, setI] = useState(0);
   const [flying, setFlying] = useState(false);
   const badge = badges[i];
+  const upgrade = Boolean(badge?.previousTier);
+  const heading = t(upgrade ? "badges.upgraded" : "badges.new");
+  const name = upgrade ? `${badge.name} · ${t(`badges.${badge.tier}`)}` : badge?.name;
   const announce = useEffectEvent(() => {
     playSound("done");
-    speak(buddyLine("badge.earned", { badge: badge.name, name: learner.name }, i, learner.buddy), {
+    speak(buddyLine("badge.earned", { badge: name, name: learner.name }, i, learner.buddy), {
       band: learner.band,
       buddy: learner.buddy,
       enabled: voice,
@@ -56,7 +59,7 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
     <Box
       role="dialog"
       aria-modal="true"
-      aria-label={t("badges.new")}
+      aria-label={heading}
       sx={{
         position: "fixed",
         inset: 0,
@@ -73,9 +76,9 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
         backgroundImage: `radial-gradient(circle at 50% 34%, ${colors.cheer.bright} 0%, ${colors.cheer.bright} 12%, ${colors.cheer.main} 38%, ${colors.cheer.deep} 100%)`,
       }}
     >
-      <Box className="badge-rays" aria-hidden="true" />
+      {!upgrade && <Box className="badge-rays" aria-hidden="true" />}
       <Box className="conf" aria-hidden="true">
-        {CONFETTI.map((c, n) => (
+        {(upgrade ? CONFETTI.slice(0, 8) : CONFETTI).map((c, n) => (
           <i
             key={n}
             style={{
@@ -105,10 +108,10 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
           component="h2"
           sx={{ color: "#fff", letterSpacing: ".04em", textShadow: `0 3px 0 ${colors.cheer.deep}` }}
         >
-          {t("badges.new")}
+          {heading}
         </Typography>
-        <Box key={badge.id} className={flying ? "badge-fly" : "starpop"}>
-          <BadgeArt badge={badge} size={150} />
+        <Box key={`${badge.id}-${badge.tier}`} className={flying ? "badge-fly" : "starpop"}>
+          <BadgeArt badge={badge} size={upgrade ? 96 : 150} />
         </Box>
         <Typography
           sx={{
@@ -119,7 +122,7 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
             textShadow: `0 2px 0 ${colors.cheer.deep}`,
           }}
         >
-          {badge.name}
+          {name}
         </Typography>
         <Typography
           sx={{

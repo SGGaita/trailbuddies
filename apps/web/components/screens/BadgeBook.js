@@ -61,13 +61,19 @@ export default function BadgeBook() {
                 .filter((b) => b.category === cat)
                 .map((b) => {
                   const has = earned.has(b.id);
+                  const tier = has ? learner.badgeTiers[b.id] || b.tier : b.tier;
+                  const nextTier = b.upgrades && has && { bronze: "silver", silver: "gold" }[tier];
+                  const how = nextTier
+                    ? t("badges.nextTier", { tier: t(`badges.${nextTier}`), how: b.upgrades[nextTier].how })
+                    : b.upgrades?.[tier]?.how || b.how;
+                  const name = b.upgrades ? `${b.name} · ${t(`badges.${tier}`)}` : b.name;
                   return (
                     <Box
                       key={b.id}
                       component="button"
                       type="button"
-                      onClick={() => hear(b)}
-                      aria-label={`${b.name}${has ? "" : ", not earned yet"}. ${t("badges.hear", { name: b.name })}`}
+                      onClick={() => hear({ name, how })}
+                      aria-label={`${name}${has ? "" : ", not earned yet"}. ${t("badges.hear", { name: b.name })}`}
                       data-earned={has ? "yes" : "no"}
                       sx={{
                         display: "flex",
@@ -83,9 +89,9 @@ export default function BadgeBook() {
                         textAlign: "center",
                       }}
                     >
-                      <BadgeArt badge={b} earned={has} size={76} />
-                      <Typography sx={{ fontWeight: 800, lineHeight: 1.2 }}>{b.name}</Typography>
-                      <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.25 }}>{b.how}</Typography>
+                      <BadgeArt badge={{ ...b, tier }} earned={has} size={76} />
+                      <Typography sx={{ fontWeight: 800, lineHeight: 1.2 }}>{name}</Typography>
+                      <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.25 }}>{how}</Typography>
                     </Box>
                   );
                 })}

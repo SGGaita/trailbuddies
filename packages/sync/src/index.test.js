@@ -87,6 +87,21 @@ describe("wallet from transactions (RWD-04)", () => {
     expect(s.owned).toEqual(["party"]);
     expect(s.reversed.map((r) => r.itemId)).toEqual(["bow"]);
   });
+  test("badge tiers never regress and duplicate upgrade payouts count once", () => {
+    const award = (tier, at) => ev("badge_awarded", { badgeId: "perfect-ten", tier }, at);
+    const payout = (badgeTotal, amount, at) =>
+      ev("treasure_earned", { reason: "badge", badgeId: "perfect-ten", badgeTotal, amount }, at);
+    const events = [
+      award("bronze", 1), payout(undefined, 10, 2),
+      award("silver", 3), payout(25, 15, 4),
+      award("silver", 5), payout(25, 15, 6),
+      award("bronze", 7),
+    ];
+    const state = deriveState(events, "k");
+    expect(state).toMatchObject({ badges: ["perfect-ten"], badgeTiers: { "perfect-ten": "silver" }, treasures: 25 });
+    const mixed = deriveState([...events, award("gold", 8), payout(undefined, 50, 9)], "k");
+    expect(mixed).toMatchObject({ badgeTiers: { "perfect-ten": "gold" }, treasures: 50 });
+  });
   test("a badge awarded on two devices counts and pays once; stars never change when spending", () => {
     const won = ev("lesson_completed", { lessonId: "l1", stars: 3 }, 0);
     const b1 = ev("badge_awarded", { badgeId: "first-steps" }, 1);
