@@ -53,6 +53,11 @@ export default function BuilderHome() {
           <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>{t("builder.viewOnly")}</Typography>
         )}
       </Card>
+      {editable && (
+        <Button component={Link} href="/family/create/badge" variant="outlined" sx={{ alignSelf: "flex-start" }}>
+          {t("builder.tile.badge")}
+        </Button>
+      )}
 
       <Typography variant="h6" component="h2">
         {t("builder.mine")}

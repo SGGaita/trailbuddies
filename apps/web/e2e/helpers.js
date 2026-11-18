@@ -44,7 +44,7 @@ export async function passGate(page, pin) {
     answer = String(a * b);
   }
   await page.keyboard.type(answer);
-  await page.getByRole("button", { name: "Open" }).click();
+  await page.getByRole("button", { name: "Open", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Grown-ups only" })).toHaveCount(0);
 }
 

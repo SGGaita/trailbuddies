@@ -33,12 +33,12 @@ import Loading from "@/components/Loading";
 import CardPanel from "./CardPanel";
 import { CardPic, ChoiceChip, Field, Pill, UploadBanner, inputSx } from "./parts";
 
-/** Prototype P10 tiles. Not built yet, so they show as "Soon" and do nothing. */
+/** P10 shortcuts to the other creation tools. */
 const TILES = [
   { icon: "sparkle", key: "builder.tile.remix" },
   { icon: "share", key: "builder.tile.import" },
   { icon: "trail", key: "builder.tile.trail" },
-  { icon: "badge", key: "builder.tile.badge" },
+  { icon: "badge", key: "builder.tile.badge", href: "/family/create/badge" },
 ];
 const label = { fontWeight: 800, fontSize: 15 };
 
@@ -295,12 +295,12 @@ function Editor({ id }) {
             {TILES.map((tile) => (
               <Card
                 key={tile.key}
-                aria-disabled="true"
-                sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 0.75, minHeight: 70 }}
+                {...(tile.href ? { component: Link, href: tile.href } : { "aria-disabled": true })}
+                sx={{ p: 1.75, display: "flex", flexDirection: "column", gap: 0.75, minHeight: 70, textDecoration: "none" }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Icon name={tile.icon} size={20} />
-                  <Pill tone="soon">{t("builder.soon")}</Pill>
+                  {!tile.href && <Pill tone="soon">{t("builder.soon")}</Pill>}
                 </Box>
                 <Typography sx={{ fontWeight: 800, textAlign: "center" }}>{t(tile.key)}</Typography>
               </Card>

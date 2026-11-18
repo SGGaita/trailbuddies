@@ -23,6 +23,7 @@ const PAGES = [
   "/play/more/island",
   "/play/custom",
   "/family/create",
+  "/family/create/badge",
   "/family/create/lesson",
   "/family/create/preview",
   "/family/progress",
