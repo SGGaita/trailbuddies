@@ -82,6 +82,8 @@ test("the teacher Badges tab opens the selected class badge wall", async ({ page
   await passGate(page);
   await page.getByRole("navigation", { name: "Teacher" }).getByRole("link", { name: "Badges" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Class badges" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1, name: "Class badges" })).toBeVisible();
   await page.getByRole("link", { name: "Badge wall for Class 1B" }).click();
   await expect(page.getByText("First Steps", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Wanjiru", exact: true })).toBeVisible();

@@ -23,6 +23,13 @@ export default function GrownUpGate({ children, setup = true }) {
   const ready = useHydrated();
   const guarded = useSetupGuard({ off: !setup });
   const open = useFamily((s) => s.gateUntil > Date.now());
+  const gateUntil = useFamily((s) => s.gateUntil);
+  const lockGate = useFamily((s) => s.lockGate);
+  useEffect(() => {
+    if (!gateUntil) return;
+    const timer = setTimeout(lockGate, Math.max(0, gateUntil - Date.now()));
+    return () => clearTimeout(timer);
+  }, [gateUntil, lockGate]);
   if (!ready || (setup && !guarded)) return <Loading />;
   if (open) return children;
   return <Gate />;

@@ -84,6 +84,34 @@ export const onLocalChange = (fn) => {
 };
 
 const now = () => new Date().toISOString();
+const GATE_KEY = "tb_grown_up_gate";
+const GATE_MS = 10 * 60_000;
+
+// Classroom devices keep their unlock in memory. Account and demo unlocks can
+// survive a reload in the same tab and are tied to the current grown-up.
+const gateOwner = ({ mode, user }) =>
+  mode === "demo" ? "demo" : mode === "account" && user?.id ? `account:${user.id}` : null;
+
+function savedGateUntil(state) {
+  try {
+    const grant = JSON.parse(sessionStorage.getItem(GATE_KEY) || "null");
+    const owner = gateOwner(state);
+    if (owner && grant?.owner === owner && Number.isFinite(grant.until) && grant.until > Date.now())
+      return grant.until;
+  } catch {
+    /* No session storage: unlocks still work in memory. */
+  }
+  return 0;
+}
+
+function rememberGate(owner, until) {
+  try {
+    if (owner && until) sessionStorage.setItem(GATE_KEY, JSON.stringify({ owner, until }));
+    else sessionStorage.removeItem(GATE_KEY);
+  } catch {
+    /* No session storage: unlocks still work in memory. */
+  }
+}
 /** The IndexedDB name for the current mode. */
 export const dbName = (s) => (s.mode === "demo" ? "demo" : s.family?.id || null);
 
@@ -123,6 +151,7 @@ export const useFamily = create(
           waiting: seed.waiting,
           events: seed.events,
           eventsReady: true,
+          gateUntil: 0,
         });
       },
       /** Leave the demo or sign out on this device. */
@@ -275,14 +304,25 @@ export const useFamily = create(
         if (name) saveEvents(familyDb(name), events, s.mode === "demo" ? 1 : 0).then(() => afterChange());
       },
       /** The grown-up zone stays open for 10 minutes after the gate. */
-      unlockGate: () => set({ gateUntil: Date.now() + 10 * 60_000 }),
-      lockGate: () => set({ gateUntil: 0 }),
+      unlockGate: () => {
+        const gateUntil = Date.now() + GATE_MS;
+        rememberGate(gateOwner(get()), gateUntil);
+        set({ gateUntil });
+      },
+      lockGate: () => {
+        rememberGate(null, 0);
+        set({ gateUntil: 0 });
+      },
       active: () => get().learners.find((l) => l.id === get().activeId) || null,
     }),
     {
       name: "trailbuddies-family-v3",
       storage: safeStorage,
       version: 4,
+      merge: (stored, current) => {
+        const state = { ...current, .../** @type {Partial<typeof current>} */ (stored) };
+        return { ...state, gateUntil: savedGateUntil(state) };
+      },
       // v4 (Sprint 9): Juma the elephant is now Jumbo.
       migrate: (state, version) => {
         if (version < 4 && state) {
@@ -332,6 +372,11 @@ export const useFamily = create(
     },
   ),
 );
+
+useFamily.subscribe((state, previous) => {
+  if (gateOwner(previous) && gateOwner(state) !== gateOwner(previous)) state.lockGate();
+  else if (previous.gateUntil && !state.gateUntil) rememberGate(null, 0);
+});
 
 /** True once the persisted store and the event log have loaded (avoids hydration mismatches). */
 export function useHydrated() {

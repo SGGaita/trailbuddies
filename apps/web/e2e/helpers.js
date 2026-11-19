@@ -34,9 +34,12 @@ export async function demo(page) {
   await expect(page).toHaveURL(/\/play$/);
 }
 
-/** Answer the parent gate's sum (or type a PIN). */
+/** Open a locked grown-up page. The same tab may already be unlocked. */
 export async function passGate(page, pin) {
-  await expect(page.getByRole("heading", { name: "Grown-ups only" })).toBeVisible();
+  const gate = page.getByRole("heading", { name: "Grown-ups only" });
+  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+  if (!pin && !(await gate.isVisible())) return;
+  await expect(gate).toBeVisible();
   let answer = pin;
   if (!pin) {
     const q = await page.locator("[data-gate-question]").getAttribute("data-gate-question");
