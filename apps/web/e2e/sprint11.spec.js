@@ -3,6 +3,7 @@ import { demo, noSideScroll, passGate } from "./helpers.js";
 
 test("Badge Studio previews and restores a parent's local draft", async ({ page }) => {
   test.setTimeout(120_000);
+  await page.clock.install();
   await demo(page);
   await page.goto("/family");
   await passGate(page);
@@ -28,7 +29,12 @@ test("Badge Studio previews and restores a parent's local draft", async ({ page 
   await expect(page.getByText("Draft saved on this device.")).toBeVisible();
 
   await page.reload();
-  await passGate(page);
   await expect(name).toHaveValue("Garden Helper");
   for (const option of [diamond, green, plant]) await expect(option).toHaveAttribute("aria-pressed", "true");
+  await page.clock.fastForward(10 * 60_000);
+  await expect(page.getByRole("heading", { name: "Grown-ups only" })).toBeVisible();
+  await passGate(page);
+  await page.goto("/play");
+  await page.getByRole("link", { name: "Grown-ups" }).click();
+  await expect(page.getByRole("heading", { name: "Grown-ups only" })).toBeVisible();
 });

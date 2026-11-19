@@ -52,7 +52,7 @@ test("a parent invites a carer, who can view progress but not change settings", 
   await nana.goto(`/invite?token=${encodeURIComponent(invite.token)}`);
   await expect(nana).toHaveURL(/\/family$/);
   await nana.goto("/family/settings");
-  await passGate(nana); // a fresh page load locks the grown-up zone again
+  await passGate(nana);
   await expect(
     nana.getByText("You can view progress. Settings can only be changed by a parent."),
   ).toBeVisible();
