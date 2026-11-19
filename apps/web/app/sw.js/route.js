@@ -4,7 +4,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { getSubjects, ALL_ASSETS, ART_BASE, HELP_ARTICLES } from "@trailbuddies/content";
-import { PLAY_MORE, FAMILY, TEACH } from "@/lib/placeholders";
+import { PLAY_MORE, FAMILY } from "@/lib/placeholders";
 
 export const dynamic = "force-static";
 
@@ -40,10 +40,10 @@ const PAGES = [
   "/teach",
   "/teach/start",
   "/teach/class",
+  "/teach/badges",
   "/teach/letters",
   "/family/classes",
   "/family/join",
-  ...Object.keys(TEACH).map((k) => `/teach/${k}`),
 ];
 const EXTRAS = [
   "/manifest.webmanifest",
