@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { MEDIA_RULES, mediaProblem } from "@trailbuddies/domain";
 import { t } from "@trailbuddies/i18n";
 import { colors } from "@trailbuddies/tokens";
 import FamilyShell from "@/components/shell/FamilyShell";
 import Loading from "@/components/Loading";
 import { canEdit } from "@/lib/account";
 import { familyDb } from "@/lib/db";
+import { preparePhoto } from "@/lib/media";
 import { dbName, useFamily, useHydrated } from "@/lib/store";
 
 const DRAFT_KEY = "badge-design-draft";
-const EMPTY_DRAFT = { name: "", shape: "circle", colour: "blue", icon: "star" };
+const EMPTY_DRAFT = { name: "", shape: "circle", colour: "blue", icon: "star", photo: null };
 const SHAPES = {
   circle: "circle(50%)",
   square: "inset(4% round 18%)",
@@ -77,10 +79,30 @@ function DesignChoice({ field, choices, value, onChange, disabled }) {
   );
 }
 
+function BadgePhoto({ blob }) {
+  const img = useRef(null);
+  useEffect(() => {
+    const url = URL.createObjectURL(blob);
+    img.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [blob]);
+  return (
+    <Box
+      component="img"
+      ref={img}
+      alt=""
+      sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+    />
+  );
+}
+
 function BadgeDesign({ databaseName }) {
+  const fileInput = useRef(null);
   const [draft, setDraft] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const busy = preparing || saving;
 
   useEffect(() => {
     let active = true;
@@ -107,9 +129,31 @@ function BadgeDesign({ databaseName }) {
     setStatus("");
     setDraft((current) => ({ ...current, [field]: value }));
   };
+
+  async function choosePhoto(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || busy) return;
+    const problem = mediaProblem("photo", file.type, file.size);
+    if (problem) {
+      setStatus(problem === "size" ? "photoTooBig" : "photoError");
+      return;
+    }
+    setStatus("");
+    setPreparing(true);
+    try {
+      const photo = await preparePhoto(file);
+      update("photo", photo);
+    } catch {
+      setStatus("photoError");
+    } finally {
+      setPreparing(false);
+    }
+  }
+
   async function save(event) {
     event.preventDefault();
-    if (saving || !draft.name.trim()) return;
+    if (busy || !draft.name.trim()) return;
     setSaving(true);
     setStatus("");
     try {
@@ -143,6 +187,7 @@ function BadgeDesign({ databaseName }) {
               sx={{
                 width: 124,
                 height: 124,
+                position: "relative",
                 display: "grid",
                 placeItems: "center",
                 clipPath: SHAPES[draft.shape],
@@ -150,7 +195,7 @@ function BadgeDesign({ databaseName }) {
                 fontSize: 50,
               }}
             >
-              {ICONS[draft.icon]}
+              {draft.photo ? <BadgePhoto blob={draft.photo} /> : ICONS[draft.icon]}
             </Box>
           </Box>
           <Typography component="figcaption" variant="h6" sx={{ mt: 1, overflowWrap: "anywhere" }}>
@@ -159,7 +204,7 @@ function BadgeDesign({ databaseName }) {
         </Box>
         <TextField
           required
-          disabled={saving}
+          disabled={busy}
           label={t("badgeStudio.name")}
           value={draft.name}
           onChange={(event) => update("name", event.target.value)}
@@ -170,23 +215,47 @@ function BadgeDesign({ databaseName }) {
           choices={SHAPES}
           value={draft.shape}
           onChange={(v) => update("shape", v)}
-          disabled={saving}
+          disabled={busy}
         />
         <DesignChoice
           field="colour"
           choices={COLOURS}
           value={draft.colour}
           onChange={(v) => update("colour", v)}
-          disabled={saving}
+          disabled={busy}
         />
         <DesignChoice
           field="icon"
           choices={ICONS}
-          value={draft.icon}
-          onChange={(v) => update("icon", v)}
-          disabled={saving}
+          value={draft.photo ? null : draft.icon}
+          onChange={(icon) => {
+            setStatus("");
+            setDraft((current) => ({ ...current, icon, photo: null }));
+          }}
+          disabled={busy}
         />
-        <Button type="submit" variant="contained" disabled={saving || !draft.name.trim()}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <input
+            type="file"
+            ref={fileInput}
+            aria-label={t("badgeStudio.choosePhoto")}
+            hidden
+            accept={MEDIA_RULES.photo.types.join(",")}
+            onChange={choosePhoto}
+          />
+          <Button type="button" variant="outlined" disabled={busy} onClick={() => fileInput.current.click()}>
+            {t(preparing ? "badgeStudio.preparingPhoto" : "badgeStudio.choosePhoto")}
+          </Button>
+          {draft.photo && (
+            <Button type="button" disabled={busy} onClick={() => update("photo", null)}>
+              {t("badgeStudio.removePhoto")}
+            </Button>
+          )}
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {t("badgeStudio.photoHelp")}
+        </Typography>
+        <Button type="submit" variant="contained" disabled={busy || !draft.name.trim()}>
           {t("badgeStudio.save")}
         </Button>
         {status && (
