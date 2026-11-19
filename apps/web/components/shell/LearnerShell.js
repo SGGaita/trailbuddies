@@ -26,9 +26,9 @@ export const LEARNER_NAV = [
 
 /**
  * Learner app frame. Tablet and web: top bar + side bar. Phone: compact top bar + bottom tabs.
- * @param {{ learner: any, title?: string, back?: string, active?: string, nav?: boolean, goal?: number, children: React.ReactNode }} props
+ * @param {{ learner: any, title?: string, back?: string, active?: string, nav?: boolean, goal?: number, headerAction?: React.ReactNode, children: React.ReactNode }} props
  */
-export default function LearnerShell({ learner, title, back, active, nav = true, goal = 2, children }) {
+export default function LearnerShell({ learner, title, back, active, nav = true, goal = 2, headerAction, children }) {
   const stars = totalStars(learner.progress);
   return (
     <Box
@@ -140,6 +140,7 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
           </Box>
         )}
         <Box sx={{ flex: 1, display: { xs: title ? "none" : "block", sm: "block" } }} />
+        {headerAction}
         {learner.streak.days > 0 && (
           <Box
             aria-label={t("streak.label", { n: learner.streak.days })}

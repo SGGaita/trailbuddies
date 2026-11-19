@@ -37,6 +37,14 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await page.getByRole("button", { name: /Zawadi/ }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
   await expect(page.getByText("Numbers Mountain").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Change buddy" })).toHaveAttribute(
+    "href",
+    "/play/buddies",
+  );
+  await page.locator('main img[src="/art/world-valley.webp"]').first().evaluate((image) => image.decode());
+  await page.locator("main a img").filter({ visible: true }).evaluateAll(async (images) => {
+    await Promise.all(images.map((image) => image.decode()));
+  });
   await noSideScroll(page);
   await shot(page, testInfo, "2-map");
 

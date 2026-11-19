@@ -26,7 +26,8 @@ import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
 import Buddy from "@/components/art/Buddy";
 import Island from "@/components/art/Island";
-import SubjectArt, { SUBJECT_ART, artWidth } from "@/components/art/SubjectArt";
+import SubjectArt, { SUBJECT_ART } from "@/components/art/SubjectArt";
+import Icon from "@/components/Icon";
 import Bubble from "@/components/Bubble";
 import SpeakButton from "@/components/SpeakButton";
 import Loading from "@/components/Loading";
@@ -37,19 +38,146 @@ import { readMemory, writeMemory } from "@/lib/memory";
 import { SavingGoal } from "@/components/screens/Shop";
 import { OUTFITS } from "@/lib/art";
 import { useTeacherWork } from "@/lib/classWork";
+import { MAP_STOPS, mapSections } from "@/lib/mapSections";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
-// Tablet/web map: a compact 3 x 2 grid anchored top-left, like the prototype (fixed 305px pitch),
-// so islands stay together on wide screens instead of spreading across the window.
+const VALLEY = "/art/world-valley.webp";
+const MAP_HEIGHT = { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" };
+
 const PLACE_SX = {
+  position: "absolute",
+  transform: "translate(-50%, -72%)",
+  width: "clamp(116px, 24%, 254px)",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   gap: 0.5,
   textDecoration: "none",
-  color: "text.primary",
+  color: colors.ink,
   minWidth: 0,
+  borderRadius: 3,
+  "&:focus-visible": { outline: `3px solid ${colors.leaf.deep}`, outlineOffset: 4 },
+  "&:hover .map-stop-label": { borderColor: colors.leaf.main },
 };
+
+function MapPath({ path }) {
+  return (
+    <Box
+      component="svg"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+    >
+      <path d={path} fill="none" stroke="#a6804277" strokeWidth="17" vectorEffect="non-scaling-stroke" />
+      <path d={path} fill="none" stroke="#f9e6b8" strokeWidth="15" vectorEffect="non-scaling-stroke" />
+      <path
+        d={path}
+        fill="none"
+        stroke="#9a733c"
+        strokeWidth="1.7"
+        strokeDasharray="2 7"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </Box>
+  );
+}
+
+function MapStop({ x, y, id, island, title, subtitle, href, onClick, children }) {
+  return (
+    <Box component={Link} href={href} onClick={onClick} sx={{ ...PLACE_SX, left: `${x}%`, top: `${y}%` }}>
+      <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 0.5 }}>{children}</Box>
+      {SUBJECT_ART[id] ? (
+        <SubjectArt
+          id={id}
+          small
+          width="min(100%, clamp(108px, 18vw, 246px))"
+          height={{ sm: "clamp(78px, 11vw, 160px)" }}
+          sx={{ filter: "drop-shadow(0 4px 4px #4d47194d)" }}
+        />
+      ) : (
+        <Island kind={island} width="min(70%, 144px)" height={88} />
+      )}
+      <Box
+        className="map-stop-label"
+        sx={{
+          bgcolor: "#fffbee",
+          border: "1px solid #dbc99d",
+          borderRadius: 3,
+          maxWidth: "100%",
+          px: 1.25,
+          py: 0.65,
+          textAlign: "center",
+          boxShadow: "0 3px 0 #6f613221",
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: { sm: 16, md: 20 },
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: { sm: 12, md: 13 },
+            color: "#5e5743",
+            mt: 0.25,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {subtitle}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function Valley({ children, priority = false, sx }) {
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        isolation: "isolate",
+        bgcolor: "#e5e8b5",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          zIndex: -1,
+          pointerEvents: "none",
+          background: "linear-gradient(180deg, #fff8df40, #fffae312)",
+        },
+        ...sx,
+      }}
+    >
+      <Box
+        component="img"
+        src={VALLEY}
+        alt=""
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        draggable={false}
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -2,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center bottom",
+          pointerEvents: "none",
+        }}
+      />
+      {children}
+    </Box>
+  );
+}
 
 function subjectsWithProgress(progress, placement = {}, interests = []) {
   return orderSubjects(getSubjects(), interests).map((s) => {
@@ -165,238 +293,247 @@ export default function WorldMap() {
     s.p.done
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
       : t("map.notStarted");
+  const { mainPath, sections } = mapSections(subjects);
+  const subjectStop = (subject, x, y) => (
+    <MapStop
+      key={subject.id}
+      id={subject.id}
+      island={subject.island}
+      x={x}
+      y={y}
+      title={subject.place}
+      subtitle={sub(subject)}
+      href={`/play/trail/${subject.id}`}
+      onClick={hear(subject.id, subject.place)}
+    >
+      {first && subject.id === "numbers" ? (
+        <Chip size="small" label="Start here!" color="primary" />
+      ) : (learner.interests || []).includes(subject.id) ? (
+        <Chip size="small" label="Favourite" color="secondary" />
+      ) : null}
+    </MapStop>
+  );
+
+  const changeBuddy = (
+    <Button
+      component={Link}
+      href="/play/buddies"
+      aria-label={t("buddies.change")}
+      variant="outlined"
+      sx={{ borderWidth: 2, flexShrink: 0, minWidth: 42, px: { xs: 0.75, sm: 1.5 }, whiteSpace: "nowrap" }}
+    >
+      <Box component="span" aria-hidden="true" sx={{ display: { xs: "flex", sm: "none" } }}>
+        <Icon name="users" size={22} />
+      </Box>
+      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+        {t("buddies.change")}
+      </Box>
+    </Button>
+  );
 
   return (
-    <LearnerShell learner={learner} active="/play/map" goal={goal}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", px: { xs: 2, sm: 3 }, pt: 1, bgcolor: colors.sand }}>
-        <Button component={Link} href="/play/buddies" variant="outlined" sx={{ bgcolor: "background.paper" }}>
-          {t("buddies.change")}
-        </Button>
-      </Box>
-      {/* tablet + web: the map */}
-      <Box
-        sx={{
-          display: { xs: "none", sm: "block" },
-          flex: 1,
-          position: "relative",
-          minHeight: 560,
-          overflow: "hidden",
-          background: `radial-gradient(circle at 20% 30%, #fdf3d3 0 18%, transparent 19%), radial-gradient(circle at 80% 70%, #f6e7bd 0 16%, transparent 17%), ${colors.sand}`,
-        }}
-      >
+    <LearnerShell learner={learner} active="/play/map" goal={goal} headerAction={changeBuddy}>
+      <Valley priority sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 260px))",
-            columnGap: { sm: 2, md: 5.5 },
-            rowGap: 2.5,
-            px: { sm: 2, md: 5 },
-            pt: 2.25,
-            pb: 22,
+            display: { xs: "none", sm: "block" },
+            flex: 1,
+            position: "relative",
+            minHeight: MAP_HEIGHT,
+            isolation: "isolate",
           }}
         >
-          {subjects.map((s) => {
-            return (
-              <Box
-                key={s.id}
-                component={Link}
-                href={`/play/trail/${s.id}`}
-                onClick={hear(s.id, s.place)}
-                sx={{ ...PLACE_SX, opacity: first && s.id !== "numbers" ? 0.55 : 1 }}
-              >
-                <Box sx={{ height: 22 }}>
-                  {first && s.id === "numbers" ? (
-                    <Chip size="small" label="Start here!" color="primary" />
-                  ) : (learner.interests || []).includes(s.id) ? (
-                    <Chip size="small" label="Favourite" color="secondary" />
-                  ) : null}
-                </Box>
-                {SUBJECT_ART[s.id] ? (
-                  <SubjectArt id={s.id} small width={artWidth(s.id, 120)} />
-                ) : (
-                  <Island kind={s.island} width="min(180px, 100%)" height={120} />
-                )}
-                <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
+          <MapPath path={mainPath} />
+          {MAP_STOPS.map(([id, x, y]) => {
+            if (id === "family") {
+              return (
+                <MapStop
+                  key={id}
+                  id={id}
+                  x={x}
+                  y={y}
+                  title={t("map.familyIsland")}
+                  subtitle={t("map.familyIslandSub")}
+                  href="/play/more/island"
+                  onClick={hear("island", t("map.familyIsland"))}
+                >
+                  {signpost}
+                  {newChip}
+                </MapStop>
+              );
+            }
+            const subject = subjects.find((place) => place.id === id);
+            return subject ? subjectStop(subject, x, y) : null;
+          })}
+          <Box
+            sx={{
+              position: "absolute",
+              left: { sm: 8, md: 18 },
+              bottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: { sm: 0.5, md: 1 },
+              maxWidth: { sm: "54%", md: "58%" },
+              "& > svg": { width: { sm: 76, md: 112 }, height: "auto" },
+            }}
+          >
+            <Buddy
+              id={learner.buddy}
+              outfit={learner.outfit}
+              size={112}
+              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+            />
+            <Bubble small sx={{ maxWidth: 360, minWidth: 0 }}>
+              {greeting}
+            </Bubble>
+            <SpeakButton text={greeting} size={44} />
+          </Box>
+          <Box
+            sx={{
+              position: "absolute",
+              right: 12,
+              bottom: 12,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 0.6,
+              p: 1,
+              maxWidth: "46%",
+              bgcolor: "#fffbee",
+              border: "1px solid #dbc99d",
+              borderRadius: 3,
+              boxShadow: "0 3px 0 #6f613221",
+            }}
+          >
+            <SavingCard learner={learner} />
+            <Typography sx={{ fontWeight: 800, color: colors.muted, fontSize: 14 }}>
+              {t("map.comingSoon")}
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 0.7 }}>
+              {COMING.map((name) => (
+                <Chip
+                  key={name}
+                  label={name}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderStyle: "dashed", bgcolor: "#fffaf0" }}
+                />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+
+        {/* phone: island list */}
+        <Box
+          sx={{
+            display: { xs: "flex", sm: "none" },
+            flexDirection: "column",
+            gap: 1.5,
+            p: 1.75,
+            flex: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
+            <Buddy
+              id={learner.buddy}
+              outfit={learner.outfit}
+              size={72}
+              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+            />
+            <Bubble small sx={{ mb: 2.5 }}>
+              {greeting}
+            </Bubble>
+          </Box>
+          <SavingCard learner={learner} />
+          {subjects.map((s) => (
+            <Box
+              key={s.id}
+              component={Link}
+              href={`/play/trail/${s.id}`}
+              onClick={hear(s.id, s.place)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                border: `3px solid ${first && s.id === "numbers" ? colors.leaf.main : colors.line}`,
+                bgcolor: "background.paper",
+                borderRadius: 5.5,
+                p: 1.25,
+                textDecoration: "none",
+                color: "text.primary",
+                opacity: first && s.id !== "numbers" ? 0.55 : 1,
+              }}
+            >
+              {SUBJECT_ART[s.id] ? (
+                <SubjectArt id={s.id} small width={110} height={72} />
+              ) : (
+                <Island kind={s.island} width={88} height={62} />
+              )}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}
+                >
                   {s.place}
                 </Typography>
-                <Typography
-                  sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary", textAlign: "center" }}
-                >
-                  {sub(s)}
-                </Typography>
+                <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{sub(s)}</Typography>
+                {s.p.total > 0 && (
+                  <LinearProgress
+                    variant="determinate"
+                    value={s.p.pct * 100}
+                    sx={{ mt: 0.75, height: 8, borderRadius: 4, bgcolor: colors.sand }}
+                  />
+                )}
               </Box>
-            );
-          })}
+              {first && s.id === "numbers" ? <Chip size="small" label="Start" color="primary" /> : null}
+            </Box>
+          ))}
           <Box
             component={Link}
             href="/play/more/island"
             onClick={hear("island", t("map.familyIsland"))}
-            sx={PLACE_SX}
-          >
-            <Box
-              sx={{ minHeight: 22, display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center" }}
-            >
-              {signpost}
-              {newChip}
-            </Box>
-            <SubjectArt id="family" small width={artWidth("family", 120)} />
-            <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19 }}>
-              {t("map.familyIsland")}
-            </Typography>
-            <Typography sx={{ fontWeight: 700, fontSize: 13, color: "text.secondary" }}>
-              {t("map.familyIslandSub")}
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            left: 18,
-            bottom: 12,
-            display: "flex",
-            alignItems: "flex-end",
-            gap: 1.5,
-          }}
-        >
-          <Buddy
-            id={learner.buddy}
-            outfit={learner.outfit}
-            size={112}
-            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-          />
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 5 }}>
-            <Bubble small sx={{ maxWidth: 360 }}>
-              {greeting}
-            </Bubble>
-            <SpeakButton text={greeting} size={48} />
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            right: 16,
-            bottom: 16,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: 0.75,
-          }}
-        >
-          <SavingCard learner={learner} />
-          <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            {COMING.map((c) => (
-              <Chip
-                key={c}
-                label={c}
-                variant="outlined"
-                sx={{ borderStyle: "dashed", bgcolor: "rgba(255,255,255,.6)" }}
-              />
-            ))}
-          </Box>
-        </Box>
-      </Box>
-
-      {/* phone: island list */}
-      <Box
-        sx={{
-          display: { xs: "flex", sm: "none" },
-          flexDirection: "column",
-          gap: 1.5,
-          p: 1.75,
-          bgcolor: colors.sand,
-          flex: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
-          <Buddy
-            id={learner.buddy}
-            outfit={learner.outfit}
-            size={72}
-            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-          />
-          <Bubble small sx={{ mb: 2.5 }}>
-            {greeting}
-          </Bubble>
-        </Box>
-        <SavingCard learner={learner} />
-        {subjects.map((s) => (
-          <Box
-            key={s.id}
-            component={Link}
-            href={`/play/trail/${s.id}`}
-            onClick={hear(s.id, s.place)}
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 1.5,
-              border: `3px solid ${first && s.id === "numbers" ? colors.leaf.main : colors.line}`,
+              border: `3px solid ${colors.line}`,
               bgcolor: "background.paper",
               borderRadius: 5.5,
               p: 1.25,
               textDecoration: "none",
               color: "text.primary",
-              opacity: first && s.id !== "numbers" ? 0.55 : 1,
             }}
           >
-            {SUBJECT_ART[s.id] ? (
-              <SubjectArt id={s.id} small width={110} height={72} />
-            ) : (
-              <Island kind={s.island} width={88} height={62} />
-            )}
+            <SubjectArt id="family" small width={110} height={72} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}
-              >
-                {s.place}
+              <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
+                {t("map.familyIsland")}
               </Typography>
-              <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{sub(s)}</Typography>
-              {s.p.total > 0 && (
-                <LinearProgress
-                  variant="determinate"
-                  value={s.p.pct * 100}
-                  sx={{ mt: 0.75, height: 8, borderRadius: 4, bgcolor: colors.sand }}
-                />
-              )}
+              <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+                {t("map.familyIslandSub")}
+              </Typography>
             </Box>
-            {first && s.id === "numbers" ? <Chip size="small" label="Start" color="primary" /> : null}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+              {signpost}
+              {newChip}
+            </Box>
           </Box>
-        ))}
-        <Box
-          component={Link}
-          href="/play/more/island"
-          onClick={hear("island", t("map.familyIsland"))}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            border: `3px solid ${colors.line}`,
-            bgcolor: "background.paper",
-            borderRadius: 5.5,
-            p: 1.25,
-            textDecoration: "none",
-            color: "text.primary",
-          }}
+          <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {COMING.map((c) => (
+              <Chip key={c} label={c} variant="outlined" sx={{ borderStyle: "dashed" }} />
+            ))}
+          </Box>
+        </Box>
+      </Valley>
+      {sections.map(({ stops, path }) => (
+        <Valley
+          key={stops[0].subject.id}
+          sx={{ display: { xs: "none", sm: "block" }, minHeight: MAP_HEIGHT }}
         >
-          <SubjectArt id="family" small width={110} height={72} />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
-              {t("map.familyIsland")}
-            </Typography>
-            <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("map.familyIslandSub")}</Typography>
-          </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-            {signpost}
-            {newChip}
-          </Box>
-        </Box>
-        <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {COMING.map((c) => (
-            <Chip key={c} label={c} variant="outlined" sx={{ borderStyle: "dashed" }} />
-          ))}
-        </Box>
-      </Box>
+          <MapPath path={path} />
+          {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}
+        </Valley>
+      ))}
       <Snackbar
         open={returned.length > 0}
         onClose={dismissReturned}
