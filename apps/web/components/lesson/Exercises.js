@@ -758,7 +758,10 @@ export function Sort({ step, hint, done, onTry, e2e, band, voice, buddy, say }) 
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: `repeat(${step.bins.length}, minmax(0, 1fr))`,
+          gridTemplateColumns: {
+            xs: `repeat(${Math.min(3, step.bins.length)}, minmax(0, 1fr))`,
+            sm: `repeat(${step.bins.length}, minmax(0, 1fr))`,
+          },
           gap: { xs: 1, sm: 2 },
           width: "100%",
           maxWidth: 900,
@@ -969,6 +972,7 @@ export function Intro({ step, band, voice, buddy, heard, onHeard }) {
 export const EXERCISES = {
   intro: Intro,
   "listen-tap": ListenTap,
+  "clue-tap": ListenTap,
   "name-it": NameIt,
   count: Count,
   compare: Compare,

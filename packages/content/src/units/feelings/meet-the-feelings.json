@@ -1,0 +1,271 @@
+{
+  "schema": "unit/1",
+  "id": "meet-the-feelings",
+  "subject": "feelings",
+  "title": "Meet the feelings",
+  "band": "seedling",
+  "summary": "Look for clues in faces, sort feelings into baskets and think about how someone might feel.",
+  "status": "ready",
+  "groups": [
+    {
+      "id": "happy",
+      "label": "Happy or loved",
+      "emoji": "😊"
+    },
+    {
+      "id": "sad",
+      "label": "Sad or worried",
+      "emoji": "😢"
+    },
+    {
+      "id": "angry",
+      "label": "Angry",
+      "emoji": "😠"
+    },
+    {
+      "id": "quiet",
+      "label": "Calm or sleepy",
+      "emoji": "😌"
+    },
+    {
+      "id": "surprise",
+      "label": "Surprised or confused",
+      "emoji": "😲"
+    }
+  ],
+  "items": [
+    {
+      "id": "feelings-happy",
+      "label": "happy",
+      "emoji": "😊",
+      "fact": "A smile can be a clue that someone feels happy.",
+      "clue": "A friend arrives and Amani smiles and jumps for joy. How might she feel?",
+      "tags": [
+        "happy"
+      ],
+      "image": "img-happy"
+    },
+    {
+      "id": "feelings-sad",
+      "label": "sad",
+      "emoji": "😢",
+      "fact": "Someone who feels sad might cry or want a little quiet time.",
+      "clue": "Sam misses a friend who moved away and tears roll down his face. How might he feel?",
+      "tags": [
+        "sad"
+      ],
+      "image": "img-sad"
+    },
+    {
+      "id": "feelings-angry",
+      "label": "angry",
+      "emoji": "😠",
+      "fact": "Someone who feels angry might frown or feel tense. They can pause and take a breath.",
+      "clue": "Someone knocks over Leo's tower on purpose. He frowns and his body feels tight. How might he feel?",
+      "tags": [
+        "angry"
+      ],
+      "image": "img-angry"
+    },
+    {
+      "id": "feelings-loved",
+      "label": "loved",
+      "emoji": "🥰",
+      "fact": "When someone cares for us, we might feel loved.",
+      "clue": "A grown-up listens, gives Amani a hug and tells her they care about her. How might she feel?",
+      "tags": [
+        "happy"
+      ],
+      "image": "img-loved"
+    },
+    {
+      "id": "feelings-worried",
+      "label": "worried",
+      "emoji": "😟",
+      "fact": "When we keep thinking that something might go wrong, we may feel worried.",
+      "clue": "Sam keeps thinking something could go wrong on his first day at a new school. How might he feel?",
+      "tags": [
+        "sad"
+      ],
+      "image": "img-worried"
+    },
+    {
+      "id": "feelings-calm",
+      "label": "calm",
+      "emoji": "😌",
+      "fact": "Slow breaths and a quiet place help some people feel calm.",
+      "clue": "Leo is sitting quietly, breathing slowly and feeling relaxed. How might he feel?",
+      "tags": [
+        "quiet"
+      ],
+      "image": "img-calm"
+    },
+    {
+      "id": "feelings-sleepy",
+      "label": "sleepy",
+      "emoji": "😴",
+      "fact": "Yawning or rubbing our eyes can be signs that we feel sleepy.",
+      "clue": "It is bedtime. Sam yawns, rubs his eyes and struggles to keep them open. How might he feel?",
+      "tags": [
+        "quiet"
+      ],
+      "image": "img-sleepy"
+    },
+    {
+      "id": "feelings-surprised",
+      "label": "surprised",
+      "emoji": "😲",
+      "fact": "Something unexpected can make us feel surprised.",
+      "clue": "A box opens and an unexpected balloon floats out. Amani's eyes open wide. How might she feel?",
+      "tags": [
+        "surprise"
+      ],
+      "image": "img-surprised"
+    },
+    {
+      "id": "feelings-confused",
+      "label": "confused",
+      "emoji": "😕",
+      "fact": "We might feel confused when we do not understand what is happening.",
+      "clue": "Leo is given directions that do not make sense to him. He does not know which way to go. How might he feel?",
+      "tags": [
+        "surprise"
+      ],
+      "image": "img-confused"
+    },
+    {
+      "id": "feelings-confident",
+      "label": "confident",
+      "emoji": "😎",
+      "fact": "Feeling confident means believing you can have a go.",
+      "clue": "Sam has practised and believes he is ready to try the challenge. How might he feel?",
+      "image": "img-confident"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "meet-the-feelings-1",
+      "title": "Meet the Faces",
+      "focus": [
+        "feelings-happy",
+        "feelings-sad",
+        "feelings-angry"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "meet-the-feelings-2",
+      "title": "Little Trail",
+      "focus": [
+        "feelings-loved",
+        "feelings-worried"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        }
+      ]
+    },
+    {
+      "id": "meet-the-feelings-3",
+      "title": "Big Trail",
+      "focus": [
+        "feelings-calm",
+        "feelings-sleepy",
+        "feelings-surprised",
+        "feelings-confused"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 5
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 5
+        }
+      ]
+    },
+    {
+      "id": "meet-the-feelings-4",
+      "title": "Feeling Stories",
+      "focus": [
+        "feelings-confident"
+      ],
+      "review": [
+        "feelings-happy",
+        "feelings-sad",
+        "feelings-angry",
+        "feelings-sleepy",
+        "feelings-surprised",
+        "feelings-worried",
+        "feelings-calm",
+        "feelings-loved",
+        "feelings-confused"
+      ],
+      "exercises": [
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

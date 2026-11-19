@@ -84,6 +84,14 @@ const EXTRAS = [
   "/art/shape-town-sm.webp",
   "/art/family-island.webp",
   "/art/family-island-sm.webp",
+  "/art/time-tower.webp",
+  "/art/time-tower-sm.webp",
+  "/art/space-station.webp",
+  "/art/space-station-sm.webp",
+  "/art/feelings-trail.webp",
+  "/art/feelings-trail-sm.webp",
+  "/art/weather-valley.webp",
+  "/art/weather-valley-sm.webp",
   // Approved unit illustrations that are in this build, so lessons look right offline.
   ...Object.values(ALL_ASSETS)
     .flatMap((m) => m.assets)

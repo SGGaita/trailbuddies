@@ -1,0 +1,95 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-happy",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/happy.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-sad",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/sad.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-angry",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/angry.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-loved",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/loved.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-worried",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/worried.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-calm",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/calm.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-sleepy",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/sleepy.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-surprised",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/surprised.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-confused",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/confused.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    },
+    {
+      "id": "img-confident",
+      "kind": "image",
+      "path": "feelings/meet-the-feelings/confident.webp",
+      "source": "licensed",
+      "license": "Trailbuddies project artwork",
+      "review_status": "approved",
+      "notes": "Reused from the Trailbuddies Feelings Trail reference site."
+    }
+  ]
+}

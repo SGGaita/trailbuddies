@@ -7,7 +7,7 @@ export default {
   "learner.newProfile": "New! Meet the buddies",
   "learner.adult": "Adult learner",
   "learner.today": "Today: {done} of {goal}",
-  "map.comingSoon": "Coming soon",
+  "map.moreTrails": "More trails",
   "map.familyIsland": "Family & Class Island",
   "map.familyIslandSub": "Lessons from your family and teacher",
   "map.notStarted": "Not started",

@@ -1,0 +1,201 @@
+{
+  "schema": "unit/1",
+  "id": "watch-the-weather",
+  "subject": "weather",
+  "title": "Watch the weather",
+  "band": "seedling",
+  "summary": "Spot the weather, choose what to take outdoors and notice how the sky can change.",
+  "status": "ready",
+  "groups": [
+    {
+      "id": "sunny",
+      "label": "Sunny day",
+      "emoji": "☀️"
+    },
+    {
+      "id": "rainy",
+      "label": "Rainy day",
+      "emoji": "🌧️"
+    },
+    {
+      "id": "windy",
+      "label": "Windy day",
+      "emoji": "💨"
+    }
+  ],
+  "items": [
+    {
+      "id": "weather-sunshine",
+      "label": "sunshine",
+      "emoji": "☀️",
+      "fact": "Sunshine can make the ground and air warmer.",
+      "clue": "The sun is shining brightly on the playground. What do you see?",
+      "tags": [
+        "sunny"
+      ]
+    },
+    {
+      "id": "weather-clouds",
+      "label": "clouds",
+      "emoji": "☁️",
+      "fact": "Clouds are made of tiny drops of water or tiny pieces of ice.",
+      "clue": "What are the white or grey shapes floating in the sky?"
+    },
+    {
+      "id": "weather-rain",
+      "label": "rain",
+      "emoji": "🌧️",
+      "fact": "Rain is water that falls from clouds.",
+      "clue": "Drops of water are falling from the clouds. What is happening?",
+      "tags": [
+        "rainy"
+      ]
+    },
+    {
+      "id": "weather-wind",
+      "label": "wind",
+      "emoji": "💨",
+      "fact": "Wind is moving air. You can notice it when leaves or flags move.",
+      "clue": "You cannot see the moving air, but it is making the leaves flutter. What is it?",
+      "tags": [
+        "windy"
+      ]
+    },
+    {
+      "id": "weather-sunhat",
+      "label": "sun hat",
+      "emoji": "👒",
+      "fact": "A wide hat helps shade your head on bright days.",
+      "clue": "What could you wear to shade your face in bright sunshine?",
+      "tags": [
+        "sunny"
+      ]
+    },
+    {
+      "id": "weather-wellies",
+      "label": "rain boots",
+      "emoji": "👢",
+      "fact": "Rain boots help keep your feet dry in puddles.",
+      "clue": "What could you wear to keep your feet dry in puddles?",
+      "tags": [
+        "rainy"
+      ]
+    },
+    {
+      "id": "weather-kite",
+      "label": "kite",
+      "emoji": "🪁",
+      "fact": "A kite needs moving air to stay up. Fly it in an open, safe space.",
+      "clue": "What can you hold by a string and fly in a gentle breeze?",
+      "tags": [
+        "windy"
+      ]
+    },
+    {
+      "id": "weather-puddle",
+      "label": "puddle",
+      "emoji": "💧",
+      "fact": "A puddle can form where rain collects on the ground.",
+      "clue": "After the rain, some water has collected in a shallow dip. What is it?",
+      "tags": [
+        "rainy"
+      ]
+    },
+    {
+      "id": "weather-rainbow",
+      "label": "rainbow",
+      "emoji": "🌈",
+      "fact": "You may see a rainbow when sunlight shines through raindrops.",
+      "clue": "The sun shines through drops of rain and a coloured arc appears. What is it?"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "watch-the-weather-1",
+      "title": "Read the sky",
+      "focus": [
+        "weather-sunshine",
+        "weather-clouds",
+        "weather-rain",
+        "weather-wind"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "watch-the-weather-2",
+      "title": "Ready for the weather",
+      "focus": [
+        "weather-sunhat",
+        "weather-wellies",
+        "weather-kite"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        }
+      ]
+    },
+    {
+      "id": "watch-the-weather-3",
+      "title": "After the rain",
+      "focus": [
+        "weather-puddle",
+        "weather-rainbow"
+      ],
+      "review": [
+        "weather-sunshine",
+        "weather-rain"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

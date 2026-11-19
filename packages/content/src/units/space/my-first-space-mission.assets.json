@@ -1,0 +1,32 @@
+{
+  "schema": "assets/1",
+  "assets": [
+    {
+      "id": "img-mercury",
+      "kind": "image",
+      "path": "space/my-first-space-mission/mercury.webp",
+      "source": "licensed",
+      "license": "NASA media usage guidelines",
+      "review_status": "approved",
+      "notes": "Credit: NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington. Source: https://science.nasa.gov/solar-system/planet-sizes-and-locations-in-our-solar-system/"
+    },
+    {
+      "id": "img-venus",
+      "kind": "image",
+      "path": "space/my-first-space-mission/venus.webp",
+      "source": "licensed",
+      "license": "NASA media usage guidelines",
+      "review_status": "approved",
+      "notes": "Credit: NASA/JPL-Caltech. Source: https://science.nasa.gov/solar-system/planet-sizes-and-locations-in-our-solar-system/"
+    },
+    {
+      "id": "img-mars",
+      "kind": "image",
+      "path": "space/my-first-space-mission/mars.webp",
+      "source": "licensed",
+      "license": "NASA media usage guidelines",
+      "review_status": "approved",
+      "notes": "Credit: NASA/JPL-Caltech. Source: https://science.nasa.gov/solar-system/planet-sizes-and-locations-in-our-solar-system/"
+    }
+  ]
+}

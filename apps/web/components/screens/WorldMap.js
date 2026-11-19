@@ -40,7 +40,6 @@ import { OUTFITS } from "@/lib/art";
 import { useTeacherWork } from "@/lib/classWork";
 import { MAP_STOPS, mapSections } from "@/lib/mapSections";
 
-const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 const VALLEY = "/art/world-valley.webp";
 const MAP_HEIGHT = { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" };
 
@@ -138,9 +137,10 @@ function MapStop({ x, y, id, island, title, subtitle, href, onClick, children })
   );
 }
 
-function Valley({ children, priority = false, sx }) {
+function Valley({ children, priority = false, id, sx }) {
   return (
     <Box
+      id={id}
       sx={{
         position: "relative",
         isolation: "isolate",
@@ -393,33 +393,19 @@ export default function WorldMap() {
               position: "absolute",
               right: 12,
               bottom: 12,
+              maxWidth: "46%",
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
-              gap: 0.6,
-              p: 1,
-              maxWidth: "46%",
-              bgcolor: "#fffbee",
-              border: "1px solid #dbc99d",
-              borderRadius: 3,
-              boxShadow: "0 3px 0 #6f613221",
+              gap: 1,
             }}
           >
             <SavingCard learner={learner} />
-            <Typography sx={{ fontWeight: 800, color: colors.muted, fontSize: 14 }}>
-              {t("map.comingSoon")}
-            </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 0.7 }}>
-              {COMING.map((name) => (
-                <Chip
-                  key={name}
-                  label={name}
-                  variant="outlined"
-                  size="small"
-                  sx={{ borderStyle: "dashed", bgcolor: "#fffaf0" }}
-                />
-              ))}
-            </Box>
+            {sections.length > 0 && (
+              <Button component="a" href="#more-trails" variant="outlined" sx={{ bgcolor: "#fffbee" }}>
+                {t("map.moreTrails")} ↓
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -517,18 +503,13 @@ export default function WorldMap() {
               {newChip}
             </Box>
           </Box>
-          <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {COMING.map((c) => (
-              <Chip key={c} label={c} variant="outlined" sx={{ borderStyle: "dashed" }} />
-            ))}
-          </Box>
         </Box>
       </Valley>
-      {sections.map(({ stops, path }) => (
+      {sections.map(({ stops, path }, index) => (
         <Valley
           key={stops[0].subject.id}
-          sx={{ display: { xs: "none", sm: "block" }, minHeight: MAP_HEIGHT }}
+          id={index === 0 ? "more-trails" : undefined}
+          sx={{ display: { xs: "none", sm: "block" }, minHeight: MAP_HEIGHT, scrollMarginTop: "70px" }}
         >
           <MapPath path={path} />
           {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}

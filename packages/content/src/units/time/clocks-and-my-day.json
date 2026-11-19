@@ -1,0 +1,198 @@
+{
+  "schema": "unit/1",
+  "id": "clocks-and-my-day",
+  "subject": "time",
+  "title": "Clocks and my day",
+  "band": "sprout",
+  "summary": "Explore the parts of a day, name hours on a clock and sort everyday routines.",
+  "status": "ready",
+  "groups": [
+    {
+      "id": "morning",
+      "label": "Morning",
+      "emoji": "🌅"
+    },
+    {
+      "id": "afternoon",
+      "label": "Afternoon",
+      "emoji": "☀️"
+    },
+    {
+      "id": "evening",
+      "label": "Evening",
+      "emoji": "🌇"
+    }
+  ],
+  "items": [
+    {
+      "id": "time-morning",
+      "label": "morning",
+      "emoji": "🌅",
+      "fact": "Morning is the early part of the day.",
+      "clue": "The sun is coming up and a new day is starting. Which part of the day is it?",
+      "tags": [
+        "morning"
+      ]
+    },
+    {
+      "id": "time-afternoon",
+      "label": "afternoon",
+      "emoji": "☀️",
+      "fact": "Afternoon comes after midday.",
+      "clue": "It is after midday and the sun is still up. Which part of the day is it?",
+      "tags": [
+        "afternoon"
+      ]
+    },
+    {
+      "id": "time-evening",
+      "label": "evening",
+      "emoji": "🌇",
+      "fact": "Evening comes towards the end of the day.",
+      "clue": "The sun is setting and the day is nearly over. Which part of the day is it?",
+      "tags": [
+        "evening"
+      ]
+    },
+    {
+      "id": "time-one",
+      "label": "one o'clock",
+      "emoji": "🕐",
+      "fact": "At one o'clock, the short hand points to one. The long hand points to twelve.",
+      "clue": "The short hand points to one and the long hand points to twelve. Which clock fits?"
+    },
+    {
+      "id": "time-three",
+      "label": "three o'clock",
+      "emoji": "🕒",
+      "fact": "At three o'clock, the short hand points to three. The long hand points to twelve.",
+      "clue": "The short hand points to three and the long hand points to twelve. Which clock fits?"
+    },
+    {
+      "id": "time-six",
+      "label": "six o'clock",
+      "emoji": "🕕",
+      "fact": "At six o'clock, the short hand points to six. The long hand points to twelve.",
+      "clue": "The short hand points to six and the long hand points to twelve. Which clock fits?"
+    },
+    {
+      "id": "time-breakfast",
+      "label": "eat breakfast",
+      "emoji": "🥞",
+      "fact": "Breakfast is often the first meal of the day.",
+      "clue": "Which picture shows eating the first meal of the day?",
+      "tags": [
+        "morning"
+      ]
+    },
+    {
+      "id": "time-after-lunch",
+      "label": "play after lunch",
+      "emoji": "⚽",
+      "fact": "Playing after lunch often happens in the afternoon.",
+      "clue": "Which picture shows playing with a ball after lunch?",
+      "tags": [
+        "afternoon"
+      ]
+    },
+    {
+      "id": "time-bedtime",
+      "label": "get ready for bed",
+      "emoji": "🛏️",
+      "fact": "Many people get ready for bed in the evening.",
+      "clue": "Which picture shows getting ready to sleep for the night?",
+      "tags": [
+        "evening"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "clocks-and-my-day-1",
+      "title": "Parts of the day",
+      "focus": [
+        "time-morning",
+        "time-afternoon",
+        "time-evening"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "listen-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "clocks-and-my-day-2",
+      "title": "Read the hour",
+      "focus": [
+        "time-one",
+        "time-three",
+        "time-six"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "clocks-and-my-day-3",
+      "title": "My daily routine",
+      "focus": [
+        "time-breakfast",
+        "time-after-lunch",
+        "time-bedtime"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 3
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}
