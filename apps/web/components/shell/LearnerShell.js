@@ -215,6 +215,13 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
               p: 1.5,
               bgcolor: "background.paper",
               borderLeft: `2px solid ${colors.line}`,
+              ...(active === "/play/map" && {
+                position: "sticky",
+                top: "calc(70px + env(safe-area-inset-top, 0px))",
+                alignSelf: "flex-start",
+                height: "calc(100dvh - 70px - env(safe-area-inset-top, 0px))",
+                overflowY: "auto",
+              }),
             }}
           >
             {LEARNER_NAV.filter((n) => !n.phoneOnly).map((n) => (
@@ -226,6 +233,7 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
                 sx={{
                   border: `2px solid ${active === n.href ? colors.leaf.main : colors.line}`,
                   borderRadius: 4.5,
+                  flexShrink: 0,
                   py: 1.25,
                   display: "flex",
                   flexDirection: "column",

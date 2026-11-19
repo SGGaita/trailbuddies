@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -144,9 +144,59 @@ function MapStop({ x, y, id, island, title, subtitle, href, onClick, children })
   );
 }
 
-function Valley({ children }) {
+function Valley({ children, sectionCount }) {
+  const map = useRef(null);
+  const drag = useRef(null);
+  const dragged = useRef(false);
+
+  function startDrag(event) {
+    if (event.isPrimary) dragged.current = false;
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    if (
+      event.target.closest("button, [data-map-control]") ||
+      event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
+    ) return;
+    drag.current = { id: event.pointerId, y: event.clientY, scroll: window.scrollY };
+  }
+
+  function moveDrag(event) {
+    const start = drag.current;
+    if (start?.id !== event.pointerId || !(event.buttons & 1)) return;
+    const distance = start.y - event.clientY;
+    if (!dragged.current) {
+      if (Math.abs(distance) < 6) return;
+      dragged.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.currentTarget.dataset.dragging = "true";
+    }
+    window.scrollTo({ top: start.scroll + distance, behavior: "instant" });
+  }
+
+  function endDrag(event) {
+    if (drag.current?.id !== event.pointerId) return;
+    drag.current = null;
+    delete event.currentTarget.dataset.dragging;
+  }
+
   return (
     <Box
+      ref={map}
+      onPointerDown={startDrag}
+      onPointerMove={moveDrag}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onLostPointerCapture={endDrag}
+      onPointerLeave={(event) => {
+        if (!dragged.current) endDrag(event);
+      }}
+      onDragStart={(event) => event.preventDefault()}
+      onClickCapture={(event) => {
+        if (dragged.current && event.detail > 0) {
+          event.preventDefault();
+          event.stopPropagation();
+          dragged.current = false;
+        }
+      }}
       sx={{
         flex: 1,
         display: "flex",
@@ -154,6 +204,8 @@ function Valley({ children }) {
         position: "relative",
         isolation: "isolate",
         bgcolor: "#e5e8b5",
+        "@media (any-pointer: fine)": { cursor: "grab", userSelect: "none" },
+        "&[data-dragging], &[data-dragging] *": { cursor: "grabbing" },
         "&::before": {
           content: '""',
           position: "absolute",
@@ -181,19 +233,77 @@ function Valley({ children }) {
         }}
       />
       {children}
+      <MoreTrails map={map} sectionCount={sectionCount} />
     </Box>
   );
 }
 
-function scrollToMoreTrails(event) {
-  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  const section = document.getElementById("more-trails");
-  if (!section) return;
-  event.preventDefault();
-  if (location.hash !== "#more-trails") history.pushState(null, "", "#more-trails");
-  section.focus({ preventScroll: true });
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  section.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth" });
+function MoreTrails({ map, sectionCount }) {
+  const [next, setNext] = useState(null);
+
+  useEffect(() => {
+    const root = map.current;
+    let frame;
+    const update = () => {
+      let target = null;
+      for (const section of root.querySelectorAll("[data-trail-section]")) {
+        const stop = Array.from(section.querySelectorAll("a")).find(
+          (link) => link.getBoundingClientRect().bottom > window.innerHeight + 6,
+        );
+        if (stop) {
+          const inset = parseFloat(getComputedStyle(section).scrollMarginTop);
+          target = section.getBoundingClientRect().top > inset + 8 ? section : stop;
+          break;
+        }
+      }
+      setNext(target);
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [map, sectionCount]);
+
+  if (!next) return null;
+  const section = next.closest("[data-trail-section]");
+  const href = `#${section.id}`;
+  return (
+    <Button
+      component="a"
+      href={href}
+      data-map-control
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        if (location.hash !== href) history.pushState(null, "", href);
+        next.focus({ preventScroll: true });
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        next.scrollIntoView({ block: next === section ? "start" : "center", behavior: reducedMotion ? "instant" : "smooth" });
+      }}
+      variant="outlined"
+      sx={{
+        display: { xs: "none", sm: "inline-flex" },
+        position: "sticky",
+        alignSelf: "flex-end",
+        zIndex: 2,
+        bottom: 12,
+        mr: 1.5,
+        height: 48,
+        mt: "-48px",
+        bgcolor: "#fffbee",
+      }}
+    >
+      {t("map.moreTrails")} ↓
+    </Button>
+  );
 }
 
 function subjectsWithProgress(progress, placement = {}, interests = []) {
@@ -350,7 +460,7 @@ export default function WorldMap() {
 
   return (
     <LearnerShell learner={learner} active="/play/map" goal={goal} headerAction={changeBuddy}>
-      <Valley>
+      <Valley sectionCount={sections.length}>
         <MapPath path={path} sectionCount={sections.length + 1} />
         <Box
           sx={{
@@ -384,7 +494,7 @@ export default function WorldMap() {
             sx={{
               position: "absolute",
               right: 12,
-              bottom: 12,
+              bottom: sections.length ? 72 : 12,
               maxWidth: "46%",
               display: "flex",
               flexDirection: "column",
@@ -393,25 +503,15 @@ export default function WorldMap() {
             }}
           >
             <SavingCard learner={learner} />
-            {sections.length > 0 && (
-              <Button
-                component="a"
-                href="#more-trails"
-                onClick={scrollToMoreTrails}
-                variant="outlined"
-                sx={{ bgcolor: "#fffbee" }}
-              >
-                {t("map.moreTrails")} ↓
-              </Button>
-            )}
           </Box>
         </Box>
 
         {sections.map((stops, index) => (
           <Box
             key={stops[0].subject.id}
-            id={index === 0 ? "more-trails" : undefined}
-            tabIndex={index === 0 ? -1 : undefined}
+            id={index === 0 ? "more-trails" : `more-trails-${index + 1}`}
+            data-trail-section
+            tabIndex={-1}
             sx={{
               display: { xs: "none", sm: "block" },
               position: "relative",
@@ -562,6 +662,7 @@ function SavingCard({ learner }) {
     <Box
       component={Link}
       href="/play/more/shop"
+      data-map-control
       sx={{
         display: "flex",
         bgcolor: "background.paper",
