@@ -1,34 +1,52 @@
-import { BUDDIES, OUTFITS, buddyBody } from "@/lib/art";
+﻿import { BUDDIES, BUDDY_ART, OUTFITS } from "@/lib/art";
 
-const BODY = { wave: "cheer", point: "happy" };
+// Hat, eyes and neck anchors on the illustrated portraits inside the shared viewBox.
+const FIT = {
+  zip: { hat: [110, 79, 0.82], eyes: [110, 108, 0.85], neck: [108, 156, 0.71] },
+  tumi: { hat: [142, 76, 0.69], eyes: [145, 109, 0.74], neck: [137, 146, 0.67] },
+  jumbo: { hat: [128, 76, 0.82], eyes: [136, 111, 0.82], neck: [117, 156, 0.83] },
+  kiki: { hat: [151, 75, 0.71], eyes: [153, 100, 0.77], neck: [145, 148, 0.7] },
+};
+const OUTFIT_CANVAS = { hatY: 0, eyeY: 0, neckY: 0, headW: 100 };
 
 /**
- * A buddy character, drawn and animated in SVG (a Lottie file can replace a state later).
- * Moods: happy, cheer, think, sleep, wave (arms up, rocking hello), point (points at the
- * next thing to do).
+ * Shared illustrated buddy used by onboarding, lessons, maps and rewards.
  * @param {{ id?: string | null, mood?: "happy" | "cheer" | "think" | "sleep" | "wave" | "point", size?: number, outfit?: Record<string, string>, still?: boolean }} props
  */
 export default function Buddy({ id, mood = "happy", size = 120, outfit = {}, still = false }) {
-  const key = id && BUDDIES[id] ? id : "zip";
-  const b = BUDDIES[key];
-  const acc = ["neck", "eyes", "hat"]
-    .map((slot) => (outfit[slot] && OUTFITS[outfit[slot]] ? OUTFITS[outfit[slot]].svg(b) : ""))
-    .join("");
-  const point =
-    mood === "point"
-      ? `<g class="buddy-point"><text x="168" y="150" font-size="56" text-anchor="middle">👉</text></g>`
-      : "";
+  const key = id && Object.hasOwn(BUDDIES, id) ? id : "zip";
+  const buddy = BUDDIES[key];
+  const pointing = mood === "point";
   return (
     <svg
-      className={still ? undefined : `buddy${mood === "wave" ? " buddy-wave" : ""}`}
-      viewBox={mood === "point" ? "-10 -40 250 260" : "-10 -40 220 260"}
-      width={mood === "point" ? Math.round((size * 250) / 220) : size}
+      className={still || mood === "sleep" ? undefined : `buddy${mood === "wave" ? " buddy-wave" : ""}`}
+      viewBox={pointing ? "0 0 250 260" : "0 0 220 260"}
+      width={pointing ? Math.round((size * 250) / 220) : size}
       height={Math.round((size * 260) / 220)}
       role="img"
-      aria-label={`${b.name} the ${b.kind}`}
+      aria-label={`${buddy.name} the ${buddy.kind}`}
       data-mood={mood}
       style={{ flex: "none", display: "block" }}
-      dangerouslySetInnerHTML={{ __html: buddyBody(key, BODY[mood] || mood) + acc + point }}
-    />
+    >
+      <image href={`${BUDDY_ART}/${key}.webp`} x="4" y="36" width="212" height="218" />
+      {["neck", "eyes", "hat"].map((slot) => {
+        const accessory = OUTFITS[outfit[slot]];
+        if (!accessory || accessory.slot !== slot) return null;
+        const [x, y, scale] = FIT[key][slot];
+        const anchorY = outfit[slot] === "astronaut" ? FIT[key].eyes[1] : y;
+        return (
+          <g
+            key={slot}
+            transform={`translate(${x} ${anchorY}) scale(${scale}) translate(-100 0)`}
+            dangerouslySetInnerHTML={{ __html: accessory.svg(OUTFIT_CANVAS) }}
+          />
+        );
+      })}
+      {pointing && (
+        <text className="buddy-point" x="212" y="166" fontSize="49" textAnchor="middle">
+          {"\u{1F449}"}
+        </text>
+      )}
+    </svg>
   );
 }
