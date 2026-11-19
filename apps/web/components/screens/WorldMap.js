@@ -3,6 +3,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
@@ -167,6 +168,11 @@ export default function WorldMap() {
 
   return (
     <LearnerShell learner={learner} active="/play/map" goal={goal}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", px: { xs: 2, sm: 3 }, pt: 1, bgcolor: colors.sand }}>
+        <Button component={Link} href="/play/buddies" variant="outlined" sx={{ bgcolor: "background.paper" }}>
+          {t("buddies.change")}
+        </Button>
+      </Box>
       {/* tablet + web: the map */}
       <Box
         sx={{

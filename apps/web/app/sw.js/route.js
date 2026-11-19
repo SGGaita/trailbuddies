@@ -57,6 +57,7 @@ const EXTRAS = [
   "/sounds/right.wav",
   "/sounds/miss.wav",
   "/sounds/done.wav",
+  ...["zip", "tumi", "jumbo", "kiki", "trail", "world"].map((name) => `/buddy-picker/${name}.webp`),
   "/art/number-mountain.webp",
   "/icons/ui/games.webp",
   "/icons/ui/games-on.webp",
