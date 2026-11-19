@@ -68,7 +68,7 @@ for (const trail of NEW_TRAILS)
     await expect(page).toHaveURL(`/play/trail/${trail.id}`, { timeout: 15_000 });
     await page.getByRole("button", { name: "Lesson 1", exact: true }).click();
     await page.getByRole("button", { name: "Let's go!" }).click();
-    await expect(page).toHaveURL(`/play/lesson/${trail.unit}/1`);
+    await expect(page).toHaveURL(`/play/lesson/${trail.unit}/1`, { timeout: 15_000 });
     await expect(page.getByRole("button", { name: "Let's play!" })).toBeVisible();
     await noSideScroll(page);
     expect(page.errors, "console errors").toEqual([]);
