@@ -1,4 +1,8 @@
-﻿import { BUDDIES, BUDDY_ART, OUTFITS } from "@/lib/art";
+"use client";
+
+import { BUDDIES, BUDDY_ART, OUTFITS } from "@/lib/art";
+import { useFamily } from "@/lib/store";
+import BuddyMotion from "./BuddyMotion";
 
 // Hat, eyes and neck anchors on the illustrated portraits inside the shared viewBox.
 const FIT = {
@@ -11,15 +15,24 @@ const OUTFIT_CANVAS = { hatY: 0, eyeY: 0, neckY: 0, headW: 100 };
 
 /**
  * Shared illustrated buddy used by onboarding, lessons, maps and rewards.
- * @param {{ id?: string | null, mood?: "happy" | "cheer" | "think" | "sleep" | "wave" | "point", size?: number, outfit?: Record<string, string>, still?: boolean }} props
+ * @param {{ id?: string | null, fallback?: string, mood?: "happy" | "cheer" | "think" | "sleep" | "wave" | "point", size?: number, outfit?: Record<string, string>, still?: boolean }} props
  */
-export default function Buddy({ id, mood = "happy", size = 120, outfit = {}, still = false }) {
-  const key = id && Object.hasOwn(BUDDIES, id) ? id : "zip";
+export default function Buddy({
+  id,
+  fallback = "zip",
+  mood = "happy",
+  size = 120,
+  outfit = {},
+  still = false,
+}) {
+  const selected = useFamily((s) => id === undefined && s.learners.find((l) => l.id === s.activeId)?.buddy);
+  const candidate = id || selected || fallback;
+  const key = Object.hasOwn(BUDDIES, candidate) ? candidate : "zip";
   const buddy = BUDDIES[key];
   const pointing = mood === "point";
   return (
     <svg
-      className={still || mood === "sleep" ? undefined : `buddy${mood === "wave" ? " buddy-wave" : ""}`}
+      className={still || mood === "sleep" ? undefined : "buddy"}
       viewBox={pointing ? "0 0 250 260" : "0 0 220 260"}
       width={pointing ? Math.round((size * 250) / 220) : size}
       height={Math.round((size * 260) / 220)}
@@ -28,7 +41,12 @@ export default function Buddy({ id, mood = "happy", size = 120, outfit = {}, sti
       data-mood={mood}
       style={{ flex: "none", display: "block" }}
     >
-      <image href={`${BUDDY_ART}/${key}.webp`} x="4" y="36" width="212" height="218" />
+      <image data-buddy-art="" href={`${BUDDY_ART}/${key}.webp`} x="4" y="36" width="212" height="218" />
+      {!still && mood !== "sleep" && (
+        <foreignObject x="4" y="36" width="212" height="218">
+          <BuddyMotion id={key} gesture={mood === "wave" ? "wave" : undefined} />
+        </foreignObject>
+      )}
       {["neck", "eyes", "hat"].map((slot) => {
         const accessory = OUTFITS[outfit[slot]];
         if (!accessory || accessory.slot !== slot) return null;

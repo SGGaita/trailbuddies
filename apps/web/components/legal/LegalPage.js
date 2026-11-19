@@ -38,7 +38,7 @@ export default function LegalPage({ kind }) {
         sx={{ maxWidth: 760, mx: "auto", display: "flex", flexDirection: "column", gap: 2.5 }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Buddy id="zip" size={44} still />
+          <Buddy fallback="zip" size={44} still />
           <Typography component="h1" variant="h4">
             {privacy ? t("legal.privacyTitle") : t("legal.termsTitle")}
           </Typography>

@@ -12,7 +12,7 @@ import { t } from "@trailbuddies/i18n";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { speak, stop } from "@/lib/speech";
 import { BUDDIES, BUDDY_ART } from "@/lib/art";
-import BuddyWalk from "@/components/art/BuddyWalk";
+import BuddyMotion from "@/components/art/BuddyMotion";
 import Loading from "@/components/Loading";
 
 const ART = BUDDY_ART;
@@ -123,7 +123,10 @@ function BuddyPicker({ learner }) {
           <Box
             sx={{ display: "flex", gap: 1, alignItems: "center", ...DISPLAY, fontSize: { xs: 20, sm: 24 } }}
           >
-            <Portrait id="zip" sx={{ width: 42, height: 42, p: 0.5, borderRadius: 3, bgcolor: TINTS.zip }} />
+            <Portrait
+              id={current || id}
+              sx={{ width: 42, height: 42, p: 0.5, borderRadius: 3, bgcolor: TINTS[current || id] }}
+            />
             Trailbuddies
           </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -249,23 +252,12 @@ function BuddyPicker({ learner }) {
                   borderRadius: 3,
                   cursor: "pointer",
                   background: `url("${ART}/world.webp") center / cover no-repeat, ${TINTS[id]}`,
-                  "@keyframes buddyPickerWave": {
-                    "30%": { transform: "rotate(-10deg) translateY(-4%)" },
-                    "65%": { transform: "rotate(9deg)" },
-                  },
-                  "&:has(canvas[data-walk-ready]) > img": { visibility: "hidden" },
-                  "@keyframes buddyPickerTalk": {
-                    "35%": { transform: "scale(1.05)" },
-                    "70%": { transform: "scale(0.98)" },
-                  },
-                  "@media (prefers-reduced-motion: reduce)": { "& img": { animation: "none !important" } },
-                  'html[data-calm="1"] & img': { animation: "none !important" },
                 }}
               >
                 <Portrait
                   key={`${id}-${action.count}`}
                   id={id}
-                  data-action={action.name}
+                  data-buddy-art=""
                   sx={{
                     position: "absolute",
                     top: "6%",
@@ -273,13 +265,9 @@ function BuddyPicker({ learner }) {
                     width: "76%",
                     height: "88%",
                     filter: "drop-shadow(0 7px 8px #302c3855)",
-                    animation:
-                      action.name && action.name !== "walk"
-                        ? `buddyPicker${action.name[0].toUpperCase()}${action.name.slice(1)} 700ms ease-in-out`
-                        : "none",
                   }}
                 />
-                {action.name === "walk" && <BuddyWalk key={action.count} id={id} />}
+                <BuddyMotion id={id} gesture={action.name} replay={action.count} stage />
               </Box>
               <Typography
                 role="status"

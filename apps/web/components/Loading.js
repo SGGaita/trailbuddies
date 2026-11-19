@@ -9,7 +9,7 @@ export default function Loading({ label = "Loading" }) {
       aria-busy="true"
       aria-label={label}
     >
-      <Buddy id="zip" size={90} />
+      <Buddy fallback="zip" size={90} />
       {label !== "Loading" && <Box sx={{ fontWeight: 800, color: "text.secondary" }}>{label}</Box>}
     </Box>
   );

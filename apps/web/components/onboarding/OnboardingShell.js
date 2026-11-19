@@ -122,7 +122,7 @@ export default function OnboardingShell({
           </Box>
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Buddy id={buddy} mood={mood} size={72} />
+          <Buddy fallback={buddy} mood={mood} size={72} />
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="h4" component="h1" sx={{ fontSize: { xs: 26, sm: 32 }, lineHeight: 1.1 }}>
               {title}

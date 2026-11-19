@@ -562,7 +562,7 @@ function Editor({ id }) {
           },
         }}
       >
-        <Buddy id="zip" mood="cheer" size={90} />
+        <Buddy fallback="zip" mood="cheer" size={90} />
         <Typography variant="h5" component="h2">
           {t("builder.live", { title: published?.title || "" })}
         </Typography>

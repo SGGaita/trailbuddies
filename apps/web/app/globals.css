@@ -43,6 +43,23 @@ a {
 .buddy {
   animation: bob 3s ease-in-out infinite;
 }
+.buddy-motion {
+  display: block;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+}
+.buddy-motion-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.buddy-motion[data-motion-ready] {
+  visibility: visible;
+}
+:is(svg, button):has(.buddy-motion[data-motion-ready]) > [data-buddy-art] {
+  visibility: hidden;
+}
 @keyframes shake {
   0%,
   100% {
@@ -86,18 +103,6 @@ a {
 .starpop {
   animation: starpop 0.6s ease both;
 }
-@keyframes wave {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-8deg);
-  }
-  75% {
-    transform: rotate(8deg);
-  }
-}
 @keyframes nudge {
   0%,
   100% {
@@ -119,10 +124,6 @@ a {
   100% {
     transform: translate(-50%, -50%) scale(1);
   }
-}
-.buddy-wave {
-  transform-origin: 50% 90%;
-  animation: wave 0.9s ease-in-out 2;
 }
 .buddy-point {
   animation: nudge 0.8s ease-in-out infinite;
@@ -203,7 +204,6 @@ html[data-calm="1"] .badge-fly {
   animation: calmfade 0.3s ease both !important;
 }
 html[data-calm="1"] .buddy,
-html[data-calm="1"] .buddy-wave,
 html[data-calm="1"] .buddy-point,
 html[data-calm="1"] .shake,
 html[data-calm="1"] .buddy * {
