@@ -38,19 +38,9 @@ import { readMemory, writeMemory } from "@/lib/memory";
 import { SavingGoal } from "@/components/screens/Shop";
 import { OUTFITS } from "@/lib/art";
 import { useTeacherWork } from "@/lib/classWork";
+import { MAP_STOPS, mapSections } from "@/lib/mapSections";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
-// Stops use the same 100 × 100 coordinates as the path, starting by the buddy dock.
-const MAP_STOPS = [
-  ["numbers", 21, 68],
-  ["language", 50, 76],
-  ["family", 77, 66],
-  ["animals", 79, 30],
-  ["colours", 48, 23],
-  ["shapes", 17, 28],
-];
-const MAP_PATH =
-  "M 1 98 C 10 98 12 68 21 68 S 38 80 50 76 S 66 64 77 66 S 93 42 79 30 S 62 38 48 23 S 26 24 17 28";
 const VALLEY = "/art/world-valley.webp";
 
 const PLACE_SX = {
@@ -69,7 +59,7 @@ const PLACE_SX = {
   "&:hover .map-stop-label": { borderColor: colors.leaf.main },
 };
 
-function MapPath() {
+function MapPath({ path }) {
   return (
     <Box
       component="svg"
@@ -78,10 +68,10 @@ function MapPath() {
       aria-hidden="true"
       sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
     >
-      <path d={MAP_PATH} fill="none" stroke="#a6804277" strokeWidth="17" vectorEffect="non-scaling-stroke" />
-      <path d={MAP_PATH} fill="none" stroke="#f9e6b8" strokeWidth="15" vectorEffect="non-scaling-stroke" />
+      <path d={path} fill="none" stroke="#a6804277" strokeWidth="17" vectorEffect="non-scaling-stroke" />
+      <path d={path} fill="none" stroke="#f9e6b8" strokeWidth="15" vectorEffect="non-scaling-stroke" />
       <path
-        d={MAP_PATH}
+        d={path}
         fill="none"
         stroke="#9a733c"
         strokeWidth="1.7"
@@ -93,17 +83,21 @@ function MapPath() {
   );
 }
 
-function MapStop({ x, y, id, title, subtitle, href, onClick, children }) {
+function MapStop({ x, y, id, island, title, subtitle, href, onClick, children }) {
   return (
     <Box component={Link} href={href} onClick={onClick} sx={{ ...PLACE_SX, left: `${x}%`, top: `${y}%` }}>
       <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 0.5 }}>{children}</Box>
-      <SubjectArt
-        id={id}
-        small
-        width="min(100%, clamp(108px, 18vw, 246px))"
-        height={{ sm: "clamp(78px, 11vw, 160px)" }}
-        sx={{ filter: "drop-shadow(0 4px 4px #4d47194d)" }}
-      />
+      {SUBJECT_ART[id] ? (
+        <SubjectArt
+          id={id}
+          small
+          width="min(100%, clamp(108px, 18vw, 246px))"
+          height={{ sm: "clamp(78px, 11vw, 160px)" }}
+          sx={{ filter: "drop-shadow(0 4px 4px #4d47194d)" }}
+        />
+      ) : (
+        <Island kind={island} width="min(70%, 144px)" height={88} />
+      )}
       <Box
         className="map-stop-label"
         sx={{
@@ -139,6 +133,47 @@ function MapStop({ x, y, id, title, subtitle, href, onClick, children }) {
           {subtitle}
         </Typography>
       </Box>
+    </Box>
+  );
+}
+
+function Valley({ children, priority = false, sx }) {
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        isolation: "isolate",
+        bgcolor: "#e5e8b5",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          zIndex: -1,
+          pointerEvents: "none",
+          background: "linear-gradient(180deg, #fff8df40, #fffae312)",
+        },
+        ...sx,
+      }}
+    >
+      <Box
+        component="img"
+        src={VALLEY}
+        alt=""
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        draggable={false}
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -2,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center bottom",
+          pointerEvents: "none",
+        }}
+      />
+      {children}
     </Box>
   );
 }
@@ -257,6 +292,26 @@ export default function WorldMap() {
     s.p.done
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
       : t("map.notStarted");
+  const { mainPath, sections } = mapSections(subjects);
+  const subjectStop = (subject, x, y) => (
+    <MapStop
+      key={subject.id}
+      id={subject.id}
+      island={subject.island}
+      x={x}
+      y={y}
+      title={subject.place}
+      subtitle={sub(subject)}
+      href={`/play/trail/${subject.id}`}
+      onClick={hear(subject.id, subject.place)}
+    >
+      {first && subject.id === "numbers" ? (
+        <Chip size="small" label="Start here!" color="primary" />
+      ) : (learner.interests || []).includes(subject.id) ? (
+        <Chip size="small" label="Favourite" color="secondary" />
+      ) : null}
+    </MapStop>
+  );
 
   const changeBuddy = (
     <Button
@@ -277,51 +332,17 @@ export default function WorldMap() {
 
   return (
     <LearnerShell learner={learner} active="/play/map" goal={goal} headerAction={changeBuddy}>
-      <Box
-        sx={{
-          position: "relative",
-          isolation: "isolate",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "#e5e8b5",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            zIndex: -1,
-            pointerEvents: "none",
-            background: "linear-gradient(180deg, #fff8df40, #fffae312)",
-          },
-        }}
-      >
-        <Box
-          component="img"
-          src={VALLEY}
-          alt=""
-          fetchPriority="high"
-          draggable={false}
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: -2,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center bottom",
-            pointerEvents: "none",
-          }}
-        />
+      <Valley priority sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Box
           sx={{
             display: { xs: "none", sm: "block" },
             flex: 1,
             position: "relative",
-            minHeight: { sm: 585, lg: 620 },
+            minHeight: { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" },
             isolation: "isolate",
           }}
         >
-          <MapPath />
+          <MapPath path={mainPath} />
           {MAP_STOPS.map(([id, x, y]) => {
             if (id === "family") {
               return (
@@ -341,25 +362,7 @@ export default function WorldMap() {
               );
             }
             const subject = subjects.find((place) => place.id === id);
-            if (!subject) return null;
-            return (
-              <MapStop
-                key={id}
-                id={id}
-                x={x}
-                y={y}
-                title={subject.place}
-                subtitle={sub(subject)}
-                href={`/play/trail/${id}`}
-                onClick={hear(id, subject.place)}
-              >
-                {first && id === "numbers" ? (
-                  <Chip size="small" label="Start here!" color="primary" />
-                ) : (learner.interests || []).includes(id) ? (
-                  <Chip size="small" label="Favourite" color="secondary" />
-                ) : null}
-              </MapStop>
-            );
+            return subject ? subjectStop(subject, x, y) : null;
           })}
           <Box
             sx={{
@@ -520,7 +523,16 @@ export default function WorldMap() {
             ))}
           </Box>
         </Box>
-      </Box>
+      </Valley>
+      {sections.map(({ stops, path }) => (
+        <Valley
+          key={stops[0].subject.id}
+          sx={{ display: { xs: "none", sm: "block" }, minHeight: { sm: 585, lg: 620 } }}
+        >
+          <MapPath path={path} />
+          {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}
+        </Valley>
+      ))}
       <Snackbar
         open={returned.length > 0}
         onClose={dismissReturned}
