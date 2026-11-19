@@ -15,9 +15,18 @@ import Loading from "@/components/Loading";
 import LearnerAvatar from "@/components/LearnerAvatar";
 import OnboardingShell from "./OnboardingShell";
 
-const EMOJI = { numbers: "🔢", language: "🔤", animals: "🦁", colours: "🎨", shapes: "🔺" };
+const EMOJI = {
+  numbers: "🔢",
+  language: "🔤",
+  animals: "🦁",
+  colours: "🎨",
+  shapes: "🔺",
+  time: "🕰️",
+  space: "🚀",
+  feelings: "😊",
+  weather: "🌦️",
+};
 const TOPICS = [
-  { id: "space", label: "Space", emoji: "🚀" },
   { id: "vehicles", label: "Vehicles", emoji: "🚗" },
   { id: "sport", label: "Sport", emoji: "⚽" },
   { id: "music", label: "Music", emoji: "🎵" },
