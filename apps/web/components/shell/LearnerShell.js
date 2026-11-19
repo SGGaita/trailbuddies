@@ -140,7 +140,6 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
           </Box>
         )}
         <Box sx={{ flex: 1, display: { xs: title ? "none" : "block", sm: "block" } }} />
-        {headerAction}
         {learner.streak.days > 0 && (
           <Box
             aria-label={t("streak.label", { n: learner.streak.days })}
@@ -175,6 +174,7 @@ export default function LearnerShell({ learner, title, back, active, nav = true,
           <Coin kind="star" value={stars} compact />
           <Coin kind="gem" value={learner.treasures} compact />
         </Box>
+        {headerAction}
         <Button
           component={Link}
           href="/family"
