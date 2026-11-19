@@ -23,7 +23,7 @@ export function mapSections(subjects) {
   const known = new Set(MAP_STOPS.map(([id]) => id));
   const extra = subjects.filter(({ id }) => !known.has(id));
   const sections = [];
-  let path = extra.length ? `${MAIN_PATH} C 15 77 15 91 19 100` : MAIN_PATH;
+  let path = extra.length ? `${MAIN_PATH} C 15 77 19 91 19 100` : MAIN_PATH;
   let previous = { x: 19, y: 100 };
   for (let i = 0; i < extra.length; i += EXTRA_STOPS.length) {
     const offset = (sections.length + 1) * 100;
