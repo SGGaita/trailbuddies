@@ -11,6 +11,7 @@ import { builtInBadges } from "@trailbuddies/content";
 import { t } from "@trailbuddies/i18n";
 import BadgeArt from "@/components/rewards/BadgeArt";
 import Loading from "@/components/Loading";
+import TeachShell from "@/components/shell/TeachShell";
 import { api } from "@/lib/account";
 
 const badgeById = new Map(builtInBadges.map((badge) => [badge.id, badge]));
@@ -65,70 +66,86 @@ function ClassBadgeWall({ id }) {
     .filter((student) => student.badges.length);
 
   return (
-    <Box
-      component="main"
-      ref={wall}
-      sx={{
-        bgcolor: "background.default",
-        color: "text.primary",
-        minHeight: "100dvh",
-        overflow: "auto",
-        p: { xs: 2, sm: 4 },
-      }}
-    >
-      <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
-          <Button component={Link} href={id ? `/teach/class?id=${encodeURIComponent(id)}` : "/teach"}>
-            {t("teach.badgeWallBack")}
-          </Button>
-          {data && document.fullscreenEnabled && !fullscreenFailed && (
-            <Button variant="outlined" onClick={toggleFullscreen}>
-              {t(fullscreen ? "teach.badgeWallExit" : "teach.badgeWallFullscreen")}
-            </Button>
-          )}
-        </Box>
-        <Typography component="h1" variant="h3">
-          {t("teach.badgeWall")}
-        </Typography>
-        {data && (
-          <Typography sx={{ mt: 1, mb: 3, fontSize: 20 }}>
-            {data.class_name} · {t("teach.badgeWallWeek")}
-          </Typography>
-        )}
-        {(!id || error) && <Alert severity="warning">{t("teach.badgeWallError")}</Alert>}
-        {id && !data && !error && <Loading />}
-        {data && !students.length && <Typography>{t("teach.badgeWallEmpty")}</Typography>}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
-            gap: 2,
-          }}
-        >
-          {students.map((student, index) => (
-            <Box component="section" key={index} sx={{ bgcolor: "background.paper", borderRadius: 4, p: 2 }}>
-              <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
-                {student.first_name}
-              </Typography>
-              <Box
-                component="ul"
-                sx={{ display: "flex", flexWrap: "wrap", gap: 2, listStyle: "none", m: 0, p: 0 }}
+    <TeachShell title={t("teach.badgeWall")} active="/teach/badges">
+      <Box
+        ref={wall}
+        sx={{
+          bgcolor: "background.default",
+          color: "text.primary",
+          "&:fullscreen": { overflow: "auto", p: { xs: 2, sm: 4 } },
+        }}
+      >
+        <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
+            {!fullscreen && (
+              <Button
+                component={Link}
+                href={id ? `/teach/class?id=${encodeURIComponent(id)}` : "/teach/badges"}
               >
-                {student.badges.map((badge) => (
-                  <Box
-                    component="li"
-                    key={badge.id}
-                    sx={{ display: "grid", justifyItems: "center", gap: 1, width: 100, textAlign: "center" }}
-                  >
-                    <BadgeArt badge={badge} size={72} />
-                    <Typography sx={{ fontWeight: 700 }}>{badge.name}</Typography>
-                  </Box>
-                ))}
+                {t("teach.badgeWallBack")}
+              </Button>
+            )}
+            {data && document.fullscreenEnabled && (fullscreen || !fullscreenFailed) && (
+              <Button variant="outlined" onClick={toggleFullscreen} sx={{ ml: "auto" }}>
+                {t(fullscreen ? "teach.badgeWallExit" : "teach.badgeWallFullscreen")}
+              </Button>
+            )}
+          </Box>
+          {fullscreen && (
+            <Typography component="h2" variant="h3">
+              {t("teach.badgeWall")}
+            </Typography>
+          )}
+          {data && (
+            <Typography sx={{ mt: 1, mb: 3, fontSize: 20 }}>
+              {data.class_name} · {t("teach.badgeWallWeek")}
+            </Typography>
+          )}
+          {(!id || error) && <Alert severity="warning">{t("teach.badgeWallError")}</Alert>}
+          {id && !data && !error && <Loading />}
+          {data && !students.length && <Typography>{t("teach.badgeWallEmpty")}</Typography>}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+              gap: 2,
+            }}
+          >
+            {students.map((student, index) => (
+              <Box
+                component="section"
+                key={index}
+                sx={{ bgcolor: "background.paper", borderRadius: 4, p: 2 }}
+              >
+                <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+                  {student.first_name}
+                </Typography>
+                <Box
+                  component="ul"
+                  sx={{ display: "flex", flexWrap: "wrap", gap: 2, listStyle: "none", m: 0, p: 0 }}
+                >
+                  {student.badges.map((badge) => (
+                    <Box
+                      component="li"
+                      key={badge.id}
+                      sx={{
+                        display: "grid",
+                        justifyItems: "center",
+                        gap: 1,
+                        width: 100,
+                        textAlign: "center",
+                      }}
+                    >
+                      <BadgeArt badge={badge} size={72} />
+                      <Typography sx={{ fontWeight: 700 }}>{badge.name}</Typography>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          ))}
+            ))}
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </TeachShell>
   );
 }
