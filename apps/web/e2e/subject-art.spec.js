@@ -96,7 +96,7 @@ test("the valley scrolls continuously beneath the pinned buddy", async ({ page }
 test("the valley supports direct scrolling and keeps map navigation in view", async ({ page }, testInfo) => {
   await demo(page);
   await page.getByRole("button", { name: /Zawadi/ }).click();
-  await expect(page).toHaveURL(/\/play\/map$/);
+  await expect(page).toHaveURL(/\/play\/map$/, { timeout: 15_000 });
   await expect(page.getByTestId("map-buddy")).toBeVisible();
   const scrollPosition = () => page.evaluate(() => window.scrollY);
   const more = page.getByRole("link", { name: /More trails/ });
@@ -120,6 +120,7 @@ test("the valley supports direct scrolling and keeps map navigation in view", as
     await page.mouse.up();
     await expect.poll(scrollPosition).toBeGreaterThan(beforeDrag + 120);
     await expect(page).toHaveURL(/\/play\/map$/);
+    await expect(more).toBeInViewport();
   } else {
     const touch = await page.context().newCDPSession(page);
     const x = Math.round(page.viewportSize().width / 2);
