@@ -1,7 +1,8 @@
 /** English UI strings. Keys are dotted; {name}-style placeholders are filled by t(). */
 export default {
   "app.name": "Trailbuddies",
-  "learner.whoIsPlaying": "Who's playing today? Tap your picture!",
+  "learner.whoIsPlaying": "Who's playing today?",
+  "learner.tapPicture": "Tap your picture to start.",
   "learner.grownUps": "Grown-ups",
   "learner.newProfile": "New! Meet the buddies",
   "learner.adult": "Adult learner",

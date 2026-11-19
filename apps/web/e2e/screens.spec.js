@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { demo, passGate } from "./helpers.js";
+import { fakeApi, newServer, seedServer } from "./fakeApi.js";
 
 // Every Sprint 0 screen at phone, tablet and desktop: renders, no console errors,
 // no sideways scrolling, and a screenshot for the pull request.
@@ -29,7 +30,7 @@ test.afterEach(async ({ page }) => {
 
 test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await demo(page);
-  await expect(page.getByText("Who's playing today? Tap your picture!").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Who's playing today?" })).toBeVisible();
   await noSideScroll(page);
   await shot(page, testInfo, "1-profiles");
 
@@ -69,6 +70,27 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
     await page.waitForTimeout(150);
   }
   await expect(far).toBeVisible();
+});
+
+test("a single learner gets a compact profile card", async ({ page, context }, testInfo) => {
+  const srv = seedServer(newServer());
+  await fakeApi(context, srv);
+  await page.goto("/start/account");
+  await page.getByLabel("Email address").fill("grace@example.com");
+  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+  await page.goto(`/auth/verify?token=${encodeURIComponent(srv.sent.at(-1).token)}`);
+  await expect(page).toHaveURL(/\/play$/);
+  const profile = page.getByRole("button", { name: /Wanjiru/ });
+  await expect(profile).toBeVisible();
+  const bounds = await profile.boundingBox();
+  expect(bounds.width).toBeLessThan(400);
+  expect(bounds.height).toBeLessThan(260);
+  await expect(page.getByRole("link", { name: "Grown-ups" })).toHaveAttribute("href", "/family");
+  await noSideScroll(page);
+  await shot(page, testInfo, "profile-picker-one-learner");
+  await profile.click();
+  await expect(page).toHaveURL(/\/play\/(map|buddies)$/);
 });
 
 test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {
