@@ -42,6 +42,7 @@ import { MAP_STOPS, mapSections } from "@/lib/mapSections";
 
 const COMING = ["Time Tower", "Space Station", "Weather Valley"];
 const VALLEY = "/art/world-valley.webp";
+const MAP_HEIGHT = { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" };
 
 const PLACE_SX = {
   position: "absolute",
@@ -338,7 +339,7 @@ export default function WorldMap() {
             display: { xs: "none", sm: "block" },
             flex: 1,
             position: "relative",
-            minHeight: { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" },
+            minHeight: MAP_HEIGHT,
             isolation: "isolate",
           }}
         >
@@ -527,7 +528,7 @@ export default function WorldMap() {
       {sections.map(({ stops, path }) => (
         <Valley
           key={stops[0].subject.id}
-          sx={{ display: { xs: "none", sm: "block" }, minHeight: { sm: 585, lg: 620 } }}
+          sx={{ display: { xs: "none", sm: "block" }, minHeight: MAP_HEIGHT }}
         >
           <MapPath path={path} />
           {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}
