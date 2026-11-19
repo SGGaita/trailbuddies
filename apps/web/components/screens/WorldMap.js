@@ -40,8 +40,8 @@ import { OUTFITS } from "@/lib/art";
 import { useTeacherWork } from "@/lib/classWork";
 import { MAP_STOPS, mapSections } from "@/lib/mapSections";
 
-const VALLEY = "/art/world-valley.webp";
-const MAP_HEIGHT = { sm: "max(585px, calc(100dvh - 70px))", lg: "max(620px, calc(100dvh - 70px))" };
+const VALLEY = "/art/world-valley-continuous.webp";
+const MAP_HEIGHT = { sm: "max(585px, calc(100dvh - 70px), 41vw)", lg: "max(620px, calc(100dvh - 70px), 41vw)" };
 
 const PLACE_SX = {
   position: "absolute",
@@ -59,14 +59,21 @@ const PLACE_SX = {
   "&:hover .map-stop-label": { borderColor: colors.leaf.main },
 };
 
-function MapPath({ path }) {
+function MapPath({ path, sectionCount }) {
   return (
     <Box
       component="svg"
-      viewBox="0 0 100 100"
+      viewBox={`0 0 100 ${sectionCount * 100}`}
       preserveAspectRatio="none"
       aria-hidden="true"
-      sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+      sx={{
+        display: { xs: "none", sm: "block" },
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
     >
       <path d={path} fill="none" stroke="#a6804277" strokeWidth="17" vectorEffect="non-scaling-stroke" />
       <path d={path} fill="none" stroke="#f9e6b8" strokeWidth="15" vectorEffect="non-scaling-stroke" />
@@ -137,11 +144,13 @@ function MapStop({ x, y, id, island, title, subtitle, href, onClick, children })
   );
 }
 
-function Valley({ children, priority = false, id, sx }) {
+function Valley({ children }) {
   return (
     <Box
-      id={id}
       sx={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
         position: "relative",
         isolation: "isolate",
         bgcolor: "#e5e8b5",
@@ -153,15 +162,13 @@ function Valley({ children, priority = false, id, sx }) {
           pointerEvents: "none",
           background: "linear-gradient(180deg, #fff8df40, #fffae312)",
         },
-        ...sx,
       }}
     >
       <Box
         component="img"
         src={VALLEY}
         alt=""
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        fetchPriority="high"
         draggable={false}
         sx={{
           position: "absolute",
@@ -169,14 +176,24 @@ function Valley({ children, priority = false, id, sx }) {
           zIndex: -2,
           width: "100%",
           height: "100%",
-          objectFit: "cover",
-          objectPosition: "center bottom",
+          objectFit: { xs: "cover", sm: "fill" },
           pointerEvents: "none",
         }}
       />
       {children}
     </Box>
   );
+}
+
+function scrollToMoreTrails(event) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const section = document.getElementById("more-trails");
+  if (!section) return;
+  event.preventDefault();
+  if (location.hash !== "#more-trails") history.pushState(null, "", "#more-trails");
+  section.focus({ preventScroll: true });
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  section.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth" });
 }
 
 function subjectsWithProgress(progress, placement = {}, interests = []) {
@@ -293,7 +310,7 @@ export default function WorldMap() {
     s.p.done
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
       : t("map.notStarted");
-  const { mainPath, sections } = mapSections(subjects);
+  const { path, sections } = mapSections(subjects);
   const subjectStop = (subject, x, y) => (
     <MapStop
       key={subject.id}
@@ -333,17 +350,15 @@ export default function WorldMap() {
 
   return (
     <LearnerShell learner={learner} active="/play/map" goal={goal} headerAction={changeBuddy}>
-      <Valley priority sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Valley>
+        <MapPath path={path} sectionCount={sections.length + 1} />
         <Box
           sx={{
             display: { xs: "none", sm: "block" },
-            flex: 1,
             position: "relative",
             minHeight: MAP_HEIGHT,
-            isolation: "isolate",
           }}
         >
-          <MapPath path={mainPath} />
           {MAP_STOPS.map(([id, x, y]) => {
             if (id === "family") {
               return (
@@ -368,29 +383,6 @@ export default function WorldMap() {
           <Box
             sx={{
               position: "absolute",
-              left: { sm: 8, md: 18 },
-              bottom: 10,
-              display: "flex",
-              alignItems: "center",
-              gap: { sm: 0.5, md: 1 },
-              maxWidth: { sm: "54%", md: "58%" },
-              "& > svg": { width: { sm: 76, md: 112 }, height: "auto" },
-            }}
-          >
-            <Buddy
-              id={learner.buddy}
-              outfit={learner.outfit}
-              size={112}
-              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-            />
-            <Bubble small sx={{ maxWidth: 360, minWidth: 0 }}>
-              {greeting}
-            </Bubble>
-            <SpeakButton text={greeting} size={44} />
-          </Box>
-          <Box
-            sx={{
-              position: "absolute",
               right: 12,
               bottom: 12,
               maxWidth: "46%",
@@ -402,12 +394,34 @@ export default function WorldMap() {
           >
             <SavingCard learner={learner} />
             {sections.length > 0 && (
-              <Button component="a" href="#more-trails" variant="outlined" sx={{ bgcolor: "#fffbee" }}>
+              <Button
+                component="a"
+                href="#more-trails"
+                onClick={scrollToMoreTrails}
+                variant="outlined"
+                sx={{ bgcolor: "#fffbee" }}
+              >
                 {t("map.moreTrails")} ↓
               </Button>
             )}
           </Box>
         </Box>
+
+        {sections.map((stops, index) => (
+          <Box
+            key={stops[0].subject.id}
+            id={index === 0 ? "more-trails" : undefined}
+            tabIndex={index === 0 ? -1 : undefined}
+            sx={{
+              display: { xs: "none", sm: "block" },
+              position: "relative",
+              minHeight: MAP_HEIGHT,
+              scrollMarginTop: "calc(70px + env(safe-area-inset-top, 0px))",
+            }}
+          >
+            {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}
+          </Box>
+        ))}
 
         {/* phone: island list */}
         <Box
@@ -416,20 +430,10 @@ export default function WorldMap() {
             flexDirection: "column",
             gap: 1.5,
             p: 1.75,
+            pb: 12,
             flex: 1,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
-            <Buddy
-              id={learner.buddy}
-              outfit={learner.outfit}
-              size={72}
-              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-            />
-            <Bubble small sx={{ mb: 2.5 }}>
-              {greeting}
-            </Bubble>
-          </Box>
           <SavingCard learner={learner} />
           {subjects.map((s) => (
             <Box
@@ -505,16 +509,35 @@ export default function WorldMap() {
           </Box>
         </Box>
       </Valley>
-      {sections.map(({ stops, path }, index) => (
-        <Valley
-          key={stops[0].subject.id}
-          id={index === 0 ? "more-trails" : undefined}
-          sx={{ display: { xs: "none", sm: "block" }, minHeight: MAP_HEIGHT, scrollMarginTop: "70px" }}
-        >
-          <MapPath path={path} />
-          {stops.map(({ subject, x, y }) => subjectStop(subject, x, y))}
-        </Valley>
-      ))}
+      <Box
+        data-testid="map-buddy"
+        sx={{
+          position: "fixed",
+          zIndex: 8,
+          left: { xs: 8, sm: 10, md: 18 },
+          bottom: { xs: "calc(72px + env(safe-area-inset-bottom, 0px))", sm: 10 },
+          display: "flex",
+          alignItems: "center",
+          gap: { xs: 0.75, md: 1 },
+          maxWidth: { xs: "calc(100% - 16px)", sm: "54%" },
+          pointerEvents: "none",
+        }}
+      >
+        <Box sx={{ flex: "none", width: { xs: 60, sm: 82, md: 112 }, "& > svg": { width: "100%", height: "auto" } }}>
+          <Buddy
+            id={learner.buddy}
+            outfit={learner.outfit}
+            size={112}
+            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+          />
+        </Box>
+        <Bubble small sx={{ maxWidth: 360, minWidth: 0 }}>
+          {greeting}
+        </Bubble>
+        <Box sx={{ pointerEvents: "auto", flex: "none" }}>
+          <SpeakButton text={greeting} size={44} />
+        </Box>
+      </Box>
       <Snackbar
         open={returned.length > 0}
         onClose={dismissReturned}

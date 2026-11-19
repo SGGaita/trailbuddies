@@ -41,7 +41,7 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
     "href",
     "/play/buddies",
   );
-  await page.locator('main img[src="/art/world-valley.webp"]').first().evaluate((image) => image.decode());
+  await page.locator('main img[src="/art/world-valley-continuous.webp"]').evaluate((image) => image.decode());
   await page.locator("main a img").filter({ visible: true }).evaluateAll(async (images) => {
     await Promise.all(images.map((image) => image.decode()));
   });

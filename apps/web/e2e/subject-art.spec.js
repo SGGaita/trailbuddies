@@ -47,6 +47,52 @@ test("place art on the map", async ({ page }) => {
   expect(page.errors, "console errors").toEqual([]);
 });
 
+test("the valley scrolls continuously beneath the pinned buddy", async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await demo(page);
+  await page.getByRole("button", { name: /Zawadi/ }).click();
+  await expect(page).toHaveURL(/\/play\/map$/);
+
+  const valley = page.locator('main img[src="/art/world-valley-continuous.webp"]');
+  await expect(valley).toHaveCount(1);
+  await valley.evaluate((image) => image.decode());
+  const buddy = page.getByTestId("map-buddy");
+  const bottom = () => buddy.evaluate((dock) => dock.getBoundingClientRect().bottom);
+  const initialBottom = await bottom();
+  const more = page.getByRole("link", { name: /More trails/ });
+
+  if (testInfo.project.name === "phone") {
+    await page.getByRole("link", { name: /Weather Valley/ }).scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    const navigationTop = await page.getByRole("navigation", { name: "Main" }).evaluate((nav) => nav.getBoundingClientRect().top);
+    expect(await bottom()).toBeLessThanOrEqual(navigationTop);
+  } else {
+    await more.scrollIntoViewIfNeeded();
+    const start = await page.evaluate(() => {
+      window.mapScrollPositions = [];
+      window.addEventListener("scroll", () => window.mapScrollPositions.push(scrollY), { passive: true });
+      return scrollY;
+    });
+    await more.click();
+    await expect(page).toHaveURL(/#more-trails$/);
+    const section = page.locator("#more-trails");
+    await expect(section).toBeFocused();
+    await expect.poll(() => section.evaluate((element) => Math.abs(element.getBoundingClientRect().top - 70))).toBeLessThan(6);
+    const movedThroughIntermediatePositions = await page.evaluate((initial) => {
+      return window.mapScrollPositions.some((position) => position > initial + 10 && position < scrollY - 10);
+    }, start);
+    expect(movedThroughIntermediatePositions).toBe(true);
+  }
+
+  expect(await bottom()).toBeCloseTo(initialBottom, 0);
+  await expect(buddy.getByRole("button", { name: "Hear it" })).toBeInViewport();
+  await noSideScroll(page);
+  if (testInfo.project.name !== "phone") {
+    await page.evaluate(() => window.scrollTo({ top: scrollY / 2, behavior: "instant" }));
+  }
+  await shot(page, testInfo, "continuous-valley");
+});
+
 for (const trail of NEW_TRAILS)
   test(`${trail.file} opens its first lesson from the map`, async ({ page }, testInfo) => {
     watchErrors(page);
