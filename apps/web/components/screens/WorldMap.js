@@ -51,8 +51,7 @@ const MAP_STOPS = [
 ];
 const MAP_PATH =
   "M 1 98 C 10 98 12 68 21 68 S 38 80 50 76 S 66 64 77 66 S 93 42 79 30 S 62 38 48 23 S 26 24 17 28";
-const VALLEY =
-  'linear-gradient(180deg, #fff8df40, #fffae312), url("/art/world-valley.webp") center bottom / cover no-repeat';
+const VALLEY = "/art/world-valley.webp";
 
 const PLACE_SX = {
   position: "absolute",
@@ -280,210 +279,246 @@ export default function WorldMap() {
     <LearnerShell learner={learner} active="/play/map" goal={goal} headerAction={changeBuddy}>
       <Box
         sx={{
-          display: { xs: "none", sm: "block" },
-          flex: 1,
           position: "relative",
-          minHeight: { sm: 585, lg: 620 },
           isolation: "isolate",
-          background: VALLEY,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "#e5e8b5",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            pointerEvents: "none",
+            background: "linear-gradient(180deg, #fff8df40, #fffae312)",
+          },
         }}
       >
-        <MapPath />
-        {MAP_STOPS.map(([id, x, y]) => {
-          if (id === "family") {
+        <Box
+          component="img"
+          src={VALLEY}
+          alt=""
+          fetchPriority="high"
+          draggable={false}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: -2,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center bottom",
+            pointerEvents: "none",
+          }}
+        />
+        <Box
+          sx={{
+            display: { xs: "none", sm: "block" },
+            flex: 1,
+            position: "relative",
+            minHeight: { sm: 585, lg: 620 },
+            isolation: "isolate",
+          }}
+        >
+          <MapPath />
+          {MAP_STOPS.map(([id, x, y]) => {
+            if (id === "family") {
+              return (
+                <MapStop
+                  key={id}
+                  id={id}
+                  x={x}
+                  y={y}
+                  title={t("map.familyIsland")}
+                  subtitle={t("map.familyIslandSub")}
+                  href="/play/more/island"
+                  onClick={hear("island", t("map.familyIsland"))}
+                >
+                  {signpost}
+                  {newChip}
+                </MapStop>
+              );
+            }
+            const subject = subjects.find((place) => place.id === id);
+            if (!subject) return null;
             return (
               <MapStop
                 key={id}
                 id={id}
                 x={x}
                 y={y}
-                title={t("map.familyIsland")}
-                subtitle={t("map.familyIslandSub")}
-                href="/play/more/island"
-                onClick={hear("island", t("map.familyIsland"))}
+                title={subject.place}
+                subtitle={sub(subject)}
+                href={`/play/trail/${id}`}
+                onClick={hear(id, subject.place)}
               >
-                {signpost}
-                {newChip}
+                {first && id === "numbers" ? (
+                  <Chip size="small" label="Start here!" color="primary" />
+                ) : (learner.interests || []).includes(id) ? (
+                  <Chip size="small" label="Favourite" color="secondary" />
+                ) : null}
               </MapStop>
             );
-          }
-          const subject = subjects.find((place) => place.id === id);
-          if (!subject) return null;
-          return (
-            <MapStop
-              key={id}
-              id={id}
-              x={x}
-              y={y}
-              title={subject.place}
-              subtitle={sub(subject)}
-              href={`/play/trail/${id}`}
-              onClick={hear(id, subject.place)}
-            >
-              {first && id === "numbers" ? (
-                <Chip size="small" label="Start here!" color="primary" />
-              ) : (learner.interests || []).includes(id) ? (
-                <Chip size="small" label="Favourite" color="secondary" />
-              ) : null}
-            </MapStop>
-          );
-        })}
-        <Box
-          sx={{
-            position: "absolute",
-            left: { sm: 8, md: 18 },
-            bottom: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: { sm: 0.5, md: 1 },
-            maxWidth: { sm: "54%", md: "58%" },
-            "& > svg": { width: { sm: 76, md: 112 }, height: "auto" },
-          }}
-        >
-          <Buddy
-            id={learner.buddy}
-            outfit={learner.outfit}
-            size={112}
-            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-          />
-          <Bubble small sx={{ maxWidth: 360, minWidth: 0 }}>
-            {greeting}
-          </Bubble>
-          <SpeakButton text={greeting} size={44} />
-        </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            right: 12,
-            bottom: 12,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: 0.6,
-            p: 1,
-            maxWidth: "46%",
-            bgcolor: "#fffbee",
-            border: "1px solid #dbc99d",
-            borderRadius: 3,
-            boxShadow: "0 3px 0 #6f613221",
-          }}
-        >
-          <SavingCard learner={learner} />
-          <Typography sx={{ fontWeight: 800, color: colors.muted, fontSize: 14 }}>
-            {t("map.comingSoon")}
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 0.7 }}>
-            {COMING.map((name) => (
-              <Chip
-                key={name}
-                label={name}
-                variant="outlined"
-                size="small"
-                sx={{ borderStyle: "dashed", bgcolor: "#fffaf0" }}
-              />
-            ))}
+          })}
+          <Box
+            sx={{
+              position: "absolute",
+              left: { sm: 8, md: 18 },
+              bottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: { sm: 0.5, md: 1 },
+              maxWidth: { sm: "54%", md: "58%" },
+              "& > svg": { width: { sm: 76, md: 112 }, height: "auto" },
+            }}
+          >
+            <Buddy
+              id={learner.buddy}
+              outfit={learner.outfit}
+              size={112}
+              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+            />
+            <Bubble small sx={{ maxWidth: 360, minWidth: 0 }}>
+              {greeting}
+            </Bubble>
+            <SpeakButton text={greeting} size={44} />
+          </Box>
+          <Box
+            sx={{
+              position: "absolute",
+              right: 12,
+              bottom: 12,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 0.6,
+              p: 1,
+              maxWidth: "46%",
+              bgcolor: "#fffbee",
+              border: "1px solid #dbc99d",
+              borderRadius: 3,
+              boxShadow: "0 3px 0 #6f613221",
+            }}
+          >
+            <SavingCard learner={learner} />
+            <Typography sx={{ fontWeight: 800, color: colors.muted, fontSize: 14 }}>
+              {t("map.comingSoon")}
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 0.7 }}>
+              {COMING.map((name) => (
+                <Chip
+                  key={name}
+                  label={name}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderStyle: "dashed", bgcolor: "#fffaf0" }}
+                />
+              ))}
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      {/* phone: island list */}
-      <Box
-        sx={{
-          display: { xs: "flex", sm: "none" },
-          flexDirection: "column",
-          gap: 1.5,
-          p: 1.75,
-          background: VALLEY,
-          flex: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
-          <Buddy
-            id={learner.buddy}
-            outfit={learner.outfit}
-            size={72}
-            mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
-          />
-          <Bubble small sx={{ mb: 2.5 }}>
-            {greeting}
-          </Bubble>
-        </Box>
-        <SavingCard learner={learner} />
-        {subjects.map((s) => (
+        {/* phone: island list */}
+        <Box
+          sx={{
+            display: { xs: "flex", sm: "none" },
+            flexDirection: "column",
+            gap: 1.5,
+            p: 1.75,
+            flex: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "flex-end", gap: 1 }}>
+            <Buddy
+              id={learner.buddy}
+              outfit={learner.outfit}
+              size={72}
+              mood={first ? "point" : greet?.firstToday ? "wave" : "happy"}
+            />
+            <Bubble small sx={{ mb: 2.5 }}>
+              {greeting}
+            </Bubble>
+          </Box>
+          <SavingCard learner={learner} />
+          {subjects.map((s) => (
+            <Box
+              key={s.id}
+              component={Link}
+              href={`/play/trail/${s.id}`}
+              onClick={hear(s.id, s.place)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                border: `3px solid ${first && s.id === "numbers" ? colors.leaf.main : colors.line}`,
+                bgcolor: "background.paper",
+                borderRadius: 5.5,
+                p: 1.25,
+                textDecoration: "none",
+                color: "text.primary",
+                opacity: first && s.id !== "numbers" ? 0.55 : 1,
+              }}
+            >
+              {SUBJECT_ART[s.id] ? (
+                <SubjectArt id={s.id} small width={110} height={72} />
+              ) : (
+                <Island kind={s.island} width={88} height={62} />
+              )}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}
+                >
+                  {s.place}
+                </Typography>
+                <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{sub(s)}</Typography>
+                {s.p.total > 0 && (
+                  <LinearProgress
+                    variant="determinate"
+                    value={s.p.pct * 100}
+                    sx={{ mt: 0.75, height: 8, borderRadius: 4, bgcolor: colors.sand }}
+                  />
+                )}
+              </Box>
+              {first && s.id === "numbers" ? <Chip size="small" label="Start" color="primary" /> : null}
+            </Box>
+          ))}
           <Box
-            key={s.id}
             component={Link}
-            href={`/play/trail/${s.id}`}
-            onClick={hear(s.id, s.place)}
+            href="/play/more/island"
+            onClick={hear("island", t("map.familyIsland"))}
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 1.5,
-              border: `3px solid ${first && s.id === "numbers" ? colors.leaf.main : colors.line}`,
+              border: `3px solid ${colors.line}`,
               bgcolor: "background.paper",
               borderRadius: 5.5,
               p: 1.25,
               textDecoration: "none",
               color: "text.primary",
-              opacity: first && s.id !== "numbers" ? 0.55 : 1,
             }}
           >
-            {SUBJECT_ART[s.id] ? (
-              <SubjectArt id={s.id} small width={110} height={72} />
-            ) : (
-              <Island kind={s.island} width={88} height={62} />
-            )}
+            <SubjectArt id="family" small width={110} height={72} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}
-              >
-                {s.place}
+              <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
+                {t("map.familyIsland")}
               </Typography>
-              <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{sub(s)}</Typography>
-              {s.p.total > 0 && (
-                <LinearProgress
-                  variant="determinate"
-                  value={s.p.pct * 100}
-                  sx={{ mt: 0.75, height: 8, borderRadius: 4, bgcolor: colors.sand }}
-                />
-              )}
+              <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+                {t("map.familyIslandSub")}
+              </Typography>
             </Box>
-            {first && s.id === "numbers" ? <Chip size="small" label="Start" color="primary" /> : null}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+              {signpost}
+              {newChip}
+            </Box>
           </Box>
-        ))}
-        <Box
-          component={Link}
-          href="/play/more/island"
-          onClick={hear("island", t("map.familyIsland"))}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            border: `3px solid ${colors.line}`,
-            bgcolor: "background.paper",
-            borderRadius: 5.5,
-            p: 1.25,
-            textDecoration: "none",
-            color: "text.primary",
-          }}
-        >
-          <SubjectArt id="family" small width={110} height={72} />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 }}>
-              {t("map.familyIsland")}
-            </Typography>
-            <Typography sx={{ color: "text.secondary", fontSize: 13 }}>{t("map.familyIslandSub")}</Typography>
+          <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {COMING.map((c) => (
+              <Chip key={c} label={c} variant="outlined" sx={{ borderStyle: "dashed" }} />
+            ))}
           </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-            {signpost}
-            {newChip}
-          </Box>
-        </Box>
-        <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>{t("map.comingSoon")}</Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {COMING.map((c) => (
-            <Chip key={c} label={c} variant="outlined" sx={{ borderStyle: "dashed" }} />
-          ))}
         </Box>
       </Box>
       <Snackbar
