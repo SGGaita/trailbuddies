@@ -37,6 +37,10 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
   await page.getByRole("button", { name: /Zawadi/ }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
   await expect(page.getByText("Numbers Mountain").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Change buddy" })).toHaveAttribute(
+    "href",
+    "/play/buddies",
+  );
   await noSideScroll(page);
   await shot(page, testInfo, "2-map");
 
