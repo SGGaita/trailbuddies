@@ -1,121 +1,32 @@
-/**
- * Original buddy and island artwork, ported from the interactive prototype.
- * Functions return SVG markup strings built only from constants in this file
- * (no user input), which components render inside an <svg>.
- * Placeholder art until the commissioned buddy designs arrive (development plan §5).
- */
+// Trailbuddies' illustrated portraits and the app's outfit and island artwork.
+export const BUDDY_ART = "/buddy-picker";
+
 export const BUDDIES = {
   zip: {
     name: "Zip",
     kind: "robot",
     line: "Beep boop! I love counting!",
     color: "#3fa6dc",
-    hatY: 38,
-    eyeY: 78,
-    neckY: 124,
-    headW: 104,
   },
   tumi: {
     name: "Tumi",
     kind: "owl",
     line: "Hoo! Let’s look closer!",
     color: "#b9814f",
-    hatY: 46,
-    eyeY: 92,
-    neckY: 146,
-    headW: 110,
   },
   jumbo: {
     name: "Jumbo",
     kind: "elephant",
     line: "Hello! I never forget a word.",
     color: "#8e9cab",
-    hatY: 42,
-    eyeY: 90,
-    neckY: 150,
-    headW: 112,
   },
   kiki: {
     name: "Kiki",
     kind: "turtle",
     line: "Slow and steady, we’ll get there!",
     color: "#2f9e5b",
-    hatY: 50,
-    eyeY: 88,
-    neckY: 128,
-    headW: 84,
   },
 };
-function mouth(mood, y) {
-  if (mood === "sleep")
-    return `<path d="M88 ${y + 2} q12 6 24 0" stroke="#263322" stroke-width="4" fill="none" stroke-linecap="round"/>`;
-  if (mood === "cheer")
-    return `<ellipse cx="100" cy="${y + 4}" rx="11" ry="9" fill="#7a2a1c"/><ellipse cx="100" cy="${y + 8}" rx="6" ry="3.5" fill="#e8664a"/>`;
-  if (mood === "think")
-    return `<path d="M90 ${y + 4} h20" stroke="#263322" stroke-width="4" stroke-linecap="round"/>`;
-  return `<path d="M86 ${y} q14 14 28 0" stroke="#263322" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
-}
-function eyes(b, mood, xs, r, col = "#263322") {
-  if (mood === "sleep")
-    return xs
-      .map(
-        (x) =>
-          `<path d="M${x - r} ${b.eyeY} q${r} ${r * 0.8} ${2 * r} 0" stroke="${col}" stroke-width="4" fill="none" stroke-linecap="round"/>`,
-      )
-      .join("");
-  return xs
-    .map(
-      (x) =>
-        `<g class="eye"><circle cx="${x}" cy="${b.eyeY}" r="${r}" fill="${col}"/><circle cx="${x + r * 0.35}" cy="${b.eyeY - r * 0.35}" r="${r * 0.32}" fill="#fff"/></g>`,
-    )
-    .join("");
-}
-export function buddyBody(id, mood) {
-  const b = BUDDIES[id];
-  if (id === "zip")
-    return `
-    <line x1="100" y1="38" x2="100" y2="18" stroke="#1d6b93" stroke-width="5"/><circle cx="100" cy="15" r="8" fill="#ffc93c" stroke="#1d6b93" stroke-width="3"/>
-    <rect x="48" y="38" width="104" height="84" rx="26" fill="#3fa6dc" stroke="#1d6b93" stroke-width="4"/>
-    <rect x="62" y="52" width="76" height="56" rx="16" fill="#163a4f"/>
-    ${eyes(b, mood, [84, 116], 8, "#9ff0ff")}
-    <g transform="translate(0,-2)">${mood === "sleep" ? "" : `<path d="M88 96 q12 10 24 0" stroke="#9ff0ff" stroke-width="4" fill="none" stroke-linecap="round"/>`}</g>
-    <rect x="60" y="124" width="80" height="60" rx="20" fill="#2b86b8" stroke="#1d6b93" stroke-width="4"/>
-    <circle cx="100" cy="150" r="10" fill="#ffc93c"/>
-    <path d="M60 140 q-26 ${mood === "cheer" ? -40 : 10} -18 ${mood === "cheer" ? -54 : 30}" stroke="#2b86b8" stroke-width="12" fill="none" stroke-linecap="round"/>
-    <path d="M140 140 q26 ${mood === "cheer" ? -40 : 10} 18 ${mood === "cheer" ? -54 : 30}" stroke="#2b86b8" stroke-width="12" fill="none" stroke-linecap="round"/>
-    <rect x="66" y="184" width="24" height="22" rx="8" fill="#1d6b93"/><rect x="110" y="184" width="24" height="22" rx="8" fill="#1d6b93"/>`;
-  if (id === "tumi")
-    return `
-    <path d="M52 64 L60 30 L78 54 Z" fill="#8f5f36"/><path d="M148 64 L140 30 L122 54 Z" fill="#8f5f36"/>
-    <ellipse cx="100" cy="122" rx="64" ry="82" fill="#b9814f" stroke="#8f5f36" stroke-width="4"/>
-    <ellipse cx="100" cy="150" rx="40" ry="46" fill="#f2d8b5"/>
-    <path d="M78 140 q6 6 12 0 M110 140 q6 6 12 0 M94 158 q6 6 12 0" stroke="#d9b48a" stroke-width="3" fill="none"/>
-    <circle cx="78" cy="92" r="24" fill="#fff" stroke="#8f5f36" stroke-width="3"/><circle cx="122" cy="92" r="24" fill="#fff" stroke="#8f5f36" stroke-width="3"/>
-    ${eyes(b, mood, [78, 122], 10)}
-    <path d="M92 108 L108 108 L100 122 Z" fill="#f0a020" stroke="#b86e00" stroke-width="2"/>
-    <path d="M38 120 q-6 ${mood === "cheer" ? -50 : 30} 16 ${mood === "cheer" ? -60 : 50}" stroke="#8f5f36" stroke-width="12" fill="none" stroke-linecap="round"/>
-    <path d="M162 120 q6 ${mood === "cheer" ? -50 : 30} -16 ${mood === "cheer" ? -60 : 50}" stroke="#8f5f36" stroke-width="12" fill="none" stroke-linecap="round"/>
-    <path d="M80 202 l-6 10 M86 203 v10 M120 202 l6 10 M114 203 v10" stroke="#f0a020" stroke-width="5" stroke-linecap="round"/>`;
-  if (id === "jumbo")
-    return `
-    <ellipse cx="100" cy="178" rx="52" ry="30" fill="#7d8b99"/>
-    <circle cx="42" cy="98" r="40" fill="#b6c2cd" stroke="#6f7d8a" stroke-width="4"/><circle cx="158" cy="98" r="40" fill="#b6c2cd" stroke="#6f7d8a" stroke-width="4"/>
-    <circle cx="42" cy="98" r="24" fill="#f2c5c0"/><circle cx="158" cy="98" r="24" fill="#f2c5c0"/>
-    <circle cx="100" cy="100" r="58" fill="#8e9cab" stroke="#6f7d8a" stroke-width="4"/>
-    ${eyes(b, mood, [80, 120], 7)}
-    <circle cx="70" cy="112" r="7" fill="#f2a7a0" opacity=".7"/><circle cx="130" cy="112" r="7" fill="#f2a7a0" opacity=".7"/>
-    <path d="M100 112 q-4 40 ${mood === "cheer" ? "30 30 q14 -4 10 -26" : "10 56 q4 10 14 4"}" stroke="#6f7d8a" stroke-width="20" fill="none" stroke-linecap="round"/>
-    <path d="M100 112 q-4 40 ${mood === "cheer" ? "30 30 q14 -4 10 -26" : "10 56 q4 10 14 4"}" stroke="#8e9cab" stroke-width="13" fill="none" stroke-linecap="round"/>
-    ${mood === "sleep" ? "" : `<path d="M84 128 q-6 8 -16 4" stroke="#263322" stroke-width="3" fill="none" stroke-linecap="round"/>`}`;
-  return `
-    <ellipse cx="100" cy="176" rx="76" ry="34" fill="#1f7a45" stroke="#14532e" stroke-width="4"/>
-    <path d="M30 168 Q100 82 170 168 Z" fill="#2f9e5b" stroke="#14532e" stroke-width="4"/>
-    <path d="M70 156 l14-26 h32 l14 26 M84 130 l-10 -14 M116 130 l10 -14 M58 160 l12 -6 M142 160 l-12 -6" stroke="#14532e" stroke-width="3" fill="none"/>
-    <circle cx="100" cy="86" r="40" fill="#8cc63f" stroke="#4f7d1c" stroke-width="4"/>
-    ${eyes(b, mood, [86, 114], 6)}
-    ${mouth(mood, 100)}
-    <ellipse cx="40" cy="194" rx="14" ry="9" fill="#8cc63f" stroke="#4f7d1c" stroke-width="3"/><ellipse cx="160" cy="194" rx="14" ry="9" fill="#8cc63f" stroke="#4f7d1c" stroke-width="3"/>`;
-}
 export const OUTFITS = {
   sunhat: {
     name: "Sun hat",

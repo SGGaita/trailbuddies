@@ -72,13 +72,22 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
 });
 
 test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {
-  await demo(page);
+  await page.goto("/start");
+  for (const id of ["zip", "tumi", "jumbo", "kiki"])
+    await expect(page.locator(`svg image[href="/buddy-picker/${id}.webp"]`).last()).toBeVisible();
+  await page.getByRole("button", { name: "Try the demo family" }).click();
+  await expect(page).toHaveURL(/\/play$/);
   await page.getByRole("button", { name: /Amani/ }).click(); // Amani has no buddy yet
   await expect(page).toHaveURL(/\/play\/buddies$/);
   await expect(page.getByRole("heading", { name: "Choose your buddy" })).toBeVisible();
   await page.getByRole("button", { name: "Jumbo, elephant" }).click();
   await page.getByRole("button", { name: "Say hello to Jumbo the elephant" }).click();
   await expect(page.locator('[data-action="talk"]')).toBeVisible();
+  await page.getByRole("button", { name: "Walk", exact: true }).click();
+  const walk = page.locator('canvas[data-action="walk"]');
+  await expect(walk).toHaveAttribute("data-walk-ready", "true");
+  const firstFrame = await walk.evaluate((canvas) => canvas.toDataURL());
+  await expect.poll(() => walk.evaluate((canvas) => canvas.toDataURL())).not.toBe(firstFrame);
   await page.getByRole("button", { name: "Wave", exact: true }).click();
   await expect(page.locator('[data-action="wave"]')).toHaveAttribute("src", "/buddy-picker/jumbo.webp");
   await noSideScroll(page);
@@ -95,6 +104,7 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
   await expect(
     page.getByRole("img", { name: "Jumbo the elephant" }).filter({ visible: true }).first(),
   ).toHaveAttribute("data-mood", "point");
+  await expect(page.locator('svg[data-mood="point"] image[href="/buddy-picker/jumbo.webp"]').first()).toBeAttached();
   await page.getByRole("link", { name: "Change buddy" }).click();
   await expect(page.getByRole("button", { name: "Jumbo, elephant" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Kiki, turtle" }).click();

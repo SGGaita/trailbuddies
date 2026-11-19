@@ -11,10 +11,11 @@ import { buddyLine } from "@trailbuddies/content";
 import { t } from "@trailbuddies/i18n";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { speak, stop } from "@/lib/speech";
-import { BUDDIES } from "@/lib/art";
+import { BUDDIES, BUDDY_ART } from "@/lib/art";
+import BuddyWalk from "@/components/art/BuddyWalk";
 import Loading from "@/components/Loading";
 
-const ART = "/buddy-picker";
+const ART = BUDDY_ART;
 const TINTS = { zip: "#e0e6fa", tumi: "#f8e9c7", jumbo: "#f5e5ef", kiki: "#e8f1cf" };
 const PANEL = {
   bgcolor: "#fcf8ee",
@@ -252,10 +253,7 @@ function BuddyPicker({ learner }) {
                     "30%": { transform: "rotate(-10deg) translateY(-4%)" },
                     "65%": { transform: "rotate(9deg)" },
                   },
-                  "@keyframes buddyPickerWalk": {
-                    "25%": { transform: "translate(-12%, -5%) rotate(-5deg)" },
-                    "60%": { transform: "translate(12%, -5%) rotate(5deg)" },
-                  },
+                  "&:has(canvas[data-walk-ready]) > img": { visibility: "hidden" },
                   "@keyframes buddyPickerTalk": {
                     "35%": { transform: "scale(1.05)" },
                     "70%": { transform: "scale(0.98)" },
@@ -275,11 +273,13 @@ function BuddyPicker({ learner }) {
                     width: "76%",
                     height: "88%",
                     filter: "drop-shadow(0 7px 8px #302c3855)",
-                    animation: action.name
-                      ? `buddyPicker${action.name[0].toUpperCase()}${action.name.slice(1)} 700ms ease-in-out`
-                      : "none",
+                    animation:
+                      action.name && action.name !== "walk"
+                        ? `buddyPicker${action.name[0].toUpperCase()}${action.name.slice(1)} 700ms ease-in-out`
+                        : "none",
                   }}
                 />
+                {action.name === "walk" && <BuddyWalk key={action.count} id={id} />}
               </Box>
               <Typography
                 role="status"
