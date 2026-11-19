@@ -93,6 +93,57 @@ test("the valley scrolls continuously beneath the pinned buddy", async ({ page }
   await shot(page, testInfo, "continuous-valley");
 });
 
+test("the valley supports direct scrolling and keeps map navigation in view", async ({ page }, testInfo) => {
+  await demo(page);
+  await page.getByRole("button", { name: /Zawadi/ }).click();
+  await expect(page).toHaveURL(/\/play\/map$/);
+  await expect(page.getByTestId("map-buddy")).toBeVisible();
+  const scrollPosition = () => page.evaluate(() => window.scrollY);
+  const more = page.getByRole("link", { name: /More trails/ });
+  const sidebar = page.getByRole("navigation", { name: "More", exact: true });
+  const sidebarTop = () => sidebar.evaluate((element) => element.getBoundingClientRect().top);
+  const wide = testInfo.project.name !== "phone";
+  const originalTop = wide ? await sidebarTop() : 0;
+  if (wide) await expect(more).toBeInViewport();
+
+  if (testInfo.project.name === "desktop") {
+    await page.mouse.move(640, 390);
+    await page.mouse.wheel(0, 180);
+    await expect.poll(scrollPosition).toBeGreaterThan(120);
+
+    const landmark = page.getByRole("link", { name: /Numbers Mountain/ }).filter({ visible: true });
+    const { x, y, width, height } = await landmark.boundingBox();
+    const beforeDrag = await scrollPosition();
+    await page.mouse.move(x + width / 2, y + height / 2);
+    await page.mouse.down();
+    await page.mouse.move(x + width / 2, y + height / 2 - 150, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(scrollPosition).toBeGreaterThan(beforeDrag + 120);
+    await expect(page).toHaveURL(/\/play\/map$/);
+  } else {
+    const touch = await page.context().newCDPSession(page);
+    const x = Math.round(page.viewportSize().width / 2);
+    await touch.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y: 575 }] });
+    for (const y of [530, 480, 430, 380]) {
+      await touch.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y }] });
+    }
+    await touch.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await touch.detach();
+    await expect.poll(scrollPosition).toBeGreaterThan(100);
+  }
+
+  if (wide) {
+    await expect(sidebar.getByRole("link", { name: "Games" })).toBeInViewport();
+    expect(Math.abs(await sidebarTop() - originalTop)).toBeLessThan(5);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(more).toHaveCount(0);
+    await expect(sidebar.getByRole("link", { name: "Wishes" })).toBeInViewport();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(more).toBeInViewport();
+  }
+  await noSideScroll(page);
+});
+
 for (const trail of NEW_TRAILS)
   test(`${trail.file} opens its first lesson from the map`, async ({ page }, testInfo) => {
     watchErrors(page);
