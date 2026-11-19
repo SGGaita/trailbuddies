@@ -1,0 +1,201 @@
+{
+  "schema": "unit/1",
+  "id": "my-first-space-mission",
+  "subject": "space",
+  "title": "My first space mission",
+  "band": "sprout",
+  "summary": "Meet the Sun, Earth and Moon, discover rocky planets and explore tools used in space.",
+  "status": "ready",
+  "groups": [
+    {
+      "id": "natural",
+      "label": "Found in space",
+      "emoji": "🌌"
+    },
+    {
+      "id": "tools",
+      "label": "Made by people",
+      "emoji": "🚀"
+    }
+  ],
+  "items": [
+    {
+      "id": "space-sun",
+      "label": "Sun",
+      "emoji": "☀️",
+      "fact": "The Sun is a star that gives Earth light and warmth.",
+      "clue": "Which star gives Earth light and warmth?",
+      "tags": [
+        "natural"
+      ]
+    },
+    {
+      "id": "space-earth",
+      "label": "Earth",
+      "emoji": "🌍",
+      "fact": "Earth is the planet where we live.",
+      "clue": "Which planet is our home?",
+      "tags": [
+        "natural"
+      ]
+    },
+    {
+      "id": "space-moon",
+      "label": "Moon",
+      "emoji": "🌕",
+      "fact": "Our Moon travels around Earth. It reflects light from the Sun.",
+      "clue": "Which object travels around Earth and reflects sunlight?",
+      "tags": [
+        "natural"
+      ]
+    },
+    {
+      "id": "space-mercury",
+      "label": "Mercury",
+      "emoji": "⚪",
+      "fact": "Mercury is the closest planet to the Sun.",
+      "clue": "Find the rocky planet closest to the Sun.",
+      "tags": [
+        "natural"
+      ],
+      "image": "img-mercury"
+    },
+    {
+      "id": "space-venus",
+      "label": "Venus",
+      "emoji": "🟡",
+      "fact": "Venus is the second planet from the Sun. Thick clouds cover it.",
+      "clue": "Find the second planet from the Sun, which is covered in thick clouds.",
+      "tags": [
+        "natural"
+      ],
+      "image": "img-venus"
+    },
+    {
+      "id": "space-mars",
+      "label": "Mars",
+      "emoji": "🔴",
+      "fact": "Mars looks reddish because much of its surface contains rusty dust.",
+      "clue": "Find the planet that looks red because of rusty dust.",
+      "tags": [
+        "natural"
+      ],
+      "image": "img-mars"
+    },
+    {
+      "id": "space-rocket",
+      "label": "rocket",
+      "emoji": "🚀",
+      "fact": "A rocket can carry instruments and people into space.",
+      "clue": "Which tool can launch people or equipment into space?",
+      "tags": [
+        "tools"
+      ]
+    },
+    {
+      "id": "space-telescope",
+      "label": "telescope",
+      "emoji": "🔭",
+      "fact": "A telescope helps us see objects that are very far away.",
+      "clue": "Which instrument helps us look at distant stars?",
+      "tags": [
+        "tools"
+      ]
+    },
+    {
+      "id": "space-satellite",
+      "label": "artificial satellite",
+      "emoji": "🛰️",
+      "fact": "People make satellites that travel around Earth to do jobs like taking weather pictures.",
+      "clue": "Which machine can travel around Earth and take pictures of the weather?",
+      "tags": [
+        "tools"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "my-first-space-mission-1",
+      "title": "Sun, Earth and Moon",
+      "focus": [
+        "space-sun",
+        "space-earth",
+        "space-moon"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "my-first-space-mission-2",
+      "title": "Rocky planets",
+      "focus": [
+        "space-mercury",
+        "space-venus",
+        "space-mars"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "name-it",
+          "choices": 3
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        }
+      ]
+    },
+    {
+      "id": "my-first-space-mission-3",
+      "title": "Tools for space",
+      "focus": [
+        "space-rocket",
+        "space-telescope",
+        "space-satellite"
+      ],
+      "exercises": [
+        {
+          "type": "listen-tap",
+          "choices": 3
+        },
+        {
+          "type": "sort",
+          "bins": 2
+        },
+        {
+          "type": "clue-tap",
+          "choices": 3
+        },
+        {
+          "type": "match"
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "review": 4,
+    "game": "memory"
+  }
+}

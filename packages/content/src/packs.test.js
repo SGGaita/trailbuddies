@@ -31,8 +31,12 @@ describe("CNT-02 content packs", () => {
       "big-small-shapes",
       "shapes-around-us",
       "sides-and-corners",
+      "clocks-and-my-day",
+      "my-first-space-mission",
+      "meet-the-feelings",
+      "watch-the-weather",
     ]);
-    expect(units(prev)).toHaveLength(26);
+    expect(units(prev)).toHaveLength(30);
     expect(prev.manifest).toMatchObject({ schema: "packs/1", release: "2027.03.1", channel: "preview" });
   });
   test("a pack's name carries its content hash, so unchanged content keeps its name", () => {

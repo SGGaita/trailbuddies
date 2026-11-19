@@ -23,6 +23,7 @@
     "colour": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
     "shape": { "type": "string" },
     "tags": { "type": "array", "items": { "$ref": "common.json#/$defs/id" }, "uniqueItems": true },
-    "fact": { "$ref": "common.json#/$defs/text" }
+    "fact": { "$ref": "common.json#/$defs/text" },
+    "clue": { "$ref": "common.json#/$defs/text" }
   }
 }

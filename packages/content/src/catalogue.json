@@ -222,6 +222,66 @@
           "lessons": 4
         }
       ]
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "place": "Time Tower",
+      "island": "time",
+      "units": [
+        {
+          "id": "clocks-and-my-day",
+          "title": "Clocks and my day",
+          "band": "sprout",
+          "status": "ready",
+          "lessons": 3
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "name": "Space",
+      "place": "Space Station",
+      "island": "space",
+      "units": [
+        {
+          "id": "my-first-space-mission",
+          "title": "My first space mission",
+          "band": "sprout",
+          "status": "ready",
+          "lessons": 3
+        }
+      ]
+    },
+    {
+      "id": "feelings",
+      "name": "Feelings",
+      "place": "Feelings Trail",
+      "island": "feelings",
+      "units": [
+        {
+          "id": "meet-the-feelings",
+          "title": "Meet the feelings",
+          "band": "seedling",
+          "status": "ready",
+          "lessons": 4
+        }
+      ]
+    },
+    {
+      "id": "weather",
+      "name": "Weather",
+      "place": "Weather Valley",
+      "island": "weather",
+      "units": [
+        {
+          "id": "watch-the-weather",
+          "title": "Watch the weather",
+          "band": "seedling",
+          "status": "ready",
+          "lessons": 3
+        }
+      ]
     }
   ]
 }

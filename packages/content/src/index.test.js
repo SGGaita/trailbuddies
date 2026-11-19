@@ -15,9 +15,11 @@ import {
   libraryPictures,
 } from "./index.js";
 
-test("catalogue lists the five MVP subjects", () => {
-  expect(getSubjects().map((s) => s.id)).toEqual(["numbers", "language", "animals", "colours", "shapes"]);
-  expect(catalogue.subjects.flatMap((s) => s.units)).toHaveLength(26);
+test("catalogue lists the nine learning destinations", () => {
+  expect(getSubjects().map((s) => s.id)).toEqual([
+    "numbers", "language", "animals", "colours", "shapes", "time", "space", "feelings", "weather",
+  ]);
+  expect(catalogue.subjects.flatMap((s) => s.units)).toHaveLength(30);
 });
 
 test("ready units always play; drafts only outside production", () => {
@@ -48,9 +50,7 @@ test("ready units always play; drafts only outside production", () => {
     "more-less-same",
     "numbers-11-20",
   ]);
-  expect(
-    ["numbers", "language", "animals", "colours", "shapes"].flatMap((s) => getReadyUnits(s)),
-  ).toHaveLength(26);
+  expect(getSubjects().flatMap((s) => getReadyUnits(s.id))).toHaveLength(30);
 });
 
 test("lesson ids come from content or the catalogue count", () => {

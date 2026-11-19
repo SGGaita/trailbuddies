@@ -7,8 +7,7 @@ import { playSound } from "@/lib/sounds";
 
 /**
  * Painted artwork for a subject place: the world map tile, the trail header and the trail
- * backdrop. The pictures are used as supplied (1536 x 1024 with their own transparency), so
- * `ratio` is width / height of the image. Each spot is a tap target on the trail
+ * backdrop. `ratio` is width / height of the transparent image. Each spot is a tap target on the trail
  * header, placed as % of the artwork (x, y = centre, w = diameter as % of the width).
  * @type {Record<string, { src: string, small: string, ratio: number, spots: { say: string, label: string, x: number, y: number, w: number }[] }>}
  */
@@ -71,6 +70,30 @@ export const SUBJECT_ART = {
       { say: "rectangle", label: "Rectangle", x: 58.9, y: 48.9, w: 9.6 },
       { say: "star", label: "Star", x: 78.1, y: 58.6, w: 11.5 },
     ],
+  },
+  time: {
+    src: "/art/time-tower.webp",
+    small: "/art/time-tower-sm.webp",
+    ratio: 3 / 2,
+    spots: [],
+  },
+  space: {
+    src: "/art/space-station.webp",
+    small: "/art/space-station-sm.webp",
+    ratio: 3 / 2,
+    spots: [],
+  },
+  feelings: {
+    src: "/art/feelings-trail.webp",
+    small: "/art/feelings-trail-sm.webp",
+    ratio: 520 / 368,
+    spots: [],
+  },
+  weather: {
+    src: "/art/weather-valley.webp",
+    small: "/art/weather-valley-sm.webp",
+    ratio: 3 / 2,
+    spots: [],
   },
   // Family & Class Island has no trail, so its art is only on the map.
   family: {

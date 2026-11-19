@@ -8,6 +8,7 @@
     "exerciseType": {
       "enum": [
         "listen-tap",
+        "clue-tap",
         "match",
         "count",
         "name-it",

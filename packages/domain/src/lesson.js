@@ -10,8 +10,8 @@ import { shuffle, pick } from "./random.js";
 import { choicesFor } from "./difficulty.js";
 
 /** @typedef {import("./random.js").Rng} Rng */
-/** @typedef {{ id: string, label: string, say?: string, number?: number, emoji?: string, fact?: string, tags?: string[] }} Item */
-/** @typedef {{ type: string, choices?: number, prompt?: string }} ExerciseConfig */
+/** @typedef {{ id: string, label: string, say?: string, number?: number, emoji?: string, fact?: string, clue?: string, tags?: string[] }} Item */
+/** @typedef {{ type: string, choices?: number, bins?: number, prompt?: string }} ExerciseConfig */
 /** @typedef {{ id: string, title: string, focus: string[], review?: string[], exercises: ExerciseConfig[] }} LessonConfig */
 /** @typedef {{ id: string, subject: string, title: string, items: Item[], lessons: LessonConfig[], checkpoint: { review: number } }} Unit */
 /**
@@ -37,7 +37,7 @@ import { choicesFor } from "./difficulty.js";
  * @property {Step[]} steps
  */
 
-export const EXERCISE_TYPES = ["listen-tap", "name-it", "count", "match", "compare", "sequence", "odd-one-out", "sort", "case-match", "build-word"];
+export const EXERCISE_TYPES = ["listen-tap", "clue-tap", "name-it", "count", "match", "compare", "sequence", "odd-one-out", "sort", "case-match", "build-word"];
 const NUMBER_ONLY = new Set(["count", "compare", "sequence"]);
 const isNumber = (/** @type {Item} */ it) => typeof it.number === "number";
 const isLetter = (/** @type {Item} */ it) => typeof it.letter === "string" && !(it.tags || []).includes("word");
@@ -118,6 +118,8 @@ export function buildExercise(cfg, ctx) {
     return pick(list, r);
   };
   let type = cfg.type;
+  const withClues = type === "clue-tap" ? pool.filter((item) => item.clue) : [];
+  if (type === "clue-tap" && !withClues.length) type = "listen-tap";
   if (NUMBER_ONLY.has(type) && numbers.length < 2) type = "listen-tap";
   if (type === "odd-one-out" && numbers.length < 2 && groupIds.length < 2) type = "listen-tap";
   if (type === "case-match" && letters.length < 2) type = "listen-tap";
@@ -125,11 +127,14 @@ export function buildExercise(cfg, ctx) {
   if (type === "sort" && groupIds.length < 2) type = "listen-tap";
   if (type === "match" && pool.length < 2) type = "listen-tap";
 
-  if (type === "listen-tap" || type === "name-it") {
-    const target = next();
+  if (type === "listen-tap" || type === "name-it" || type === "clue-tap") {
+    const target = type === "clue-tap" ? nextOf((item) => item.clue, withClues) : next();
     const kin = sameKind(pool, target);
     const n = optionCount(cfg, level, kin.length);
     const options = shuffle([target, ...distractors(target, kin, sameKind(all, target), n - 1, r)], r);
+    if (type === "clue-tap") {
+      return { id, type, prompt: target.clue, say: target.clue, target, options, itemIds: [target.id] };
+    }
     if (type === "listen-tap") {
       return { id, type, prompt: cfg.prompt || `Tap ${target.label}!`, say: `Tap ${words(target)}!`, target, options, itemIds: [target.id] };
     }
@@ -263,7 +268,7 @@ export function buildExercise(cfg, ctx) {
 
   if (type === "sort") {
     // LES-08: drop each item in the right basket; 2 baskets at level 1, up to 4 above.
-    const binCount = clamp(level + 1, 2, Math.min(4, groupIds.length));
+    const binCount = clamp(cfg.bins ?? level + 1, 2, Math.min(cfg.bins ?? 4, groupIds.length));
     const first = nextOf((i) => groupOf(i, groups), grouped);
     const binIds = [groupOf(first, groups).id, ...shuffle(groupIds.filter((g) => g !== groupOf(first, groups).id), r)].slice(0, binCount);
     const bins = groups.filter((g) => binIds.includes(g.id));

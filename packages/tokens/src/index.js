@@ -73,5 +73,9 @@ export const subjectFills = {
   animals: "#e2f3e8",
   colours: "#f7e3ec",
   shapes: "#fff1c7",
+  time: "#fff1cd",
+  space: "#e9e5fb",
+  feelings: "#f8e4ef",
+  weather: "#ddf4ed",
   family: "#fde6df",
 };

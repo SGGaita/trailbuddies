@@ -26,6 +26,10 @@ import moreShapes from "./shapes/more-shapes.json" with { type: "json" };
 import bigSmallShapes from "./shapes/big-small-shapes.json" with { type: "json" };
 import shapesAroundUs from "./shapes/shapes-around-us.json" with { type: "json" };
 import sidesAndCorners from "./shapes/sides-and-corners.json" with { type: "json" };
+import clocksAndMyDay from "./time/clocks-and-my-day.json" with { type: "json" };
+import myFirstSpaceMission from "./space/my-first-space-mission.json" with { type: "json" };
+import meetTheFeelings from "./feelings/meet-the-feelings.json" with { type: "json" };
+import watchTheWeather from "./weather/watch-the-weather.json" with { type: "json" };
 import counting15Assets from "./numbers/counting-1-5.assets.json" with { type: "json" };
 import counting610Assets from "./numbers/counting-6-10.assets.json" with { type: "json" };
 import numberShapes010Assets from "./numbers/number-shapes-0-10.assets.json" with { type: "json" };
@@ -52,9 +56,13 @@ import moreShapesAssets from "./shapes/more-shapes.assets.json" with { type: "js
 import bigSmallShapesAssets from "./shapes/big-small-shapes.assets.json" with { type: "json" };
 import shapesAroundUsAssets from "./shapes/shapes-around-us.assets.json" with { type: "json" };
 import sidesAndCornersAssets from "./shapes/sides-and-corners.assets.json" with { type: "json" };
+import clocksAndMyDayAssets from "./time/clocks-and-my-day.assets.json" with { type: "json" };
+import myFirstSpaceMissionAssets from "./space/my-first-space-mission.assets.json" with { type: "json" };
+import meetTheFeelingsAssets from "./feelings/meet-the-feelings.assets.json" with { type: "json" };
+import watchTheWeatherAssets from "./weather/watch-the-weather.assets.json" with { type: "json" };
 
 /** @type {any[]} */
-export const ALL_UNITS = [counting15, counting610, numberShapes010, moreLessSame, numbers1120, lettersAE, letterSounds1, letterSounds2, upperLower, blendingCvc, whereAnimalsLive, animalSounds, domesticAnimals, farmAnimals, animalPatterns, wildAnimals, redYellowBlue, moreColours, coloursOfThings, sameDifferentColour, mixingColours, circleSquareTriangle, moreShapes, bigSmallShapes, shapesAroundUs, sidesAndCorners];
+export const ALL_UNITS = [counting15, counting610, numberShapes010, moreLessSame, numbers1120, lettersAE, letterSounds1, letterSounds2, upperLower, blendingCvc, whereAnimalsLive, animalSounds, domesticAnimals, farmAnimals, animalPatterns, wildAnimals, redYellowBlue, moreColours, coloursOfThings, sameDifferentColour, mixingColours, circleSquareTriangle, moreShapes, bigSmallShapes, shapesAroundUs, sidesAndCorners, clocksAndMyDay, myFirstSpaceMission, meetTheFeelings, watchTheWeather];
 
 /** Each unit's asset manifest (images and recordings with their review status), by unit id. */
 /** @type {Record<string, any>} */
@@ -85,4 +93,8 @@ export const ALL_ASSETS = {
   "big-small-shapes": bigSmallShapesAssets,
   "shapes-around-us": shapesAroundUsAssets,
   "sides-and-corners": sidesAndCornersAssets,
+  "clocks-and-my-day": clocksAndMyDayAssets,
+  "my-first-space-mission": myFirstSpaceMissionAssets,
+  "meet-the-feelings": meetTheFeelingsAssets,
+  "watch-the-weather": watchTheWeatherAssets,
 };

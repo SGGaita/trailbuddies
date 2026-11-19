@@ -30,4 +30,20 @@ describe("every unit plays", () => {
         seen.set(it.id, u.id);
       }
   });
+
+  test("Feelings Trail keeps its basket counts and speaks the scenario clues", () => {
+    const unit = ALL_UNITS.find((u) => u.id === "meet-the-feelings");
+    const plan = (index, level) => buildLesson(unit, index, { level, band: unit.band, r: rng(17) });
+    for (const level of [1, 2, 3]) {
+      const little = plan(1, level).steps.find((step) => step.type === "sort");
+      const big = plan(2, level).steps.find((step) => step.type === "sort");
+      expect(little.bins).toHaveLength(3);
+      expect(big.bins).toHaveLength(5);
+      expect(new Set(big.items.map((item) => item.bin))).toEqual(new Set(big.bins.map((bin) => bin.id)));
+      const story = plan(3, level).steps.find((step) => step.type === "clue-tap");
+      expect(story.prompt).toBe(story.target.clue);
+      expect(story.say).toBe(story.prompt);
+      expect(story.options).toContain(story.target);
+    }
+  });
 });
