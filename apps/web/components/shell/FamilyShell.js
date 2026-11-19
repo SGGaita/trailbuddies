@@ -86,7 +86,7 @@ export default function FamilyShell({
             pb: 1.75,
           }}
         >
-          <Buddy id="zip" size={30} still />
+          <Buddy fallback="zip" size={30} still />
           <Typography
             sx={{
               display: { sm: "none", lg: "block" },

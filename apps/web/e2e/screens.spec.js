@@ -72,6 +72,22 @@ test("profile picker → map → numbers trail", async ({ page }, testInfo) => {
 });
 
 test("a new learner meets the buddies, then starts at Numbers", async ({ page }, testInfo) => {
+  test.setTimeout(60_000);
+  // Headless Chrome may have no system voice. Drive the same speech events that a voice emits.
+  await page.addInitScript(() => {
+    let timers = [];
+    speechSynthesis.cancel = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+    };
+    speechSynthesis.speak = (line) => {
+      timers = [
+        setTimeout(() => line.onstart?.(), 40),
+        setTimeout(() => line.onboundary?.({ charIndex: 7 }), 450),
+        setTimeout(() => line.onend?.(), 1000),
+      ];
+    };
+  });
   await page.goto("/start");
   for (const id of ["zip", "tumi", "jumbo", "kiki"])
     await expect(page.locator(`svg image[href="/buddy-picker/${id}.webp"]`).last()).toBeVisible();
@@ -82,14 +98,22 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
   await expect(page.getByRole("heading", { name: "Choose your buddy" })).toBeVisible();
   await page.getByRole("button", { name: "Jumbo, elephant" }).click();
   await page.getByRole("button", { name: "Say hello to Jumbo the elephant" }).click();
-  await expect(page.locator('[data-action="talk"]')).toBeVisible();
+  const stage = page.locator(".buddy-motion-stage");
+  await expect(stage).toHaveAttribute("data-speaking", "true");
+  const talkingFrame = await stage.evaluate((canvas) => canvas.toDataURL());
+  await expect.poll(() => stage.evaluate((canvas) => canvas.toDataURL())).not.toBe(talkingFrame);
+  await expect(stage).not.toHaveAttribute("data-speaking", "true");
   await page.getByRole("button", { name: "Walk", exact: true }).click();
   const walk = page.locator('canvas[data-action="walk"]');
-  await expect(walk).toHaveAttribute("data-walk-ready", "true");
+  await expect(walk).toHaveAttribute("data-motion-ready", "true");
   const firstFrame = await walk.evaluate((canvas) => canvas.toDataURL());
   await expect.poll(() => walk.evaluate((canvas) => canvas.toDataURL())).not.toBe(firstFrame);
   await page.getByRole("button", { name: "Wave", exact: true }).click();
-  await expect(page.locator('[data-action="wave"]')).toHaveAttribute("src", "/buddy-picker/jumbo.webp");
+  await expect(stage).toHaveAttribute("data-action", "wave");
+  await expect(stage).toHaveAttribute("data-motion-ready", "true");
+  const firstWaveFrame = await stage.evaluate((canvas) => canvas.toDataURL());
+  await expect.poll(() => stage.evaluate((canvas) => canvas.toDataURL())).not.toBe(firstWaveFrame);
+  await expect.poll(() => stage.getAttribute("data-blinking"), { intervals: [30], timeout: 7000 }).toBe("true");
   await noSideScroll(page);
   await shot(page, testInfo, "7-buddies");
   await page.getByRole("button", { name: "Pick Jumbo" }).click();
@@ -112,6 +136,7 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
   await page.getByRole("button", { name: "Yes, Kiki!" }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
   await page.reload();
+  await expect(page.getByRole("img", { name: "Kiki the turtle" }).filter({ visible: true }).first()).toBeVisible();
   await page.getByRole("link", { name: "Change buddy" }).click();
   await expect(page.getByRole("button", { name: "Kiki, turtle" })).toHaveAttribute("aria-pressed", "true");
 });

@@ -52,7 +52,7 @@ export default function TeachShell({ title, sub, active = "/teach", children }) 
             pb: 1.75,
           }}
         >
-          <Buddy id="jumbo" size={34} still />
+          <Buddy fallback="jumbo" size={34} still />
           <Typography
             sx={{
               display: { xs: "none", lg: "block" },

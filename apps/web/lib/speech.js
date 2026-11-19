@@ -13,6 +13,17 @@ export const onSpeech = (fn) => {
   return () => listeners.delete(fn);
 };
 const emit = (text) => listeners.forEach((fn) => fn(text));
+const motionListeners = new Set();
+let motion = null;
+export function onBuddySpeech(fn) {
+  motionListeners.add(fn);
+  fn(motion);
+  return () => motionListeners.delete(fn);
+}
+function emitMotion(value) {
+  motion = value;
+  motionListeners.forEach((fn) => fn(value));
+}
 let token = 0;
 let audio = null;
 
@@ -69,6 +80,7 @@ export const clipFor = (text, clip) => chooseClip(text, clip, { parent: textClip
 export function stop() {
   token++;
   emit(null);
+  emitMotion(null);
   if (canSpeak()) {
     try {
       speechSynthesis.cancel();
@@ -96,16 +108,28 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
   stop();
   const my = token;
   let finished = false;
+  let triedTts = false;
+  const state = useFamily.getState();
+  const speaker = buddy || state.learners.find((learner) => learner.id === state.activeId)?.buddy || "zip";
+  const motionAt = (index, speed, media = null) => {
+    if (my === token && !finished) emitMotion({ speaker, text, index, speed, media, at: performance.now() });
+  };
+  const pauseMotion = () => {
+    if (my === token && !finished) emitMotion(null);
+  };
   const finish = () => {
     if (finished || my !== token) return;
     finished = true;
     emit(null);
+    emitMotion(null);
     if (done) done();
   };
   if (!enabled || !text) return finish();
   emit(text);
 
   const tts = () => {
+    if (triedTts || finished || my !== token) return;
+    triedTts = true;
     if (!canSpeak()) return finish();
     try {
       const u = new SpeechSynthesisUtterance(text);
@@ -113,6 +137,14 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
       const bv = (buddy && BUDDY_VOICES[buddy]) || { pitch: 1.1, rate: 1 };
       u.rate = Math.min(2, (rate ?? RATE[band] ?? 0.9) * bv.rate * voiceScale());
       u.pitch = bv.pitch;
+      let charIndex = 0;
+      u.onstart = () => motionAt(0, u.rate);
+      u.onboundary = (event) => {
+        charIndex = event.charIndex;
+        motionAt(charIndex, u.rate);
+      };
+      u.onpause = pauseMotion;
+      u.onresume = () => motionAt(charIndex, u.rate);
       u.onend = finish;
       u.onerror = finish;
       speechSynthesis.speak(u);
@@ -128,6 +160,10 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
       audio = new Audio(url);
       audio.onended = finish;
       audio.onerror = () => my === token && tts();
+      const media = audio;
+      media.onplaying = () => motionAt(0, 1, media);
+      media.onpause = pauseMotion;
+      media.onwaiting = pauseMotion;
       audio.play().catch(() => my === token && tts());
       return;
     } catch {

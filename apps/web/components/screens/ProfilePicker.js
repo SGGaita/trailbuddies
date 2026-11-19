@@ -82,10 +82,10 @@ export default function ProfilePicker() {
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
         <Box sx={{ display: { xs: "block", sm: "none" } }}>
-          <Buddy id="zip" size={70} />
+          <Buddy fallback="zip" size={70} />
         </Box>
         <Box sx={{ display: { xs: "none", sm: "block" } }}>
-          <Buddy id="zip" size={110} />
+          <Buddy fallback="zip" size={110} />
         </Box>
         <Bubble>
           {classroom ? t("classroom.whoAreYou", { name: classroom.name }) : t("learner.whoIsPlaying")}

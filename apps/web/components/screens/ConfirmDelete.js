@@ -40,7 +40,7 @@ export default function ConfirmDelete() {
         textAlign: "center",
       }}
     >
-      <Buddy id="tumi" mood={state.step === "done" ? "happy" : "think"} size={110} />
+      <Buddy fallback="tumi" mood={state.step === "done" ? "happy" : "think"} size={110} />
       <Typography variant="h4" component="h1" sx={{ maxWidth: 560 }}>
         {state.step === "done" ? t("privacy.confirmedTitle") : t("privacy.confirmTitle")}
       </Typography>
