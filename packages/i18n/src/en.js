@@ -757,6 +757,8 @@ export default {
   "teach.newCode": "Make a new code",
   "teach.letters": "Print parent letters",
   "teach.badgeWall": "Badge wall",
+  "teach.classBadges": "Class badges",
+  "teach.badgeWallFor": "Badge wall for {name}",
   "teach.badgeWallWeek": "Badges earned in class this week",
   "teach.badgeWallEmpty": "No badges earned in class this week yet.",
   "teach.badgeWallError": "The badge wall could not load.",

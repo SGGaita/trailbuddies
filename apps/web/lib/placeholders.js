@@ -6,6 +6,3 @@ export const PLAY_MORE = {
 export const FAMILY = {
   rewards: { title: "Wishes & awards", sprint: "Phase 2 (Sprint 11)", story: "BST-04, BST-05" },
 };
-export const TEACH = {
-  badges: { title: "Class badges", sprint: "Phase 2 (Sprint 11)", story: "BDG-04" },
-};
