@@ -189,6 +189,26 @@ export default function Classroom() {
             </Box>
           ))}
         </Box>
+        {/* T06's third tab in the prototype: the badge wall, for the board. */}
+        <Box
+          component="section"
+          aria-label={t("teach.badgeWall")}
+          sx={{ ...card, display: "flex", flexDirection: "column", gap: 1, alignItems: "flex-start" }}
+        >
+          <Typography component="h2" variant="h6">
+            {t("teach.badgeWall")}
+          </Typography>
+          <Typography>{t("teach.badgeWallOnBoard")}</Typography>
+          <Button
+            component={Link}
+            variant="outlined"
+            sx={{ borderWidth: 2 }}
+            href={`/teach/badge-wall?id=${encodeURIComponent(cls.id)}`}
+            aria-label={t("teach.badgeWallFor", { name: cls.name })}
+          >
+            {t("teach.badgeWallOpen")}
+          </Button>
+        </Box>
       </Box>
     </TeachShell>
   );

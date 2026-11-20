@@ -35,3 +35,4 @@ export * from "./sounds.js";
 export * from "./firstSteps.js";
 export * from "./classes.js";
 export * from "./assignments.js";
+export * from "./badgeWall.js";

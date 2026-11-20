@@ -49,26 +49,108 @@ def class_with_children(client, outbox, names=("Zawadi", "Amani", "Baraka")):
     return c, {s["first_name"]: s["id"] for s in roster}
 
 
-def test_badge_wall_shows_first_earnings_this_week_and_first_names(client, outbox, monkeypatch):
+def award(n, who, badge, at, **data):
+    return ev(n, who, "badge_awarded", badgeId=badge, **data) | {"at": at}
+
+
+# Nairobi's week of Monday 16 November 2026: Sunday 21:00 UTC to Sunday 21:00 UTC.
+NAIROBI_WEEK = {"from": "2026-11-15T21:00:00Z", "to": "2026-11-22T21:00:00Z"}
+
+
+def test_badge_wall_lists_every_child_with_badges_first_earned_this_week(client, outbox, monkeypatch):
     c, ids = class_with_children(client, outbox)
     monkeypatch.setattr(classwork, "utcnow", lambda: datetime(2026, 11, 18, tzinfo=UTC))
     path = f"/classes/{c['id']}"
+    z = ids["Zawadi"]
     awards = [
-        ev(1, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-15T23:59:59Z"},
-        ev(2, ids["Zawadi"], "badge_awarded", badgeId="old") | {"at": "2026-11-16T01:00:00Z"},
-        ev(3, ids["Zawadi"], "badge_awarded", badgeId="new", tier="bronze") | {"at": "2026-11-16T00:00:00Z"},
-        ev(4, ids["Zawadi"], "badge_awarded", badgeId="new") | {"at": "2026-11-17T01:00:00Z"},
-        ev(5, ids["Zawadi"], "badge_awarded", badgeId="new", tier="silver", upgrade=True)
-        | {"at": "2026-11-17T02:00:00Z"},
+        award(1, z, "old", "2026-11-15T20:59:59Z"),  # Sunday 23:59 in Nairobi: last week
+        award(2, z, "old", "2026-11-16T09:00:00Z"),  # a duplicate from another tablet: not new
+        award(3, z, "sunday-night", "2026-11-15T21:30:00Z"),  # Monday 00:30 in Nairobi: this week
+        award(4, z, "perfect-ten", "2026-11-17T09:00:00Z", tier="bronze"),
+        award(5, z, "perfect-ten", "2026-11-18T09:00:00Z", tier="silver", upgrade=True),  # an upgrade
+        award(6, z, "next-week", "2026-11-22T21:00:00Z"),
     ]
     assert client.post(f"{path}/events", json={"events": awards}).status_code == 200
-    assert client.get(f"{path}/badge-wall").json() == {
-        "class_name": c["name"],
-        "students": [{"first_name": "Zawadi", "badge_ids": ["new"], "badge_tiers": {"new": "bronze"}}],
-    }
+    wall = client.get(f"{path}/badge-wall", params=NAIROBI_WEEK).json()
+    assert wall["class_name"] == c["name"] and wall["from"] == NAIROBI_WEEK["from"]
+    # Every child, in name order, including those with nothing new yet.
+    assert [s["first_name"] for s in wall["students"]] == ["Amani", "Baraka", "Zawadi"]
+    assert wall["students"][0]["badges"] == []
+    assert wall["students"][2]["badges"] == [
+        {"badge_id": "sunday-night", "tier": None, "at": "2026-11-15T21:30:00Z", "where": "class"},
+        {"badge_id": "perfect-ten", "tier": "bronze", "at": "2026-11-17T09:00:00Z", "where": "class"},
+    ]
+    # Only what the wall needs about each child.
+    assert set(wall["students"][2]) == {"id", "first_name", "initial", "avatar_color", "badges"}
+    # Without a week, Monday 00:00 UTC (older apps).
+    utc = client.get(f"{path}/badge-wall").json()
+    assert utc["from"] == "2026-11-16T00:00:00Z"
+    # In UTC weeks, Monday 00:30 in Nairobi is still last week and Sunday 21:00 UTC is this week.
+    assert [b["badge_id"] for b in utc["students"][2]["badges"]] == ["perfect-ten", "next-week"]
+    # Last week, in Nairobi.
+    last = client.get(
+        f"{path}/badge-wall", params={"from": "2026-11-08T21:00:00Z", "to": NAIROBI_WEEK["from"]}
+    )
+    assert [b["badge_id"] for b in last.json()["students"][2]["badges"]] == ["old"]
+
+
+def test_badge_wall_weeks_must_be_a_week_and_the_class_the_teachers_own(client, outbox, monkeypatch):
+    c, _ = class_with_children(client, outbox)
+    monkeypatch.setattr(classwork, "utcnow", lambda: datetime(2026, 11, 18, tzinfo=UTC))
+    path = f"/classes/{c['id']}/badge-wall"
+    for params in (
+        {"from": "yesterday", "to": "today"},
+        {"from": NAIROBI_WEEK["to"], "to": NAIROBI_WEEK["from"]},
+        {"from": "2026-10-01T00:00:00Z", "to": "2026-11-01T00:00:00Z"},  # a month
+        {"from": "2024-01-01T00:00:00Z", "to": "2024-01-08T00:00:00Z"},  # too long ago
+        {"from": NAIROBI_WEEK["from"]},
+    ):
+        assert client.get(path, params=params).status_code == 422, params
     other = TestClient(client.app)
     teacher(other, outbox, "james@hill.sc.ke", "Hill School")
-    assert other.get(f"{path}/badge-wall").status_code == 404
+    assert other.get(path, params=NAIROBI_WEEK).status_code == 404
+
+
+def test_home_badges_count_only_when_the_parent_shares_all_progress(client, outbox, monkeypatch):
+    teacher(client, outbox)
+    c = a_class(client)
+    added = client.post(
+        f"/classes/{c['id']}/students",
+        json={"students": [{"first_name": "Amani", "initial": "A"}, {"first_name": "Amani", "initial": "K"}]},
+    ).json()["added"]
+    sid = added[0]["id"]
+    grace = TestClient(client.app)
+    fam = family_with_consent(grace, outbox)
+    grace.put(f"/families/{fam['id']}/learners/{LEARNER}", json=learner_body())
+    home = [
+        award(10, LEARNER, "counting-champ", "2026-11-17T15:00:00Z", name="Counting Champ"),
+        award(11, LEARNER, "first-steps", "2026-10-01T15:00:00Z"),  # earned at home weeks ago
+    ]
+    grace.post("/sync/events", json={"family_id": fam["id"], "events": home})
+    body = {"code": c["join_code"], "student_id": sid, "learner_id": LEARNER}
+    assert grace.post(f"/families/{fam['id']}/links", json=body).status_code == 201
+    # The same badge earned again in class this week isn't new for this child.
+    client.post(
+        f"/classes/{c['id']}/events",
+        json={"events": [award(12, sid, "first-steps", "2026-11-16T09:00:00Z")]},
+    )
+    monkeypatch.setattr(classwork, "utcnow", lambda: datetime(2026, 11, 18, tzinfo=UTC))
+    path = f"/classes/{c['id']}/badge-wall"
+
+    def amani_a():
+        students = client.get(path, params=NAIROBI_WEEK).json()["students"]
+        return next(s for s in students if s["id"] == sid)
+
+    # Scope "class": home badges stay at home, and class play is judged by itself.
+    assert amani_a()["initial"] == "A"
+    assert [b["badge_id"] for b in amani_a()["badges"]] == ["first-steps"]
+    grace.patch(f"/families/{fam['id']}/links/{sid}", json={"scope": "all"})
+    # Scope "all": this week's home badge shows, and the old one keeps class play from looking new.
+    assert amani_a()["badges"] == [
+        {"badge_id": "counting-champ", "tier": None, "at": "2026-11-17T15:00:00Z", "where": "home"}
+    ]
+    grace.delete(f"/families/{fam['id']}/links/{sid}")
+    assert [b["badge_id"] for b in amani_a()["badges"]] == ["first-steps"]
 
 
 def test_groups_hold_children_of_the_class_only(client, outbox):
