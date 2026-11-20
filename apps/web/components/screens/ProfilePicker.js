@@ -143,7 +143,7 @@ export default function ProfilePicker() {
               <Typography sx={{ color: colors.ink, fontSize: { xs: 16, sm: 19 }, fontWeight: 700 }}>
                 {hint}
               </Typography>
-              <SpeakButton text={`${title} ${hint}`} size={44} />
+              <SpeakButton text={`${title} ${hint}`} size={48} />
             </Box>
           </Box>
         </Box>
