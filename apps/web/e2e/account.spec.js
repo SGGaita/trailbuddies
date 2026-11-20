@@ -226,8 +226,9 @@ test("the PIN guards the grown-up zone, with a lock-out after 5 wrong tries", as
   await page.reload();
   await passGate(page, "2580");
   await expect(page.getByRole("heading", { name: "Hello, Grace" })).toBeVisible();
-  // Going back to the children locks it again.
+  // Going back to the children locks it again (the profile picker relocks it, #268).
   await page.goto("/play");
+  await expect(page.getByText("Who's playing today?")).toBeVisible();
   await page.goto("/family");
   await expect(page.getByRole("heading", { name: "Grown-ups only" })).toBeVisible();
 });

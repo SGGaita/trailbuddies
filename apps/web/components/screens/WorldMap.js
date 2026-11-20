@@ -635,7 +635,7 @@ export default function WorldMap() {
           {greeting}
         </Bubble>
         <Box sx={{ pointerEvents: "auto", flex: "none" }}>
-          <SpeakButton text={greeting} size={44} />
+          <SpeakButton text={greeting} size={48} />
         </Box>
       </Box>
       <Snackbar
