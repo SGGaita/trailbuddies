@@ -1,6 +1,6 @@
 "use client";
 
-import { BUDDIES, BUDDY_ART, OUTFITS } from "@/lib/art";
+import { BUDDIES, OUTFITS, buddySrc } from "@/lib/art";
 import { useFamily } from "@/lib/store";
 import BuddyMotion from "./BuddyMotion";
 
@@ -30,6 +30,7 @@ export default function Buddy({
   const key = Object.hasOwn(BUDDIES, candidate) ? candidate : "zip";
   const buddy = BUDDIES[key];
   const pointing = mood === "point";
+  const src = buddySrc(key, size);
   return (
     <svg
       className={still || mood === "sleep" ? undefined : "buddy"}
@@ -41,10 +42,10 @@ export default function Buddy({
       data-mood={mood}
       style={{ flex: "none", display: "block" }}
     >
-      <image data-buddy-art="" href={`${BUDDY_ART}/${key}.webp`} x="4" y="36" width="212" height="218" />
+      <image data-buddy-art="" href={src} x="4" y="36" width="212" height="218" />
       {!still && mood !== "sleep" && (
         <foreignObject x="4" y="36" width="212" height="218">
-          <BuddyMotion id={key} gesture={mood === "wave" ? "wave" : undefined} />
+          <BuddyMotion id={key} src={src} gesture={mood === "wave" ? "wave" : undefined} />
         </foreignObject>
       )}
       {["neck", "eyes", "hat"].map((slot) => {

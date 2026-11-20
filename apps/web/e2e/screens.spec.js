@@ -119,8 +119,9 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
     };
   });
   await page.goto("/start");
+  // Small buddies use the 320 px pictures (the welcome page's weight, #254).
   for (const id of ["zip", "tumi", "jumbo", "kiki"])
-    await expect(page.locator(`svg image[href="/buddy-picker/${id}.webp"]`).last()).toBeVisible();
+    await expect(page.locator(`svg image[href="/buddy-picker/${id}-sm.webp"]`).last()).toBeVisible();
   await page.getByRole("button", { name: "Try the demo family" }).click();
   await expect(page).toHaveURL(/\/play$/);
   await page.getByRole("button", { name: /Amani/ }).click(); // Amani has no buddy yet
@@ -158,7 +159,7 @@ test("a new learner meets the buddies, then starts at Numbers", async ({ page },
   await expect(
     page.getByRole("img", { name: "Jumbo the elephant" }).filter({ visible: true }).first(),
   ).toHaveAttribute("data-mood", "point");
-  await expect(page.locator('svg[data-mood="point"] image[href="/buddy-picker/jumbo.webp"]').first()).toBeAttached();
+  await expect(page.locator('svg[data-mood="point"] image[href^="/buddy-picker/jumbo"]').first()).toBeAttached();
   await page.getByRole("link", { name: "Change buddy" }).click();
   await expect(page.getByRole("button", { name: "Jumbo, elephant" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Kiki, turtle" }).click();

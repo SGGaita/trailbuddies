@@ -1,6 +1,17 @@
 // Trailbuddies' illustrated portraits and the app's outfit and island artwork.
 export const BUDDY_ART = "/buddy-picker";
 
+/** Buddies drawn at this size (CSS px) or smaller use the 320 px picture (sharp at 2x screens). */
+export const BUDDY_SMALL_MAX = 140;
+
+/**
+ * The portrait for a buddy at a size: a 320 px picture (~30 KB) for the many small buddies, the
+ * full 660 px one (~100 KB) only for big ones such as Meet the buddies.
+ * @param {string} id @param {number} [size] CSS px
+ */
+export const buddySrc = (id, size = 0) =>
+  `${BUDDY_ART}/${id}${size && size <= BUDDY_SMALL_MAX ? "-sm" : ""}.webp`;
+
 export const BUDDIES = {
   zip: {
     name: "Zip",
