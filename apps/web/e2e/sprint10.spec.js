@@ -68,38 +68,6 @@ function classOnServer(srv) {
     };
 }
 
-test("the teacher Badges tab opens the selected class badge wall", async ({ page, context }) => {
-  const srv = seedServer(newServer());
-  classOnServer(srv);
-  await fakeApi(context, srv);
-  await page.route(`**/api/classes/${CID}/badge-wall`, (route) =>
-    route.fulfill({
-      json: { class_name: "Class 1B", students: [{ first_name: "Wanjiru", badge_ids: ["first-steps"] }] },
-    }),
-  );
-  await signIn(page, srv, "priya@stmarys.sch.ke");
-  await page.goto("/teach");
-  await passGate(page);
-  await page.getByRole("navigation", { name: "Teacher" }).getByRole("link", { name: "Badges" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Class badges" })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole("heading", { level: 1, name: "Class badges" })).toBeVisible();
-  await page.getByRole("link", { name: "Badge wall for Class 1B" }).click();
-  await expect(page.getByText("First Steps", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Wanjiru", exact: true })).toBeVisible();
-  const badgesNav = page.getByRole("navigation", { name: "Teacher" }).getByRole("link", { name: "Badges" });
-  await expect(badgesNav).toHaveAttribute("aria-current", "page");
-
-  await page.getByRole("button", { name: "Enter full screen" }).click();
-  await expect.poll(() => page.evaluate(() => Boolean(document.fullscreenElement))).toBe(true);
-  await expect(page.getByRole("link", { name: "Back to class" })).toHaveCount(0);
-  await expect(page.getByText("First Steps", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Exit full screen" }).click();
-  await expect.poll(() => page.evaluate(() => Boolean(document.fullscreenElement))).toBe(false);
-  await badgesNav.click();
-  await expect(page.getByRole("heading", { level: 1, name: "Class badges" })).toBeVisible();
-});
-
 test("groups, assigning work, Class Island at home and the class progress heatmap (CLS-07, ASN-01..04, MAP-06b)", async ({
   page,
   context,

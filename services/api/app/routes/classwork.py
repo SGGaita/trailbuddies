@@ -9,7 +9,7 @@ set, from the day it was set.
 
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
@@ -331,48 +331,101 @@ def assignment_events(
     return out
 
 
+TIERS = ("bronze", "silver", "gold")
+MAX_WALL_WEEK = timedelta(days=7, hours=2)  # a week that crosses a clock change is 7 days ± 1 h
+MAX_WALL_HISTORY = timedelta(days=400)
+
+
+def wall_window(from_: str | None, to: str | None) -> tuple[datetime, datetime]:
+    """The week the wall shows. The device sends Monday 00:00 to Monday 00:00 in the school's
+    time zone (packages/domain wallWeek); without one, this week from Monday 00:00 UTC."""
+    if from_ is None and to is None:
+        now = utcnow()
+        start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        return start, start + timedelta(days=7)
+    try:
+        start = aware(datetime.fromisoformat((from_ or "").replace("Z", "+00:00")))
+        end = aware(datetime.fromisoformat((to or "").replace("Z", "+00:00")))
+    except ValueError:
+        raise HTTPException(422, "bad_week") from None
+    if not (timedelta(0) < end - start <= MAX_WALL_WEEK) or start < utcnow() - MAX_WALL_HISTORY:
+        raise HTTPException(422, "bad_week")
+    return start, end
+
+
+def first_awards(rows) -> dict[str, tuple[datetime, str | None, str]]:
+    """badge id -> (when, tier, where) of the first time a child earned it. Tier upgrades
+    (BDG-04) are not new badges and keep the tier the badge was first earned at."""
+    first: dict[str, tuple[datetime, str | None, str]] = {}
+    for data, at, where in rows:
+        data = data or {}
+        badge_id = data.get("badgeId")
+        if data.get("upgrade") or not isinstance(badge_id, str) or not badge_id or len(badge_id) > 64:
+            continue
+        at = aware(at)
+        if badge_id not in first or at < first[badge_id][0]:
+            tier = data.get("tier")
+            first[badge_id] = (at, tier if tier in TIERS else None, where)
+    return first
+
+
 @router.get("/classes/{class_id}/badge-wall")
-def badge_wall(class_id: str, user: User = Depends(current_user), db: DbSession = Depends(get_session)):
+def badge_wall(
+    class_id: str,
+    from_: str | None = Query(None, alias="from"),
+    to: str | None = None,
+    user: User = Depends(current_user),
+    db: DbSession = Depends(get_session),
+):
+    """ASN-05: every child in the class with the badges they earned for the first time this
+    week. First name and initial only (the device adds the initial when names clash), the
+    roster colour, and badge ids. Home badges count only for children whose parent shares all
+    progress; a badge first earned at home before the week isn't new because it came up in
+    class. Nothing else about home play is sent."""
     c = own_class(db, user, class_id)
+    start, end = wall_window(from_, to)
     roster = class_roster(db, c)
-    now = utcnow()
-    week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-    badges = {s.id: [] for s in roster}
-    tiers = {s.id: {} for s in roster}
-    seen = set()
+    rows: dict[str, list] = {s.id: [] for s in roster}
     if roster:
-        rows = db.execute(
-            select(ClassEvent.student_id, ClassEvent.data, ClassEvent.at)
-            .where(
+        for student_id, data, at in db.execute(
+            select(ClassEvent.student_id, ClassEvent.data, ClassEvent.at).where(
                 ClassEvent.class_id == c.id,
-                ClassEvent.student_id.in_(badges),
+                ClassEvent.student_id.in_(rows),
                 ClassEvent.type == "badge_awarded",
-                ClassEvent.at <= now,
+                ClassEvent.at < end,
             )
-            .order_by(ClassEvent.at, ClassEvent.id)
-        )
-        for student_id, data, at in rows:
-            if data.get("upgrade"):
-                continue
-            badge_id = data.get("badgeId")
-            if not isinstance(badge_id, str) or not badge_id or (student_id, badge_id) in seen:
-                continue
-            seen.add((student_id, badge_id))
-            if aware(at) >= week_start:
-                badges[student_id].append(badge_id)
-                tier = data.get("tier")
-                if tier in ("bronze", "silver", "gold"):
-                    tiers[student_id][badge_id] = tier
+        ):
+            rows[student_id].append((data, at, "class"))
+        sharing = {s.learner_id: s.id for s in roster if s.learner_id and s.scope == "all"}
+        if sharing:
+            for learner_id, data, at in db.execute(
+                select(Event.learner_id, Event.data, Event.at).where(
+                    Event.learner_id.in_(sharing), Event.type == "badge_awarded", Event.at < end
+                )
+            ):
+                rows[sharing[learner_id]].append((data, at, "home"))
+
+    def badges_of(student_id: str) -> list[dict]:
+        new = [
+            {"badge_id": badge_id, "tier": tier, "at": WHEN(at), "where": where}
+            for badge_id, (at, tier, where) in first_awards(rows[student_id]).items()
+            if at >= start
+        ]
+        return sorted(new, key=lambda b: (b["at"], b["badge_id"]))
+
     return {
         "class_name": c.name,
+        "from": WHEN(start),
+        "to": WHEN(end),
         "students": [
             {
+                "id": s.id,
                 "first_name": s.first_name,
-                "badge_ids": badges[s.id],
-                "badge_tiers": tiers[s.id],
+                "initial": s.initial,
+                "avatar_color": s.avatar_color,
+                "badges": badges_of(s.id),
             }
             for s in roster
-            if badges[s.id]
         ],
     }
 

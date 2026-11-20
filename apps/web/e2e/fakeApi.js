@@ -521,6 +521,57 @@ export async function fakeApi(context, srv) {
         events: workEvents(srv, pairs),
       });
     }
+    m = path.match(/^\/classes\/([^/]+)\/badge-wall$/);
+    if (m && method === "GET") {
+      // Mirrors services/api badge_wall: every child; first awards in [from, to); home badges
+      // only for links that share all progress; tier upgrades are not new badges.
+      const cls = srv.classes[m[1]];
+      if (!cls || cls.teacher !== userId) return json(route, 404, { detail: "Not found" });
+      let from = url.searchParams.get("from");
+      let to = url.searchParams.get("to");
+      if (!from && !to) {
+        const d = new Date();
+        d.setUTCHours(0, 0, 0, 0);
+        d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+        from = d.toISOString();
+        to = new Date(+d + 7 * 864e5).toISOString();
+      }
+      const span = Date.parse(to) - Date.parse(from);
+      if (!(span > 0 && span <= (7 * 24 + 2) * 36e5)) return json(route, 422, { detail: "bad_week" });
+      const when = (iso) => new Date(iso).toISOString().replace(".000Z", "Z");
+      const roster = Object.values(srv.students)
+        .filter((st) => st.class_id === m[1])
+        .sort((a, b) => (a.first_name < b.first_name ? -1 : 1));
+      const students = roster.map((st) => {
+        const awards = [
+          ...srv.classEvents.filter((e) => e.learnerId === st.id).map((e) => [e, "class"]),
+          ...(st.learner_id && st.scope === "all"
+            ? srv.events.filter((e) => e.learnerId === st.learner_id).map((e) => [e, "home"])
+            : []),
+        ].filter(([e]) => e.type === "badge_awarded" && !e.data.upgrade && Date.parse(e.at) < Date.parse(to));
+        const first = new Map();
+        for (const [e, where] of awards) {
+          const had = first.get(e.data.badgeId);
+          if (!had || Date.parse(e.at) < Date.parse(had.at))
+            first.set(e.data.badgeId, {
+              badge_id: e.data.badgeId,
+              tier: ["bronze", "silver", "gold"].includes(e.data.tier) ? e.data.tier : null,
+              at: when(e.at),
+              where,
+            });
+        }
+        return {
+          id: st.id,
+          first_name: st.first_name,
+          initial: st.initial,
+          avatar_color: st.avatar_color,
+          badges: [...first.values()]
+            .filter((b) => Date.parse(b.at) >= Date.parse(from))
+            .sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0)),
+        };
+      });
+      return json(route, 200, { class_name: cls.name, from: when(from), to: when(to), students });
+    }
     m = path.match(/^\/classes\/([^/]+)\/assignments\/([^/]+)$/);
     if (m && method === "DELETE") {
       srv.assignments[m[2]].removed = true;

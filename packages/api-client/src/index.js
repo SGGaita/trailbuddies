@@ -189,7 +189,15 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
       request(`/classes/${encodeURIComponent(classId)}/assignments/${encodeURIComponent(assignmentId)}`, { method: "DELETE" }),
     /** ASN-02..04: assignments, groups and the play that counts towards them. */
     classProgress: (classId) => request(`/classes/${encodeURIComponent(classId)}/assignments/progress`),
-    classBadgeWall: (classId) => request(`/classes/${encodeURIComponent(classId)}/badge-wall`),
+    /**
+     * ASN-05: every child with the badges they first earned in the week.
+     * @param {string} classId @param {{ from: string, to: string }} [week] UTC instants (domain `wallWeek`)
+     */
+    classBadgeWall: (classId, week) =>
+      request(
+        `/classes/${encodeURIComponent(classId)}/badge-wall` +
+          (week ? `?${new URLSearchParams({ from: week.from, to: week.to })}` : ""),
+      ),
     /** MAP-06b: work from the children's teachers, for Class Island at home. */
     familyAssignments: (familyId) => request(`${fam(familyId)}/assignments`),
     /** CRM-01 @param {string} classId @param {{ id: string, label: string }} body */
