@@ -37,8 +37,15 @@ export async function demo(page) {
 /** Open a locked grown-up page. The same tab may already be unlocked. */
 export async function passGate(page, pin) {
   const gate = page.getByRole("heading", { name: "Grown-ups only" });
-  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-  if (!pin && !(await gate.isVisible())) return;
+  if (!pin) {
+    // After a link click the previous page's heading can still be on screen, so "no gate yet"
+    // doesn't mean "already open": give the gate a moment to appear (#268 keeps unlocks on reload).
+    const shown = await gate.waitFor({ state: "visible", timeout: 2_500 }).then(
+      () => true,
+      () => false,
+    );
+    if (!shown) return;
+  }
   await expect(gate).toBeVisible();
   let answer = pin;
   if (!pin) {
