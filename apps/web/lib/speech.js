@@ -172,3 +172,16 @@ export function speak(text, { rate, band, buddy, clip, done, enabled = true } = 
   }
   tts();
 }
+
+/**
+ * Say several lines one after another, each with its own recorded clip if it has one
+ * (e.g. "Who's playing today?" then "Tap your picture to start."). Stopping, or any new
+ * speech, cancels the rest.
+ * @param {{ text: string, clip?: string }[]} lines
+ * @param {{ enabled?: boolean }} [opts]
+ */
+export function speakLines(lines, { enabled = true } = {}) {
+  const [first, ...rest] = lines;
+  if (!first) return;
+  speak(first.text, { clip: first.clip, enabled, done: rest.length ? () => speakLines(rest, { enabled }) : undefined });
+}

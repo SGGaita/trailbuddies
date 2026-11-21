@@ -2,19 +2,20 @@
 import IconButton from "@mui/material/IconButton";
 import { colors } from "@trailbuddies/tokens";
 import { SoundIcon } from "@/components/art/UiIcon";
-import { speak } from "@/lib/speech";
+import { speak, speakLines } from "@/lib/speech";
 import { useFamily } from "@/lib/store";
 
 /**
  * Round "hear it again" button. Children's prompts are always available as speech.
- * @param {{ text: string, size?: number, clip?: string }} props clip: a recorded clip's id
- *   (registerClip); the device voice is used when it can't play
+ * @param {{ text?: string, size?: number, clip?: string, lines?: { text: string, clip?: string }[] }} props
+ *   clip: a recorded clip's id (registerClip); the device voice is used when it can't play.
+ *   lines: several lines said one after another, instead of text and clip.
  */
-export default function SpeakButton({ text, size = 56, clip }) {
+export default function SpeakButton({ text, size = 56, clip, lines }) {
   const voice = useFamily((s) => s.settings.voice);
   return (
     <IconButton
-      onClick={() => speak(text, { clip, enabled: voice })}
+      onClick={() => (lines ? speakLines(lines, { enabled: voice }) : speak(text, { clip, enabled: voice }))}
       aria-label="Hear it"
       sx={{
         width: size,

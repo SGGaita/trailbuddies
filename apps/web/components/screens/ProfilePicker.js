@@ -17,11 +17,18 @@ import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
 import { PictureLockDialog } from "@/components/PictureLock";
 import { api } from "@/lib/account";
-import { registerClip, speak, stop } from "@/lib/speech";
+import { registerClip, speakLines, stop } from "@/lib/speech";
 
 // C01: "Who's playing today?" in a real voice (Steve's recording), with the device voice as the fallback.
 const WHO_CLIP = "voice.who-is-playing";
+const TAP_CLIP = "voice.tap-your-picture";
 registerClip(WHO_CLIP, "/voice/who-is-playing.mp3");
+registerClip(TAP_CLIP, "/voice/tap-your-picture.mp3");
+/** The question, then the hint, both in Steve's recorded voice. */
+const ASK = () => [
+  { text: t("learner.whoIsPlaying"), clip: WHO_CLIP },
+  { text: t("learner.tapPicture"), clip: TAP_CLIP },
+];
 
 const BAND_NAMES = {
   seedling: "Seedling",
@@ -50,7 +57,7 @@ export default function ProfilePicker() {
   const askAloud = !classroom && ready && learners.length > 0 && voice;
   useEffect(() => {
     if (!askAloud) return undefined;
-    speak(t("learner.whoIsPlaying"), { clip: WHO_CLIP });
+    speakLines(ASK());
     return () => stop();
   }, [askAloud]);
   // FAM-02: a learner with a picture password taps their pictures first.
@@ -159,7 +166,7 @@ export default function ProfilePicker() {
               {classroom ? (
                 <SpeakButton text={`${title} ${hint}`} size={48} />
               ) : (
-                <SpeakButton text={title} clip={WHO_CLIP} size={48} />
+                <SpeakButton lines={ASK()} size={48} />
               )}
             </Box>
           </Box>

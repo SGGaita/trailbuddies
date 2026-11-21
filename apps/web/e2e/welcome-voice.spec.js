@@ -21,9 +21,10 @@ test.afterEach(({ page }) => expect(page.errors, "console errors").toEqual([]));
 test("the welcome screen asks who's playing in a real voice", async ({ page }) => {
   await demo(page); // lands on the picker
   await expect(page.getByRole("heading", { name: "Who's playing today?" })).toBeVisible();
-  await expect.poll(() => played(page)).toEqual(["/voice/who-is-playing.mp3"]);
+  const both = ["/voice/who-is-playing.mp3", "/voice/tap-your-picture.mp3"];
+  await expect.poll(() => played(page)).toEqual(both); // the question, then the hint
   await page.getByRole("button", { name: "Hear it" }).click();
-  await expect.poll(() => played(page)).toEqual(["/voice/who-is-playing.mp3", "/voice/who-is-playing.mp3"]);
+  await expect.poll(() => played(page)).toEqual([...both, ...both]);
 });
 
 test("with Voice off, the screen stays quiet", async ({ page }) => {
