@@ -58,6 +58,7 @@ const EXTRAS = [
   "/sounds/miss.wav",
   "/sounds/done.wav",
   ...["zip", "tumi", "jumbo", "kiki", "trail", "world"].map((name) => `/buddy-picker/${name}.webp`),
+  ...["zip", "tumi", "jumbo", "kiki"].map((name) => `/buddy-picker/${name}-sm.webp`),
   "/art/number-mountain.webp",
   "/art/world-valley-continuous.webp",
   "/icons/ui/games.webp",

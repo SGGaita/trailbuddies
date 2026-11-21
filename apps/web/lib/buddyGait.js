@@ -94,8 +94,52 @@ function resample(distance, inner, scale) {
   return Math.sign(distance) * original - distance;
 }
 
-/** Deform painted limbs, mouths and eyelids while leaving the rest of the portrait intact. */
-export function buddyGait(image, id) {
+/** Give the browser a turn between slices of work, so building a rig never blocks a tap. */
+const yieldToMain = () =>
+  globalThis.scheduler?.yield ? globalThis.scheduler.yield() : new Promise((r) => setTimeout(r, 0));
+/** Rows of the 256 px rig worked out per slice: well under 50 ms even on a slow phone. */
+const ROWS_PER_SLICE = 16;
+/** Which pixels move with which limb or feature. It depends only on the buddy, not the picture. */
+const geometry = new Map();
+
+function jointsFor(id, limbs, faceRegions) {
+  if (!geometry.has(id))
+    geometry.set(
+      id,
+      (async () => {
+        const joints = [];
+        for (let row = 0; row < SIZE; row++) {
+          if (row && row % ROWS_PER_SLICE === 0) await yieldToMain();
+          for (let col = 0; col < SIZE; col++) {
+            const x = (col - PAD) / SCALE;
+            const y = (row - PAD) / SCALE;
+            const weights = [];
+            for (let i = 0; i < limbs.length; i++) {
+              const weight = limbWeight(x, y, limbs[i]);
+              if (weight) weights.push({ i, weight, dx: x - limbs[i].joint[0], dy: y - limbs[i].joint[1] });
+            }
+            const features = [];
+            for (let i = 0; i < faceRegions.length; i++) {
+              const [cx, cy, halfWidth, halfHeight] = faceRegions[i];
+              const dy = y - cy;
+              const blend = 1 - ease((Math.abs(x - cx) / halfWidth - 0.65) / 0.8);
+              if (blend && Math.abs(dy) < halfHeight * 2.2) features.push({ i, dy, halfHeight, blend });
+            }
+            if (weights.length || features.length)
+              joints.push({ x, y, weights, features, index: (row * SIZE + col) * 4 });
+          }
+        }
+        return joints;
+      })(),
+    );
+  return geometry.get(id);
+}
+
+/**
+ * Deform painted limbs, mouths and eyelids while leaving the rest of the portrait intact.
+ * Resolves to a renderer once the rig is built, in slices that leave the page responsive.
+ */
+export async function buddyGait(image, id) {
   const limbs = LIMBS[id].map(([joint, tip, radius, side, foot = false]) => ({
     joint,
     tip,
@@ -103,33 +147,16 @@ export function buddyGait(image, id) {
     side,
     foot,
   }));
+  const face = FACES[id];
+  const faceRegions = [face.mouth, ...face.eyes];
+  const waveSides = new Map(face.wave);
+  const joints = await jointsFor(id, limbs, faceRegions);
   const surface = document.createElement("canvas");
   surface.width = surface.height = SIZE;
   const ctx = surface.getContext("2d", { willReadFrequently: true });
   ctx.drawImage(image, PAD, PAD, SIZE - 2 * PAD, SIZE - 2 * PAD);
   const frame = ctx.getImageData(0, 0, SIZE, SIZE);
   const source = frame.data.slice();
-  const joints = [];
-  const face = FACES[id];
-  const faceRegions = [face.mouth, ...face.eyes];
-  const waveSides = new Map(face.wave);
-  for (let row = 0; row < SIZE; row++) {
-    for (let col = 0; col < SIZE; col++) {
-      const x = (col - PAD) / SCALE;
-      const y = (row - PAD) / SCALE;
-      const weights = limbs.flatMap((limb, i) => {
-        const weight = limbWeight(x, y, limb);
-        return weight ? [{ i, weight, dx: x - limb.joint[0], dy: y - limb.joint[1] }] : [];
-      });
-      const features = faceRegions.flatMap(([cx, cy, halfWidth, halfHeight], i) => {
-        const dy = y - cy;
-        const blend = 1 - ease((Math.abs(x - cx) / halfWidth - 0.65) / 0.8);
-        return blend && Math.abs(dy) < halfHeight * 2.2 ? [{ i, dy, halfHeight, blend }] : [];
-      });
-      if (weights.length || features.length)
-        joints.push({ x, y, weights, features, index: (row * SIZE + col) * 4 });
-    }
-  }
 
   return (target, { walk = 0, wave = 0, mouth = 1, blink = 0, stage = false }) => {
     const gait = Math.sin(walk * Math.PI * 8) * ease(walk * 8) * ease((1 - walk) * 8);

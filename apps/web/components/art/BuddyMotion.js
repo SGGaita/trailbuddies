@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useRef } from "react";
-import { BUDDY_ART } from "@/lib/art";
+import { buddySrc } from "@/lib/art";
 import { buddyGait } from "@/lib/buddyGait";
 import { onBuddySpeech } from "@/lib/speech";
 
@@ -9,22 +9,23 @@ const rigs = new Map();
 const DURATION = { walk: 2000, wave: 1550 };
 const BLINK = 165;
 
-function loadRig(id) {
-  if (!rigs.has(id)) {
+/** One rig per picture: the same buddy at two sizes uses two pictures. */
+function loadRig(id, src) {
+  if (!rigs.has(src)) {
     const image = new Image();
-    image.src = `${BUDDY_ART}/${id}.webp`;
+    image.src = src;
     rigs.set(
-      id,
+      src,
       image
         .decode()
         .then(() => buddyGait(image, id))
         .catch(() => {
-          rigs.delete(id);
+          rigs.delete(src);
           return null;
         }),
     );
   }
-  return rigs.get(id);
+  return rigs.get(src);
 }
 
 function mouthShape(speech, now) {
@@ -41,7 +42,12 @@ function mouthShape(speech, now) {
   return 0.3 + (open - 0.3) * Math.sin(Math.PI * (elapsed % 1));
 }
 
-export default function BuddyMotion({ id, gesture, replay, stage = false }) {
+/**
+ * @param {{ id: string, src?: string, gesture?: string, replay?: number, stage?: boolean }} props
+ *   `src` is the picture already drawn underneath, so it downloads once (default: the full one)
+ */
+export default function BuddyMotion({ id, src: given, gesture, replay, stage = false }) {
+  const src = given || buddySrc(id);
   const ref = useRef(null);
   useEffect(() => {
     const canvas = ref.current;
@@ -73,7 +79,7 @@ export default function BuddyMotion({ id, gesture, replay, stage = false }) {
       if (!paint) {
         if (!preparing) {
           preparing = true;
-          loadRig(id).then((renderer) => {
+          loadRig(id, src).then((renderer) => {
             preparing = false;
             if (!active || !renderer) return;
             paint = renderer;
@@ -107,7 +113,7 @@ export default function BuddyMotion({ id, gesture, replay, stage = false }) {
     function planBlink(delay) {
       timer = setTimeout(() => {
         if (visible()) {
-          loadRig(id).then((renderer) => {
+          loadRig(id, src).then((renderer) => {
             if (!active || !renderer) return;
             paint = renderer;
             blinkAt = performance.now();
@@ -133,7 +139,7 @@ export default function BuddyMotion({ id, gesture, replay, stage = false }) {
       delete canvas.dataset.speaking;
       delete canvas.dataset.blinking;
     };
-  }, [id, gesture, replay, stage]);
+  }, [id, src, gesture, replay, stage]);
 
   return (
     <canvas
