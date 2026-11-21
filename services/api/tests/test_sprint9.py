@@ -177,6 +177,7 @@ def test_a_parent_links_a_child_and_controls_what_the_teacher_sees(client, outbo
         "school": "St Mary's Primary",
         "scope": "all",
         "linked_at": None,
+        "badges": [],  # teacher-made badges earned in class (S11)
     }
     assert grace.post(f"/families/{fam['id']}/links", json=body).status_code == 201  # same link again is fine
     assert grace.delete(f"/families/{fam['id']}/links/{sid}").status_code == 204

@@ -1,7 +1,26 @@
 import { createEvent } from "@trailbuddies/sync";
 import { builtInBadges, economy } from "@trailbuddies/content";
-import { newBadges, badgePayout, capped } from "@trailbuddies/domain";
+import { newBadges, badgePayout, capped, customCatalogue, ruleUses } from "@trailbuddies/domain";
 import { learnerView } from "./learner";
+import { useFamily } from "./store";
+import { weekWorkDoneFor } from "./classWork";
+
+/**
+ * Badge Studio badges this learner can earn automatically (BST-02): the family's badges, or the
+ * class's on a class device, where the "assignment" rule also needs this week's work.
+ * @param {string} learnerId @param {any[]} events including the activity being recorded
+ */
+function customFor(learnerId, events, now) {
+  const s = useFamily.getState();
+  if (s.mode === "class")
+    return {
+      catalogue: customCatalogue(s.classBadges || [], learnerId),
+      assignmentsDone: (s.classBadges || []).some((b) => ruleUses(b.rule, "assignment"))
+        ? weekWorkDoneFor(learnerId, events, now)
+        : false,
+    };
+  return { catalogue: customCatalogue(s.customBadges || [], learnerId, s.lessons || []), assignmentsDone: false };
+}
 
 /** The family's daily cap: 100 by default (economy.json), or none when a grown-up turns it off. */
 export const capFor = (settings) => (settings?.treasure_cap === false ? 0 : economy.dailyCap);
@@ -24,8 +43,11 @@ export const payable = (learner, amount, settings) => capped(amount, learner.ear
  * @returns {{ badges: any[], events: any[] }}
  */
 export function badgeEvents(profile, allEvents, added, { goal, now = new Date() }) {
-  const view = learnerView(profile, [...allEvents, ...added], now, { goal });
-  const earned = newBadges(builtInBadges, { ...view, now }).map((badge) => ({
+  const all = [...allEvents, ...added];
+  const view = learnerView(profile, all, now, { goal });
+  const custom = customFor(profile.id, all, now);
+  const catalogue = [...builtInBadges, ...custom.catalogue];
+  const earned = newBadges(catalogue, { ...view, now, assignmentsDone: custom.assignmentsDone }).map((badge) => ({
     ...badge,
     totalPayout: badgePayout(badge, economy.badge),
     payout: badgePayout(badge, economy.badge) - (economy.badge[badge.previousTier] || 0),
@@ -35,7 +57,14 @@ export function badgeEvents(profile, allEvents, added, { goal, now = new Date() 
     createEvent(
       "badge_awarded",
       profile.id,
-      { badgeId: b.id, tier: b.tier, name: b.name, ...(b.previousTier && { upgrade: true }) },
+      {
+        badgeId: b.id,
+        tier: b.tier,
+        name: b.name,
+        ...(b.previousTier && { upgrade: true }),
+        // A custom badge carries its design, so it stays in the badge book if it's deleted (BDG-07).
+        ...(b.custom && { custom: b.custom }),
+      },
       now,
     ),
     createEvent(

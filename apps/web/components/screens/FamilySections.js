@@ -10,7 +10,7 @@ import { SOUNDS, recordedCount } from "@trailbuddies/domain";
 import { useFamily, DEFAULT_SETTINGS } from "@/lib/store";
 import { Frame } from "./SettingsSections";
 
-/** PAR-07, BDG-06: which emails parents get. Wish emails start with the wishes feature. */
+/** PAR-07, BDG-06: which emails parents get: the weekly digest, new badges, and wishes to answer or rewards to deliver. */
 export function EmailsSection({ disabled }) {
   const saved = useFamily((s) => s.settings.emails);
   const emails = { ...DEFAULT_SETTINGS.emails, ...(saved || {}) };
@@ -23,7 +23,7 @@ export function EmailsSection({ disabled }) {
       control={
         <Switch
           checked={!!emails[k]}
-          disabled={disabled || k === "wishes"}
+          disabled={disabled}
           onChange={(e) => set(k, e.target.checked)}
         />
       }

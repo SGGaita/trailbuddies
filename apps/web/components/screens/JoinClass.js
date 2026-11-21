@@ -16,6 +16,7 @@ import { useFamily, useHydrated } from "@/lib/store";
 import { api, canEdit } from "@/lib/account";
 import FamilyShell from "@/components/shell/FamilyShell";
 import Loading from "@/components/Loading";
+import CustomBadgeArt from "@/components/rewards/CustomBadgeArt";
 
 const card = {
   bgcolor: "background.paper",
@@ -239,6 +240,17 @@ export default function JoinClass() {
                     })}
                   </Typography>
                   <SeeList scope={l.scope} />
+                  {l.badges?.length > 0 && (
+                    <Box aria-label={t("classes.badgesFor", { name })} sx={{ display: "flex", gap: 1.25, flexWrap: "wrap", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 800 }}>{t("classes.badges")}</Typography>
+                      {l.badges.map((b) => (
+                        <Box key={b.id} title={b.name} sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                          <CustomBadgeArt badge={b} size={36} />
+                          <Typography sx={{ fontSize: 14, fontWeight: 700 }}>{b.name}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                   <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
                     <FormControlLabel
                       control={

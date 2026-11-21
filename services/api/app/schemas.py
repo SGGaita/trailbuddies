@@ -2,7 +2,7 @@
 nickname, birth month and year, and app choices (colour, buddy, interests, levels)."""
 
 from datetime import UTC, date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
@@ -11,7 +11,18 @@ BuddyId = Literal["zip", "tumi", "jumbo", "kiki"]
 Difficulty = Literal["auto", "1", "2", "3"]
 Role = Literal["owner", "parent", "carer", "viewer"]
 EventType = Literal[
-    "lesson_completed", "item_answered", "treasure_earned", "treasure_spent", "badge_awarded", "game_finished"
+    "lesson_completed",
+    "item_answered",
+    "treasure_earned",
+    "treasure_spent",
+    "badge_awarded",
+    "game_finished",
+    "wish_requested",
+    "wish_approved",
+    "wish_declined",
+    "wish_delivered",
+    "reward_delivered",
+    "badge_hidden",
 ]
 
 
@@ -261,6 +272,97 @@ class CustomLessonIn(Strict):
     updated_at: datetime
 
     _clean = field_validator("title", "question")(lambda v: _one_line(v))
+
+
+BadgeShape = Literal["circle", "square", "diamond", "arch"]
+BadgeColour = Literal["blue", "green", "pink", "yellow", "orange"]
+BadgeIcon = Literal[
+    "star", "plant", "heart", "trophy", "book", "sparkle", "rocket", "broom", "music", "paw", "sun", "smile"
+]
+CountMetric = Literal["stars", "lessons", "perfect-lessons", "goal-days", "mastered-items"]
+BADGE_TREASURE_MAX = 50  # BST-03, same as packages/domain customBadges.js
+
+
+class ManualRule(Strict):
+    type: Literal["manual"]
+
+
+class LessonRule(Strict):
+    """Finish a custom lesson, or master every card in it."""
+
+    type: Literal["lesson", "mastery"]
+    lesson: str = Field(min_length=26, max_length=26)
+
+
+class CountRule(Strict):
+    type: Literal["count"]
+    metric: CountMetric
+    n: int = Field(ge=1, le=1000)
+
+
+class StreakRule(Strict):
+    type: Literal["streak"]
+    days: int = Field(ge=1, le=7)
+
+
+class AssignmentRule(Strict):
+    type: Literal["assignment"]
+
+
+Condition = Annotated[LessonRule | CountRule | StreakRule | AssignmentRule, Field(discriminator="type")]
+
+
+class ComboRule(Strict):
+    """BST-02: up to 3 conditions with AND/OR. Manual awards and combinations can't be inside."""
+
+    type: Literal["combo"]
+    op: Literal["and", "or"]
+    all: list[Condition] = Field(min_length=2, max_length=3)
+
+
+BadgeRule = Annotated[
+    ManualRule | LessonRule | CountRule | StreakRule | AssignmentRule | ComboRule, Field(discriminator="type")
+]
+
+
+class BadgeIn(Strict):
+    name: str = Field(min_length=1, max_length=40)
+    shape: BadgeShape = "circle"
+    colour: BadgeColour = "blue"
+    icon: BadgeIcon = "star"
+    photo: str | None = Field(default=None, min_length=26, max_length=26)
+    note: str | None = Field(default=None, max_length=120)
+    voice: str | None = Field(default=None, min_length=26, max_length=26)
+    rule: BadgeRule
+    treasures: int = Field(
+        default=0, ge=0, le=BADGE_TREASURE_MAX, description="capped so the shop economy stays fair"
+    )
+    reward: str | None = Field(default=None, max_length=80)
+    audience: list[str] | Literal["class"] = Field(description='learner or student ids, or "class"')
+    updated_at: datetime
+
+    _clean = field_validator("name", "note", "reward")(lambda v: _one_line(v))
+
+    @field_validator("audience")
+    @classmethod
+    def some(cls, v):
+        if isinstance(v, list) and not 1 <= len(v) <= 60:
+            raise ValueError("choose who can earn it")
+        return v
+
+
+class WishIn(Strict):
+    learner_id: str = Field(min_length=26, max_length=26)
+    title: str = Field(min_length=1, max_length=60)
+    price: int = Field(ge=1, le=1000)
+    emoji: str | None = Field(default=None, max_length=8)
+    updated_at: datetime
+
+    _clean = field_validator("title")(lambda v: _one_line(v))
+
+
+class AwardIn(Strict):
+    student_ids: list[str] = Field(min_length=1, max_length=60)
 
 
 class CodeIn(Strict):

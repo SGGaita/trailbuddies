@@ -86,12 +86,21 @@ function ClassBadgeWall({ id }) {
     let live = true;
     let timer = null;
     let before = null;
+    // T05: the class's own badges are on the wall too, drawn from their design.
+    let catalogue = null;
+    const classBadges = () =>
+      catalogue
+        ? Promise.resolve(catalogue)
+        : api.classBadges(id).then(
+            (r) => (catalogue = [...builtInBadges, ...r.badges.map((b) => ({ id: b.id, name: b.name, custom: b }))]),
+            () => builtInBadges,
+          );
     const load = () => {
       const week = wallWeek(new Date(), timeZone(), back);
-      api.classBadgeWall(id, week).then(
-        (raw) => {
+      Promise.all([api.classBadgeWall(id, week), classBadges()]).then(
+        ([raw, known]) => {
           if (!live) return;
-          const wall = badgeWall(raw.students || [], builtInBadges);
+          const wall = badgeWall(raw.students || [], known);
           const arrived = newOnWall(before, wall);
           before = wall;
           setError(false);

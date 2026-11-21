@@ -31,6 +31,7 @@ import Buddy from "@/components/art/Buddy";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import CardPanel from "./CardPanel";
+import { useMediaConsent } from "./useMediaConsent";
 import { CardPic, ChoiceChip, Field, Pill, UploadBanner, inputSx } from "./parts";
 
 /** P10 shortcuts to the other creation tools. */
@@ -70,12 +71,10 @@ function Editor({ id }) {
   );
   const [step, setStep] = useState(/** @type {"cards" | "play"} */ ("cards"));
   const [editing, setEditing] = useState(/** @type {null | { index: number, card: any }} */ (null));
-  const [ask, setAsk] = useState(
-    /** @type {null | { scope: "photos" | "voice", resolve: (ok: boolean) => void }} */ (null),
-  );
   const [published, setPublished] = useState(/** @type {any} */ (null));
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const { ensureConsent, dialog: consentDialog } = useMediaConsent(setError);
   const editable = canEdit(s);
   const kids = s.learners;
   const nameOf = (lid) => kids.find((l) => l.id === lid)?.name;
@@ -98,28 +97,6 @@ function Editor({ id }) {
     );
 
   /** Photos and recordings need the family's optional consent (account families only). */
-  const ensureConsent = (scope) => {
-    if (s.mode !== "account" || s.family?.consent?.scopes?.[scope]) return Promise.resolve(true);
-    return new Promise((resolve) => setAsk({ scope, resolve }));
-  };
-  const answerConsent = async (ok) => {
-    const a = ask;
-    setAsk(null);
-    if (!ok) return a.resolve(false);
-    try {
-      const c = s.family.consent;
-      await api.giveConsent(s.family.id, {
-        policy_version: c.policy_version,
-        scopes: { ...c.scopes, [a.scope]: true },
-      });
-      await refreshAccount();
-      a.resolve(true);
-    } catch {
-      setError(t("builder.photoFail"));
-      a.resolve(false);
-    }
-  };
-
   const saveCard = (card) => {
     const cards = [...draft.cards];
     if (editing.index >= 0) cards[editing.index] = card;
@@ -172,7 +149,7 @@ function Editor({ id }) {
         onSave={saveCard}
         onCancel={() => setEditing(null)}
       >
-        <ConsentDialog ask={ask} onAnswer={answerConsent} />
+        {consentDialog}
       </CardPanel>
     );
 
@@ -597,26 +574,5 @@ function Editor({ id }) {
         </Box>
       </Dialog>
     </FamilyShell>
-  );
-}
-
-function ConsentDialog({ ask, onAnswer }) {
-  return (
-    <Dialog
-      open={!!ask}
-      onClose={() => onAnswer(false)}
-      slotProps={{ paper: { sx: { borderRadius: 5.5, p: 3, maxWidth: 460, gap: 1.5 } } }}
-    >
-      <Typography variant="h6" component="h2">
-        {ask?.scope === "voice" ? t("builder.allowVoice") : t("builder.allowPhotos")}
-      </Typography>
-      <Typography sx={{ color: "text.secondary" }}>{t("builder.allowSub")}</Typography>
-      <Box sx={{ display: "flex", gap: 1.25, justifyContent: "flex-end" }}>
-        <Button onClick={() => onAnswer(false)}>{t("builder.notNow")}</Button>
-        <Button variant="contained" onClick={() => onAnswer(true)} autoFocus>
-          {t("builder.allow")}
-        </Button>
-      </Box>
-    </Dialog>
   );
 }

@@ -9,7 +9,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { ageFrom, bandForAge, isAdult, totalStars, weekSummary } from "@trailbuddies/domain";
+import { ageFrom, bandForAge, grownUpQueue, isAdult, totalStars, weekSummary } from "@trailbuddies/domain";
 import { builtInBadges } from "@trailbuddies/content";
 import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import FamilyShell from "@/components/shell/FamilyShell";
@@ -43,7 +43,6 @@ export default function ParentHome() {
   if (!ready) return <Loading />;
   const goal = s.settings.goal;
   const minutes = learners.reduce((n, l) => n + l.week.reduce((a, b) => a + b, 0), 0);
-  const name = (id) => s.learners.find((l) => l.id === id)?.name || "";
 
   return (
     <FamilyShell
@@ -65,33 +64,7 @@ export default function ParentHome() {
     >
       <WhatsNew />
       <FirstSteps />
-      {s.waiting.length > 0 && (
-        <Card
-          sx={{
-            p: 2,
-            bgcolor: colors.sun.soft,
-            borderColor: colors.sun.deep,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <Typography sx={{ fontWeight: 800 }}>{t("family.waiting")}</Typography>
-          {s.waiting.map((w) => (
-            <Box
-              key={w.id}
-              sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}
-            >
-              <Typography>
-                <b>{name(w.learnerId)}</b> {w.text}
-              </Typography>
-              <Button component={Link} href="/family/rewards" variant="contained" size="small">
-                Review
-              </Button>
-            </Box>
-          ))}
-        </Card>
-      )}
+      <WaitingForYou learners={learners} wishes={s.wishes} />
 
       <Box
         sx={{
@@ -215,5 +188,31 @@ function WeekLine({ learner }) {
       {t("family.weekKid", { minutes: w.minutes, lessons: w.lessons })}
       {latest ? ` · ${t("family.latestBadge", { name: latest.name })}` : ""}
     </Typography>
+  );
+}
+
+/** P08 "Waiting for you": wishes to answer and rewards to hand over (BST-04, BST-07). */
+function WaitingForYou({ learners, wishes }) {
+  const q = grownUpQueue(wishes, learners.map((l) => ({ id: l.id, name: l.name, state: l })));
+  const lines = [
+    ...q.requests.map((r) => ({ key: `r${r.wish.id}`, text: t("rewards.asked", { name: r.name, title: r.wish.title }), go: t("family.review") })),
+    ...q.approved.map((r) => ({ key: `a${r.wish.id}`, text: t("family.deliverWish", { title: r.wish.title, name: r.name }), go: t("family.open") })),
+    ...q.toDeliver.map((r) => ({ key: `d${r.learnerId}${r.badgeId}`, text: t("family.deliverWish", { title: r.reward, name: r.name }), go: t("family.open") })),
+  ];
+  if (!lines.length) return null;
+  return (
+    <Card sx={{ p: 2, bgcolor: colors.sun.soft, borderColor: colors.sun.deep, display: "flex", flexDirection: "column", gap: 1 }}>
+      <Typography component="h2" sx={{ fontWeight: 800 }}>
+        {t("family.waiting")}
+      </Typography>
+      {lines.slice(0, 4).map((l) => (
+        <Box key={l.key} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, flexWrap: "wrap" }}>
+          <Typography>{l.text}</Typography>
+          <Button component={Link} href="/family/rewards" variant="contained" size="small">
+            {l.go}
+          </Button>
+        </Box>
+      ))}
+    </Card>
   );
 }

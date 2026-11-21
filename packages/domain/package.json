@@ -11,5 +11,8 @@
   "scripts": {
     "lint": "eslint src",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "@trailbuddies/sync": "workspace:*"
   }
 }

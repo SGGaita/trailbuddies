@@ -1,7 +1,8 @@
 /**
  * Badge rule engine (BDG-01). Runs on the device after every lesson and game, so badges
  * arrive instantly and offline. Rules are data (content/badges/*.json): complete, count,
- * streak, mastery, combo; manual badges are given by grown-ups.
+ * streak, mastery, combo; manual badges are given by grown-ups. Custom badges (customBadges.js)
+ * add lessons (custom lessons finished) and assignment (class work done this week).
  */
 import { goalDaysWithin } from "./streak.js";
 
@@ -50,6 +51,10 @@ export function ruleMet(rule, stats, s) {
   switch (rule.type) {
     case "complete":
       return rule.units.every((u) => (s.progress[`${u}-trophy`] || 0) > 0);
+    case "lessons": // custom lessons (Badge Studio): finished at least once
+      return rule.ids.every((id) => (s.progress[id] || 0) > 0);
+    case "assignment": // class badges: everything assigned this week is finished (worked out by the caller)
+      return !!s.assignmentsDone;
     case "count":
       return (stats[rule.metric] || 0) >= rule.n;
     case "streak":
@@ -61,7 +66,7 @@ export function ruleMet(rule, stats, s) {
         ? rule.all.every((r) => ruleMet(r, stats, s))
         : rule.all.some((r) => ruleMet(r, stats, s));
     default:
-      return false; // manual badges are awarded by grown-ups
+      return false; // manual badges are awarded by grown-ups; "never" is a rule that can't be met
   }
 }
 

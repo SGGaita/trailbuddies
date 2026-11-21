@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -8,11 +9,17 @@ import Typography from "@mui/material/Typography";
 import { t } from "@trailbuddies/i18n";
 import Loading from "@/components/Loading";
 import TeachShell from "@/components/shell/TeachShell";
+import { refreshAccount } from "@/lib/account";
 import { useFamily, useHydrated } from "@/lib/store";
 
 export default function ClassBadgesPage() {
   const ready = useHydrated();
   const teacher = useFamily((s) => s.teacher);
+  const mode = useFamily((s) => s.mode);
+  // The classes may have changed on another device (or another tab): fetch them fresh.
+  useEffect(() => {
+    if (ready && mode === "account") refreshAccount().catch(() => {});
+  }, [ready, mode]);
   if (!ready) return <Loading />;
   const classes = teacher?.classes || [];
 
@@ -36,14 +43,24 @@ export default function ClassBadgesPage() {
               <Typography component="h2" variant="h6">
                 {cls.name}
               </Typography>
-              <Button
-                component={Link}
-                href={`/teach/badge-wall?id=${encodeURIComponent(cls.id)}`}
-                variant="outlined"
-                aria-label={t("teach.badgeWallFor", { name: cls.name })}
-              >
-                {t("teach.badgeWall")}
-              </Button>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Button
+                  component={Link}
+                  href={`/teach/class-badges?id=${encodeURIComponent(cls.id)}`}
+                  variant="contained"
+                  aria-label={t("classBadges.openFor", { name: cls.name })}
+                >
+                  {t("classBadges.open")}
+                </Button>
+                <Button
+                  component={Link}
+                  href={`/teach/badge-wall?id=${encodeURIComponent(cls.id)}`}
+                  variant="outlined"
+                  aria-label={t("teach.badgeWallFor", { name: cls.name })}
+                >
+                  {t("teach.badgeWall")}
+                </Button>
+              </Box>
             </Card>
           ))}
         </Box>

@@ -79,6 +79,9 @@ export async function startClassPlay(classId, opts = {}) {
     })),
   );
   useFamily.setState({
+    // A teacher's awards from the last week are celebrated when each child signs in here.
+    celebrateFrom: Date.now() - 7 * 86_400_000,
+    celebrated: readLocal(cls.id).celebrated || {},
     mode: "class",
     user: before.user,
     teacher: before.teacher,

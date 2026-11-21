@@ -24,6 +24,7 @@ import {
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
+import AwardCelebrations from "@/components/rewards/AwardCelebrations";
 import Buddy from "@/components/art/Buddy";
 import Island from "@/components/art/Island";
 import SubjectArt, { SUBJECT_ART } from "@/components/art/SubjectArt";
@@ -650,6 +651,8 @@ export default function WorldMap() {
         )}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       />
+      {/* BST-05: badges a grown-up awarded from another device, celebrated once here. */}
+      <AwardCelebrations learner={learner} />
     </LearnerShell>
   );
 }

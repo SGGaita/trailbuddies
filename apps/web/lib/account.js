@@ -110,6 +110,69 @@ async function pushLessons() {
   }
 }
 
+/** Store badge ↔ API badge (Badge Studio). */
+export const badgeToApi = (b) => ({
+  name: b.name,
+  shape: b.shape,
+  colour: b.colour,
+  icon: b.icon,
+  photo: b.photo || null,
+  note: b.note || null,
+  voice: b.voice || null,
+  rule: b.rule,
+  treasures: b.treasures,
+  reward: b.reward || null,
+  audience: b.audience,
+  updated_at: b.updated_at,
+});
+export const wishToApi = (w) => ({
+  learner_id: w.learner_id,
+  title: w.title,
+  price: w.price,
+  emoji: w.emoji || null,
+  updated_at: w.updated_at,
+});
+
+/**
+ * Merge a list from the server (badges, wishes): a dirty local edit wins only if it's newer,
+ * and things deleted on this device stay deleted.
+ * @param {"customBadges" | "wishes"} field @param {"removedBadges" | "removedWishes"} removedField
+ */
+function applyList(field, removedField, remote) {
+  const s = get();
+  const local = new Map(s[field].map((x) => [x.id, x]));
+  const merged = remote
+    .filter((a) => !s[removedField].includes(a.id))
+    .map((theirs) => {
+      const mine = local.get(theirs.id);
+      local.delete(theirs.id);
+      return mine?.dirty ? newer(theirs, mine) : theirs;
+    });
+  for (const x of local.values()) if (x.dirty) merged.push(x);
+  useFamily.setState({ [field]: merged });
+}
+
+/** Send badges or wishes changed on this device, then deletions. */
+async function pushList(field, removedField, put, del, toApi) {
+  const s = get();
+  const fam = s.family;
+  if (!fam?.id || !fam.consent || fam.role === "viewer") return;
+  for (const id of s[removedField]) {
+    try {
+      await del(fam.id, id);
+    } catch (e) {
+      if (!(e instanceof ApiError && e.status === 404)) throw e;
+    }
+    useFamily.setState((st) => ({ [removedField]: st[removedField].filter((x) => x !== id) }));
+  }
+  for (const x of s[field].filter((y) => y.dirty)) {
+    await put(fam.id, x.id, toApi(x));
+    useFamily.setState((st) => ({
+      [field]: st[field].map((y) => (y.id === x.id && y.updated_at === x.updated_at ? { ...y, dirty: false } : y)),
+    }));
+  }
+}
+
 /** Merge the server's copy into the store: dirty local edits win only if they are newer. */
 function applyMe(me) {
   const s = get();
@@ -167,7 +230,10 @@ function applyMe(me) {
     if (v) sounds[k] = v;
     else delete sounds[k];
   }
+  // A family loaded on this device for the first time: celebrate grown-ups' awards from now.
+  const firstLoad = !s.celebrateFrom || s.family?.id !== fam?.id;
   useFamily.setState({
+    ...(firstLoad && { celebrateFrom: Date.now(), celebrated: {} }),
     sounds,
     teacher: me.teacher || null,
     mode: "account",
@@ -345,11 +411,15 @@ export async function syncNow() {
     await uploadMedia(api);
     await pushSounds();
     await pushLessons();
+    await pushList("customBadges", "removedBadges", api.putBadge, api.deleteBadge, badgeToApi);
+    await pushList("wishes", "removedWishes", api.putWish, api.deleteWish, wishToApi);
     // Carers only read: their devices pull progress but never upload.
     if (get().family?.role === "viewer") await syncer.pull();
     else await syncer.syncOnce();
     applyMe(await api.me());
     applyLessons((await api.lessons(s.family.id)).lessons);
+    applyList("customBadges", "removedBadges", (await api.badges(s.family.id)).badges);
+    applyList("wishes", "removedWishes", (await api.wishes(s.family.id)).wishes);
     await loadClassWork(api); // MAP-06b: work from the children's teachers
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch (e) {

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { builtInBadges } from "@trailbuddies/content";
+import { earnedCustom } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
 import { speak } from "@/lib/speech";
 import LearnerShell from "@/components/shell/LearnerShell";
@@ -36,6 +37,8 @@ export default function BadgeBook() {
   }, [ready, learner, router]);
   if (!ready || !learner) return <Loading />;
   const earned = new Set(learner.badges);
+  // BDG-07: badges grown-ups made, from the design they were earned with; hidden ones stay out.
+  const mine = earnedCustom(learner);
   const hear = (b) =>
     speak(`${b.name}. ${b.how}.`, { band: learner.band, buddy: learner.buddy, enabled: voice });
 
@@ -45,6 +48,30 @@ export default function BadgeBook() {
         <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>
           {t("badges.earned", { n: earned.size, total: builtInBadges.length })}
         </Typography>
+        {mine.length > 0 && (
+          <Box component="section" aria-label={t("badges.fromGrownUps")}>
+            <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
+              {t("badges.fromGrownUps")}
+            </Typography>
+            <Box sx={grid}>
+              {mine.map((b) => (
+                <Box
+                  key={b.id}
+                  component="button"
+                  type="button"
+                  data-earned="yes"
+                  data-custom={b.name}
+                  onClick={() => hear({ name: b.name, how: b.note || t("badges.fromAGrownUp") })}
+                  aria-label={`${b.name}. ${t("badges.hear", { name: b.name })}`}
+                  sx={{ ...tile, border: `2px solid ${colors.sun.main}` }}
+                >
+                  <BadgeArt badge={b} size={76} />
+                  <Typography sx={{ fontWeight: 800, lineHeight: 1.2 }}>{b.name}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
         {ORDER.map((cat) => (
           <Box key={cat} component="section" aria-label={TITLES[cat]}>
             <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
@@ -102,3 +129,21 @@ export default function BadgeBook() {
     </LearnerShell>
   );
 }
+
+const grid = {
+  display: "grid",
+  gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))", lg: "repeat(5, minmax(0, 1fr))" },
+  gap: { xs: 1.25, sm: 1.75 },
+};
+const tile = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 0.75,
+  p: 1.75,
+  bgcolor: "background.paper",
+  borderRadius: 4.5,
+  cursor: "pointer",
+  color: "text.primary",
+  textAlign: "center",
+};
