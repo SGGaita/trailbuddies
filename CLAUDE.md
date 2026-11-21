@@ -34,6 +34,7 @@
 - Never add a third-party analytics or ad SDK.
 - Never log a child's name, photo URL or audio URL.
 - Every upload path strips EXIF. Free-text inputs only in grown-up screens.
+- Every grown-up photo goes through the on-device image check (`apps/web/lib/imageCheck.js`, models self-hosted in `public/models`, never a third-party service). Share packages are built by the server (`app/shares.py`) and never carry learner ids, assignments, progress, names or children's recordings.
 - Error reports go through `scrubText`/`scrubEvent` (`packages/domain/src/scrub.js`) or `app/scrub.py`. No Sentry Session Replay, tracing or DOM breadcrumbs.
 
 ## Definition of done

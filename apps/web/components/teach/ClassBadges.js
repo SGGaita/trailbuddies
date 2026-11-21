@@ -28,6 +28,9 @@ import Loading from "@/components/Loading";
 import CustomBadgeArt from "@/components/rewards/CustomBadgeArt";
 import { ChoiceChip } from "@/components/builder/parts";
 import { api } from "@/lib/account";
+import ImportByCode from "@/components/share/ImportByCode";
+import ShareDialog from "@/components/share/ShareDialog";
+import { ShareList } from "@/components/share/ShareCodes";
 
 const RULES = ["manual", "assignment", "count", "streak"];
 const blank = () => ({
@@ -344,6 +347,7 @@ function ClassBadgesFor({ id }) {
           )}
         </Box>
       </Box>
+      <ClassSharing cls={cls} badges={badges} onImported={() => setReload((n) => n + 1)} />
     </TeachShell>
   );
 }
@@ -362,5 +366,58 @@ function Chips({ label, items, value, onPick, text }) {
         ))}
       </Box>
     </Box>
+  );
+}
+
+/** SHR-01 and SHR-02 for teachers: share this class's badges with colleagues, or import a set. */
+function ClassSharing({ cls, badges, onImported }) {
+  const [shares, setShares] = useState(/** @type {any[]} */ ([]));
+  const [open, setOpen] = useState(false);
+  const [reload, setReload] = useState(0);
+  const [done, setDone] = useState("");
+  useEffect(() => {
+    let live = true;
+    api.shares({ classId: cls.id }).then(
+      (r) => live && setShares(r.shares),
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
+  }, [cls.id, reload]);
+  return (
+    <Card sx={{ p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column", gap: 1.5 }} aria-label={t("classBadges.sharing")}>
+      <Typography variant="h6" component="h2">
+        {t("classBadges.sharing")}
+      </Typography>
+      <Typography sx={{ color: "text.secondary" }}>{t("classBadges.sharingSub")}</Typography>
+      <Button variant="outlined" disabled={!badges.length} onClick={() => setOpen(true)} sx={{ alignSelf: "flex-start" }}>
+        {t("classBadges.share")}
+      </Button>
+      <ShareList
+        shares={shares}
+        canStop
+        onStop={async (s) => {
+          await api.revokeShare({ classId: cls.id }, s.id);
+          setReload((n) => n + 1);
+        }}
+      />
+      <Typography sx={{ fontWeight: 800 }}>{t("classBadges.importTitle")}</Typography>
+      <ImportByCode
+        target={{ classId: cls.id }}
+        onImported={(r) => {
+          setDone(t("classBadges.imported", { n: r.badges.length }));
+          onImported();
+        }}
+      />
+      {done && <Alert severity="success">{done}</Alert>}
+      <ShareDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onShared={() => setReload((n) => n + 1)}
+        owner={{ classId: cls.id }}
+        badges={badges}
+      />
+    </Card>
   );
 }

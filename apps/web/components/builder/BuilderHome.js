@@ -53,11 +53,21 @@ export default function BuilderHome() {
           <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>{t("builder.viewOnly")}</Typography>
         )}
       </Card>
-      {editable && (
-        <Button component={Link} href="/family/create/badge" variant="outlined" sx={{ alignSelf: "flex-start" }}>
-          {t("builder.tile.badge")}
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+        {editable && (
+          <Button component={Link} href="/family/create/badge" variant="outlined">
+            {t("builder.tile.badge")}
+          </Button>
+        )}
+        <Button component={Link} href="/family/create/shares" variant="outlined" startIcon={<Icon name="share" size={18} />}>
+          {t("share.codesTitle")}
         </Button>
-      )}
+        {editable && (
+          <Button component={Link} href="/family/create/import" variant="outlined">
+            {t("share.importTitle")}
+          </Button>
+        )}
+      </Box>
 
       <Typography variant="h6" component="h2">
         {t("builder.mine")}

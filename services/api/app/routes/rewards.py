@@ -44,6 +44,7 @@ def badge_out(b: CustomBadge) -> dict:
         "treasures": b.treasures,
         "reward": b.reward,
         "audience": b.audience,
+        "source_share": b.source_share,
         "updated_at": iso(b.updated_at),
     }
 

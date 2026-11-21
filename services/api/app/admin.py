@@ -16,6 +16,7 @@
     python -m app.admin weekly                      send the weekly badge emails and compute metrics now
     python -m app.admin metrics [--weeks 8] [--json] product metrics (OPS-07), newest week first
     python -m app.admin support [--days 7]          messages sent with Contact support
+    python -m app.admin moderation                  the moderation queue (the web screen is /admin/moderation)
 
 Prints no children's data: families are shown by id, feedback has names replaced already.
 """
@@ -177,6 +178,21 @@ def _support(db: Session, a) -> None:
             print(f"    diagnostics: {t.diagnostics}")
 
 
+def _moderation(db: Session, a) -> None:
+    from .models import ModerationItem, Share
+    from .moderation import overdue, reason_text
+    from .shares import fmt
+
+    now = utcnow()
+    for i in db.scalars(
+        select(ModerationItem).where(ModerationItem.status == "open").order_by(ModerationItem.created_at)
+    ):
+        share = db.get(Share, i.share_id) if i.share_id else None
+        late = " OVERDUE" if overdue(i, now) else ""
+        where = f"{fmt(share.code)} {share.title}" if share else f"media {i.media_id}"
+        print(f"{i.id} {i.created_at:%Y-%m-%d %H:%M} {i.kind:6} {reason_text(i.reason)}: {where}{late}")
+
+
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(prog="python -m app.admin", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -209,6 +225,7 @@ def main(argv=None) -> None:
     mt.add_argument("--json", action="store_true")
     sp = sub.add_parser("support")
     sp.add_argument("--days", type=int, default=7)
+    sub.add_parser("moderation")
     a = p.parse_args(argv)
     with Session(get_engine()) as db:
         if a.cmd == "daily":
@@ -226,6 +243,7 @@ def main(argv=None) -> None:
             "errors": _errors,
             "metrics": _metrics,
             "support": _support,
+            "moderation": _moderation,
         }[a.cmd](db, a)
 
 

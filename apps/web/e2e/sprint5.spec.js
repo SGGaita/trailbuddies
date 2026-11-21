@@ -10,6 +10,8 @@ test.describe.configure({ timeout: 150_000 });
 test.beforeEach(async ({ page }) => {
   watchErrors(page, [/Failed to load resource/, /ERR_INTERNET_DISCONNECTED/]);
   await page.addInitScript(() => localStorage.setItem("tb_e2e", "1"));
+  // The on-device image check (S11b) answers "fine" here; its models are tested in sprint11b.spec.js.
+  await page.addInitScript(() => (globalThis.__tbImageCheck = async () => ({ faces: 0, flagged: false })));
 });
 test.afterEach(async ({ page }) => {
   expect(page.errors, "console errors").toEqual([]);

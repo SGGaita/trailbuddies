@@ -6,7 +6,11 @@ import { fakeApi, newServer, seedServer } from "./fakeApi.js";
 // Sprint 11, part 1: Badge Studio (BST-01…06, BDG-07), wishes (BST-07), real-world rewards (BST-04),
 // awards from another device (BST-05), class badges (T05) and parents' class links.
 test.describe.configure({ timeout: 150_000 });
-test.beforeEach(({ page }) => watchErrors(page, [/Failed to load resource/]));
+test.beforeEach(async ({ page }) => {
+  watchErrors(page, [/Failed to load resource/]);
+  // The on-device image check (S11b) answers "fine" here; its models are tested in sprint11b.spec.js.
+  await page.addInitScript(() => (globalThis.__tbImageCheck = async () => ({ faces: 0, flagged: false })));
+});
 test.afterEach(({ page }) => expect(page.errors, "console errors").toEqual([]));
 
 const wallet = (page) => page.getByLabel(/^\d+ treasures$/).first();

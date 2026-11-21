@@ -17,7 +17,7 @@ import logging
 import zipfile
 from datetime import datetime, timedelta
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.orm import Session as DbSession
 
 from . import mailer
@@ -39,7 +39,10 @@ from .models import (
     Learner,
     LoginToken,
     MediaAsset,
+    ModerationItem,
     Session,
+    Share,
+    ShareReport,
     SupportTicket,
     Teacher,
     User,
@@ -96,6 +99,11 @@ def release_media(db: DbSession, family_id: str, ids: set[str], now: datetime | 
         select(CustomBadge.design, CustomBadge.voice).where(CustomBadge.family_id == family_id)
     ):
         still |= {m for m in ((design or {}).get("photo"), voice) if m}
+    # A code that still works needs its files (copies made by importers are their own).
+    for media in db.scalars(
+        select(Share.media).where(Share.family_id == family_id, Share.status.in_(("live", "review")))
+    ):
+        still |= set(media or [])
     gone = ids - still
     if not gone:
         return 0
@@ -198,6 +206,14 @@ def family_record(db: DbSession, fam: Family) -> dict:
             _row(w, ["id", "learner_id", "title", "price", "emoji", "updated_at"])
             for w in db.scalars(select(Wish).where(Wish.family_id == fid))
         ],
+        "shares": [
+            _row(x, ["code", "kind", "title", "status", "checklist", "created_at", "expires_at", "imports"])
+            for x in db.scalars(select(Share).where(Share.family_id == fid))
+        ],
+        "reports_made": [
+            _row(r, ["share_id", "reason", "note", "created_at", "answered_at"])
+            for r in db.scalars(select(ShareReport).where(ShareReport.family_id == fid))
+        ],
         "media": [
             _row(m, ["id", "kind", "content_type", "bytes", "status", "created_at", "released_at"])
             for m in db.scalars(select(MediaAsset).where(MediaAsset.family_id == fid))
@@ -299,6 +315,18 @@ def purge_family(db: DbSession, storage, family_id: str) -> None:
     for eid in db.scalars(select(DataExport.id).where(DataExport.family_id == family_id)):
         _quiet(storage.delete_key, export_key(eid))
     users = set(db.scalars(select(FamilyMember.user_id).where(FamilyMember.family_id == family_id)))
+    shares = db.scalars(select(Share.id).where(Share.family_id == family_id)).all()
+    _x(
+        db,
+        delete(ShareReport).where(or_(ShareReport.family_id == family_id, ShareReport.share_id.in_(shares))),
+    )
+    _x(
+        db,
+        delete(ModerationItem).where(
+            or_(ModerationItem.family_id == family_id, ModerationItem.share_id.in_(shares))
+        ),
+    )
+    _x(db, delete(Share).where(Share.family_id == family_id))
     for lid in db.scalars(select(Learner.id).where(Learner.family_id == family_id)).all():
         _x(
             db,
@@ -451,4 +479,7 @@ def daily(db: DbSession, storage, now: datetime | None = None) -> dict:
     ).rowcount
     out.update(inactivity(db, storage, now))
     db.commit()
+    from .moderation import remind  # the queue's daily reminder (MOD-01); imports privacy
+
+    out["moderation_reminder"] = remind(db, now)
     return out

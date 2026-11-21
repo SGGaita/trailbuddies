@@ -115,6 +115,7 @@ The root `vercel.json` defines both services, so the project's Root Directory mu
 | `TB_BETA_CODE_REQUIRED` | `true` (new families need an invite code) |
 | `TB_REVIEW_EMAIL` | where "a US consent form is waiting" emails go |
 | `TB_SUPPORT_EMAIL` | where Contact support messages go (they're also stored: `python -m app.admin support`) |
+| `TB_ADMIN_EMAILS` | the safety team: comma-separated emails who can open `/admin/moderation` and get the daily "waiting over 24 hours" reminder (also `python -m app.admin moderation`) |
 | `NEXT_PUBLIC_TB_CHANNEL` | `production` |
 | `TB_SENTRY_DSN` 🔒, `NEXT_PUBLIC_SENTRY_DSN` 🔒 | optional: Sentry project DSNs (see [monitoring.md](monitoring.md)) |
 

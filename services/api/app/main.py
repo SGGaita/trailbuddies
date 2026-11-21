@@ -19,9 +19,11 @@ from .routes import (
     links,
     media,
     members,
+    moderation,
     ops,
     privacy,
     rewards,
+    shares,
     sounds,
     support,
     sync,
@@ -110,6 +112,8 @@ def create_app() -> FastAPI:
         teach.router,
         links.router,
         classwork.router,
+        shares.router,
+        moderation.router,
     ):
         app.include_router(r)
 

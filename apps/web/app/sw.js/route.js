@@ -37,6 +37,8 @@ const PAGES = [
   "/privacy",
   "/terms",
   "/family/rewards",
+  "/family/create/shares",
+  "/family/create/import",
   "/play/more/wishes",
   "/teach",
   "/teach/start",

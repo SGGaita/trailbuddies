@@ -28,6 +28,7 @@ def lesson_out(c: CustomLesson) -> dict:
         "assigned": c.assigned,
         "version": c.version,
         "options": c.options or {},
+        "source_share": c.source_share,
         "updated_at": aware(c.updated_at).isoformat(),
     }
 

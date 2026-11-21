@@ -26,6 +26,7 @@ const BANDS = ["seedling", "sprout", "explorer"];
 import { ulid } from "@trailbuddies/sync";
 import { useFamily, useHydrated } from "@/lib/store";
 import { api, canEdit, refreshAccount } from "@/lib/account";
+import ReportShare from "@/components/share/ReportShare";
 import FamilyShell from "@/components/shell/FamilyShell";
 import Buddy from "@/components/art/Buddy";
 import Icon from "@/components/Icon";
@@ -328,6 +329,7 @@ function Editor({ id }) {
               </Card>
             </>
           )}
+          {existing?.sourceShare && <ReportShare shareId={existing.sourceShare} what="lesson" />}
           {existing && (
             <Button color="error" onClick={() => setDeleting(true)} sx={{ alignSelf: "flex-start" }}>
               {t("builder.delete")}

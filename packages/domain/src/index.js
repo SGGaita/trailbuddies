@@ -38,3 +38,4 @@ export * from "./assignments.js";
 export * from "./badgeWall.js";
 export * from "./customBadges.js";
 export * from "./wishes.js";
+export * from "./shares.js";

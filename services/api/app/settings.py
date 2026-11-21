@@ -75,6 +75,13 @@ class Settings(BaseSettings):
     review_email: str = ""
     # Where "Contact support" messages go (HLP-02). Empty: stored only (python -m app.admin support).
     support_email: str = ""
+    # The safety team (MOD-01): comma-separated emails who may open /admin/moderation and get
+    # its daily reminder. Empty: nobody (the queue still fills; python -m app.admin moderation).
+    admin_emails: str = ""
+
+    @property
+    def admins(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
     @property
     def error_backend(self) -> str:
