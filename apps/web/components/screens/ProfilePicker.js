@@ -17,6 +17,11 @@ import LearnerAvatar from "@/components/LearnerAvatar";
 import Loading from "@/components/Loading";
 import { PictureLockDialog } from "@/components/PictureLock";
 import { api } from "@/lib/account";
+import { registerClip, speak, stop } from "@/lib/speech";
+
+// C01: "Who's playing today?" in a real voice (Steve's recording), with the device voice as the fallback.
+const WHO_CLIP = "voice.who-is-playing";
+registerClip(WHO_CLIP, "/voice/who-is-playing.mp3");
 
 const BAND_NAMES = {
   seedling: "Seedling",
@@ -40,6 +45,14 @@ export default function ProfilePicker() {
   // Classroom mode (S10, CRM-01/02): the class list, compact, with 'Ask my teacher'.
   const classroom = useFamily((s) => (s.mode === "class" && s.family?.classroom ? s.family : null));
   const router = useRouter();
+  // The question is asked out loud when the screen opens (if Voice is on). A browser that
+  // blocks sound before the first tap just stays quiet; the speak button plays it again.
+  const askAloud = !classroom && ready && learners.length > 0 && voice;
+  useEffect(() => {
+    if (!askAloud) return undefined;
+    speak(t("learner.whoIsPlaying"), { clip: WHO_CLIP });
+    return () => stop();
+  }, [askAloud]);
   // FAM-02: a learner with a picture password taps their pictures first.
   const [locked, setLocked] = useState(/** @type {any} */ (null));
   if (!ready) return <Loading />;
@@ -143,7 +156,11 @@ export default function ProfilePicker() {
               <Typography sx={{ color: colors.ink, fontSize: { xs: 16, sm: 19 }, fontWeight: 700 }}>
                 {hint}
               </Typography>
-              <SpeakButton text={`${title} ${hint}`} size={48} />
+              {classroom ? (
+                <SpeakButton text={`${title} ${hint}`} size={48} />
+              ) : (
+                <SpeakButton text={title} clip={WHO_CLIP} size={48} />
+              )}
             </Box>
           </Box>
         </Box>
