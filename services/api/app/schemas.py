@@ -275,7 +275,7 @@ class CustomLessonIn(Strict):
 
 
 BadgeShape = Literal["circle", "square", "diamond", "arch"]
-BadgeColour = Literal["blue", "green", "pink", "yellow", "orange", "purple"]
+BadgeColour = Literal["blue", "green", "pink", "yellow", "orange"]
 BadgeIcon = Literal[
     "star", "plant", "heart", "trophy", "book", "sparkle", "rocket", "broom", "music", "paw", "sun", "smile"
 ]

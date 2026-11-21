@@ -87,6 +87,7 @@ describe("plain-English summaries (BST-02)", () => {
   test("each rule reads back before saving", () => {
     expect(ruleSummary({ type: "manual" }, { by: "Ms Priya" })).toBe("Ms Priya awards it.");
     expect(ruleSummary({ type: "manual" })).toBe("A grown-up awards it.");
+    expect(ruleSummary({ type: "manual" }, { by: "You" })).toBe("You award it.");
     expect(ruleSummary({ type: "lesson", lesson: "L1" }, { lessons })).toBe("Earned when they finish “Week 3 spelling”.");
     expect(ruleSummary({ type: "mastery", lesson: "L2" }, { lessons })).toBe("Earned when they master every card in “Our Farm”.");
     expect(ruleSummary({ type: "count", metric: "stars", n: 100 })).toBe("Earned when they reach 100 stars.");

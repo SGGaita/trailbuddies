@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -8,11 +9,17 @@ import Typography from "@mui/material/Typography";
 import { t } from "@trailbuddies/i18n";
 import Loading from "@/components/Loading";
 import TeachShell from "@/components/shell/TeachShell";
+import { refreshAccount } from "@/lib/account";
 import { useFamily, useHydrated } from "@/lib/store";
 
 export default function ClassBadgesPage() {
   const ready = useHydrated();
   const teacher = useFamily((s) => s.teacher);
+  const mode = useFamily((s) => s.mode);
+  // The classes may have changed on another device (or another tab): fetch them fresh.
+  useEffect(() => {
+    if (ready && mode === "account") refreshAccount().catch(() => {});
+  }, [ready, mode]);
   if (!ready) return <Loading />;
   const classes = teacher?.classes || [];
 

@@ -89,6 +89,11 @@ const empty = () => ({
    * (BST-05: the child sees the celebration the next time they open the app).
    */
   celebrated: /** @type {Record<string, string[]>} */ ({}),
+  /**
+   * Awards made before this time aren't celebrated here: when this device first loaded the
+   * family (so years of history don't all celebrate at once), or a week back on a class device.
+   */
+  celebrateFrom: 0,
 });
 
 /** Called after local changes so account mode can sync (set by lib/account.js). */
@@ -163,6 +168,7 @@ export const useFamily = create(
           learners: seed.learners,
           lessons: seed.lessons,
           customBadges: seed.badges || [],
+          celebrateFrom: Date.now(),
           wishes: seed.wishes || [],
           waiting: seed.waiting,
           events: seed.events,
@@ -351,10 +357,22 @@ export const useFamily = create(
         afterChange();
       },
       /** @param {string} learnerId @param {string[]} eventIds */
-      markCelebrated: (learnerId, eventIds) =>
+      markCelebrated: (learnerId, eventIds) => {
         set((s) => ({
           celebrated: { ...s.celebrated, [learnerId]: [...new Set([...(s.celebrated[learnerId] || []), ...eventIds])] },
-        })),
+        }));
+        // On a class device, kept with the class's other device choices (lib/classPlay.js), so
+        // the next class session doesn't celebrate the same award again.
+        const { mode, family, celebrated } = get();
+        if (mode === "class" && family?.classId)
+          try {
+            const key = `tb_class_${family.classId}`;
+            const saved = JSON.parse(localStorage.getItem(key) || "{}");
+            localStorage.setItem(key, JSON.stringify({ ...saved, celebrated }));
+          } catch {
+            /* private window: celebrated again next session at worst */
+          }
+      },
       /** Append events (built with createEvent): memory now, IndexedDB and the outbox next. */
       record: (events) => {
         const s = get();
@@ -377,13 +395,15 @@ export const useFamily = create(
     {
       name: "trailbuddies-family-v3",
       storage: safeStorage,
-      version: 4,
+      version: 5,
       merge: (stored, current) => {
         const state = { ...current, .../** @type {Partial<typeof current>} */ (stored) };
         return { ...state, gateUntil: savedGateUntil(state) };
       },
       // v4 (Sprint 9): Juma the elephant is now Jumbo.
       migrate: (state, version) => {
+        // v5 (Sprint 11): grown-ups' awards are celebrated from now on, not all the old ones.
+        if (version < 5 && state) state.celebrateFrom = Date.now();
         if (version < 4 && state) {
           const rename = (l) => (l.buddy === "juma" ? { ...l, buddy: "jumbo" } : l);
           state.learners = (state.learners || []).map(rename);
@@ -415,7 +435,9 @@ export const useFamily = create(
         wishes,
         removedWishes,
         celebrated,
+        celebrateFrom,
       }) => ({
+        celebrateFrom,
         classBadges,
         customBadges,
         removedBadges,

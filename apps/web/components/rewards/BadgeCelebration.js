@@ -127,24 +127,20 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
         >
           {name}
         </Typography>
-        <Typography
-          sx={{
-            bgcolor: "#fff",
-            color: colors.ink,
-            borderRadius: 5.5,
-            px: 2.5,
-            py: 1.25,
-            fontWeight: 700,
-            boxShadow: `0 4px 0 ${colors.cheer.deep}`,
-          }}
-        >
-          {badge.how}
-        </Typography>
-        {message && (
+        {/* Built-in badges say how they were earned; a grown-up's badge shows their message. */}
+        {(badge.how || message) && (
           <Typography
-            sx={{ color: "#fff", fontWeight: 700, fontSize: 20, maxWidth: 360, textShadow: `0 2px 0 ${colors.cheer.deep}` }}
+            sx={{
+              bgcolor: "#fff",
+              color: colors.ink,
+              borderRadius: 5.5,
+              px: 2.5,
+              py: 1.25,
+              fontWeight: 700,
+              boxShadow: `0 4px 0 ${colors.cheer.deep}`,
+            }}
           >
-            “{message}”
+            {badge.how || `“${message}”`}
           </Typography>
         )}
         {badge.payout > 0 && (

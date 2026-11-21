@@ -18,6 +18,8 @@ export function newServer() {
     events: [],
     consents: {},
     lessons: {}, // id -> lesson (with family_id)
+    badges: {}, // S11 Badge Studio: id -> badge (with family_id or class_id)
+    wishes: {}, // S11: id -> wish (with family_id)
     media: {}, // id -> { family, kind, type, bytes: Buffer | null, status }
     tokens: {},
     sent: [],
@@ -169,8 +171,51 @@ const linkOut = (srv, x) => {
     school: srv.schools[c.school_id]?.name || null,
     scope: x.scope,
     linked_at: "2026-11-01T10:00:00Z",
+    // Teacher-made badges earned in class (mirrors services/api links.class_badges).
+    badges: srv.classEvents
+      .filter((e) => e.learnerId === x.id && e.type === "badge_awarded" && e.data?.custom)
+      .filter((e, i, all) => all.findIndex((y) => y.data.badgeId === e.data.badgeId) === i)
+      .map((e) => ({
+        id: e.data.badgeId,
+        name: e.data.custom.name,
+        shape: e.data.custom.shape,
+        colour: e.data.custom.colour,
+        icon: e.data.custom.icon,
+        at: e.at,
+      })),
   };
 };
+
+/** Badge Studio rule types (mirrors services/api routes/rewards.py). */
+const FAMILY_RULES = ["manual", "lesson", "count", "streak", "mastery", "combo"];
+const CLASS_RULES = ["manual", "count", "streak", "assignment", "combo"];
+const ruleTypes = (r) => [r.type, ...(r.all || []).map((x) => x.type)];
+const badgeOut = ({ family_id: _f, class_id: _c, ...b }) => ({
+  photo: null,
+  note: null,
+  voice: null,
+  reward: null,
+  ...b,
+});
+/** The checks the API makes on a badge (BST-02, BST-03, BST-06). */
+function badgeProblem(body, rules, audienceOk) {
+  if (!String(body.name || "").trim()) return "name";
+  if (!Number.isInteger(body.treasures) || body.treasures < 0 || body.treasures > 50) return "treasures";
+  if (!body.rule || !ruleTypes(body.rule).every((t) => rules.includes(t))) return "rule";
+  if (body.rule.type === "combo" && !(body.rule.all?.length >= 2 && body.rule.all.length <= 3)) return "rule";
+  if (!audienceOk) return "audience";
+  return null;
+}
+const snapshotOf = (b) => ({
+  name: b.name,
+  shape: b.shape,
+  colour: b.colour,
+  icon: b.icon,
+  ...(b.photo ? { photo: b.photo } : {}),
+  ...(b.note ? { note: b.note } : {}),
+  ...(b.voice ? { voice: b.voice } : {}),
+  ...(b.reward ? { reward: b.reward } : {}),
+});
 
 const defaultSettings = () => ({
   goal: 2,
@@ -520,6 +565,63 @@ export async function fakeApi(context, srv) {
         groups: groupsOf(srv, m[1]),
         events: workEvents(srv, pairs),
       });
+    }
+    // T05 class badges (S11): made and awarded by the teacher.
+    m = path.match(/^\/classes\/([^/]+)\/badges$/);
+    if (m && method === "GET") {
+      const cls = srv.classes[m[1]];
+      if (!cls || cls.teacher !== userId) return json(route, 404, { detail: "Not found" });
+      return json(route, 200, { badges: Object.values(srv.badges).filter((b) => b.class_id === m[1]).map(badgeOut) });
+    }
+    m = path.match(/^\/classes\/([^/]+)\/badges\/([^/]+)$/);
+    if (m && (method === "PUT" || method === "DELETE")) {
+      const cls = srv.classes[m[1]];
+      if (!cls || cls.teacher !== userId) return json(route, 404, { detail: "Not found" });
+      if (method === "DELETE") {
+        delete srv.badges[m[2]];
+        return json(route, 204);
+      }
+      const roster = Object.values(srv.students).filter((x) => x.class_id === m[1]).map((x) => x.id);
+      const audienceOk = body.audience === "class" || (Array.isArray(body.audience) && body.audience.length > 0 && body.audience.every((a) => roster.includes(a)));
+      const problem = body.photo || body.voice ? "design" : badgeProblem(body, CLASS_RULES, audienceOk);
+      if (problem) return json(route, 422, { detail: problem });
+      srv.badges[m[2]] = { id: m[2], class_id: m[1], ...body };
+      return json(route, 200, badgeOut(srv.badges[m[2]]));
+    }
+    m = path.match(/^\/classes\/([^/]+)\/badges\/([^/]+)\/award$/);
+    if (m && method === "POST") {
+      const cls = srv.classes[m[1]];
+      const b = srv.badges[m[2]];
+      if (!cls || cls.teacher !== userId || !b || b.class_id !== m[1]) return json(route, 404, { detail: "Not found" });
+      const consented = Boolean(srv.schools[cls.school_id]?.consent);
+      const awarded = [];
+      const skipped = [];
+      const at = new Date().toISOString();
+      for (const sid of [...new Set(body.student_ids || [])]) {
+        const st = srv.students[sid];
+        const has = srv.classEvents.some((e) => e.learnerId === sid && e.type === "badge_awarded" && e.data.badgeId === b.id);
+        if (!st || st.class_id !== m[1]) skipped.push({ id: sid, reason: "not in this class" });
+        else if (b.audience !== "class" && !b.audience.includes(sid)) skipped.push({ id: sid, reason: "not for this child" });
+        else if (has) skipped.push({ id: sid, reason: "already earned" });
+        else if (!consented && !st.learner_id) skipped.push({ id: sid, reason: "school_consent" });
+        else {
+          const id = () => `01JZ${String(++srv.seq).padStart(22, "0")}`;
+          const data = { badgeId: b.id, name: b.name, custom: snapshotOf(b), manual: true };
+          srv.classEvents.push({ id: id(), type: "badge_awarded", learnerId: sid, at, data, seq: srv.seq, class_id: m[1] });
+          if (b.treasures)
+            srv.classEvents.push({
+              id: id(),
+              type: "treasure_earned",
+              learnerId: sid,
+              at,
+              data: { amount: b.treasures, reason: "badge", badgeId: b.id },
+              seq: srv.seq,
+              class_id: m[1],
+            });
+          awarded.push(sid);
+        }
+      }
+      return json(route, 200, { awarded, skipped });
     }
     m = path.match(/^\/classes\/([^/]+)\/badge-wall$/);
     if (m && method === "GET") {
@@ -920,6 +1022,41 @@ export async function fakeApi(context, srv) {
     if (m && method === "DELETE") {
       if (role === "viewer") return forbidViewer();
       delete srv.lessons[m[2]];
+      return json(route, 204);
+    }
+    // Badge Studio (S11): family badges and wishes, newest edit wins.
+    m = path.match(/^\/families\/([^/]+)\/(badges|wishes)$/);
+    if (m && method === "GET") {
+      const store = m[2] === "badges" ? srv.badges : srv.wishes;
+      const rows = Object.values(store).filter((x) => x.family_id === m[1]);
+      return json(route, 200, {
+        [m[2]]: rows.map((x) => (m[2] === "badges" ? badgeOut(x) : (({ family_id: _f, ...w }) => w)(x))),
+      });
+    }
+    m = path.match(/^\/families\/([^/]+)\/(badges|wishes)\/([^/]+)$/);
+    if (m && method === "PUT") {
+      if (role === "viewer") return forbidViewer();
+      const kids = Object.values(srv.learners).filter((l) => l.family_id === m[1]).map((l) => l.id);
+      const store = m[2] === "badges" ? srv.badges : srv.wishes;
+      if (m[2] === "badges") {
+        const lessons = Object.values(srv.lessons).filter((l) => l.family_id === m[1]).map((l) => l.id);
+        const lessonOk = [body.rule, ...(body.rule?.all || [])].every((r) => !r?.lesson || lessons.includes(r.lesson));
+        const audienceOk = Array.isArray(body.audience) && body.audience.length > 0 && body.audience.every((a) => kids.includes(a));
+        const problem = badgeProblem(body, FAMILY_RULES, audienceOk) || (lessonOk ? null : "rule");
+        if (problem) return json(route, 422, { detail: problem });
+      } else {
+        const t = String(body.title || "").trim();
+        if (!t || t.length > 60 || !(body.price >= 1 && body.price <= 1000) || !kids.includes(body.learner_id))
+          return json(route, 422, { detail: "wish" });
+      }
+      const cur = store[m[3]];
+      if (!cur || Date.parse(body.updated_at) > Date.parse(cur.updated_at)) store[m[3]] = { id: m[3], family_id: m[1], ...body };
+      const { family_id: _f, ...out } = store[m[3]];
+      return json(route, 200, m[2] === "badges" ? badgeOut(out) : out);
+    }
+    if (m && method === "DELETE") {
+      if (role === "viewer") return forbidViewer();
+      delete (m[2] === "badges" ? srv.badges : srv.wishes)[m[3]];
       return json(route, 204);
     }
     // Photos and voice clips: reserve, upload, check (any EXIF is refused, like GPS data).

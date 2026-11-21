@@ -57,19 +57,22 @@ const EMPTY = {
 /** Rule types in the order a grown-up sees them; manual first (the most common). */
 const RULES = ["manual", "lesson", "count", "streak", "mastery", "combo"];
 const CONDITIONS = ["lesson", "count", "streak", "mastery"];
-const blankRule = (type, lessons) =>
-  ({
-    manual: { type: "manual" },
-    lesson: { type: "lesson", lesson: lessons[0]?.id || "" },
-    mastery: { type: "mastery", lesson: lessons[0]?.id || "" },
-    count: { type: "count", metric: "stars", n: 50 },
-    streak: { type: "streak", days: 5 },
-    combo: {
-      type: "combo",
-      op: "and",
-      all: [blankRule("count", lessons), blankRule("streak", lessons)],
-    },
-  })[type];
+/** A new rule of a type, with sensible starting values. */
+function blankRule(type, lessons) {
+  switch (type) {
+    case "lesson":
+    case "mastery":
+      return { type, lesson: lessons[0]?.id || "" };
+    case "count":
+      return { type: "count", metric: "stars", n: 50 };
+    case "streak":
+      return { type: "streak", days: 5 };
+    case "combo":
+      return { type: "combo", op: "and", all: [blankRule("count", lessons), blankRule("streak", lessons)] };
+    default:
+      return { type: "manual" };
+  }
+}
 
 /**
  * P14/P15 Badge Studio (BST-01…06): design a badge, then choose how it's earned, its reward and

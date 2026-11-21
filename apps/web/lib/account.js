@@ -230,7 +230,10 @@ function applyMe(me) {
     if (v) sounds[k] = v;
     else delete sounds[k];
   }
+  // A family loaded on this device for the first time: celebrate grown-ups' awards from now.
+  const firstLoad = !s.celebrateFrom || s.family?.id !== fam?.id;
   useFamily.setState({
+    ...(firstLoad && { celebrateFrom: Date.now(), celebrated: {} }),
     sounds,
     teacher: me.teacher || null,
     mode: "account",

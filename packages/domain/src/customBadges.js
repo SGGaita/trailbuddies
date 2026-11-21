@@ -209,7 +209,8 @@ export function ruleSummary(rule, ctx = {}) {
   const one = (r) => {
     switch (r.type) {
       case "manual":
-        return ctx.by ? `${ctx.by} awards it` : "a grown-up awards it";
+        // "You award it" (a teacher's own screen), "Ms Priya awards it", "a grown-up awards it".
+        return ctx.by ? `${ctx.by} ${ctx.by === "You" ? "award" : "awards"} it` : "a grown-up awards it";
       case "lesson":
         return `finish ${title(r.lesson)}`;
       case "mastery":
