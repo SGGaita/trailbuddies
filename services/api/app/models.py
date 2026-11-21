@@ -35,6 +35,9 @@ class User(Timestamped, Base):
     google_sub: Mapped[str | None] = mapped_column(
         String(64), unique=True, nullable=True, doc="Google account id once linked (ONB-03)"
     )
+    share_banned_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="MOD-02: suspended from sharing by the safety team"
+    )
 
 
 class Family(Timestamped, Base):
@@ -250,7 +253,11 @@ class MediaAsset(Base):
     kind: Mapped[str] = mapped_column(String(8), doc="photo or voice")
     content_type: Mapped[str] = mapped_column(String(32))
     bytes: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(12), default="pending", doc="pending, ready or rejected")
+    status: Mapped[str] = mapped_column(
+        String(12),
+        default="pending",
+        doc="pending, ready, rejected, flagged (the image check, SAF-08) or hidden (MOD-02)",
+    )
     reject_code: Mapped[str | None] = mapped_column(String(24), nullable=True)
     created_by: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -261,6 +268,10 @@ class MediaAsset(Base):
         index=True,
         doc="no lesson uses it any more; deleted from storage 30 days later (SAF-05)",
     )
+    origin_id: Mapped[str | None] = mapped_column(
+        ULID, nullable=True, index=True, doc="the shared file this is a copy of (SHR-02)"
+    )
+    scan: Mapped[dict | None] = mapped_column(JSON, nullable=True, doc="the device's image check (SAF-08)")
 
 
 class CustomLesson(Base):
@@ -279,6 +290,9 @@ class CustomLesson(Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
     options: Mapped[dict] = mapped_column(
         JSON, default=dict, doc="lesson settings: band, activities, hints, games (BLD-06)"
+    )
+    source_share: Mapped[str | None] = mapped_column(
+        ULID, nullable=True, doc="imported from this share (SHR-02), so it can be reported (SHR-05)"
     )
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -310,6 +324,7 @@ class CustomBadge(Base):
     treasures: Mapped[int] = mapped_column(Integer, default=0)
     reward: Mapped[str | None] = mapped_column(String(80), nullable=True, doc="real-world reward (BST-04)")
     audience: Mapped[list | str] = mapped_column(JSON, default=list, doc='learner/student ids, or "class"')
+    source_share: Mapped[str | None] = mapped_column(ULID, nullable=True, doc="imported from this share")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -584,3 +599,88 @@ class ClassroomDevice(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Share(Base):
+    """SHR-01: a code for a copy of a grown-up's lesson, trail or badge set. The package is
+    built by the server from the family's (or class's) own rows and holds only cards, media,
+    templates, settings and badge designs (SHR-04). A share with photos or voice clips waits
+    for the safety team before its code works."""
+
+    __tablename__ = "shares"
+    __table_args__ = (
+        CheckConstraint("(family_id IS NULL) <> (class_id IS NULL)", name="ck_shares_one_owner"),
+    )
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    code: Mapped[str] = mapped_column(String(6), unique=True, index=True)
+    family_id: Mapped[str | None] = mapped_column(
+        ForeignKey("families.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    class_id: Mapped[str | None] = mapped_column(
+        ForeignKey("classes.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    kind: Mapped[str] = mapped_column(String(8), doc="lesson, trail or badges")
+    title: Mapped[str] = mapped_column(String(60))
+    package: Mapped[dict] = mapped_column(JSON)
+    media: Mapped[list] = mapped_column(JSON, default=list, doc="media ids in the package")
+    checklist: Mapped[dict] = mapped_column(
+        JSON, default=dict, doc="SHR-03: what the sender confirmed, and when"
+    )
+    status: Mapped[str] = mapped_column(
+        String(10), default="live", doc="review, live, revoked (by the sender) or suspended (MOD-02)"
+    )
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    imports: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
+
+class ShareReport(Base):
+    """SHR-05: one family's report of a shared lesson. Three families suspend the code."""
+
+    __tablename__ = "share_reports"
+    __table_args__ = (UniqueConstraint("share_id", "family_id", name="uq_share_reports_family"),)
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    share_id: Mapped[str] = mapped_column(ForeignKey("shares.id", ondelete="CASCADE"), index=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    reason: Mapped[str] = mapped_column(String(24))
+    note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    answered_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, doc="MOD-03: the reporter was told the outcome"
+    )
+
+
+class ModerationItem(Base):
+    """MOD-01: one entry in the safety team's queue: a share waiting for review, a reported
+    share, or a photo the image check flagged."""
+
+    __tablename__ = "moderation_items"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(8), doc="share, report or upload")
+    share_id: Mapped[str | None] = mapped_column(
+        ForeignKey("shares.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    media_id: Mapped[str | None] = mapped_column(ULID, nullable=True, index=True)
+    family_id: Mapped[str | None] = mapped_column(
+        ForeignKey("families.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    reason: Mapped[str] = mapped_column(String(24))
+    status: Mapped[str] = mapped_column(String(8), default="open", index=True, doc="open or closed")
+    outcome: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ModerationAction(Base):
+    """MOD-02: the audit log. Who did what, to what, when and why. Kept when the item goes."""
+
+    __tablename__ = "moderation_actions"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    item_id: Mapped[str | None] = mapped_column(ULID, nullable=True, index=True)
+    action: Mapped[str] = mapped_column(String(24))
+    target: Mapped[str] = mapped_column(String(40), doc="share code, media id or user id")
+    who: Mapped[str] = mapped_column(String(320), doc="the reviewer's email, or 'automatic'")
+    why: Mapped[str] = mapped_column(String(300))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

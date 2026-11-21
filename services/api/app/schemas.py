@@ -531,3 +531,83 @@ class DeviceIn(Strict):
 
     id: str = Field(min_length=26, max_length=26)
     label: str = Field(min_length=1, max_length=60)
+
+
+# --- Sharing and moderation (SHR-01…05, SAF-08, MOD-01…03) ------------------------------
+
+ShareKind = Literal["lesson", "trail", "badges"]
+ReportReason = Literal["child-photo", "personal-details", "unkind", "not-for-children", "other"]
+SHARE_MAX_ITEMS = 6  # packages/domain shares.js
+
+
+class ScanIn(Strict):
+    """SAF-08: the device's image check (open models run in the browser, nothing sent away)."""
+
+    flagged: bool
+    reason: Literal["nudity"] | None = None
+    scores: dict[str, float] = Field(default_factory=dict, max_length=8)
+    model: str = Field(default="", max_length=40)
+
+
+class MediaCompleteIn(Strict):
+    scan: ScanIn | None = None
+
+
+class ChecklistIn(Strict):
+    """SHR-03: what the sender confirmed before the code is made."""
+
+    no_names: bool
+    faces_checked: bool = Field(description="the face check ran over every photo")
+    not_child: list[str] = Field(
+        default_factory=list, max_length=80, description="photos with a face: not a child"
+    )
+    removed: list[str] = Field(
+        default_factory=list, max_length=80, description="photos left out of the share"
+    )
+
+
+class ShareIn(Strict):
+    kind: ShareKind
+    ids: list[str] = Field(min_length=1, max_length=SHARE_MAX_ITEMS, description="lesson or badge ids")
+    title: str | None = Field(default=None, max_length=60)
+    voice: bool = Field(default=False, description="include the grown-up's voice recordings")
+    checklist: ChecklistIn
+
+    _clean = field_validator("title")(lambda v: _one_line(v))
+
+
+class ImportIn(Strict):
+    family_id: str | None = Field(default=None, min_length=26, max_length=26)
+    class_id: str | None = Field(default=None, min_length=26, max_length=26)
+
+    @model_validator(mode="after")
+    def one(self):
+        if (self.family_id is None) == (self.class_id is None):
+            raise ValueError("import into a family or a class")
+        return self
+
+
+class ReportIn(Strict):
+    family_id: str = Field(min_length=26, max_length=26)
+    reason: ReportReason
+    note: str | None = Field(default=None, max_length=200)
+
+    _clean = field_validator("note")(lambda v: _one_line(v))
+
+
+class ModActionIn(Strict):
+    action: Literal[
+        "approve",
+        "keep",
+        "hide_image",
+        "restore_image",
+        "suspend_share",
+        "restore_share",
+        "warn_creator",
+        "suspend_creator",
+        "dismiss",
+    ]
+    media_id: str | None = Field(default=None, min_length=26, max_length=26)
+    reason: str = Field(min_length=3, max_length=300)
+
+    _clean = field_validator("reason")(lambda v: _one_line(v))

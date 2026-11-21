@@ -17,7 +17,8 @@ from sqlalchemy.orm import Session as DbSession
 from ..db import get_session, utcnow
 from ..media_check import Rejected, check_photo, check_voice
 from ..models import MediaAsset, User
-from ..schemas import MediaIn
+from ..moderation import open_item
+from ..schemas import MediaCompleteIn, MediaIn
 from ..security import current_user, membership
 from ..storage import LocalStorage, get_storage
 from .families import latest_consent, require_consent
@@ -95,13 +96,14 @@ def start_upload(
 def finish_upload(
     family_id: str,
     media_id: str,
+    body: MediaCompleteIn | None = None,
     user: User = Depends(current_user),
     db: DbSession = Depends(get_session),
     storage=Depends(get_storage),
 ) -> dict:
     membership(db, user, family_id, write=True)
     m = owned(db, family_id, media_id)
-    if m.status == "ready":
+    if m.status in ("ready", "flagged", "hidden"):
         return media_out(m)
     max_bytes, _ = LIMITS[m.kind]
     data = storage.get(m.id, max_bytes)
@@ -117,6 +119,13 @@ def finish_upload(
         db.commit()
         raise HTTPException(422, {"code": r.code, "message": r.message}) from None
     m.status, m.content_type, m.bytes, m.checked_at = "ready", real, len(data), utcnow()
+    scan = body.scan if body else None
+    if scan and m.kind == "photo":
+        m.scan = scan.model_dump()
+        if scan.flagged:
+            # SAF-08: hidden until the safety team looks; the device has told the grown-up why.
+            m.status = "flagged"
+            open_item(db, "upload", scan.reason or "nudity", media_id=m.id, family_id=family_id)
     db.commit()
     return media_out(m)
 
@@ -131,6 +140,8 @@ def open_media(
 ):
     membership(db, user, family_id)
     m = owned(db, family_id, media_id)
+    if m.status in ("flagged", "hidden"):
+        raise HTTPException(404, {"code": "hidden", "message": "This photo is hidden."})
     if m.status != "ready":
         raise HTTPException(404, "Not ready")
     return RedirectResponse(

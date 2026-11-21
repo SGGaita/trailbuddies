@@ -65,6 +65,10 @@ class LocalStorage:
     def delete(self, media_id: str) -> None:
         self.path(media_id).unlink(missing_ok=True)
 
+    def copy(self, src: str, dst: str) -> None:
+        """A copy for a family that imported a share (SHR-02)."""
+        self.put(dst, self.path(src).read_bytes())
+
     # Content packs (CNT-02) live beside the media under packs/.
     def put_key(self, key: str, data: bytes, content_type: str = "application/json") -> None:
         p = self.root / key
@@ -134,6 +138,11 @@ class S3Storage:
 
     def delete(self, media_id: str) -> None:
         self.client.delete_object(Bucket=self.bucket, Key=_key(media_id))
+
+    def copy(self, src: str, dst: str) -> None:
+        self.client.copy_object(
+            Bucket=self.bucket, Key=_key(dst), CopySource={"Bucket": self.bucket, "Key": _key(src)}
+        )
 
     def put_key(self, key: str, data: bytes, content_type: str = "application/json") -> None:
         self._ensure_bucket()

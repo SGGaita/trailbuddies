@@ -70,6 +70,7 @@ def test_family_badges_save_with_their_rule_reward_and_who_can_earn_them(client,
         "treasures": 20,
         "reward": "Pick Friday's movie",
         "audience": [LEARNER],
+        "source_share": None,
         "updated_at": None,
     }
     # Automatic rules: a custom lesson, a count, a streak, and up to 3 combined.
