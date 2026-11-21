@@ -24,7 +24,7 @@ export const FAMILY_RULES = ["manual", "lesson", "count", "streak", "mastery", "
 export const CLASS_RULES = ["manual", "count", "streak", "assignment", "combo"];
 
 export const BADGE_SHAPES = ["circle", "square", "diamond", "arch"];
-export const BADGE_COLOURS = ["blue", "green", "pink", "yellow", "orange", "purple"];
+export const BADGE_COLOURS = ["blue", "green", "pink", "yellow", "orange"];
 export const BADGE_ICONS = ["star", "plant", "heart", "trophy", "book", "sparkle", "rocket", "broom", "music", "paw", "sun", "smile"];
 export const ICON_EMOJI = {
   star: "⭐",
@@ -112,6 +112,9 @@ export function badgeProblems(b, ctx) {
   out.push(...ruleProblems(b.rule, ctx));
   return [...new Set(out)];
 }
+
+/** Does a rule (or one of its combined conditions) use this rule type? */
+export const ruleUses = (rule, type) => rule?.type === type || (rule?.all || []).some((r) => r.type === type);
 
 /** BST-06: can this learner (or student) earn the badge? A whole-class badge includes new joiners. */
 export const canEarn = (b, learnerId) => b.audience === "class" || (Array.isArray(b.audience) && b.audience.includes(learnerId));

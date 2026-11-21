@@ -88,6 +88,18 @@ function firstFullAt(events, unit, from, total) {
 }
 
 /**
+ * Class badges (BST-02, "Assignment" rule): has the child finished everything due this week?
+ * False when nothing is due this week, so a badge isn't given for doing nothing.
+ * @param {Assignment[]} assignments this child's assignments
+ * @param {(a: Assignment) => { done: boolean }} statusOf
+ * @param {{ monday: string, sunday: string }} week local calendar dates (badgeWall.js wallWeek)
+ */
+export function weekWorkDone(assignments, statusOf, week) {
+  const due = assignments.filter((a) => a.due_on && a.due_on >= week.monday && a.due_on <= week.sunday);
+  return due.length > 0 && due.every((a) => statusOf(a).done);
+}
+
+/**
  * ASN-01: is it overdue? Due dates are calendar days (YYYY-MM-DD) in the device's time zone.
  * @param {Assignment} a @param {Date} now
  */

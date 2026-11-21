@@ -3,6 +3,8 @@ import { useMemo } from "react";
 import { getUnit } from "@trailbuddies/content";
 import {
   assignmentStatus,
+  wallWeek,
+  weekWorkDone,
   assignmentMedia,
   classroomSubjects,
   islandOrder,
@@ -37,6 +39,8 @@ export async function loadClassWork(api) {
     useFamily.setState({
       classWork: { assignments: next.assignments || [], events: next.events || [], at: Date.now() },
     });
+    // T05: the class's own badges, checked on this device during class play.
+    if (s.mode === "class") useFamily.setState({ classBadges: (await api.classBadges(s.family.classId)).badges });
     if (s.mode === "class" && s.family?.classroom) await keepMediaOffline(next.assignments || []);
   } catch {
     /* offline or signed out: keep what this device has */
@@ -51,6 +55,28 @@ function forLearner(classWork, mode, learnerId) {
   return (classWork.assignments || []).filter((a) =>
     mode === "class" ? (a.to || []).includes(learnerId) : a.learner_id === learnerId,
   );
+}
+
+/**
+ * Class badges (BST-02): has this child finished everything due this week? Uses the class's
+ * play on this device. Not a hook: it's called when a lesson or game ends.
+ * @param {string} learnerId @param {any[]} events the device's events, including the new ones
+ */
+export function weekWorkDoneFor(learnerId, events, now = new Date()) {
+  const s = useFamily.getState();
+  const mine = forLearner(s.classWork, s.mode, learnerId);
+  if (!mine.length) return false;
+  const seen = new Set();
+  const all = [...events, ...(s.classWork.events || [])].filter(
+    (e) => e.learnerId === learnerId && !seen.has(e.id) && seen.add(e.id),
+  );
+  let zone = "UTC";
+  try {
+    zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    /* keep UTC */
+  }
+  return weekWorkDone(mine, (a) => assignmentStatus(a, all, lessonsTotal(a)), wallWeek(now, zone));
 }
 
 /**

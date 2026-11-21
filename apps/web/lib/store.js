@@ -75,6 +75,20 @@ const empty = () => ({
     events: [],
     at: 0,
   }),
+  /** Badge Studio (BST-01…06): the family's own badges; on a class device, the class's badges. */
+  customBadges: /** @type {any[]} */ ([]),
+  /** Badges deleted on this device that the server still has. */
+  removedBadges: /** @type {string[]} */ ([]),
+  /** On a class device (S9/S10): the class's badges, made by the teacher (T05). */
+  classBadges: /** @type {any[]} */ ([]),
+  /** Wishes (BST-07): real-world rewards set up for each child. */
+  wishes: /** @type {any[]} */ ([]),
+  removedWishes: /** @type {string[]} */ ([]),
+  /**
+   * Badges a grown-up awarded from another device that this device has celebrated, per learner
+   * (BST-05: the child sees the celebration the next time they open the app).
+   */
+  celebrated: /** @type {Record<string, string[]>} */ ({}),
 });
 
 /** Called after local changes so account mode can sync (set by lib/account.js). */
@@ -148,6 +162,8 @@ export const useFamily = create(
           settings: { ...DEFAULT_SETTINGS, ...seed.settings },
           learners: seed.learners,
           lessons: seed.lessons,
+          customBadges: seed.badges || [],
+          wishes: seed.wishes || [],
           waiting: seed.waiting,
           events: seed.events,
           eventsReady: true,
@@ -296,6 +312,49 @@ export const useFamily = create(
         }));
         afterChange();
       },
+      /** BST-01…06: save a badge (new or edited). Returns it. */
+      saveBadge: (draft) => {
+        const id = draft.id || ulid();
+        const saved = { ...draft, id, updated_at: now(), dirty: true };
+        set((s) => ({
+          customBadges: s.customBadges.some((b) => b.id === id)
+            ? s.customBadges.map((b) => (b.id === id ? saved : b))
+            : [...s.customBadges, saved],
+        }));
+        afterChange();
+        return saved;
+      },
+      /** Children who earned it keep it (BDG-07). @param {string} id */
+      deleteBadge: (id) => {
+        set((s) => ({
+          customBadges: s.customBadges.filter((b) => b.id !== id),
+          removedBadges: s.mode === "account" ? [...s.removedBadges, id] : s.removedBadges,
+        }));
+        afterChange();
+      },
+      /** BST-07: save a wish (new or edited). Returns it. */
+      saveWish: (draft) => {
+        const id = draft.id || ulid();
+        const saved = { ...draft, id, updated_at: now(), dirty: true };
+        set((s) => ({
+          wishes: s.wishes.some((w) => w.id === id) ? s.wishes.map((w) => (w.id === id ? saved : w)) : [...s.wishes, saved],
+        }));
+        afterChange();
+        return saved;
+      },
+      /** @param {string} id */
+      deleteWish: (id) => {
+        set((s) => ({
+          wishes: s.wishes.filter((w) => w.id !== id),
+          removedWishes: s.mode === "account" ? [...s.removedWishes, id] : s.removedWishes,
+        }));
+        afterChange();
+      },
+      /** @param {string} learnerId @param {string[]} eventIds */
+      markCelebrated: (learnerId, eventIds) =>
+        set((s) => ({
+          celebrated: { ...s.celebrated, [learnerId]: [...new Set([...(s.celebrated[learnerId] || []), ...eventIds])] },
+        })),
       /** Append events (built with createEvent): memory now, IndexedDB and the outbox next. */
       record: (events) => {
         const s = get();
@@ -350,7 +409,19 @@ export const useFamily = create(
         tips,
         teacher,
         classWork,
+        customBadges,
+        removedBadges,
+        classBadges,
+        wishes,
+        removedWishes,
+        celebrated,
       }) => ({
+        classBadges,
+        customBadges,
+        removedBadges,
+        wishes,
+        removedWishes,
+        celebrated,
         classWork,
         teacher,
         sounds,

@@ -14,6 +14,7 @@ import {
   wishProblems,
   grownUpQueue,
   waitingCount,
+  weekWorkDone,
 } from "./index.js";
 
 const lessons = [
@@ -269,5 +270,17 @@ describe("wishes (BST-07) and real-world rewards (BST-04)", () => {
     expect(q.approved.map((r) => r.name)).toEqual(["Leo"]);
     expect(q.toDeliver.map((r) => [r.name, r.reward])).toEqual([["Zawadi", "Movie night"]]);
     expect(waitingCount(q)).toBe(3);
+  });
+});
+
+describe("the class 'assignment' rule: everything due this week (BST-02)", () => {
+  const week = { monday: "2026-11-16", sunday: "2026-11-22" };
+  const a = (id, due_on) => ({ id, due_on });
+  test("done only when something is due this week and all of it is finished", () => {
+    const done = new Set(["A1", "A2"]);
+    const statusOf = (x) => ({ done: done.has(x.id) });
+    expect(weekWorkDone([a("A1", "2026-11-18"), a("A2", "2026-11-20"), a("A9", "2026-11-30")], statusOf, week)).toBe(true);
+    expect(weekWorkDone([a("A1", "2026-11-18"), a("A3", "2026-11-19")], statusOf, week)).toBe(false);
+    expect(weekWorkDone([a("A9", "2026-11-30"), a("A8", null)], statusOf, week)).toBe(false); // nothing due
   });
 });

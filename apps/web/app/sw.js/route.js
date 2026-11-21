@@ -4,7 +4,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { getSubjects, ALL_ASSETS, ART_BASE, HELP_ARTICLES } from "@trailbuddies/content";
-import { PLAY_MORE, FAMILY } from "@/lib/placeholders";
+import { PLAY_MORE } from "@/lib/placeholders";
 
 export const dynamic = "force-static";
 
@@ -36,7 +36,8 @@ const PAGES = [
   "/family/sounds",
   "/privacy",
   "/terms",
-  ...Object.keys(FAMILY).map((k) => `/family/${k}`),
+  "/family/rewards",
+  "/play/more/wishes",
   "/teach",
   "/teach/start",
   "/teach/class",

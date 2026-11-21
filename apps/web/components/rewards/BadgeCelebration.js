@@ -7,6 +7,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { buddyLine } from "@trailbuddies/content";
 import { speak } from "@/lib/speech";
+import { mediaUrl } from "@/lib/media";
 import { playSound } from "@/lib/sounds";
 import Buddy from "@/components/art/Buddy";
 import BadgeArt from "./BadgeArt";
@@ -34,13 +35,15 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
   const upgrade = Boolean(badge?.previousTier);
   const heading = t(upgrade ? "badges.upgraded" : "badges.new");
   const name = upgrade ? `${badge.name} · ${t(`badges.${badge.tier}`)}` : badge?.name;
+  const message = badge?.custom?.note || "";
   const announce = useEffectEvent(() => {
     playSound("done");
-    speak(buddyLine("badge.earned", { badge: name, name: learner.name }, i, learner.buddy), {
-      band: learner.band,
-      buddy: learner.buddy,
-      enabled: voice,
-    });
+    const line = buddyLine("badge.earned", { badge: name, name: learner.name }, i, learner.buddy);
+    // BST-01: a grown-up's badge plays their recorded message, or the buddy reads their note.
+    const clip = badge.custom?.voice;
+    speak(clip || !message ? line : `${line} ${message}`, { band: learner.band, buddy: learner.buddy, enabled: voice });
+    if (clip && voice)
+      mediaUrl(clip).then((url) => url && setTimeout(() => new Audio(url).play().catch(() => {}), 1800));
   });
   useEffect(() => {
     if (badge) announce();
@@ -137,6 +140,13 @@ export default function BadgeCelebration({ badges, learner, voice, onDone }) {
         >
           {badge.how}
         </Typography>
+        {message && (
+          <Typography
+            sx={{ color: "#fff", fontWeight: 700, fontSize: 20, maxWidth: 360, textShadow: `0 2px 0 ${colors.cheer.deep}` }}
+          >
+            “{message}”
+          </Typography>
+        )}
         {badge.payout > 0 && (
           <Box
             sx={{

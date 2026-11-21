@@ -36,14 +36,24 @@ export default function ClassBadgesPage() {
               <Typography component="h2" variant="h6">
                 {cls.name}
               </Typography>
-              <Button
-                component={Link}
-                href={`/teach/badge-wall?id=${encodeURIComponent(cls.id)}`}
-                variant="outlined"
-                aria-label={t("teach.badgeWallFor", { name: cls.name })}
-              >
-                {t("teach.badgeWall")}
-              </Button>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Button
+                  component={Link}
+                  href={`/teach/class-badges?id=${encodeURIComponent(cls.id)}`}
+                  variant="contained"
+                  aria-label={t("classBadges.openFor", { name: cls.name })}
+                >
+                  {t("classBadges.open")}
+                </Button>
+                <Button
+                  component={Link}
+                  href={`/teach/badge-wall?id=${encodeURIComponent(cls.id)}`}
+                  variant="outlined"
+                  aria-label={t("teach.badgeWallFor", { name: cls.name })}
+                >
+                  {t("teach.badgeWall")}
+                </Button>
+              </Box>
             </Card>
           ))}
         </Box>

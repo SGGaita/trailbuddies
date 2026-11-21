@@ -1,4 +1,5 @@
 import { createEvent } from "@trailbuddies/sync";
+import { badgeSnapshot } from "@trailbuddies/domain";
 
 /**
  * Demo family used until accounts arrive in Sprint 2. Profiles hold only what a
@@ -92,8 +93,43 @@ export function seedEvents(now = new Date()) {
     lesson("joseph", day(2, 20), "counting-1-5-5", 3, 20),
     lesson("joseph", day(1, 20), "counting-1-5-6", 3, 15),
     earn("joseph", day(1, 20), 410),
+
+    // Amani: Grace gave her the "Kind Helper" badge for helping in the garden; its pancakes
+    // reward is on Grace's "To deliver" list (BST-04, BST-05).
+    createEvent(
+      "badge_awarded",
+      "amani",
+      { badgeId: "demo-kind-helper", name: "Kind Helper", manual: true, custom: badgeSnapshot(seedBadges()[0]) },
+      day(1, 18),
+    ),
+    createEvent("treasure_earned", "amani", { amount: 10, reason: "badge", badgeId: "demo-kind-helper" }, day(1, 18)),
   ];
 }
+
+/** Badge Studio: a badge Grace made for helping at home (BST-01…05). */
+export const seedBadges = (now = new Date()) => [
+  {
+    id: "demo-kind-helper",
+    name: "Kind Helper",
+    shape: "arch",
+    colour: "green",
+    icon: "heart",
+    photo: null,
+    note: "Thank you for helping in the garden!",
+    voice: null,
+    rule: { type: "manual" },
+    treasures: 10,
+    reward: "Choose Saturday's pancakes",
+    audience: ["zawadi", "amani"],
+    updated_at: now.toISOString(),
+  },
+];
+
+/** Wishes Grace set up for Zawadi (BST-07). */
+export const seedWishes = (now = new Date()) => [
+  { id: "demo-wish-story", learner_id: "zawadi", title: "Bedtime story of my choice", price: 100, emoji: "📖", updated_at: now.toISOString() },
+  { id: "demo-wish-park", learner_id: "zawadi", title: "Extra park time", price: 150, emoji: "🌳", updated_at: now.toISOString() },
+];
 
 /** A lesson Grace made in the Lesson Builder, waiting on Family Island for Zawadi and Amani. */
 export const seedLessons = (now = new Date()) => [
@@ -122,7 +158,9 @@ export const seedFamily = (now = new Date()) => ({
   settings: { voice: true, goal: 2, limit: 20 },
   learners: seedProfiles(),
   lessons: seedLessons(now),
+  badges: seedBadges(now),
+  wishes: seedWishes(now),
   events: seedEvents(now),
-  waiting: [{ id: "w1", learnerId: "zawadi", text: "asked for Bedtime story of my choice" }],
+  waiting: [],
   activeId: null,
 });
