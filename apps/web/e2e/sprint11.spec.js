@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { fileURLToPath } from "node:url";
-import { demo, noSideScroll, passGate, shot, watchErrors } from "./helpers.js";
+import { demo, noSideScroll, passGate, settled, shot, watchErrors } from "./helpers.js";
 import { fakeApi, newServer, seedServer } from "./fakeApi.js";
 
 // Sprint 11, part 1: Badge Studio (BST-01…06, BDG-07), wishes (BST-07), real-world rewards (BST-04),
@@ -13,6 +13,7 @@ const wallet = (page) => page.getByLabel(/^\d+ treasures$/).first();
 const tile = (page, title) => page.locator(`[data-wish="${title}"]`);
 
 async function asChild(page, name) {
+  await settled(page);
   await page.goto("/play");
   await page.getByRole("button", { name: new RegExp(name) }).click();
   await expect(page).toHaveURL(/\/play\/map$/);
@@ -21,6 +22,7 @@ async function asChild(page, name) {
 test("Badge Studio: design, how it's earned, the reward, and a child who already earned it", async ({ page }, testInfo) => {
   await page.clock.install();
   await demo(page);
+  await settled(page);
   await page.goto("/family");
   await passGate(page);
   await page.getByRole("link", { name: "Make a badge" }).first().click();
@@ -109,21 +111,27 @@ test("Badge Studio: design, how it's earned, the reward, and a child who already
   await expect(party.getByLabel("+20", { exact: true })).toBeVisible();
   await shot(page, testInfo, "s11-award-celebration");
   await party.getByRole("button", { name: /badge book/i }).click();
+  await expect(party).toHaveCount(0); // it flies into the badge book, then it's marked as celebrated
   await page.goto("/play/map");
+  await expect(page).toHaveURL(/\/play\/map$/);
   await expect(party).toHaveCount(0); // celebrated once on this device
+  await settled(page);
   await page.goto("/play/more/badges");
   await expect(page.locator('[data-custom="Garden Helper"]')).toBeVisible();
   // BST-04: the real-world reward is on her wishes, waiting.
+  await settled(page);
   await page.goto("/play/more/wishes");
   await expect(tile(page, "Pick Friday's movie")).toHaveAttribute("data-status", "earned");
   await expect(tile(page, "Pick Friday's movie")).toContainText("Your grown-up will bring it");
 
   // The grown-up delivers it; the child sees the thank-you.
+  await settled(page);
   await page.goto("/family/rewards");
   await passGate(page);
   await page.getByRole("button", { name: "Pick Friday's movie delivered to Zawadi" }).click();
   await expect(page.getByText("Marked as delivered. Zawadi will see a thank-you.")).toBeVisible();
   await asChild(page, "Zawadi");
+  await settled(page);
   await page.goto("/play/more/wishes");
   await expect(tile(page, "Pick Friday's movie")).toHaveAttribute("data-status", "delivered");
   await expect(tile(page, "Pick Friday's movie")).toContainText("Delivered! Thank you!");
@@ -132,6 +140,7 @@ test("Badge Studio: design, how it's earned, the reward, and a child who already
 test("wishes: save up, ask, 'not now' gives treasures back, approve and deliver", async ({ page }, testInfo) => {
   await demo(page);
   await page.getByRole("button", { name: /Zawadi/ }).click();
+  await settled(page);
   await page.goto("/play/more/wishes");
   await expect(wallet(page)).toHaveAttribute("aria-label", "110 treasures");
   const story = tile(page, "Bedtime story of my choice");
@@ -146,6 +155,7 @@ test("wishes: save up, ask, 'not now' gives treasures back, approve and deliver"
   await expect(wallet(page)).toHaveAttribute("aria-label", "10 treasures"); // held
 
   // The grown-up sees it on the home screen, then says "not now": the treasures come back.
+  await settled(page);
   await page.goto("/family");
   await passGate(page);
   const waiting = page.getByRole("heading", { name: "Waiting for you" }).locator("..");
@@ -159,26 +169,32 @@ test("wishes: save up, ask, 'not now' gives treasures back, approve and deliver"
 
   await asChild(page, "Zawadi");
   await expect(wallet(page)).toHaveAttribute("aria-label", "110 treasures");
+  await settled(page);
   await page.goto("/play/more/wishes");
   await story.getByRole("button", { name: "Ask for it!" }).click();
 
   // Approve, then deliver: the treasures stay spent.
+  await settled(page);
   await page.goto("/family/rewards");
   await passGate(page);
   await page.locator('[data-request="Bedtime story of my choice"]').getByRole("button", { name: "Yes, approve" }).click();
   await expect(page.getByText("Zawadi will see “Approved! Coming soon”.")).toBeVisible();
   await asChild(page, "Zawadi");
+  await settled(page);
   await page.goto("/play/more/wishes");
   await expect(story).toContainText("Approved! Coming soon");
+  await settled(page);
   await page.goto("/family/rewards");
   await passGate(page);
   await page.getByRole("button", { name: "Bedtime story of my choice delivered to Zawadi" }).click();
   await asChild(page, "Zawadi");
+  await settled(page);
   await page.goto("/play/more/wishes");
   await expect(story).toContainText("Delivered! Thank you!");
   await expect(wallet(page)).toHaveAttribute("aria-label", "10 treasures");
 
   // A new wish for Amani, from the wish list.
+  await settled(page);
   await page.goto("/family/rewards?tab=lists");
   await passGate(page);
   await page.getByRole("group", { name: "Which child" }).getByRole("button", { name: "Amani" }).click();
@@ -212,6 +228,7 @@ test("a grown-up awards a badge from their phone; the child celebrates on the fa
   await asChild(k, "Wanjiru");
 
   // The phone makes a hand-given badge, then awards it.
+  await settled(p);
   await p.goto("/family/create/badge");
   await passGate(p);
   await p.getByRole("textbox", { name: "Badge name" }).fill("Tidy Champion");
@@ -232,8 +249,10 @@ test("a grown-up awards a badge from their phone; the child celebrates on the fa
   await expect(party).toContainText("“Your room looks great!”");
   await expect(party.getByLabel("+10", { exact: true })).toBeVisible();
   await party.getByRole("button", { name: /badge book/i }).click();
+  await expect(party).toHaveCount(0);
 
   // BDG-07: deleting the badge keeps it in her badge book; a grown-up can hide it instead.
+  await settled(p);
   await p.goto("/family/create/badge?id=" + Object.keys(srv.badges)[0]);
   await passGate(p);
   await p.getByRole("button", { name: "Next: how it’s earned" }).click();
@@ -241,6 +260,7 @@ test("a grown-up awards a badge from their phone; the child celebrates on the fa
   await expect(p.getByText("Children who already earned it keep it in their badge book.", { exact: false })).toBeVisible();
   await p.getByRole("button", { name: "Delete", exact: true }).click();
   await expect.poll(() => Object.keys(srv.badges).length).toBe(0);
+  await settled(k);
   await k.goto("/play/more/badges");
   await expect(k.locator('[data-custom="Tidy Champion"]')).toBeVisible();
   await p.getByRole("button", { name: "Hide Tidy Champion from the badge book" }).click();
@@ -319,6 +339,7 @@ test("teachers make class badges, award them, and they show on the badge wall an
   await g.getByRole("button", { name: "Email me a sign-in link" }).click();
   await g.goto(`/auth/verify?token=${encodeURIComponent(srv.sent.at(-1).token)}`);
   await expect(g).not.toHaveURL(/\/auth\/verify/);
+  await settled(g);
   await g.goto("/family/classes");
   await passGate(g);
   const badges = g.getByLabel("Badges Wanjiru earned in class");
