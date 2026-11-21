@@ -16,12 +16,14 @@ function Go() {
   const preview = q.get("preview") === "1";
   return (
     <LessonPlayer
-      key={`${unit}/${step}/${preview}`}
+      key={`${unit}/${step}/${preview}/${q.get("admin")}`}
       where={{
         kind: step === "trophy" ? "trophy" : "lesson",
         unitId: unit,
         step,
         ...(preview ? { preview: true, learnerId: q.get("learner") || undefined } : {}),
+        // CMS-04: staff previewing a draft from the content admin (a stand-in child).
+        ...(preview && q.get("admin") === "1" ? { admin: true, band: q.get("band") || undefined } : {}),
       }}
     />
   );

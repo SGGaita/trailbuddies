@@ -39,3 +39,4 @@ export * from "./badgeWall.js";
 export * from "./customBadges.js";
 export * from "./wishes.js";
 export * from "./shares.js";
+export * from "./cms.js";

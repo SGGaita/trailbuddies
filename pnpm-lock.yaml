@@ -138,6 +138,9 @@ importers:
 
   packages/domain:
     devDependencies:
+      '@trailbuddies/content-schema':
+        specifier: workspace:*
+        version: link:../content-schema
       '@trailbuddies/sync':
         specifier: workspace:*
         version: link:../sync

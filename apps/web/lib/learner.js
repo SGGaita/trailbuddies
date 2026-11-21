@@ -78,3 +78,18 @@ export function learnerView(learner, events, now = new Date(), { goal = 2 } = {}
     reviewDue,
   };
 }
+
+const PREVIEW_AGE = { seedling: 4, sprout: 6, explorer: 8, voyager: 10, trailblazer: 13 };
+/**
+ * CMS-04: a stand-in child for staff previewing a draft unit (no family needed, nothing is
+ * saved). Their age matches the unit's band so lessons are built as that child would get them.
+ * @param {string} [band]
+ */
+export function previewLearner(band = "sprout", now = new Date()) {
+  const age = PREVIEW_AGE[band] ?? 6;
+  return learnerView(
+    { id: "preview", name: "Preview", birth: { year: now.getFullYear() - age, month: 1 }, color: "leaf", buddy: "zip", outfit: {}, interests: [], placement: {}, difficulty: "auto" },
+    [],
+    now,
+  );
+}

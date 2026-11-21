@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DbSession
 
+from .. import cms
 from ..db import get_session, utcnow
 from ..models import MediaAsset, ModerationAction, ModerationItem, Share, ShareReport, User
 from ..moderation import (
@@ -21,7 +22,6 @@ from ..moderation import (
 )
 from ..schemas import ModActionIn
 from ..security import aware, current_user
-from ..settings import get_settings
 from ..shares import fmt, photos_of
 from ..storage import get_storage
 from .rewards import iso
@@ -39,8 +39,9 @@ CLOSES = {
 }
 
 
-def admin(user: User = Depends(current_user)) -> User:
-    if user.email.lower() not in get_settings().admins:
+def admin(user: User = Depends(current_user), db: DbSession = Depends(get_session)) -> User:
+    """CMS-01: moderators and admins (TB_ADMIN_EMAILS, or staff with the role)."""
+    if not cms.can(cms.role_of(db, user), "moderate"):
         raise HTTPException(403, "Only the safety team can open this")
     return user
 

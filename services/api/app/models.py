@@ -684,3 +684,81 @@ class ModerationAction(Base):
     who: Mapped[str] = mapped_column(String(320), doc="the reviewer's email, or 'automatic'")
     why: Mapped[str] = mapped_column(String(300))
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class StaffMember(Base):
+    """CMS-01: a Trailbuddies staff member and their role. The emails in TB_ADMIN_EMAILS are
+    admins without a row (the first admin); everyone else is invited here by an admin."""
+
+    __tablename__ = "staff_members"
+    email: Mapped[str] = mapped_column(String(320), primary_key=True)
+    role: Mapped[str] = mapped_column(String(12), doc="admin, editor, reviewer or moderator")
+    name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    invited_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class AdminLog(Base):
+    """CMS-01: every staff change (roles, content edits, publishing) with who, when and what."""
+
+    __tablename__ = "admin_log"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    who: Mapped[str] = mapped_column(String(320))
+    action: Mapped[str] = mapped_column(String(32), index=True)
+    target: Mapped[str] = mapped_column(String(80))
+    detail: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class ContentVersion(Base):
+    """CMS-02: a version of the built-in content. Version 1 is the import of the files in the
+    code; each publish makes the next. At most one draft at a time, holding only what changed."""
+
+    __tablename__ = "content_versions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    status: Mapped[str] = mapped_column(String(10), index=True, doc="draft or published")
+    note: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(320))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    published_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    self_published: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", doc="an admin published their own changes"
+    )
+    release: Mapped[str | None] = mapped_column(String(32), nullable=True, doc="the packs' release name")
+
+
+class ContentDoc(Base):
+    """CMS-02: one document in a version: the subject catalogue, a unit, or a unit's asset
+    manifest. A version holds only the documents it changed; the rest come from earlier ones."""
+
+    __tablename__ = "content_docs"
+    __table_args__ = (UniqueConstraint("version_id", "kind", "key", name="uq_content_docs_key"),)
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    version_id: Mapped[int] = mapped_column(ForeignKey("content_versions.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(10), doc="catalogue, unit or assets")
+    key: Mapped[str] = mapped_column(String(64), doc="the unit id, or 'catalogue'")
+    data: Mapped[dict] = mapped_column(JSON)
+    updated_by: Mapped[str] = mapped_column(String(320))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ContentAsset(Base):
+    """CMS-03: a picture staff uploaded for a built-in unit. It passes the image check, then a
+    reviewer or admin approves it before it can be published to children."""
+
+    __tablename__ = "content_assets"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    content_type: Mapped[str] = mapped_column(String(32))
+    bytes: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(12), default="pending", doc="pending, ready or rejected")
+    approval: Mapped[str] = mapped_column(
+        String(16), default="waiting", doc="waiting, approved, flagged (the image check) or refused"
+    )
+    scan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    label: Mapped[str | None] = mapped_column(String(80), nullable=True, doc="what it shows")
+    uploaded_by: Mapped[str] = mapped_column(String(320))
+    approved_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

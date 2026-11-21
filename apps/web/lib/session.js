@@ -46,8 +46,13 @@ export function planLesson(where, learner, seed, lessons = [], { assigned = fals
   const unit = getUnit(where.unitId);
   if (!unit) return { blocked: "/play/map" };
   // CNT-04: outside production a grown-up can preview any unit from /review, locks or not.
-  const reviewing = !!where.preview && SHOW_DRAFTS;
-  const back = reviewing ? "/review" : `/play/trail/${unit.subject}`;
+  // CMS-04: staff preview a draft from the content admin, in production too.
+  const reviewing = !!where.preview && (SHOW_DRAFTS || !!where.admin);
+  const back = where.admin
+    ? `/admin/content/unit?id=${encodeURIComponent(unit.id)}`
+    : reviewing
+      ? "/review"
+      : `/play/trail/${unit.subject}`;
   const step = where.step === "trophy" ? "trophy" : Number(where.step);
   if (step !== "trophy" && !(step >= 1 && step <= unit.lessons.length)) return { blocked: back };
   if (

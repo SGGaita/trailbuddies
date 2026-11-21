@@ -10,5 +10,7 @@ httpx==0.28.1
 email-validator==2.3.0
 pillow==13.0.0
 boto3==1.43.118
+# Content admin (CMS-02): the same JSON Schemas as packages/content-schema.
+jsonschema==4.25.1
 # Errors only, scrubbed (SAF-07); used when TB_SENTRY_DSN is set.
 sentry-sdk==2.73.0

@@ -16,7 +16,7 @@
           "id": { "$ref": "common.json#/$defs/id" },
           "kind": { "enum": ["image", "audio"] },
           "path": { "type": "string" },
-          "source": { "enum": ["licensed", "ai-assisted", "commissioned", "recorded", "tts"] },
+          "source": { "enum": ["licensed", "ai-assisted", "commissioned", "recorded", "tts", "uploaded"] },
           "license": { "type": "string", "minLength": 2 },
           "review_status": { "enum": ["draft", "reviewed", "approved"] },
           "notes": { "type": "string" }

@@ -1,16 +1,33 @@
 /**
  * Content validation: JSON Schema checks (Ajv, draft 2020-12) plus cross-checks
  * that a schema can't express (ids unique, lesson items exist, catalogue matches units).
- * Node only: schemas are read from disk.
+ * Works in Node and in the browser (the content admin checks edits as they're typed), so the
+ * schemas are imported as JSON modules rather than read from disk.
  */
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import common from "./schemas/common.json" with { type: "json" };
+import item from "./schemas/item.json" with { type: "json" };
+import unitSchema from "./schemas/unit.json" with { type: "json" };
+import catalogueSchema from "./schemas/subject-catalogue.json" with { type: "json" };
+import badge from "./schemas/badge.json" with { type: "json" };
+import buddyScript from "./schemas/buddy-script.json" with { type: "json" };
+import assets from "./schemas/asset-manifest.json" with { type: "json" };
+import economy from "./schemas/economy.json" with { type: "json" };
 
-const here = dirname(fileURLToPath(import.meta.url));
-const load = (name) => JSON.parse(readFileSync(join(here, "schemas", name), "utf8"));
+const SCHEMAS = {
+  "common.json": common,
+  "item.json": item,
+  "unit.json": unitSchema,
+  "subject-catalogue.json": catalogueSchema,
+  "badge.json": badge,
+  "buddy-script.json": buddyScript,
+  "asset-manifest.json": assets,
+  "economy.json": economy,
+};
+/** Every schema by file name (the API keeps a copy in sync: services/api/app/content_schemas.json). */
+export { SCHEMAS };
+const load = (name) => SCHEMAS[name];
 
 /** @typedef {"unit" | "catalogue" | "badge" | "buddy-script" | "assets" | "item" | "economy"} Kind */
 /** @typedef {{ valid: boolean, errors: string[] }} Result */
