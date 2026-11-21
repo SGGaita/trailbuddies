@@ -85,6 +85,18 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     deleteLesson: (familyId, lessonId) =>
       request(`${fam(familyId)}/lessons/${encodeURIComponent(lessonId)}`, { method: "DELETE" }),
     /** Reserve an upload. @param {string} familyId @param {{ id: string, kind: "photo" | "voice", content_type: string, bytes: number }} body */
+    /** Badge Studio (BST-01…06): the family's own badges. */
+    badges: (familyId) => request(`${fam(familyId)}/badges`),
+    putBadge: (familyId, badgeId, body) =>
+      request(`${fam(familyId)}/badges/${encodeURIComponent(badgeId)}`, { method: "PUT", json: body }),
+    deleteBadge: (familyId, badgeId) =>
+      request(`${fam(familyId)}/badges/${encodeURIComponent(badgeId)}`, { method: "DELETE" }),
+    /** Wishes (BST-07): real-world rewards a child saves treasures for. */
+    wishes: (familyId) => request(`${fam(familyId)}/wishes`),
+    putWish: (familyId, wishId, body) =>
+      request(`${fam(familyId)}/wishes/${encodeURIComponent(wishId)}`, { method: "PUT", json: body }),
+    deleteWish: (familyId, wishId) =>
+      request(`${fam(familyId)}/wishes/${encodeURIComponent(wishId)}`, { method: "DELETE" }),
     startMedia: (familyId, body) => request(`${fam(familyId)}/media`, { method: "POST", json: body }),
     /** Ask the server to check an uploaded file. @param {string} familyId @param {string} mediaId */
     completeMedia: (familyId, mediaId) =>
@@ -193,6 +205,21 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
      * ASN-05: every child with the badges they first earned in the week.
      * @param {string} classId @param {{ from: string, to: string }} [week] UTC instants (domain `wallWeek`)
      */
+    /** T05 class badges: made and awarded by the teacher. */
+    classBadges: (classId) => request(`/classes/${encodeURIComponent(classId)}/badges`),
+    putClassBadge: (classId, badgeId, body) =>
+      request(`/classes/${encodeURIComponent(classId)}/badges/${encodeURIComponent(badgeId)}`, {
+        method: "PUT",
+        json: body,
+      }),
+    deleteClassBadge: (classId, badgeId) =>
+      request(`/classes/${encodeURIComponent(classId)}/badges/${encodeURIComponent(badgeId)}`, { method: "DELETE" }),
+    /** @param {string} classId @param {string} badgeId @param {string[]} studentIds */
+    awardClassBadge: (classId, badgeId, studentIds) =>
+      request(`/classes/${encodeURIComponent(classId)}/badges/${encodeURIComponent(badgeId)}/award`, {
+        method: "POST",
+        json: { student_ids: studentIds },
+      }),
     classBadgeWall: (classId, week) =>
       request(
         `/classes/${encodeURIComponent(classId)}/badge-wall` +

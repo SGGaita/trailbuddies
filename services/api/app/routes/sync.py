@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
 from ..models import Event, Learner, User
-from ..notify import badges_earned
+from ..notify import badges_earned, wishes_waiting
 from ..schemas import EventsIn
 from ..security import aware, current_user, membership
 from .families import require_consent
@@ -62,6 +62,7 @@ def push(body: EventsIn, user: User = Depends(current_user), db: DbSession = Dep
         accepted.append(e.id)
     db.commit()
     badges_earned(db, body.family_id, fresh)  # PAR-07, when the family turned it on
+    wishes_waiting(db, body.family_id, fresh)  # PAR-07: wishes to answer, rewards to deliver
     return {"accepted": accepted, "rejected": rejected}
 
 

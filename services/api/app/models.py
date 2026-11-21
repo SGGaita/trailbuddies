@@ -8,6 +8,7 @@ from sqlalchemy import (
     JSON,
     BigInteger,
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -213,7 +214,7 @@ class EditHistory(Base):
     __tablename__ = "edit_history"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
-    entity: Mapped[str] = mapped_column(String(16), doc="learner, family or lesson")
+    entity: Mapped[str] = mapped_column(String(16), doc="learner, family, lesson, badge or wish")
     entity_id: Mapped[str] = mapped_column(String(26), index=True)
     data: Mapped[dict] = mapped_column(JSON)
     reason: Mapped[str] = mapped_column(
@@ -279,6 +280,52 @@ class CustomLesson(Base):
     options: Mapped[dict] = mapped_column(
         JSON, default=dict, doc="lesson settings: band, activities, hints, games (BLD-06)"
     )
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class CustomBadge(Base):
+    """Badge Studio (BST-01…06): a badge a grown-up designed, how it's earned, its reward and who
+    can earn it. A family badge belongs to a family; a class badge to a class (exactly one of
+    the two). Earned badges live in the events with a snapshot of the design, so deleting a
+    badge never takes it away from a child (BDG-07)."""
+
+    __tablename__ = "custom_badges"
+    __table_args__ = (
+        CheckConstraint("(family_id IS NULL) <> (class_id IS NULL)", name="ck_custom_badges_one_owner"),
+    )
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    family_id: Mapped[str | None] = mapped_column(
+        ForeignKey("families.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    class_id: Mapped[str | None] = mapped_column(
+        ForeignKey("classes.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    name: Mapped[str] = mapped_column(String(40))
+    design: Mapped[dict] = mapped_column(JSON, default=dict, doc="shape, colour, icon, photo (media id)")
+    note: Mapped[str | None] = mapped_column(String(120), nullable=True, doc="the buddy reads it out")
+    voice: Mapped[str | None] = mapped_column(String(26), nullable=True, doc="grown-up's recorded message")
+    rule: Mapped[dict] = mapped_column(JSON, default=dict)
+    treasures: Mapped[int] = mapped_column(Integer, default=0)
+    reward: Mapped[str | None] = mapped_column(String(80), nullable=True, doc="real-world reward (BST-04)")
+    audience: Mapped[list | str] = mapped_column(JSON, default=list, doc='learner/student ids, or "class"')
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Wish(Base):
+    """BST-07: a real-world reward a grown-up set up for one child, priced in treasures. Whether
+    it's been asked for, approved or delivered comes from the child's events."""
+
+    __tablename__ = "wishes"
+    id: Mapped[str] = mapped_column(ULID, primary_key=True)
+    family_id: Mapped[str] = mapped_column(ForeignKey("families.id", ondelete="CASCADE"), index=True)
+    learner_id: Mapped[str] = mapped_column(ForeignKey("learners.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(60))
+    price: Mapped[int] = mapped_column(Integer)
+    emoji: Mapped[str | None] = mapped_column(String(8), nullable=True)
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

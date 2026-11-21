@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from . import mailer
 from .db import utcnow
-from .models import Event, Family, Learner
+from .models import Event, Family, Learner, Wish
 from .privacy import grown_up_emails
 from .schemas import FamilySettings
 from .security import aware
@@ -46,6 +46,40 @@ def badges_earned(db: DbSession, family_id: str, events: list[Event]) -> None:
     for to in grown_up_emails(db, family_id):
         mailer.send_notice(
             to, "A new Trailbuddies badge!", [*lines[:10], OFF], get_settings().web_url + "/family"
+        )
+
+
+def wishes_waiting(db: DbSession, family_id: str, events: list[Event]) -> None:
+    """PAR-07: a child asked for a wish, or earned a badge with a real-world reward. The email
+    links to Rewards in the app, where a grown-up answers behind the grown-ups' gate; the email
+    itself can't approve anything."""
+    fam = db.get(Family, family_id)
+    asks = [e for e in events if e.type == "wish_requested"]
+    rewards = [
+        e for e in events if e.type == "badge_awarded" and ((e.data or {}).get("custom") or {}).get("reward")
+    ]
+    if not (asks or rewards) or not emails_for(fam).wishes:
+        return
+    names = {lr.id: lr.name for lr in db.scalars(select(Learner).where(Learner.family_id == family_id))}
+    titles = {w.id: w.title for w in db.scalars(select(Wish).where(Wish.family_id == family_id))}
+    lines = []
+    for e in asks:
+        d = e.data or {}
+        title = titles.get(d.get("wishId"), "a wish")
+        lines.append(
+            f"{names.get(e.learner_id, 'Your child')} asked for “{title}”. "
+            f"Their {int(d.get('amount') or 0)} treasures are kept safe until you answer."
+        )
+    for e in rewards:
+        c = e.data["custom"]
+        lines.append(
+            f"{names.get(e.learner_id, 'Your child')} earned the {c.get('name', 'new')} badge: "
+            f"“{c['reward']}” is waiting for you to deliver."
+        )
+    subject = "A wish is waiting for you" if asks else "A reward to deliver"
+    for to in grown_up_emails(db, family_id):
+        mailer.send_notice(
+            to, subject, [*lines[:10], OFF], get_settings().web_url + "/family/rewards", "Open Rewards"
         )
 
 

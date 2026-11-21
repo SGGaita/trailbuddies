@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 from ..db import get_session, utcnow
-from ..models import ClassStudent, Learner, School, SchoolClass, User
+from ..models import ClassEvent, ClassStudent, Learner, School, SchoolClass, User
 from ..schemas import LinkIn, ScopeIn
 from ..security import aware, current_user, membership
 from .families import require_consent
@@ -73,7 +73,26 @@ def link_out(db: DbSession, s: ClassStudent) -> dict:
         "school": school.name if school else None,
         "scope": s.scope,
         "linked_at": aware(s.linked_at).isoformat() if s.linked_at else None,
+        "badges": class_badges(db, s),
     }
+
+
+def class_badges(db: DbSession, s: ClassStudent) -> list[dict]:
+    """Teacher-made badges this child earned in class (concept §9.4: visible to linked parents),
+    with the design they had when earned. Built-in badges from class play stay in class."""
+    out, seen = [], set()
+    for e in db.scalars(
+        select(ClassEvent)
+        .where(ClassEvent.student_id == s.id, ClassEvent.type == "badge_awarded")
+        .order_by(ClassEvent.seq)
+    ):
+        d = e.data or {}
+        c = d.get("custom")
+        if isinstance(c, dict) and d.get("badgeId") not in seen:
+            seen.add(d.get("badgeId"))
+            design = {k: c.get(k) for k in ("name", "shape", "colour", "icon")}
+            out.append({"id": d.get("badgeId"), **design, "at": aware(e.at).isoformat()})
+    return out
 
 
 @router.get("/families/{family_id}/links")

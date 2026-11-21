@@ -36,3 +36,5 @@ export * from "./firstSteps.js";
 export * from "./classes.js";
 export * from "./assignments.js";
 export * from "./badgeWall.js";
+export * from "./customBadges.js";
+export * from "./wishes.js";

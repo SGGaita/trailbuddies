@@ -25,6 +25,7 @@ from .db import utcnow
 from .models import (
     ClassStudent,
     Consent,
+    CustomBadge,
     CustomLesson,
     DataExport,
     EditHistory,
@@ -42,6 +43,7 @@ from .models import (
     SupportTicket,
     Teacher,
     User,
+    Wish,
 )
 from .security import aware
 from .settings import get_settings
@@ -83,12 +85,17 @@ def media_ids(cards: list | None) -> set[str]:
 
 
 def release_media(db: DbSession, family_id: str, ids: set[str], now: datetime | None = None) -> int:
-    """A lesson was deleted: its photos and clips that no other lesson uses start their 30 days."""
+    """A lesson or badge was deleted (or changed its photo): its photos and clips that nothing
+    else uses start their 30 days."""
     if not ids:
         return 0
     still = set((db.scalar(select(Family.sounds).where(Family.id == family_id)) or {}).values())
     for cards in db.scalars(select(CustomLesson.cards).where(CustomLesson.family_id == family_id)):
         still |= media_ids(cards)
+    for design, voice in db.execute(
+        select(CustomBadge.design, CustomBadge.voice).where(CustomBadge.family_id == family_id)
+    ):
+        still |= {m for m in ((design or {}).get("photo"), voice) if m}
     gone = ids - still
     if not gone:
         return 0
@@ -168,6 +175,28 @@ def family_record(db: DbSession, fam: Family) -> dict:
         "custom_lessons": [
             _row(c, ["id", "title", "template", "question", "cards", "assigned", "options", "updated_at"])
             for c in db.scalars(select(CustomLesson).where(CustomLesson.family_id == fid))
+        ],
+        "custom_badges": [
+            _row(
+                b,
+                [
+                    "id",
+                    "name",
+                    "design",
+                    "note",
+                    "voice",
+                    "rule",
+                    "treasures",
+                    "reward",
+                    "audience",
+                    "updated_at",
+                ],
+            )
+            for b in db.scalars(select(CustomBadge).where(CustomBadge.family_id == fid))
+        ],
+        "wishes": [
+            _row(w, ["id", "learner_id", "title", "price", "emoji", "updated_at"])
+            for w in db.scalars(select(Wish).where(Wish.family_id == fid))
         ],
         "media": [
             _row(m, ["id", "kind", "content_type", "bytes", "status", "created_at", "released_at"])
@@ -257,6 +286,7 @@ def purge_learner(db: DbSession, learner_id: str) -> None:
         .values(learner_id=None, scope="class"),
     )
     _x(db, delete(Event).where(Event.learner_id == learner_id))
+    _x(db, delete(Wish).where(Wish.learner_id == learner_id))
     _x(db, delete(EditHistory).where(EditHistory.entity == "learner", EditHistory.entity_id == learner_id))
     _x(db, delete(Learner).where(Learner.id == learner_id))
 
@@ -276,8 +306,10 @@ def purge_family(db: DbSession, storage, family_id: str) -> None:
         )
     for model in (
         Event,
+        Wish,
         Learner,
         CustomLesson,
+        CustomBadge,
         MediaAsset,
         Consent,
         EditHistory,

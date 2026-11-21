@@ -21,6 +21,7 @@ from .routes import (
     members,
     ops,
     privacy,
+    rewards,
     sounds,
     support,
     sync,
@@ -94,6 +95,7 @@ def create_app() -> FastAPI:
     )
     for r in (
         auth.router,
+        rewards.router,
         families.router,
         members.router,
         sync.router,

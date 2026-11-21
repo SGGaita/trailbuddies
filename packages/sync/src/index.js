@@ -7,7 +7,7 @@ import { ulid } from "./ulid.js";
 
 export { ulid };
 
-/** @typedef {"lesson_completed" | "item_answered" | "treasure_earned" | "treasure_spent" | "badge_awarded" | "game_finished"} EventType */
+/** @typedef {"lesson_completed" | "item_answered" | "treasure_earned" | "treasure_spent" | "badge_awarded" | "game_finished" | "wish_requested" | "wish_approved" | "wish_declined" | "wish_delivered" | "reward_delivered" | "badge_hidden"} EventType */
 /**
  * @typedef {object} ProgressEvent
  * @property {string} id ULID
@@ -24,6 +24,15 @@ export const EVENT_TYPES = [
   "treasure_spent",
   "badge_awarded",
   "game_finished",
+  // Wishes (BST-07): asking holds treasures; "not now" returns them; delivered keeps them spent.
+  "wish_requested",
+  "wish_approved",
+  "wish_declined",
+  "wish_delivered",
+  // A custom badge's real-world reward was handed over (BST-04).
+  "reward_delivered",
+  // A grown-up hid (or showed again) a badge in the badge book; badges are never taken away (BDG-07).
+  "badge_hidden",
 ];
 
 /**
@@ -107,6 +116,14 @@ export function deriveState(events, learnerId) {
   const reversed = [];
   /** @type {Array<{ game: string, unitId: string, at: number }>} */
   const games = [];
+  /** Custom badges earned, with the design they had when earned (BDG-07). @type {Record<string, any>} */
+  const customAwards = Object.create(null);
+  const hidden = new Set();
+  /** Each wish's state: open (nothing held), asked, approved or delivered. @type {Record<string, any>} */
+  const wishes = Object.create(null);
+  /** Wish requests that couldn't hold their treasures after a merge. */
+  const refusedWishes = [];
+  const rewardsDelivered = new Set();
   // Events are processed in ULID (time) order, so every device reaches the same balance.
   const ordered = [...events].sort((a, b) => (a.id < b.id ? -1 : 1));
   for (const e of ordered) {
@@ -146,13 +163,57 @@ export function deriveState(events, learnerId) {
         if (d.itemId && !owned.includes(d.itemId)) owned.push(d.itemId);
       }
     } else if (e.type === "badge_awarded") {
+      if (d.custom && !badges.has(d.badgeId)) customAwards[d.badgeId] = { ...d.custom, manual: !!d.manual, at };
       badges.add(d.badgeId);
       if (tiers.indexOf(d.tier) > tiers.indexOf(badgeTiers[d.badgeId])) badgeTiers[d.badgeId] = d.tier;
     }
     else if (e.type === "game_finished") games.push({ game: d.game, unitId: d.unitId, at });
+    else if (e.type === "badge_hidden") {
+      if (d.hidden === false) hidden.delete(d.badgeId);
+      else hidden.add(d.badgeId);
+    } else if (e.type === "reward_delivered") rewardsDelivered.add(d.badgeId);
+    else if (e.type.startsWith("wish_") && d.wishId) {
+      const w = wishes[d.wishId];
+      const live = w && (w.status === "asked" || w.status === "approved");
+      const same = !d.requestId || d.requestId === w?.requestId;
+      if (e.type === "wish_requested") {
+        // Asked twice (two devices): the first request counts.
+        if (live || w?.status === "delivered") continue;
+        const amount = Math.max(0, d.amount || 0);
+        if (treasures - amount < 0) {
+          refusedWishes.push({ id: e.id, wishId: d.wishId, amount, at });
+          continue;
+        }
+        treasures -= amount;
+        wishes[d.wishId] = { status: "asked", held: amount, requestId: e.id, at };
+      } else if (!live || !same) continue;
+      else if (e.type === "wish_approved") w.status = "approved";
+      else if (e.type === "wish_delivered") wishes[d.wishId] = { ...w, status: "delivered", deliveredAt: at };
+      else if (e.type === "wish_declined") {
+        treasures += w.held;
+        wishes[d.wishId] = { status: "open", held: 0, declinedAt: at };
+      }
+    }
   }
   const stars = Object.values(progress).reduce((a, b) => a + b, 0);
-  return { progress, stars, treasures, badges: [...badges], badgeTiers, answers, results, earnings, owned, reversed, games };
+  return {
+    progress,
+    stars,
+    treasures,
+    badges: [...badges],
+    badgeTiers,
+    answers,
+    results,
+    earnings,
+    owned,
+    reversed,
+    games,
+    customAwards,
+    hiddenBadges: [...hidden],
+    wishes,
+    refusedWishes,
+    rewardsDelivered: [...rewardsDelivered],
+  };
 }
 
 /**
