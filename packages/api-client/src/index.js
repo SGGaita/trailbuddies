@@ -47,6 +47,7 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
   }
   const post = (path, json) => request(path, { method: "POST", json });
   const fam = (id) => `/families/${encodeURIComponent(id)}`;
+  const shareOwner = (o) => (o.classId ? `/classes/${encodeURIComponent(o.classId)}` : fam(o.familyId));
   return {
     request,
     /** @returns {Promise<{ status: string, version: string, database: string }>} */
@@ -99,8 +100,28 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
       request(`${fam(familyId)}/wishes/${encodeURIComponent(wishId)}`, { method: "DELETE" }),
     startMedia: (familyId, body) => request(`${fam(familyId)}/media`, { method: "POST", json: body }),
     /** Ask the server to check an uploaded file. @param {string} familyId @param {string} mediaId */
-    completeMedia: (familyId, mediaId) =>
-      request(`${fam(familyId)}/media/${encodeURIComponent(mediaId)}/complete`, { method: "POST" }),
+    completeMedia: (familyId, mediaId, scan) =>
+      request(`${fam(familyId)}/media/${encodeURIComponent(mediaId)}/complete`, {
+        method: "POST",
+        ...(scan ? { json: { scan } } : {}),
+      }),
+    /** SAF-08, MOD-02: the family's photos that are hidden (flagged by the check, or by the safety team). */
+    hiddenMedia: (familyId) => request(`${fam(familyId)}/media-hidden`),
+    /** Share codes (SHR-01…05). owner: { familyId } or { classId }. */
+    shares: (owner) => request(`${shareOwner(owner)}/shares`),
+    createShare: (owner, body) => post(`${shareOwner(owner)}/shares`, body),
+    revokeShare: (owner, shareId) =>
+      request(`${shareOwner(owner)}/shares/${encodeURIComponent(shareId)}`, { method: "DELETE" }),
+    sharePreview: (code) => request(`/shares/${encodeURIComponent(code)}`),
+    shareMediaUrl: (code, mediaId) => `${base}/shares/${encodeURIComponent(code)}/media/${encodeURIComponent(mediaId)}`,
+    importShare: (code, target) =>
+      post(`/shares/${encodeURIComponent(code)}/import`, target.classId ? { class_id: target.classId } : { family_id: target.familyId }),
+    reportShare: (shareId, familyId, reason, note) =>
+      post(`/shares/${encodeURIComponent(shareId)}/reports`, { family_id: familyId, reason, ...(note ? { note } : {}) }),
+    /** The safety team's queue (MOD-01…03): only for TB_ADMIN_EMAILS. */
+    moderation: () => request("/admin/moderation"),
+    moderate: (itemId, body) => post(`/admin/moderation/${encodeURIComponent(itemId)}`, body),
+    adminMediaUrl: (mediaId) => `${base}/admin/media/${encodeURIComponent(mediaId)}`,
     /** Where the browser can fetch a family member's media (redirects to a short-lived link). */
     mediaUrl: (familyId, mediaId) => `${base}${fam(familyId)}/media/${encodeURIComponent(mediaId)}`,
     /** @param {string} id */

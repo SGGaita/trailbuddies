@@ -77,6 +77,8 @@ const empty = () => ({
   }),
   /** Badge Studio (BST-01…06): the family's own badges; on a class device, the class's badges. */
   customBadges: /** @type {any[]} */ ([]),
+  /** SAF-08, MOD-02: photos hidden by the image check or the safety team (placeholders). */
+  hiddenMedia: /** @type {string[]} */ ([]),
   /** Badges deleted on this device that the server still has. */
   removedBadges: /** @type {string[]} */ ([]),
   /** On a class device (S9/S10): the class's badges, made by the teacher (T05). */
@@ -442,8 +444,10 @@ export const useFamily = create(
         removedWishes,
         celebrated,
         celebrateFrom,
+        hiddenMedia,
       }) => ({
         celebrateFrom,
+        hiddenMedia,
         classBadges,
         customBadges,
         removedBadges,

@@ -2,7 +2,16 @@
 // routing on /api/*. It follows the real API's contract (see services/api/tests) so the
 // web app's sign-in, onboarding and sync can be tested at every screen size.
 
-import { countryRules, deviceName, deviceLimit } from "@trailbuddies/domain";
+import {
+  REPORT_THRESHOLD,
+  countryRules,
+  deviceLimit,
+  deviceName,
+  formatShareCode,
+  normaliseShareCode,
+  packageMedia,
+  sharePackage,
+} from "@trailbuddies/domain";
 
 export const POLICY = "2026-10";
 const LIMITS = { free: 1, family: 6 };
@@ -40,6 +49,11 @@ export function newServer() {
     groups: {}, // S10: id -> { id, class_id, name, student_ids }
     assignments: {}, // S10
     classDevices: {}, // S10: id -> { id, class_id, label, removed }
+    shares: {}, // S11b: id -> share (code, family_id or class_id, package, status…)
+    reports: [], // S11b: { share_id, family_id, reason }
+    modItems: {}, // S11b: id -> { kind, share_id, media_id, reason, status, created_at }
+    modLog: [], // S11b: the audit log
+    admins: ["steve@trailbuddies.africa"], // TB_ADMIN_EMAILS
     seq: 0,
   };
 }
@@ -230,6 +244,66 @@ const defaultSettings = () => ({
   calm: "device",
   emails: { digest: true, badges: false, wishes: false },
 });
+
+
+// ---- Share codes and moderation (S11b): mirrors services/api shares.py and moderation.py ----
+const SHARE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const shareState = (sh) => (sh.status === "live" && Date.parse(sh.expires_at) <= Date.now() ? "expired" : sh.status);
+const shareOut = (sh) => ({
+  id: sh.id,
+  code: formatShareCode(sh.code),
+  kind: sh.kind,
+  title: sh.title,
+  status: shareState(sh),
+  created_at: sh.created_at,
+  expires_at: sh.expires_at,
+  imports: sh.imports,
+  lessons: sh.package.lessons.length,
+  badges: sh.package.badges.length,
+  cards: sh.package.lessons.reduce((n, l) => n + l.cards.length, 0),
+});
+const REASON_TEXT = {
+  "child-photo": "a photo of a child",
+  "personal-details": "names or personal details",
+  unkind: "unkind or upsetting content",
+  "not-for-children": "not suitable for children",
+  other: "something else",
+  nudity: "the image check flagged it",
+  review: "new share with photos or voice clips",
+};
+function openItem(srv, kind, reason, ids) {
+  const found = Object.values(srv.modItems).find(
+    (i) => i.kind === kind && i.status === "open" && Object.entries(ids).every(([k, v]) => i[k] === v),
+  );
+  if (found) return found;
+  const id = `MOD${++srv.seq}`;
+  srv.modItems[id] = { id, kind, reason, status: "open", outcome: null, created_at: new Date().toISOString(), ...ids };
+  return srv.modItems[id];
+}
+const copiesOf = (srv, mid) => Object.entries(srv.media).filter(([id, x]) => id === mid || x.origin === mid);
+function modItemOut(srv, i) {
+  const share = i.share_id ? srv.shares[i.share_id] : null;
+  const reports = srv.reports.filter((r) => r.share_id === i.share_id);
+  const reasons = {};
+  for (const r of reports) reasons[r.reason] = (reasons[r.reason] || 0) + 1;
+  const photos = i.media_id ? [i.media_id] : share ? packageMedia(share.package).photos : [];
+  return {
+    id: i.id,
+    kind: i.kind,
+    reason: i.reason,
+    reason_text: REASON_TEXT[i.reason] || i.reason,
+    status: i.status,
+    outcome: i.outcome,
+    created_at: i.created_at,
+    uploaded_at: share?.created_at || i.created_at,
+    overdue: i.status === "open" && Date.now() - Date.parse(i.created_at) > 24 * 3600_000,
+    reports: reports.length,
+    report_reasons: share ? reasons : {},
+    photos: photos.map((id) => ({ id, status: srv.media[id]?.status || "missing" })),
+    scan: i.media_id ? srv.media[i.media_id]?.scan || null : null,
+    share: share ? { ...shareOut(share), package: share.package, checklist: share.checklist } : null,
+  };
+}
 
 /**
  * Route /api/* for a browser context. Each context is one device with its own session.
@@ -1059,6 +1133,205 @@ export async function fakeApi(context, srv) {
       delete (m[2] === "badges" ? srv.badges : srv.wishes)[m[3]];
       return json(route, 204);
     }
+
+    // ---- S11b share codes (SHR-01…05) ----
+    m = path.match(/^\/(families|classes)\/([^/]+)\/shares$/);
+    if (m && user) {
+      const owner = m[1] === "families" ? { family_id: m[2] } : { class_id: m[2] };
+      if (method === "GET")
+        return json(route, 200, {
+          shares: Object.values(srv.shares)
+            .filter((x) => (owner.family_id ? x.family_id === m[2] : x.class_id === m[2]))
+            .reverse()
+            .map(shareOut),
+        });
+      if (method === "POST") {
+        if (role === "viewer" && owner.family_id) return forbidViewer();
+        if (user.share_banned) return json(route, 403, { detail: { code: "banned", message: "Sharing is switched off." } });
+        if (!body.checklist?.no_names)
+          return json(route, 422, { detail: { code: "checklist", message: "Confirm there are no names or addresses." } });
+        const mine = (x) => (owner.family_id ? x.family_id === m[2] : x.class_id === m[2]);
+        const pool = body.kind === "badges" ? Object.values(srv.badges).filter(mine) : Object.values(srv.lessons).filter(mine);
+        const rows = body.ids.map((id) => pool.find((x) => x.id === id));
+        if (rows.some((x) => !x)) return json(route, 404, { detail: "Not found" });
+        const src = body.kind === "badges" ? { kind: "badges", badges: rows } : { kind: body.kind, lessons: rows };
+        const pkg = sharePackage(src, { voice: body.voice, removed: body.checklist.removed });
+        const { photos, voices } = packageMedia(pkg);
+        const media = [...photos, ...voices];
+        if (media.some((id) => srv.media[id]?.status !== "ready"))
+          return json(route, 409, { detail: { code: "media_not_ready", message: "Still uploading" } });
+        let code;
+        do code = Array.from({ length: 6 }, () => SHARE_ALPHABET[Math.floor(Math.random() * 32)]).join("");
+        while (Object.values(srv.shares).some((x) => x.code === code));
+        const id = `SH${++srv.seq}`;
+        const now = new Date();
+        srv.shares[id] = {
+          id,
+          code,
+          ...owner,
+          kind: body.kind,
+          title: pkg.title,
+          package: pkg,
+          media,
+          checklist: { ...body.checklist, voice: !!body.voice, by: userId, at: now.toISOString() },
+          status: media.length ? "review" : "live",
+          created_by: userId,
+          created_at: now.toISOString(),
+          expires_at: new Date(now.getTime() + 30 * 864e5).toISOString(),
+          imports: 0,
+        };
+        if (media.length) openItem(srv, "share", "review", { share_id: id });
+        return json(route, 201, shareOut(srv.shares[id]));
+      }
+    }
+    m = path.match(/^\/(families|classes)\/([^/]+)\/shares\/([^/]+)$/);
+    if (m && method === "DELETE" && user) {
+      const sh = srv.shares[m[3]];
+      if (!sh) return json(route, 404, { detail: "Share not found" });
+      if (sh.status === "live" || sh.status === "review") sh.status = "revoked";
+      return json(route, 204);
+    }
+    m = path.match(/^\/families\/([^/]+)\/media-hidden$/);
+    if (m && user)
+      return json(route, 200, {
+        hidden: Object.entries(srv.media)
+          .filter(([, x]) => x.family === m[1] && (x.status === "flagged" || x.status === "hidden"))
+          .map(([id]) => id),
+      });
+    m = path.match(/^\/shares\/([^/]+)(\/media\/([^/]+)|\/import)?$/);
+    if (m && user && !path.endsWith("/reports")) {
+      const sh = Object.values(srv.shares).find((x) => x.code === normaliseShareCode(m[1]));
+      if (!sh) return json(route, 404, { detail: { code: "not_found", message: "We couldn't find that code." } });
+      const st = shareState(sh);
+      if (st === "review") return json(route, 423, { detail: { code: "review", message: "Being checked" } });
+      if (st !== "live") return json(route, 410, { detail: { code: "gone", message: "This code is no longer available." } });
+      if (m[3] && method === "GET") {
+        const md = srv.media[m[3]];
+        if (!sh.media.includes(m[3]) || md?.status !== "ready") return json(route, 404, { detail: { code: "hidden" } });
+        return route.fulfill({ status: 200, contentType: md.type, body: md.bytes });
+      }
+      if (m[2] === "/import" && method === "POST") {
+        const out = { lessons: [], badges: [] };
+        const now = new Date().toISOString();
+        const moved = {};
+        if (body.family_id)
+          for (const mid of sh.media) {
+            const md = srv.media[mid];
+            if (md?.status !== "ready") continue;
+            const nid = `01JCOPY${String(++srv.seq).padStart(19, "0")}`;
+            srv.media[nid] = { ...md, family: body.family_id, origin: md.origin || mid };
+            moved[mid] = nid;
+          }
+        const ulidish = () => `01JIMP${String(++srv.seq).padStart(20, "0")}`;
+        for (const l of sh.package.lessons) {
+          const cards = l.cards.map((c) => {
+            const x = { ...c };
+            for (const k of ["photo", "voice"]) if (x[k]) (moved[x[k]] ? (x[k] = moved[x[k]]) : delete x[k]);
+            return x;
+          });
+          const id = ulidish();
+          srv.lessons[id] = { id, family_id: body.family_id, ...l, cards, assigned: [], version: 1, source_share: sh.id, updated_at: now };
+          const { family_id: _f, ...row } = srv.lessons[id];
+          out.lessons.push(row);
+        }
+        const kids = Object.values(srv.learners).filter((x) => x.family_id === body.family_id).map((x) => x.id);
+        for (const b of sh.package.badges) {
+          const id = ulidish();
+          const photo = body.family_id ? moved[b.design.photo] : null;
+          srv.badges[id] = {
+            id,
+            ...(body.class_id ? { class_id: body.class_id } : { family_id: body.family_id }),
+            name: b.name,
+            shape: b.design.shape,
+            colour: b.design.colour,
+            icon: b.design.icon,
+            photo: photo || null,
+            note: b.note || null,
+            voice: body.family_id ? moved[b.voice] || null : null,
+            rule: b.rule,
+            treasures: b.treasures,
+            reward: b.reward || null,
+            audience: body.class_id ? "class" : kids,
+            source_share: sh.id,
+            updated_at: now,
+          };
+          out.badges.push(badgeOut(srv.badges[id]));
+        }
+        sh.imports += 1;
+        return json(route, 201, out);
+      }
+      if (!m[2] && method === "GET") {
+        const by = srv.users[sh.created_by]?.name || "a Trailbuddies grown-up";
+        const own = sh.family_id ? srv.members.some((x) => x.family === sh.family_id && x.user === userId) : srv.classes[sh.class_id]?.teacher === userId;
+        return json(route, 200, { ...shareOut(sh), by, own, package: sh.package });
+      }
+    }
+    m = path.match(/^\/shares\/([^/]+)\/reports$/);
+    if (m && method === "POST" && user) {
+      const sh = srv.shares[m[1]];
+      const hasCopy = [...Object.values(srv.lessons), ...Object.values(srv.badges)].some(
+        (x) => x.family_id === body.family_id && x.source_share === m[1],
+      );
+      if (!sh || !hasCopy) return json(route, 404, { detail: "Share not found" });
+      if (srv.reports.some((r) => r.share_id === m[1] && r.family_id === body.family_id))
+        return json(route, 201, { reported: true, already: true, suspended: sh.status === "suspended" });
+      srv.reports.push({ share_id: m[1], family_id: body.family_id, reason: body.reason });
+      openItem(srv, "report", body.reason, { share_id: m[1] });
+      const n = srv.reports.filter((r) => r.share_id === m[1]).length;
+      if (n >= REPORT_THRESHOLD && sh.status === "live") {
+        sh.status = "suspended";
+        srv.modLog.unshift({ id: `A${++srv.seq}`, action: "suspend_share", target: formatShareCode(sh.code), who: "automatic", why: `${n} families reported it`, at: new Date().toISOString() });
+      }
+      return json(route, 201, { reported: true, already: false, suspended: sh.status === "suspended" });
+    }
+    // ---- S11b moderation (MOD-01…03), safety team only ----
+    if (path.startsWith("/admin/")) {
+      if (!user) return json(route, 401, { detail: "Not signed in" });
+      if (!srv.admins.includes(user.email)) return json(route, 403, { detail: "Only the safety team can open this" });
+      if (path === "/admin/moderation" && method === "GET") {
+        const items = Object.values(srv.modItems);
+        return json(route, 200, {
+          items: items.filter((i) => i.status === "open").sort((a, b) => (a.created_at < b.created_at ? -1 : 1)).map((i) => modItemOut(srv, i)),
+          closed: items.filter((i) => i.status === "closed").map((i) => modItemOut(srv, i)),
+          audit: srv.modLog.slice(0, 50),
+        });
+      }
+      m = path.match(/^\/admin\/media\/([^/]+)$/);
+      if (m) {
+        const md = srv.media[m[1]];
+        return md?.bytes ? route.fulfill({ status: 200, contentType: md.type, body: md.bytes }) : json(route, 404, { detail: "Not found" });
+      }
+      m = path.match(/^\/admin\/moderation\/([^/]+)$/);
+      if (m && method === "POST") {
+        const i = srv.modItems[m[1]];
+        if (!i) return json(route, 404, { detail: "Not found" });
+        if (!body.reason || body.reason.length < 3) return json(route, 422, { detail: "reason" });
+        const sh = i.share_id ? srv.shares[i.share_id] : null;
+        const a = body.action;
+        let target = sh ? formatShareCode(sh.code) : i.media_id;
+        if (a === "approve" && sh?.status === "review") sh.status = "live";
+        if (a === "keep" && sh?.status === "suspended") sh.status = "live";
+        if (a === "suspend_share" && sh) sh.status = "suspended";
+        if (a === "restore_share" && sh?.status === "suspended") sh.status = "live";
+        if (a === "hide_image" || a === "restore_image") {
+          target = body.media_id || i.media_id;
+          for (const [, md] of copiesOf(srv, target))
+            if (a === "hide_image") md.status = "hidden";
+            else if (md.status === "hidden" || md.status === "flagged") md.status = "ready";
+        }
+        srv.modLog.unshift({ id: `A${++srv.seq}`, item_id: i.id, action: a, target, who: user.email, why: body.reason, at: new Date().toISOString() });
+        const closes = { approve: "approved", keep: "kept", suspend_share: "removed", suspend_creator: "removed", dismiss: "dismissed" };
+        if (closes[a] && i.status === "open") Object.assign(i, { status: "closed", outcome: closes[a] });
+        if (i.kind === "upload" && (a === "hide_image" || a === "restore_image") && i.status === "open")
+          Object.assign(i, { status: "closed", outcome: a === "hide_image" ? "hidden" : "restored" });
+        if (i.kind === "report" && i.status === "closed" && sh)
+          for (const r of srv.reports.filter((x) => x.share_id === sh.id && !x.answered)) {
+            r.answered = true;
+            srv.sent.push({ to: r.family_id, subject: "We've reviewed the lesson you reported" });
+          }
+        return json(route, 200, modItemOut(srv, i));
+      }
+    }
     // Photos and voice clips: reserve, upload, check (any EXIF is refused, like GPS data).
     m = path.match(/^\/families\/([^/]+)\/media$/);
     if (m && method === "POST") {
@@ -1100,14 +1373,23 @@ export async function fakeApi(context, srv) {
         return json(route, 422, { detail: { code: "gps_metadata", message: "Location data" } });
       }
       md.status = "ready";
-      return json(route, 200, { id: m[2], kind: md.kind, status: "ready" });
+      if (body.scan && md.kind === "photo") {
+        md.scan = body.scan;
+        if (body.scan.flagged) {
+          md.status = "flagged"; // SAF-08: hidden until the safety team looks
+          openItem(srv, "upload", body.scan.reason || "nudity", { media_id: m[2], family_id: m[1] });
+        }
+      }
+      return json(route, 200, { id: m[2], kind: md.kind, status: md.status });
     }
     m = path.match(/^\/families\/([^/]+)\/media\/([^/]+)$/);
     if (m && method === "GET") {
       const md = srv.media[m[2]];
       if (!md || md.family !== m[1] || md.status !== "ready")
         return json(route, 404, { detail: "Not found" });
-      return route.fulfill({ status: 307, headers: { location: `/api/media/blob/${m[2]}?exp=1&sig=x` } });
+      // The real API redirects to a short-lived link; Playwright's routing doesn't see the
+      // redirected request, so the file is served here directly.
+      return route.fulfill({ status: 200, contentType: md.type, body: md.bytes });
     }
     if (path === "/sync/events" && method === "POST") {
       if (role === "viewer") return forbidViewer();

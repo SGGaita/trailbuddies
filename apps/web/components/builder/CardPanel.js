@@ -11,7 +11,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { searchLibrary } from "@trailbuddies/content";
 import { LIMITS, NUMBER_MAX } from "@trailbuddies/domain";
-import { preparePhoto, saveMedia, createRecorder, mediaUrl, StorageFullError } from "@/lib/media";
+import { preparePhoto, savePhoto, saveMedia, createRecorder, mediaUrl, StorageFullError } from "@/lib/media";
 import { speak } from "@/lib/speech";
 import Card from "@mui/material/Card";
 import FamilyShell from "@/components/shell/FamilyShell";
@@ -65,13 +65,15 @@ export default function CardPanel({
     setProblem(null);
     setBusy("photo");
     try {
-      // Cropped, resized and re-encoded here: the saved copy has no EXIF (SAF-02).
-      const id = await saveMedia("photo", await preparePhoto(f));
+      // Cropped, resized and re-encoded here: the saved copy has no EXIF (SAF-02). Then the
+      // image check runs on this device (SAF-08): a flagged photo is hidden until reviewed.
+      const { id, flagged } = await savePhoto(await preparePhoto(f));
       setCard((c) => {
         const { emoji: _e, ...rest } = c;
         return { ...rest, photo: id };
       });
       setLibrary(false);
+      if (flagged) setProblem("flagged");
     } catch (err) {
       setProblem(err instanceof StorageFullError ? "full" : "photo");
     } finally {
@@ -378,6 +380,12 @@ export default function CardPanel({
             </>
           ) : problem === "photo" ? (
             t("builder.photoFail")
+          ) : problem === "flagged" ? (
+            <>
+              <b>{t("builder.photoFlagged")}</b>
+              <br />
+              {t("builder.photoFlaggedSub")}
+            </>
           ) : problem === "mic" ? (
             t("builder.noMic")
           ) : problem === "silent" ? (

@@ -12,6 +12,7 @@ import {
 import { useFamily, dbName } from "./store";
 import { familyDb } from "./db";
 import { assignmentMediaPath } from "./classWork";
+import { checkImage, scanForServer } from "./imageCheck";
 
 /**
  * Grown-ups' photos and voice clips (BLD-01, BLD-15, BLD-16, SAF-02).
@@ -173,11 +174,27 @@ export function createRecorder() {
 }
 
 /**
+ * SAF-08, BST-08: check a photo on this device before it's used. A flagged photo is kept (so
+ * the safety team can look at it) but hidden everywhere until they do.
+ * @param {Blob} blob
+ */
+export async function savePhoto(blob) {
+  const check = await checkImage(blob, { faces: false });
+  const id = await saveMedia("photo", blob, { scan: scanForServer(check) });
+  return { id, flagged: check.flagged };
+}
+
+/** Is this photo hidden (flagged on this device, or by the server)? */
+const hiddenFor = (id, entry) =>
+  useFamily.getState().hiddenMedia.includes(id) || Boolean(entry?.scan?.flagged && entry.state !== "uploaded");
+
+/**
  * Keep a photo or clip on this device and queue it for upload. Returns its id.
  * @param {"photo" | "voice"} kind
  * @param {Blob} blob
+ * @param {{ scan?: object | null }} [opts] the image check's answer, sent with the upload
  */
-export async function saveMedia(kind, blob) {
+export async function saveMedia(kind, blob, { scan = null } = {}) {
   const d = db();
   if (!d) throw new Error("No family on this device");
   const type = blob.type.split(";")[0] || (kind === "photo" ? "image/jpeg" : "audio/wav");
@@ -187,7 +204,7 @@ export async function saveMedia(kind, blob) {
   const id = ulid();
   const demo = useFamily.getState().mode === "demo";
   try {
-    await d.media.put({ id, kind, type, blob, state: demo ? "device" : "local", attempts: 0 });
+    await d.media.put({ id, kind, type, blob, state: demo ? "device" : "local", attempts: 0, ...(scan ? { scan } : {}) });
   } catch (e) {
     if (e?.name === "QuotaExceededError" || e?.inner?.name === "QuotaExceededError")
       throw new StorageFullError("full");
@@ -239,7 +256,13 @@ export async function uploadMedia(api, { retry = false } = {}) {
           const put = await fetch(r.upload.url, { method: "PUT", body: e.blob, headers: r.upload.headers });
           if (!put.ok) throw new Error(`upload ${put.status}`);
         }
-        await api.completeMedia(s.family.id, id);
+        // A photo the check couldn't look at when it was added (models not loaded) is checked now.
+        let scan = e.scan || null;
+        if (e.kind === "photo" && !scan) {
+          scan = scanForServer(await checkImage(e.blob, { faces: false }));
+          if (scan) await d.media.update(id, { scan });
+        }
+        await api.completeMedia(s.family.id, id, scan);
         result = "ok";
       } catch (err) {
         error = err?.code || err?.message;
@@ -259,6 +282,7 @@ export async function uploadMedia(api, { retry = false } = {}) {
  * @param {string | undefined} id
  */
 export function useMediaUrl(id) {
+  const hidden = useFamily((s) => Boolean(id) && s.hiddenMedia.includes(id));
   const [state, setState] = useState(/** @type {{ id?: string, url: string | null }} */ ({ url: null }));
   useEffect(() => {
     if (!id) return undefined;
@@ -266,7 +290,8 @@ export function useMediaUrl(id) {
     let live = true;
     getMedia(id).then((e) => {
       if (!live) return;
-      if (e?.blob) url = URL.createObjectURL(e.blob);
+      if (hiddenFor(id, e)) url = null; // a placeholder (SAF-08, MOD-02)
+      else if (e?.blob) url = URL.createObjectURL(e.blob);
       else url = serverUrl(id);
       setState({ id, url });
     });
@@ -274,13 +299,14 @@ export function useMediaUrl(id) {
       live = false;
       if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
     };
-  }, [id]);
-  return state.id === id ? state.url : null;
+  }, [id, hidden]);
+  return state.id === id && !hidden ? state.url : null;
 }
 
 /** Resolve a URL once (not a hook), for voice clips registered before a lesson starts. */
 export async function mediaUrl(id) {
   const e = await getMedia(id);
+  if (hiddenFor(id, e)) return null;
   if (e?.blob) return URL.createObjectURL(e.blob);
   return serverUrl(id);
 }

@@ -27,6 +27,7 @@ import {
 } from "@trailbuddies/domain";
 import { t } from "@trailbuddies/i18n";
 import { colors } from "@trailbuddies/tokens";
+import ReportShare from "@/components/share/ReportShare";
 import FamilyShell from "@/components/shell/FamilyShell";
 import Loading from "@/components/Loading";
 import Icon from "@/components/Icon";
@@ -34,6 +35,7 @@ import CustomBadgeArt from "@/components/rewards/CustomBadgeArt";
 import { canEdit } from "@/lib/account";
 import { familyDb } from "@/lib/db";
 import { StorageFullError, createRecorder, mediaUrl, preparePhoto, saveMedia } from "@/lib/media";
+import { checkImage, scanForServer } from "@/lib/imageCheck";
 import { badgeEvents } from "@/lib/rewards";
 import { speak } from "@/lib/speech";
 import { dbName, useFamily, useHydrated } from "@/lib/store";
@@ -129,6 +131,7 @@ function DesignChoice({ field, choices, value, onChange, disabled }) {
 function BadgeEditor({ databaseName, existing }) {
   const router = useRouter();
   const fileInput = useRef(null);
+  const photoScan = useRef(/** @type {object | null} */ (null));
   const [draft, setDraft] = useState(() => (existing ? { ...EMPTY, ...existing } : null));
   const [step, setStep] = useState(/** @type {"design" | "earn"} */ ("design"));
   const [status, setStatus] = useState("");
@@ -185,7 +188,12 @@ function BadgeEditor({ databaseName, existing }) {
     setBusy("photo");
     try {
       // Cropped square and re-encoded on this device: the copy kept has no EXIF (SAF-02).
-      update("photo", await preparePhoto(file));
+      const photo = await preparePhoto(file);
+      // BST-08: the image check runs here too. A flagged photo can't be used on a badge.
+      const check = await checkImage(photo, { faces: false });
+      if (check.flagged) return setStatus("photoFlagged");
+      photoScan.current = scanForServer(check);
+      update("photo", photo);
     } catch {
       setStatus("photoError");
     } finally {
@@ -212,7 +220,8 @@ function BadgeEditor({ databaseName, existing }) {
     if (problems.length || busy) return setStatus(problems[0] ? `problem.${problems[0]}` : "");
     setBusy("save");
     try {
-      const photo = draft.photo instanceof Blob ? await saveMedia("photo", draft.photo) : draft.photo;
+      const photo =
+        draft.photo instanceof Blob ? await saveMedia("photo", draft.photo, { scan: photoScan.current }) : draft.photo;
       const s = useFamily.getState();
       const saved = s.saveBadge({
         id: existing?.id,
@@ -419,6 +428,7 @@ function BadgeEditor({ databaseName, existing }) {
       </Box>
 
       <StatusLine status={status} />
+      {existing?.source_share && <ReportShare shareId={existing.source_share} what="badge" />}
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "space-between" }}>
         {existing ? (
           <Button color="error" onClick={() => setDeleting(true)}>

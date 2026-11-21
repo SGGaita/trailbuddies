@@ -69,6 +69,7 @@ export const lessonFromApi = (a) => ({
   assigned: a.assigned,
   version: a.version,
   options: a.options || {},
+  ...(a.source_share ? { sourceShare: a.source_share } : {}),
   updated_at: a.updated_at,
 });
 
@@ -420,6 +421,7 @@ export async function syncNow() {
     applyLessons((await api.lessons(s.family.id)).lessons);
     applyList("customBadges", "removedBadges", (await api.badges(s.family.id)).badges);
     applyList("wishes", "removedWishes", (await api.wishes(s.family.id)).wishes);
+    useFamily.setState({ hiddenMedia: (await api.hiddenMedia(s.family.id)).hidden });
     await loadClassWork(api); // MAP-06b: work from the children's teachers
     useFamily.setState({ sync: { state: "idle", at: Date.now(), pending: await pendingCount(db) } });
   } catch (e) {
