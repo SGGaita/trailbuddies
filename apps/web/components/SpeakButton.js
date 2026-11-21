@@ -5,12 +5,16 @@ import { SoundIcon } from "@/components/art/UiIcon";
 import { speak } from "@/lib/speech";
 import { useFamily } from "@/lib/store";
 
-/** Round "hear it again" button. Children's prompts are always available as speech. */
-export default function SpeakButton({ text, size = 56 }) {
+/**
+ * Round "hear it again" button. Children's prompts are always available as speech.
+ * @param {{ text: string, size?: number, clip?: string }} props clip: a recorded clip's id
+ *   (registerClip); the device voice is used when it can't play
+ */
+export default function SpeakButton({ text, size = 56, clip }) {
   const voice = useFamily((s) => s.settings.voice);
   return (
     <IconButton
-      onClick={() => speak(text, { enabled: voice })}
+      onClick={() => speak(text, { clip, enabled: voice })}
       aria-label="Hear it"
       sx={{
         width: size,
