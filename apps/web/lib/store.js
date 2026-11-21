@@ -378,7 +378,13 @@ export const useFamily = create(
         const s = get();
         set({ events: [...s.events, ...events] });
         const name = dbName(s);
-        if (name) saveEvents(familyDb(name), events, s.mode === "demo" ? 1 : 0).then(() => afterChange());
+        if (!name) return;
+        // Saves still in flight, so tests can wait for them before a full page load
+        // (e2e/helpers.js settled). A reload in that moment would cancel the write.
+        globalThis.__tbSaving = (globalThis.__tbSaving || 0) + 1;
+        saveEvents(familyDb(name), events, s.mode === "demo" ? 1 : 0)
+          .then(() => afterChange())
+          .finally(() => (globalThis.__tbSaving -= 1));
       },
       /** The grown-up zone stays open for 10 minutes after the gate. */
       unlockGate: () => {

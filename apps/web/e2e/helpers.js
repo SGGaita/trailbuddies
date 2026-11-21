@@ -61,3 +61,9 @@ export async function passGate(page, pin) {
 /** Any praise line, in any buddy's words (packages/content/src/buddy/*.json). */
 export const PRAISE =
   /right|Correct|rilliant|Yes|got it|Great|Wise|Splendid|done|Steady|Lovely|Trumpet|step at a time/i;
+
+/**
+ * Wait until events recorded on the device are saved to IndexedDB. Call it before page.goto or
+ * reload right after something was recorded (a tap that records happens in memory first).
+ */
+export const settled = (page) => page.waitForFunction(() => !globalThis.__tbSaving);
