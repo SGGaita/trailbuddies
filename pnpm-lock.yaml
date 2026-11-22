@@ -62,6 +62,9 @@ importers:
       '@trailbuddies/content':
         specifier: workspace:*
         version: link:../../packages/content
+      '@trailbuddies/content-schema':
+        specifier: workspace:*
+        version: link:../../packages/content-schema
       '@trailbuddies/domain':
         specifier: workspace:*
         version: link:../../packages/domain

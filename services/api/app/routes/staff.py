@@ -256,6 +256,25 @@ def unit_doc(db: DbSession, unit_id: str, with_draft: bool):
     return current.get(("unit", unit_id)), current.get(("assets", unit_id)), current
 
 
+@router.get("/admin/content/export")
+def export_content(s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-02: the published version as one file; `pnpm content export:apply <file>` writes it
+    over the bundled copy in the code, so new installs start from today's content."""
+    s.need("publish")
+    live = cms.live_version(db)
+    if not live:
+        raise HTTPException(404, "Nothing is published yet")
+    current = cms.docs(db, None)
+    return {
+        "schema": "content-export/1",
+        "version": live.id,
+        "release": live.release,
+        "catalogue": current[("catalogue", "catalogue")].data,
+        "units": [d.data for (k, _), d in current.items() if k == "unit"],
+        "assets": {key: d.data for (k, key), d in current.items() if k == "assets"},
+    }
+
+
 @router.get("/admin/content/units/{unit_id}")
 def get_unit(unit_id: str, s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
     if not (cms.can(s.role, "edit") or cms.can(s.role, "approve-asset")):

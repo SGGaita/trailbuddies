@@ -106,3 +106,32 @@ export function setUnitStatus(unitId, status, root = SRC) {
   cat.subjects.flatMap((s) => s.units).find((u) => u.id === unitId).status = status;
   write(catFile, cat);
 }
+
+/**
+ * CMS-02: refresh the bundled copy from the content admin's Export (the published version as
+ * one JSON file). Writes the catalogue and every unit and asset manifest in it; units the
+ * export doesn't carry are left alone. Uploaded pictures stay on the server, so their manifest
+ * entries point at /api/content/assets.
+ * @param {{ catalogue: any, units: any[], assets: Record<string, any>, version?: number }} bundle
+ * @returns {string[]} the files written
+ */
+export function applyExport(bundle, root = SRC) {
+  if (!bundle?.catalogue?.subjects || !Array.isArray(bundle.units)) throw new Error("That isn't a content export");
+  const subjectOf = Object.fromEntries(bundle.catalogue.subjects.flatMap((s) => s.units.map((u) => [u.id, s.id])));
+  const out = [];
+  for (const unit of bundle.units) {
+    const subject = subjectOf[unit.id];
+    if (!subject || subject !== unit.subject) throw new Error(`${unit.id} isn't in the catalogue under ${unit.subject}`);
+    const dir = join(root, "units", subject);
+    mkdirSync(dir, { recursive: true });
+    write(join(dir, `${unit.id}.json`), unit);
+    out.push(`units/${subject}/${unit.id}.json`);
+    if (bundle.assets?.[unit.id]) {
+      write(join(dir, `${unit.id}.assets.json`), bundle.assets[unit.id]);
+      out.push(`units/${subject}/${unit.id}.assets.json`);
+    }
+  }
+  write(join(root, "catalogue.json"), bundle.catalogue);
+  out.push("catalogue.json");
+  return out;
+}

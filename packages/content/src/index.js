@@ -83,6 +83,12 @@ export function setPreviewUnit(unit, manifest) {
   PREVIEW[unit.id] = attachImages(JSON.parse(JSON.stringify(unit)), manifest, { drafts: true });
 }
 export const clearPreviewUnit = (id) => delete PREVIEW[id];
+/**
+ * CMS-02: the content files exactly as they are in the code, kept before pictures are
+ * attached or packs installed. The content admin imports this as version 1.
+ */
+const BUNDLED = JSON.stringify({ catalogue, units: ALL_UNITS, assets: ALL_ASSETS });
+export const bundledContent = () => JSON.parse(BUNDLED);
 ALL_UNITS.forEach((u) => attachImages(u, ALL_ASSETS[u.id]));
 
 /** Units with content a child can play here, in trail order. @param {string} subjectId */

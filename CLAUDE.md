@@ -9,7 +9,7 @@
 ## Where things go
 
 - No business logic in screens. Lesson generation, difficulty, mastery, rewards, badge rules and sync live in `packages/` and are pure JS with Jest tests.
-- Content is data: units are JSON validated against `packages/content-schema`. New units start as `draft` (shown in development and previews only) and become `ready` once reviewed; see `docs/content.md`. Run `pnpm content units:index` after adding a unit file.
+- Content is data: units are JSON validated against `packages/content-schema`. New units start as `draft` (shown in development and previews only) and become `ready` once reviewed; see `docs/content.md`. Run `pnpm content units:index` after adding a unit file. From Sprint 12 staff edit built-in content at `/admin` (database versions, ADR 0008); the files are the bundled copy, refreshed with `pnpm content export:apply`. After changing a schema run `pnpm --filter @trailbuddies/content-schema schemas:api`.
 - Every screen works on every device its app supports (development plan §3.4): learner tablet/phone/web, parent phone/tablet/web, teacher web/tablet. The prototype in `prototype/` is the reference for layout and behaviour.
 
 ## Shapes and corners (match the prototype)

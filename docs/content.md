@@ -56,3 +56,37 @@ Run these from the repo root:
 3. Devices check the manifest when the app opens. They download changed packs in the background on Wi-Fi, and use them from the next launch (OFF-02).
 
 A unit that's new in a pack, rather than an update to a built-in unit, plays on the generic `/play/go?unit=…&step=…` page until the next app release gives it its own pages.
+
+## The content admin at /admin (Sprint 12, CMS-01…04)
+
+From Sprint 12 the built-in content can be edited on the web, without a code change. The files in `packages/content/src` stay as the **bundled copy** every install starts with; the database holds the versions staff edit.
+
+**Roles** (CMS-01). People in `TB_ADMIN_EMAILS` are admins. Admins add other staff by email at `/admin/staff`; they sign in with the usual magic link.
+
+| Role | Can |
+|---|---|
+| Admin | everything: roles, publishing, exporting, approving pictures, moderation |
+| Editor | edit units and save them to the draft |
+| Reviewer | approve or refuse uploaded pictures (approving and publishing a draft comes in Sprint 13) |
+| Moderator | the moderation queue only |
+
+Every role change, save, upload, approval and publish is in the audit log on `/admin/staff`.
+
+**First time** (CMS-02). An admin opens `/admin/content` and presses **Import the content**. The app sends its own bundled files; the API checks every one against the same JSON Schemas and saves them as version 1. Version 1 builds exactly the packs `pnpm content packs:build` makes today, so nothing changes for children.
+
+**Editing** (CMS-03). `/admin/content/unit?id=<unit>` edits a unit's name, summary, age band, items (word, what the buddy says, fun fact, picture) and each lesson's items and exercise mix. Problems show next to the field and Save stays off until they're fixed; the API checks again. Item ids never change, so children keep their stars and mastery. Saves go into a **draft** of the next version; children keep the published one.
+
+**Pictures**. Choose a picture from the unit, from the approved library of every unit, or an emoji, or upload one. Uploads are cropped and re-encoded on the device (no EXIF or location), pass the on-device image check, and wait for a reviewer or admin to approve them. A unit that's ready for children can't be published while it uses an unapproved upload. Approved uploads are served at `/api/content/assets/<id>`.
+
+**Preview** (CMS-04). **Preview as a child** opens the draft in the real learner screens (`/play/go?…&preview=1&admin=1`) with a stand-in child of the unit's age band. Nothing is recorded.
+
+**Publishing**. In Sprint 12 only an admin publishes, from the draft banner on `/admin/content`, with a short note. An admin publishing changes only they made must confirm it, and it's flagged in the log. Publishing rebuilds the production and preview packs and manifests in the media store (the same keys as `python -m app.packs publish`), so devices get the new version on their next launch.
+
+**Refreshing the bundled copy**. Now and then, press **Export** on `/admin/content` and commit the result so new installs start from the latest content:
+```
+pnpm content export:apply trailbuddies-content-v3.json
+pnpm content units:index && pnpm content:validate
+```
+Then open a PR. Uploaded pictures stay on the server, so their manifest entries point at `/api/content/assets/<id>`.
+
+The JSON Schemas are copied for the API by `pnpm --filter @trailbuddies/content-schema schemas:api` (writes `services/api/app/content_schemas.json`). Run it after changing a schema; a test fails if the copy is out of date.

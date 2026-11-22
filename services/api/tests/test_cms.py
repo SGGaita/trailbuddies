@@ -1,6 +1,8 @@
 """Sprint 12: the staff area and content admin (CMS-01…04)."""
 
 import json
+import shutil
+import subprocess
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -25,6 +27,7 @@ REVIEWER = "otieno@trailbuddies.africa"
 MOD = "safety@trailbuddies.africa"
 ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "packages" / "content" / "src"
+PACKS_JS = ROOT / "packages" / "content" / "scripts" / "packs.js"
 CLEAN = {"flagged": False, "scores": {"porn": 0.01}, "model": "nsfwjs-mobilenet-v2"}
 
 
@@ -183,6 +186,9 @@ def test_an_admin_publishing_their_own_change_must_confirm(client, outbox, stora
     assert r.status_code == 200
     log = client.get("/admin/staff").json()["log"]
     assert log[0]["action"] == "content_publish" and log[0]["detail"]["self_published"] is True
+    out = client.get("/admin/content/export").json()
+    assert out["version"] == 2 and {u["id"] for u in out["units"]} == {"where-animals-live", "wild-animals"}
+    assert next(u for u in out["units"] if u["id"] == "wild-animals")["summary"] == unit["summary"]
 
 
 def test_discarding_the_draft(client, outbox):
@@ -293,3 +299,44 @@ def test_a_flagged_upload_cant_be_used(client, outbox, storage):  # noqa: F811
         json={"unit": unit, "assets": {**got["assets"], "assets": got["assets"]["assets"] + [entry]}},
     )
     assert r.status_code == 422 and "can't be used" in " ".join(r.json()["detail"]["problems"])
+
+
+def full_bundle():
+    cat = json.loads((SRC / "catalogue.json").read_text())
+    ids = [
+        e["id"]
+        for s in cat["subjects"]
+        for e in s["units"]
+        if (SRC / "units" / s["id"] / f"{e['id']}.json").exists()
+    ]
+    return bundle(ids)
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="needs node for the JS pack builder")
+def test_the_imported_version_gives_exactly_todays_packs(client, outbox, engine):
+    """CMS-02: the database copy builds the same packs, byte for byte, as `pnpm content packs:build`."""
+    as_(client, outbox, ADMIN)
+    assert client.post("/admin/content/import", json=full_bundle()).status_code == 201
+    script = (
+        f"import {{ loadContent, buildPacks }} from {json.dumps(str(PACKS_JS))};"
+        "const c = loadContent(); const out = {};"
+        "for (const ch of ['production', 'preview'])"
+        "  out[ch] = buildPacks(c, { channel: ch, release: 'r1' }).files;"
+        "process.stdout.write(JSON.stringify(out));"
+    )
+    js = json.loads(
+        subprocess.run(
+            ["node", "--input-type=module", "-e", script], capture_output=True, check=True, text=True
+        ).stdout
+    )
+    with Session(engine) as db:
+        current = cms.docs(db, None)
+        for channel in ("production", "preview"):
+            manifest, files = cms.build_packs(current, channel, "r1")
+            ours = dict(files) | {
+                f"manifest-{channel}.json": json.dumps(manifest, indent=2, ensure_ascii=False)
+            }
+            theirs = {f["name"]: f["body"] for f in js[channel]}
+            assert ours.keys() == theirs.keys()
+            for name in theirs:
+                assert ours[name] == theirs[name], name

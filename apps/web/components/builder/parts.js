@@ -125,7 +125,13 @@ export function ChoiceChip({ on, onClick, children, ...rest }) {
   );
 }
 
-/** Prototype `.pill`: small capitals in a soft tag (Chosen, Soon). */
+const PILL = {
+  ok: [colors.leaf.soft, colors.leaf.deep],
+  sky: [colors.sky.soft, colors.sky.deep],
+  sun: [colors.sun.soft, "#7a5200"],
+  bad: [colors.bad.soft, colors.bad.main],
+};
+/** Prototype `.pill`: small capitals in a soft tag (Chosen, Soon). tone: ok, sky, sun, bad or sand. */
 export function Pill({ children, tone = "ok" }) {
   return (
     <Box
@@ -139,8 +145,8 @@ export function Pill({ children, tone = "ok" }) {
         px: "9px",
         py: "3px",
         whiteSpace: "nowrap",
-        bgcolor: tone === "ok" ? colors.leaf.soft : colors.sand,
-        color: tone === "ok" ? colors.leaf.deep : "text.secondary",
+        bgcolor: PILL[tone]?.[0] || colors.sand,
+        color: PILL[tone]?.[1] || "text.secondary",
       }}
     >
       {children}

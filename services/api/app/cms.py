@@ -269,6 +269,10 @@ def asset_problems(db: DbSession, current: dict) -> list[str]:
     return out
 
 
+def _js(obj) -> str:
+    return json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+
+
 def build_packs(current: dict, channel: str, release: str) -> tuple[dict, list[tuple[str, str]]]:
     cat = current[("catalogue", "catalogue")].data
     files, packs = [], []
@@ -294,8 +298,10 @@ def build_packs(current: dict, channel: str, release: str) -> tuple[dict, list[t
                 for uid in ids
             },
         }
-        h = hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
-        text = json.dumps({**body, "release": release, "hash": h}, ensure_ascii=False)
+        # Byte for byte what `pnpm content packs:build` makes (JSON.stringify), so the imported
+        # version gives exactly today's packs (CMS-02).
+        h = hashlib.sha256(_js(body).encode()).hexdigest()[:16]
+        text = _js({**body, "release": release, "hash": h})
         name = f"{s['id']}.{h}.json"
         files.append((name, text))
         packs.append({"subject": s["id"], "hash": h, "bytes": len(text.encode()), "file": name, "units": ids})
