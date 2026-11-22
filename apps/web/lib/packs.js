@@ -1,6 +1,6 @@
 "use client";
 import Dexie from "dexie";
-import { installPack, getSubjects } from "@trailbuddies/content";
+import { installPack, installMap, installBadges, getSubjects, BUILT_IN_SUBJECT_IDS } from "@trailbuddies/content";
 import { activeSubjects, packPlan, unusedPacks } from "@trailbuddies/domain";
 import { api } from "./account";
 import { useFamily } from "./store";
@@ -21,6 +21,8 @@ const store = () => {
   if (!db) {
     db = new Dexie("trailbuddies-content");
     db.version(1).stores({ packs: "subject" });
+    // CMS-05/08: the published map and badges, applied at every launch (offline too).
+    db.version(2).stores({ packs: "subject", meta: "key" });
   }
   return db;
 };
@@ -30,6 +32,9 @@ export async function installStoredPacks() {
   try {
     const rows = await store().packs.toArray();
     rows.forEach((r) => installPack(r.pack));
+    const meta = Object.fromEntries((await store().meta.toArray()).map((m) => [m.key, m.value]));
+    installMap(meta.map);
+    installBadges(meta.badges?.doc);
     useFamily.setState({
       packs: {
         ...useFamily.getState().packs,
@@ -70,6 +75,9 @@ export function wantedSubjects(learners) {
   return list.length ? list : getSubjects().map((s) => s.id);
 }
 
+/** Trails added in the content admin aren't built into this app: every device downloads them. */
+export const newTrails = (manifest) => (manifest?.map || []).filter((m) => !m.archived && !BUILT_IN_SUBJECT_IDS.has(m.id)).map((m) => m.id);
+
 /**
  * Check the manifest and download what's due. Status lands in the store's `packs` for the
  * grown-ups' Settings (what's ready, waiting for Wi-Fi, or didn't fit).
@@ -95,7 +103,7 @@ export async function syncPacks({ force = false, learners } = {}) {
   const rows = await store().packs.toArray();
   const cached = Object.fromEntries(rows.map((r) => [r.subject, r.hash]));
   const forClass = st.mode === "class" ? classroomPackSubjects() : [];
-  const wanted = forClass.length ? forClass : wantedSubjects(learners || st.learners);
+  const wanted = [...new Set([...(forClass.length ? forClass : wantedSubjects(learners || st.learners)), ...newTrails(manifest)])];
   const plan = packPlan(manifest, cached, wanted, { free: await freeBytes(), wifi: onWifi(), force });
   for (const p of plan.download) {
     try {
@@ -105,6 +113,17 @@ export async function syncPacks({ force = false, learners } = {}) {
     } catch (e) {
       if (e?.name === "QuotaExceededError" || e?.inner?.name === "QuotaExceededError") plan.noRoom.push(p);
     }
+  }
+  // The map and the badges (CMS-05, CMS-08) take effect on the next launch, like packs.
+  try {
+    if (manifest.map) await store().meta.put({ key: "map", value: manifest.map });
+    const kept = await store().meta.get("badges");
+    if (manifest.badges && kept?.value?.hash !== manifest.badges.hash) {
+      const doc = await api.contentPack(manifest.badges.file);
+      await store().meta.put({ key: "badges", value: { hash: manifest.badges.hash, doc } });
+    }
+  } catch {
+    /* offline or no room: the bundled map and badges keep working */
   }
   useFamily.setState({
     packs: {

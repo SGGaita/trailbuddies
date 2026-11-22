@@ -24,13 +24,11 @@ import {
   uploadedMediaId,
 } from "@trailbuddies/domain";
 import { t } from "@trailbuddies/i18n";
-import { ulid } from "@trailbuddies/sync";
 import { colors } from "@trailbuddies/tokens";
 import { ChoiceChip, Field, Pill, inputSx } from "@/components/builder/parts";
 import { api } from "@/lib/account";
 import { previewHref } from "@/lib/cmsPreview";
-import { checkImage, scanForServer } from "@/lib/imageCheck";
-import { preparePhoto } from "@/lib/media";
+import { uploadContentPicture } from "@/lib/contentUpload";
 import { StaffHead, useStaff } from "./StaffShell";
 
 const BANDS = ["seedling", "sprout", "explorer", "voyager", "trailblazer"];
@@ -109,16 +107,7 @@ function PicturePicker({ item, manifest, onPick, onClose }) {
     if (!file) return;
     setBusy(t("cms.pic.checking"));
     try {
-      const blob = await preparePhoto(file);
-      const check = await checkImage(blob, { faces: false });
-      if (check.flagged) throw new Error(t("cms.pic.flagged"));
-      const id = ulid();
-      const r = await api.startContentAsset({ id, content_type: "image/jpeg", bytes: blob.size, label: item.label.slice(0, 80) });
-      if (r.upload) {
-        const put = await fetch(r.upload.url, { method: "PUT", body: blob, headers: r.upload.headers });
-        if (!put.ok) throw new Error(t("cms.pic.uploadFailed"));
-      }
-      await api.completeContentAsset(id, scanForServer(check));
+      const id = await uploadContentPicture(file, item.label);
       onPick({ asset: uploadAssetEntry(id), upload: id });
     } catch (e) {
       setBusy(e.message);

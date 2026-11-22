@@ -20,6 +20,8 @@ export const BUILT_IN_UNIT_IDS = new Set(ALL_UNITS.map((u) => u.id));
 export { ALL_ASSETS };
 
 export { catalogue, builtInBadges };
+/** Trails built into this app (others arrive in content packs, CMS-05). */
+export const BUILT_IN_SUBJECT_IDS = new Set(catalogue.subjects.map((s) => s.id));
 
 /**
  * Trails on the map, in map order. Archived trails (CMS-05) are left out for everyone;
@@ -124,8 +126,7 @@ export function installPack(pack) {
   if (!subject) {
     // A trail added in the content admin (CMS-05): it joins the map.
     if (!pack.subject.name || !pack.subject.place || !pack.subject.island) return false;
-    const { units: _units, ...rest } = pack.subject;
-    subject = { ...rest, units: [] };
+    subject = { ...pack.subject, units: [] };
     catalogue.subjects.push(subject);
   }
   for (const u of pack.units)

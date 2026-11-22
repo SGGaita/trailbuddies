@@ -15,8 +15,12 @@ const StaffContext = createContext(null);
 /** The signed-in staff member (inside /admin). */
 export const useStaff = () => useContext(StaffContext);
 
+const content = (r) => can(r, "edit") || can(r, "review") || can(r, "approve-asset");
 const NAV = [
-  { href: "/admin/content", key: "content", show: (r) => can(r, "edit") || can(r, "approve-asset") },
+  { href: "/admin/content", key: "content", show: content },
+  { href: "/admin/content/map", key: "map", show: content },
+  { href: "/admin/content/badges", key: "badges", show: content },
+  { href: "/admin/content/review", key: "review", show: content },
   { href: "/admin/staff", key: "staff", show: (r) => can(r, "roles") },
   { href: "/admin/moderation", key: "moderation", show: (r) => can(r, "moderate") },
 ];
@@ -30,12 +34,18 @@ export default function StaffShell({ children }) {
   const path = usePathname();
   const [me, setMe] = useState(/** @type {any} */ (null));
   const [denied, setDenied] = useState(/** @type {"" | "signin" | "forbidden" | "error"} */ (""));
+  const [who, setWho] = useState("");
 
   useEffect(() => {
     let live = true;
     api.staffMe().then(
       (m) => live && setMe(m),
-      (e) => live && setDenied(e.status === 401 ? "signin" : e.status === 403 ? "forbidden" : "error"),
+      (e) => {
+        if (!live) return;
+        setDenied(e.status === 401 ? "signin" : e.status === 403 ? "forbidden" : "error");
+        // Say who is signed in, so a wrong account (or a missing TB_ADMIN_EMAILS entry) is obvious.
+        if (e.status === 403) api.me().then((u) => live && setWho(u?.user?.email || u?.email || ""), () => {});
+      },
     );
     return () => {
       live = false;
@@ -44,6 +54,8 @@ export default function StaffShell({ children }) {
 
   const nav = me ? NAV.filter((n) => n.show(me.role)) : [];
   const allowed = !me || path === "/admin" || nav.some((n) => path.startsWith(n.href));
+  // The most specific item is the current one (/admin/content/map is Map, not Content).
+  const current = nav.filter((n) => path.startsWith(n.href)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <Box
@@ -77,7 +89,7 @@ export default function StaffShell({ children }) {
           {t("staff.brand")}
         </Typography>
         {nav.map((n) => {
-          const on = path.startsWith(n.href);
+          const on = n.href === current;
           return (
             <Box
               key={n.href}
@@ -114,6 +126,11 @@ export default function StaffShell({ children }) {
           {denied ? (
             <Alert severity={denied === "error" ? "warning" : "info"} sx={{ borderRadius: 4 }}>
               {t(`staff.denied.${denied}`)} {denied === "signin" && <Link href="/start/account">{t("staff.signIn")}</Link>}
+              {who && (
+                <Box component="span" sx={{ display: "block", mt: 0.5 }} data-testid="signed-in-as">
+                  {t("staff.signedInAs", { email: who })}
+                </Box>
+              )}
             </Alert>
           ) : !me ? (
             <Typography>{t("staff.loading")}</Typography>

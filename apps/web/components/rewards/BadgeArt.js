@@ -1,3 +1,4 @@
+import { uploadSrc } from "@trailbuddies/content";
 import Box from "@mui/material/Box";
 import { colors } from "@trailbuddies/tokens";
 import CustomBadgeArt from "./CustomBadgeArt";
@@ -9,6 +10,8 @@ const RING = { bronze: "#c98a4b", silver: "#b8c2cc", gold: colors.sun.main };
 export default function BadgeArt({ badge, earned = true, size = 88 }) {
   // A grown-up's badge (Badge Studio) is drawn from its design, or the design it was earned with.
   if (badge.custom || badge.shape) return <CustomBadgeArt badge={badge.custom || badge} size={size} earned={earned} />;
+  // Built-in badges can have uploaded art from the content admin (CMS-08); the emoji is the fallback.
+  const art = uploadSrc(badge.art);
   return (
     <Box
       aria-hidden="true"
@@ -25,9 +28,10 @@ export default function BadgeArt({ badge, earned = true, size = 88 }) {
         filter: earned ? "none" : "grayscale(1) brightness(0.2)",
         opacity: earned ? 1 : 0.35,
         flex: "none",
+        ...(art ? { backgroundImage: `url("${art}")`, backgroundSize: "cover", backgroundPosition: "center" } : {}),
       }}
     >
-      {badge.icon || "🏅"}
+      {!art && (badge.icon || "🏅")}
     </Box>
   );
 }
