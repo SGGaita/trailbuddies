@@ -2,7 +2,7 @@ import { mkdtempSync, cpSync, readFileSync, existsSync, mkdirSync } from "node:f
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import sharp from "sharp";
-import { importImages, approveAssets, setUnitStatus, SRC } from "../scripts/assets.js";
+import { importImages, approveAssets, setUnitStatus, applyExport, SRC } from "../scripts/assets.js";
 import { attachImages, assetShows } from "./index.js";
 
 const read = (f) => JSON.parse(readFileSync(f, "utf8"));
@@ -63,5 +63,21 @@ describe("illustrations (CNT-03, CNT-09)", () => {
     attachImages(unit, { assets: [{ id: "img-goat", path: "animals/farm/goat.webp", review_status: "approved" }] });
     expect(unit.items[0].imageSrc).toBe("/art/units/animals/farm/goat.webp");
     expect(unit.items[1].imageSrc).toBeUndefined();
+  });
+});
+
+describe("refreshing the bundled copy (CMS-02)", () => {
+  test("an export from the content admin rewrites the catalogue and the units it carries", () => {
+    const sb = sandbox();
+    const catalogue = read(join(sb.root, "catalogue.json"));
+    const unit = read(join(sb.root, "units/animals/farm-animals.json"));
+    const assets = read(join(sb.root, "units/animals/farm-animals.assets.json"));
+    unit.title = "Farm friends";
+    catalogue.subjects.find((s) => s.id === "animals").units.find((u) => u.id === "farm-animals").title = "Farm friends";
+    const files = applyExport({ version: 3, catalogue, units: [unit], assets: { "farm-animals": assets } }, sb.root);
+    expect(files).toEqual(["units/animals/farm-animals.json", "units/animals/farm-animals.assets.json", "catalogue.json"]);
+    expect(read(join(sb.root, "units/animals/farm-animals.json")).title).toBe("Farm friends");
+    expect(() => applyExport({ catalogue, units: [{ ...unit, subject: "space" }] }, sb.root)).toThrow(/isn't in the catalogue/);
+    expect(() => applyExport({}, sb.root)).toThrow(/content export/);
   });
 });

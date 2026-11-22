@@ -2,8 +2,13 @@
 // routing on /api/*. It follows the real API's contract (see services/api/tests) so the
 // web app's sign-in, onboarding and sync can be tested at every screen size.
 
+import { validate } from "@trailbuddies/content-schema";
 import {
   REPORT_THRESHOLD,
+  ROLE_CAN,
+  diffUnit,
+  syncEntry,
+  uploadedMediaId,
   countryRules,
   deviceLimit,
   deviceName,
@@ -54,8 +59,201 @@ export function newServer() {
     modItems: {}, // S11b: id -> { kind, share_id, media_id, reason, status, created_at }
     modLog: [], // S11b: the audit log
     admins: ["steve@trailbuddies.africa"], // TB_ADMIN_EMAILS
+    staff: {}, // S12 CMS-01: email -> { role, invited_by, seen_at }
+    cms: { live: null, draft: null, log: [] }, // S12 CMS-02: { version, catalogue, units, assets, by }
+    contentAssets: {}, // S12 CMS-03: id -> { status, approval, uploaded_by, label }
     seq: 0,
   };
+}
+
+const staffRole = (srv, email) => (srv.admins.includes(email) ? "admin" : srv.staff[email]?.role || null);
+const cmsCan = (srv, email, action) => Boolean(ROLE_CAN[staffRole(srv, email)]?.includes(action));
+const cmsCurrent = (srv) => {
+  const { live, draft } = srv.cms;
+  return draft ? { ...live, catalogue: draft.catalogue || live.catalogue, units: { ...live.units, ...draft.units }, assets: { ...live.assets, ...draft.assets } } : live;
+};
+function cmsSummary(srv) {
+  const { live, draft } = srv.cms;
+  if (!live) return { imported: false, live: null, draft: null, subjects: [], assets_waiting: 0 };
+  const cur = cmsCurrent(srv);
+  const changes = draft
+    ? Object.entries(draft.units)
+        .map(([id, u]) => ({ unit: id, title: u.title, changes: diffUnit(live.units[id] || null, u), by: draft.by[id] }))
+        .filter((c) => c.changes.length)
+    : [];
+  return {
+    imported: true,
+    live: { version: live.version, published_at: live.at, by: live.by, note: live.note },
+    draft: draft ? { version: draft.version, changes, created_by: draft.created_by } : null,
+    subjects: cur.catalogue.subjects.map((sub) => ({
+      id: sub.id,
+      name: sub.name,
+      units: sub.units.map((e) => ({ id: e.id, title: e.title, band: e.band, status: e.status, has_content: !!cur.units[e.id], items: cur.units[e.id]?.items.length || 0, edited: !!draft?.units[e.id] })),
+    })),
+    assets_waiting: Object.values(srv.contentAssets).filter((a) => a.approval === "waiting").length,
+  };
+}
+const cmsLog = (srv, who, action, target, detail = null) => srv.cms.log.unshift({ id: `L${++srv.seq}`, who, action, target, detail, at: new Date().toISOString() });
+
+/** S12: the staff area (CMS-01…04), following services/api/app/routes/staff.py. */
+function staffRoutes(srv, route, { path, method, body, user }) {
+  const email = user.email;
+  const role = staffRole(srv, email);
+  if (!role) return json(route, 403, { detail: "Only Trailbuddies staff can open this" });
+  const need = (a) => (cmsCan(srv, email, a) ? null : json(route, 403, { detail: { code: "role", message: "Your role can't do that." } }));
+  let m;
+  if (path === "/admin/me") return json(route, 200, { email, role, can: [...ROLE_CAN[role]].sort() });
+  if (path === "/admin/staff" && method === "GET")
+    return (
+      need("roles") ||
+      json(route, 200, {
+        staff: [...srv.admins.map((e) => ({ email: e, role: "admin", bootstrap: true })), ...Object.entries(srv.staff).map(([e, x]) => ({ email: e, role: x.role, invited_by: x.invited_by, seen_at: null, bootstrap: false }))],
+        log: srv.cms.log.slice(0, 50),
+      })
+    );
+  if (path === "/admin/staff" && method === "POST") {
+    const no = need("roles");
+    if (no) return no;
+    const e = body.email.toLowerCase();
+    if (srv.staff[e] || srv.admins.includes(e)) return json(route, 409, { detail: { code: "exists", message: "That person is already staff." } });
+    srv.staff[e] = { role: body.role, invited_by: email };
+    cmsLog(srv, email, "staff_add", e, { role: body.role });
+    return json(route, 201, { email: e, role: body.role });
+  }
+  m = path.match(/^\/admin\/staff\/([^/]+)$/);
+  if (m) {
+    const no = need("roles");
+    if (no) return no;
+    const e = decodeURIComponent(m[1]);
+    if (!srv.staff[e]) return json(route, 404, { detail: "Not staff" });
+    if (method === "PATCH") {
+      cmsLog(srv, email, "staff_role", e, { from: srv.staff[e].role, to: body.role });
+      srv.staff[e].role = body.role;
+      return json(route, 200, { email: e, role: body.role });
+    }
+    cmsLog(srv, email, "staff_remove", e, { role: srv.staff[e].role });
+    delete srv.staff[e];
+    return json(route, 204);
+  }
+  const canSee = cmsCan(srv, email, "edit") || cmsCan(srv, email, "approve-asset");
+  if (path === "/admin/content" && method === "GET") return canSee ? json(route, 200, cmsSummary(srv)) : need("edit");
+  if (path === "/admin/content/import" && method === "POST") {
+    const no = need("publish");
+    if (no) return no;
+    if (srv.cms.live) return json(route, 409, { detail: { code: "imported", message: "The content is already imported." } });
+    const problems = body.units.flatMap((u) => validate("unit", u).errors.map((e) => `${u.id}: ${e}`));
+    if (problems.length) return json(route, 422, { detail: { code: "invalid", message: "The content didn't pass the checks.", problems } });
+    srv.cms.live = { version: 1, catalogue: body.catalogue, units: Object.fromEntries(body.units.map((u) => [u.id, u])), assets: body.assets, by: email, at: new Date().toISOString(), note: "Imported" };
+    cmsLog(srv, email, "content_import", "v1", { units: body.units.length });
+    return json(route, 201, cmsSummary(srv));
+  }
+  if (path === "/admin/content/export") {
+    const no = need("publish");
+    if (no) return no;
+    const l = srv.cms.live;
+    return json(route, 200, { schema: "content-export/1", version: l.version, catalogue: l.catalogue, units: Object.values(l.units), assets: l.assets });
+  }
+  m = path.match(/^\/admin\/content\/units\/([^/]+)$/);
+  if (m) {
+    if (!canSee) return need("edit");
+    const id = m[1];
+    const cur = cmsCurrent(srv);
+    const unitOut = () => {
+      const c = cmsCurrent(srv);
+      const ups = (c.assets[id]?.assets || []).map(uploadedMediaId).filter(Boolean);
+      return {
+        unit: c.units[id],
+        assets: c.assets[id] || { schema: "assets/1", assets: [] },
+        published: srv.cms.live.units[id] || null,
+        changes: srv.cms.draft?.units[id] ? diffUnit(srv.cms.live.units[id] || null, c.units[id]) : [],
+        uploads: Object.fromEntries(ups.filter((u) => srv.contentAssets[u]).map((u) => [u, srv.contentAssets[u].approval])),
+      };
+    };
+    if (!cur?.units[id]) return json(route, 404, { detail: "No content for that unit" });
+    if (method === "GET") return json(route, 200, unitOut());
+    const no = need("edit");
+    if (no) return no;
+    const unit = body.unit;
+    if (unit.status !== cur.units[id].status && !cmsCan(srv, email, "publish"))
+      return json(route, 403, { detail: { code: "role", message: "Only an admin can mark a unit ready or back to draft." } });
+    const problems = validate("unit", unit).errors;
+    for (const a of body.assets?.assets || []) {
+      const up = uploadedMediaId(a);
+      if (up && ["flagged", "refused"].includes(srv.contentAssets[up]?.approval)) problems.push(`assets picture "${a.id}" can't be used`);
+    }
+    if (problems.length) return json(route, 422, { detail: { code: "invalid", message: "Fix these before saving.", problems } });
+    const d = (srv.cms.draft ||= { version: srv.cms.live.version + 1, units: {}, assets: {}, by: {}, created_by: email, catalogue: null });
+    d.units[id] = unit;
+    d.by[id] = email;
+    if (body.assets) d.assets[id] = body.assets;
+    const cat = cur.catalogue;
+    d.catalogue = { ...cat, subjects: cat.subjects.map((sub) => ({ ...sub, units: sub.units.map((e) => (e.id === id ? syncEntry(e, unit) : e)) })) };
+    cmsLog(srv, email, "unit_save", id, { version: d.version });
+    return json(route, 200, unitOut());
+  }
+  if (path === "/admin/content/draft" && method === "DELETE") {
+    const no = need("edit");
+    if (no) return no;
+    srv.cms.draft = null;
+    cmsLog(srv, email, "draft_discard", "draft");
+    return json(route, 204);
+  }
+  if (path === "/admin/content/publish" && method === "POST") {
+    const no = need("publish");
+    if (no) return no;
+    const d = srv.cms.draft;
+    if (!d) return json(route, 409, { detail: { code: "no_draft", message: "There's nothing to publish." } });
+    const own = Object.values(d.by).every((w) => w === email);
+    if (own && !body.confirm_own) return json(route, 409, { detail: { code: "own", message: "These are your own changes. Confirm to publish them without a second person." } });
+    const cur = cmsCurrent(srv);
+    const blocked = [];
+    for (const [uid, u] of Object.entries(cur.units)) {
+      if (u.status !== "ready") continue;
+      const used = new Set(u.items.map((i) => i.image).filter(Boolean));
+      for (const a of cur.assets[uid]?.assets || []) {
+        const up = uploadedMediaId(a);
+        if (up && used.has(a.id) && srv.contentAssets[up]?.approval !== "approved") blocked.push(`${uid}: uploaded picture "${a.id}" isn't approved yet`);
+      }
+    }
+    if (blocked.length) return json(route, 409, { detail: { code: "assets", message: "Some pictures aren't approved yet.", problems: blocked } });
+    srv.cms.live = { ...cur, version: d.version, by: email, at: new Date().toISOString(), note: body.note };
+    srv.cms.draft = null;
+    cmsLog(srv, email, "content_publish", `v${d.version}`, { self_published: own, note: body.note });
+    return json(route, 200, cmsSummary(srv));
+  }
+  const assetOut = (id) => ({ id, ...srv.contentAssets[id] });
+  if (path === "/admin/content/assets" && method === "GET") return canSee ? json(route, 200, { assets: Object.keys(srv.contentAssets).filter((id) => srv.contentAssets[id].status === "ready").map(assetOut) }) : need("approve-asset");
+  if (path === "/admin/content/assets" && method === "POST") {
+    const no = need("edit");
+    if (no) return no;
+    srv.contentAssets[body.id] = { status: "pending", approval: "waiting", label: body.label || null, uploaded_by: email };
+    srv.media[body.id] = { family: null, kind: "content", type: body.content_type, bytes: null, status: "pending" };
+    return json(route, 201, { ...assetOut(body.id), upload: { url: `/api/media/blob/${body.id}`, method: "PUT", headers: { "Content-Type": body.content_type } } });
+  }
+  m = path.match(/^\/admin\/content\/assets\/([^/]+)\/(complete|decision|file)$/);
+  if (m) {
+    const a = srv.contentAssets[m[1]];
+    if (!a) return json(route, 404, { detail: "Not found" });
+    if (m[2] === "file") {
+      const md = srv.media[m[1]];
+      return md?.bytes ? route.fulfill({ status: 200, contentType: md.type, body: md.bytes }) : json(route, 404, { detail: "Not found" });
+    }
+    if (m[2] === "complete") {
+      if (!srv.media[m[1]]?.bytes) return json(route, 409, { detail: { code: "not_uploaded", message: "The file hasn't arrived yet." } });
+      a.status = "ready";
+      srv.media[m[1]].status = "ready";
+      if (body.scan?.flagged) a.approval = "flagged";
+      cmsLog(srv, email, "asset_upload", m[1]);
+      return json(route, 200, assetOut(m[1]));
+    }
+    const no = need("approve-asset");
+    if (no) return no;
+    if (a.uploaded_by === email && role !== "admin") return json(route, 403, { detail: { code: "own", message: "Someone else must approve your upload." } });
+    a.approval = body.approve ? "approved" : "refused";
+    cmsLog(srv, email, `asset_${a.approval}`, m[1]);
+    return json(route, 200, assetOut(m[1]));
+  }
+  return null;
 }
 
 const json = (route, status, body) =>
@@ -1285,9 +1483,19 @@ export async function fakeApi(context, srv) {
       return json(route, 201, { reported: true, already: false, suspended: sh.status === "suspended" });
     }
     // ---- S11b moderation (MOD-01…03), safety team only ----
+    m0 = path.match(/^\/content\/assets\/([^/]+)$/);
+    if (m0) {
+      const a = srv.contentAssets[m0[1]];
+      const md = srv.media[m0[1]];
+      return a?.approval === "approved" && md?.bytes ? route.fulfill({ status: 200, contentType: md.type, body: md.bytes }) : json(route, 404, { detail: "Not found" });
+    }
     if (path.startsWith("/admin/")) {
       if (!user) return json(route, 401, { detail: "Not signed in" });
-      if (!srv.admins.includes(user.email)) return json(route, 403, { detail: "Only the safety team can open this" });
+      if (!path.startsWith("/admin/moderation") && !path.startsWith("/admin/media/")) {
+        const done = staffRoutes(srv, route, { path, method, body, user });
+        if (done) return done;
+      }
+      if (!cmsCan(srv, user.email, "moderate")) return json(route, 403, { detail: "Only the safety team can open this" });
       if (path === "/admin/moderation" && method === "GET") {
         const items = Object.values(srv.modItems);
         return json(route, 200, {

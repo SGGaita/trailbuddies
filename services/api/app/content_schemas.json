@@ -1,0 +1,871 @@
+{
+ "common.json": {
+  "$id": "https://trailbuddies.africa/schema/common.json",
+  "$defs": {
+   "id": {
+    "type": "string",
+    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+    "maxLength": 64
+   },
+   "band": {
+    "enum": [
+     "seedling",
+     "sprout",
+     "explorer",
+     "voyager",
+     "trailblazer"
+    ]
+   },
+   "status": {
+    "enum": [
+     "draft",
+     "ready",
+     "planned"
+    ]
+   },
+   "text": {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 300
+   },
+   "exerciseType": {
+    "enum": [
+     "listen-tap",
+     "clue-tap",
+     "match",
+     "count",
+     "name-it",
+     "compare",
+     "sequence",
+     "sort",
+     "odd-one-out",
+     "case-match",
+     "build-word",
+     "trace",
+     "clock",
+     "true-false"
+    ]
+   }
+  }
+ },
+ "item.json": {
+  "$id": "https://trailbuddies.africa/schema/item.json",
+  "title": "Item (a card a child learns: a word, number, picture or sound)",
+  "type": "object",
+  "required": [
+   "id",
+   "label"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "id": {
+    "$ref": "common.json#/$defs/id"
+   },
+   "label": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "say": {
+    "$ref": "common.json#/$defs/text",
+    "description": "What the voice says, if different from the label"
+   },
+   "emoji": {
+    "type": "string",
+    "maxLength": 16,
+    "description": "Placeholder picture until illustrated art is approved"
+   },
+   "image": {
+    "type": "string",
+    "description": "Asset id from the unit's asset manifest"
+   },
+   "audio": {
+    "type": "string",
+    "description": "Asset id of a recorded word"
+   },
+   "number": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 1000000
+   },
+   "letter": {
+    "type": "string",
+    "maxLength": 3
+   },
+   "colour": {
+    "type": "string",
+    "pattern": "^#[0-9a-fA-F]{6}$"
+   },
+   "shape": {
+    "type": "string"
+   },
+   "tags": {
+    "type": "array",
+    "items": {
+     "$ref": "common.json#/$defs/id"
+    },
+    "uniqueItems": true
+   },
+   "fact": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "clue": {
+    "$ref": "common.json#/$defs/text"
+   }
+  }
+ },
+ "unit.json": {
+  "$id": "https://trailbuddies.africa/schema/unit.json",
+  "title": "Unit (a stage on a subject trail: items, lessons and a checkpoint)",
+  "type": "object",
+  "required": [
+   "schema",
+   "id",
+   "subject",
+   "title",
+   "band",
+   "status",
+   "items",
+   "lessons",
+   "checkpoint"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "schema": {
+    "const": "unit/1"
+   },
+   "id": {
+    "$ref": "common.json#/$defs/id"
+   },
+   "subject": {
+    "$ref": "common.json#/$defs/id"
+   },
+   "title": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "band": {
+    "$ref": "common.json#/$defs/band"
+   },
+   "status": {
+    "$ref": "common.json#/$defs/status"
+   },
+   "summary": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "requires": {
+    "type": "array",
+    "items": {
+     "$ref": "common.json#/$defs/id"
+    },
+    "description": "Unit ids that must be finished first (any subject)"
+   },
+   "items": {
+    "type": "array",
+    "minItems": 3,
+    "items": {
+     "$ref": "item.json"
+    }
+   },
+   "lessons": {
+    "type": "array",
+    "minItems": 1,
+    "maxItems": 8,
+    "items": {
+     "type": "object",
+     "required": [
+      "id",
+      "title",
+      "focus",
+      "exercises"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "title": {
+       "$ref": "common.json#/$defs/text"
+      },
+      "focus": {
+       "type": "array",
+       "minItems": 0,
+       "items": {
+        "$ref": "common.json#/$defs/id"
+       },
+       "description": "New items introduced in this lesson"
+      },
+      "review": {
+       "type": "array",
+       "items": {
+        "$ref": "common.json#/$defs/id"
+       },
+       "description": "Earlier items mixed back in"
+      },
+      "exercises": {
+       "type": "array",
+       "minItems": 3,
+       "maxItems": 8,
+       "items": {
+        "type": "object",
+        "required": [
+         "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "type": {
+          "$ref": "common.json#/$defs/exerciseType"
+         },
+         "prompt": {
+          "$ref": "common.json#/$defs/text"
+         },
+         "choices": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 6
+         },
+         "bins": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 6
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "checkpoint": {
+    "type": "object",
+    "required": [
+     "review",
+     "game"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "review": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 8
+     },
+     "game": {
+      "enum": [
+       "jigsaw",
+       "memory",
+       "sorting-race",
+       "quiz-show",
+       "maze"
+      ]
+     }
+    }
+   },
+   "buddy": {
+    "type": "object",
+    "description": "Unit-specific buddy lines by event",
+    "additionalProperties": {
+     "type": "array",
+     "items": {
+      "$ref": "common.json#/$defs/text"
+     }
+    }
+   },
+   "groups": {
+    "type": "array",
+    "minItems": 2,
+    "maxItems": 6,
+    "description": "Categories for sort and odd-one-out; an item belongs to a group when its tags include the group id",
+    "items": {
+     "type": "object",
+     "required": [
+      "id",
+      "label"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "label": {
+       "$ref": "common.json#/$defs/text"
+      },
+      "say": {
+       "$ref": "common.json#/$defs/text"
+      },
+      "emoji": {
+       "type": "string",
+       "maxLength": 16
+      }
+     }
+    }
+   }
+  }
+ },
+ "subject-catalogue.json": {
+  "$id": "https://trailbuddies.africa/schema/subject-catalogue.json",
+  "title": "Subject catalogue (places on the world map and their units in trail order)",
+  "type": "object",
+  "required": [
+   "schema",
+   "subjects"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "schema": {
+    "const": "catalogue/1"
+   },
+   "subjects": {
+    "type": "array",
+    "minItems": 1,
+    "items": {
+     "type": "object",
+     "required": [
+      "id",
+      "name",
+      "place",
+      "island",
+      "units"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "name": {
+       "$ref": "common.json#/$defs/text"
+      },
+      "place": {
+       "$ref": "common.json#/$defs/text"
+      },
+      "island": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "units": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "object",
+        "required": [
+         "id",
+         "title",
+         "band",
+         "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "id": {
+          "$ref": "common.json#/$defs/id"
+         },
+         "title": {
+          "$ref": "common.json#/$defs/text"
+         },
+         "band": {
+          "$ref": "common.json#/$defs/band"
+         },
+         "status": {
+          "$ref": "common.json#/$defs/status"
+         },
+         "lessons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "badge.json": {
+  "$id": "https://trailbuddies.africa/schema/badge.json",
+  "title": "Badge (built-in or custom) with its achievement rule",
+  "type": "object",
+  "required": [
+   "id",
+   "name",
+   "how",
+   "rule"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "id": {
+    "$ref": "common.json#/$defs/id"
+   },
+   "name": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "how": {
+    "$ref": "common.json#/$defs/text"
+   },
+   "category": {
+    "enum": [
+     "learning",
+     "mastery",
+     "effort",
+     "consistency",
+     "exploration",
+     "creator",
+     "hidden",
+     "custom"
+    ]
+   },
+   "reward": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 200
+   },
+   "real": {
+    "$ref": "common.json#/$defs/text",
+    "description": "Real-world reward a grown-up delivers"
+   },
+   "rule": {
+    "$ref": "#/$defs/rule"
+   },
+   "tier": {
+    "enum": [
+     "bronze",
+     "silver",
+     "gold"
+    ],
+    "description": "Sets the treasure payout from the economy config"
+   },
+   "icon": {
+    "type": "string",
+    "maxLength": 16,
+    "description": "Placeholder art until badge illustrations arrive"
+   },
+   "upgrades": {
+    "type": "object",
+    "required": [
+     "silver",
+     "gold"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "silver": {
+      "$ref": "#/$defs/upgrade"
+     },
+     "gold": {
+      "$ref": "#/$defs/upgrade"
+     }
+    }
+   }
+  },
+  "dependentSchemas": {
+   "upgrades": {
+    "required": [
+     "tier"
+    ],
+    "properties": {
+     "tier": {
+      "const": "bronze"
+     }
+    }
+   }
+  },
+  "$defs": {
+   "upgrade": {
+    "type": "object",
+    "required": [
+     "how",
+     "rule"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "how": {
+      "$ref": "common.json#/$defs/text"
+     },
+     "rule": {
+      "$ref": "#/$defs/rule"
+     }
+    }
+   },
+   "rule": {
+    "oneOf": [
+     {
+      "type": "object",
+      "required": [
+       "type",
+       "units"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "complete"
+       },
+       "units": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "$ref": "common.json#/$defs/id"
+        }
+       }
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "type",
+       "metric",
+       "n"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "count"
+       },
+       "metric": {
+        "enum": [
+         "stars",
+         "lessons",
+         "perfect-lessons",
+         "badges",
+         "games",
+         "no-hint-lessons",
+         "kept-going-lessons",
+         "comebacks",
+         "goal-days",
+         "subjects",
+         "game-kinds",
+         "jigsaws",
+         "memory-games",
+         "mastered-items"
+        ]
+       },
+       "n": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "subject": {
+        "$ref": "common.json#/$defs/id"
+       }
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "type",
+       "days"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "streak"
+       },
+       "days": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 365
+       },
+       "window": {
+        "type": "integer",
+        "minimum": 1
+       }
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "type",
+       "items"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "mastery"
+       },
+       "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "$ref": "common.json#/$defs/id"
+        }
+       }
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "manual"
+       }
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "type",
+       "op",
+       "all"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "type": {
+        "const": "combo"
+       },
+       "op": {
+        "enum": [
+         "and",
+         "or"
+        ]
+       },
+       "all": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 3,
+        "items": {
+         "$ref": "#/$defs/rule"
+        }
+       }
+      }
+     }
+    ]
+   }
+  }
+ },
+ "buddy-script.json": {
+  "$id": "https://trailbuddies.africa/schema/buddy-script.json",
+  "title": "Buddy script table: event -> line variants, per buddy and language",
+  "type": "object",
+  "required": [
+   "schema",
+   "buddy",
+   "lang",
+   "events"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "schema": {
+    "const": "buddy-script/1"
+   },
+   "buddy": {
+    "enum": [
+     "zip",
+     "tumi",
+     "jumbo",
+     "kiki",
+     "all"
+    ]
+   },
+   "lang": {
+    "type": "string",
+    "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+   },
+   "events": {
+    "type": "object",
+    "propertyNames": {
+     "pattern": "^[a-z]+(\\.[a-z-]+)*$"
+    },
+    "additionalProperties": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "common.json#/$defs/text"
+     }
+    }
+   }
+  }
+ },
+ "asset-manifest.json": {
+  "$id": "https://trailbuddies.africa/schema/asset-manifest.json",
+  "title": "Asset manifest: every image and audio file with its source, licence and review status",
+  "type": "object",
+  "required": [
+   "schema",
+   "assets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "schema": {
+    "const": "assets/1"
+   },
+   "assets": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "required": [
+      "id",
+      "kind",
+      "path",
+      "source",
+      "license",
+      "review_status"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "kind": {
+       "enum": [
+        "image",
+        "audio"
+       ]
+      },
+      "path": {
+       "type": "string"
+      },
+      "source": {
+       "enum": [
+        "licensed",
+        "ai-assisted",
+        "commissioned",
+        "recorded",
+        "tts",
+        "uploaded"
+       ]
+      },
+      "license": {
+       "type": "string",
+       "minLength": 2
+      },
+      "review_status": {
+       "enum": [
+        "draft",
+        "reviewed",
+        "approved"
+       ]
+      },
+      "notes": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  }
+ },
+ "economy.json": {
+  "$id": "https://trailbuddies.africa/schema/economy.json",
+  "title": "Reward economy: earning, caps, badge payouts and shop prices (RWD-09)",
+  "type": "object",
+  "required": [
+   "schema",
+   "earn",
+   "badge",
+   "dailyCap",
+   "restDaysPerWeek",
+   "shop"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "schema": {
+    "const": "economy/1"
+   },
+   "earn": {
+    "type": "object",
+    "required": [
+     "lesson",
+     "perfect",
+     "dailyGoal",
+     "trophy",
+     "game",
+     "gameNewTopic"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "lesson": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "perfect": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "dailyGoal": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "trophy": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "game": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "gameNewTopic": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     }
+    }
+   },
+   "badge": {
+    "type": "object",
+    "required": [
+     "bronze",
+     "silver",
+     "gold"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "bronze": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "silver": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     },
+     "gold": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500
+     }
+    }
+   },
+   "dailyCap": {
+    "type": "integer",
+    "minimum": 0,
+    "description": "Most treasures from lessons and games in a day (badges are extra); 0 = no cap"
+   },
+   "restDaysPerWeek": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 3
+   },
+   "shop": {
+    "type": "array",
+    "minItems": 1,
+    "items": {
+     "type": "object",
+     "required": [
+      "id",
+      "slot",
+      "price"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "$ref": "common.json#/$defs/id"
+      },
+      "slot": {
+       "enum": [
+        "hat",
+        "eyes",
+        "neck"
+       ]
+      },
+      "price": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 2000
+      },
+      "band": {
+       "$ref": "common.json#/$defs/band"
+      }
+     }
+    }
+   }
+  }
+ }
+}

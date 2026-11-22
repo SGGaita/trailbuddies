@@ -5,10 +5,12 @@
 
 export class ApiError extends Error {
   /** @param {number} status @param {string} message @param {string} [code] */
-  constructor(status, message, code) {
+  constructor(status, message, code, problems) {
     super(message);
     this.status = status;
     this.code = code;
+    /** Field problems from the content admin's checks (CMS-03). @type {string[]} */
+    this.problems = problems || [];
   }
 }
 
@@ -31,17 +33,19 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     if (!res.ok) {
       let message = `${rest.method || "GET"} ${path} failed with ${res.status}`;
       let code;
+      let problems;
       try {
         const body = await res.json();
         if (typeof body.detail === "string") message = body.detail;
         else if (body.detail?.message) {
           message = body.detail.message;
           code = body.detail.code;
+          problems = body.detail.problems;
         }
       } catch {
         /* not JSON */
       }
-      throw new ApiError(res.status, message, code);
+      throw new ApiError(res.status, message, code, problems);
     }
     return res.status === 204 ? null : res.json();
   }
@@ -118,9 +122,29 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
       post(`/shares/${encodeURIComponent(code)}/import`, target.classId ? { class_id: target.classId } : { family_id: target.familyId }),
     reportShare: (shareId, familyId, reason, note) =>
       post(`/shares/${encodeURIComponent(shareId)}/reports`, { family_id: familyId, reason, ...(note ? { note } : {}) }),
-    /** The safety team's queue (MOD-01…03): only for TB_ADMIN_EMAILS. */
+    /** The safety team's queue (MOD-01…03): admins and moderators. */
     moderation: () => request("/admin/moderation"),
     moderate: (itemId, body) => post(`/admin/moderation/${encodeURIComponent(itemId)}`, body),
+    /** The staff area (CMS-01…04). */
+    staffMe: () => request("/admin/me"),
+    staff: () => request("/admin/staff"),
+    addStaff: (body) => post("/admin/staff", body),
+    changeStaffRole: (email, role) => request(`/admin/staff/${encodeURIComponent(email)}`, { method: "PATCH", json: { role } }),
+    removeStaff: (email) => request(`/admin/staff/${encodeURIComponent(email)}`, { method: "DELETE" }),
+    content: () => request("/admin/content"),
+    importContent: (body) => post("/admin/content/import", body),
+    contentUnit: (id) => request(`/admin/content/units/${encodeURIComponent(id)}`),
+    saveContentUnit: (id, unit, assets) =>
+      request(`/admin/content/units/${encodeURIComponent(id)}`, { method: "PUT", json: assets ? { unit, assets } : { unit } }),
+    discardDraft: () => request("/admin/content/draft", { method: "DELETE" }),
+    publishContent: (note, confirmOwn = false) => post("/admin/content/publish", { note, confirm_own: confirmOwn }),
+    contentAssets: () => request("/admin/content/assets"),
+    startContentAsset: (body) => post("/admin/content/assets", body),
+    completeContentAsset: (id, scan) =>
+      request(`/admin/content/assets/${encodeURIComponent(id)}/complete`, { method: "POST", ...(scan ? { json: { scan } } : {}) }),
+    decideContentAsset: (id, approve, reason) =>
+      post(`/admin/content/assets/${encodeURIComponent(id)}/decision`, { approve, ...(reason ? { reason } : {}) }),
+    contentAssetUrl: (id) => `${base}/admin/content/assets/${encodeURIComponent(id)}/file`,
     adminMediaUrl: (mediaId) => `${base}/admin/media/${encodeURIComponent(mediaId)}`,
     /** Where the browser can fetch a family member's media (redirects to a short-lived link). */
     mediaUrl: (familyId, mediaId) => `${base}${fam(familyId)}/media/${encodeURIComponent(mediaId)}`,

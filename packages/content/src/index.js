@@ -64,11 +64,31 @@ export function attachImages(unit, manifest, opts) {
   const byId = new Map((manifest?.assets || []).map((a) => [a.id, a]));
   for (const it of unit.items) {
     const asset = it.image && byId.get(it.image);
-    if (assetShows(asset, opts)) it.imageSrc = ART_BASE + asset.path;
+    if (assetShows(asset, opts)) it.imageSrc = assetSrc(asset);
     else delete it.imageSrc;
   }
   return unit;
 }
+
+/** Pictures staff uploaded in the content admin (CMS-03) are served by the API once approved. */
+export const UPLOADS_BASE = "/api/content/assets/";
+/** @param {{ path: string }} asset */
+export const assetSrc = (asset) =>
+  asset.path.startsWith("uploads/") ? UPLOADS_BASE + asset.path.slice("uploads/".length) : ART_BASE + asset.path;
+
+/** CMS-04: a draft unit a staff member is previewing (never saved, never seen by children). */
+const PREVIEW = {};
+/** @param {any} unit @param {any} [manifest] */
+export function setPreviewUnit(unit, manifest) {
+  PREVIEW[unit.id] = attachImages(JSON.parse(JSON.stringify(unit)), manifest, { drafts: true });
+}
+export const clearPreviewUnit = (id) => delete PREVIEW[id];
+/**
+ * CMS-02: the content files exactly as they are in the code, kept before pictures are
+ * attached or packs installed. The content admin imports this as version 1.
+ */
+const BUNDLED = JSON.stringify({ catalogue, units: ALL_UNITS, assets: ALL_ASSETS });
+export const bundledContent = () => JSON.parse(BUNDLED);
 ALL_UNITS.forEach((u) => attachImages(u, ALL_ASSETS[u.id]));
 
 /** Units with content a child can play here, in trail order. @param {string} subjectId */
@@ -79,6 +99,7 @@ export const getReadyUnits = (subjectId) => playableUnits(subjectId);
  * @param {string} id
  */
 export const getUnit = (id) => {
+  if (PREVIEW[id]) return PREVIEW[id];
   const u = UNITS[id];
   return u && (u.status === "ready" || (SHOW_DRAFTS && u.status === "draft")) ? u : null;
 };

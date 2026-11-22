@@ -12,6 +12,7 @@ import { t } from "@trailbuddies/i18n";
 import { colors } from "@trailbuddies/tokens";
 import { ChoiceChip, Pill } from "@/components/builder/parts";
 import { api } from "@/lib/account";
+import { StaffHead } from "./StaffShell";
 
 const ACTIONS = {
   share: ["approve", "suspend_share", "warn_creator", "suspend_creator"],
@@ -47,7 +48,7 @@ function ReviewPhoto({ id, status, reveal }) {
 }
 
 /**
- * M01 Moderation queue (MOD-01…03), for the safety team only (TB_ADMIN_EMAILS). Shares waiting
+ * M01 Moderation queue (MOD-01…03), for admins and moderators (CMS-01). Shares waiting
  * for review, reported shares and photos the check flagged, oldest first; anything waiting
  * over 24 hours is marked overdue. Every action needs a reason and goes in the audit log.
  */
@@ -72,18 +73,12 @@ export default function ModerationQueue() {
     };
   }, [reload]);
 
+  // Inside the staff area's shell (CMS-01): the heading here, the navigation around it.
   const shell = (children) => (
-    <Box component="main" sx={{ minHeight: "100dvh", bgcolor: colors.cream, color: colors.ink }}>
-      <Box sx={{ bgcolor: colors.ink, color: "#fff", px: { xs: 2, sm: 4 }, py: 2, display: "flex", alignItems: "center", gap: 2 }}>
-        <Typography component="h1" sx={{ fontWeight: 800, fontSize: { xs: 20, sm: 24 }, flex: 1 }}>
-          {t("mod.title")}
-        </Typography>
-        <Typography sx={{ opacity: 0.8, display: { xs: "none", sm: "block" } }}>{t("mod.team")}</Typography>
-      </Box>
-      <Box sx={{ px: { xs: 2, sm: 4 }, py: 2.5, display: "flex", flexDirection: "column", gap: 2, maxWidth: 1400, mx: "auto" }}>
-        {children}
-      </Box>
-    </Box>
+    <>
+      <StaffHead title={t("mod.title")} sub={t("mod.team")} />
+      {children}
+    </>
   );
 
   if (denied)

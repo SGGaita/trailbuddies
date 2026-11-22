@@ -18,6 +18,7 @@ import {
   soundLines,
 } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
+import { previewLearner } from "@/lib/learner";
 import { planLesson, completionEvents } from "@/lib/session";
 import { assignedLessons, isAssignedUnit } from "@/lib/classWork";
 import { setSalvage, clearSalvageSoon } from "@/lib/salvage";
@@ -66,7 +67,10 @@ function readE2E() {
  */
 export default function LessonPlayer({ where }) {
   const ready = useHydrated();
-  const learner = useLearner(where.preview ? where.learnerId : undefined);
+  const found = useLearner(where.preview ? where.learnerId : undefined);
+  // CMS-04: staff preview drafts on any device, with or without a family on it.
+  const [standIn] = useState(() => (where.admin ? previewLearner(where.band) : null));
+  const learner = where.admin ? standIn : found;
   const router = useRouter();
   useEffect(() => {
     if (ready && !learner) router.replace("/play");

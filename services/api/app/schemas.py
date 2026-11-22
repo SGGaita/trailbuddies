@@ -611,3 +611,52 @@ class ModActionIn(Strict):
     reason: str = Field(min_length=3, max_length=300)
 
     _clean = field_validator("reason")(lambda v: _one_line(v))
+
+
+# --- Content admin (CMS-01…04) -----------------------------------------------------------
+
+StaffRole = Literal["admin", "editor", "reviewer", "moderator"]
+
+
+class StaffIn(Strict):
+    email: EmailStr
+    role: StaffRole
+    name: str | None = Field(default=None, max_length=120)
+
+    _clean = field_validator("name")(lambda v: _one_line(v))
+
+
+class StaffPatch(Strict):
+    role: StaffRole
+
+
+class ContentImportIn(Strict):
+    """The content files bundled in the web app, sent once by an admin to seed version 1."""
+
+    catalogue: dict
+    units: list[dict] = Field(max_length=1000)
+    assets: dict[str, dict] = Field(default_factory=dict)
+
+
+class UnitSaveIn(Strict):
+    unit: dict
+    assets: dict | None = None
+
+
+class PublishIn(Strict):
+    note: str = Field(min_length=3, max_length=300)
+    confirm_own: bool = Field(default=False, description="an admin publishing changes they made themselves")
+
+    _clean = field_validator("note")(lambda v: _one_line(v))
+
+
+class ContentAssetIn(Strict):
+    id: str = _ulid()
+    content_type: str = Field(max_length=64)
+    bytes: int = Field(gt=0)
+    label: str | None = Field(default=None, max_length=80)
+
+
+class AssetDecisionIn(Strict):
+    approve: bool
+    reason: str | None = Field(default=None, max_length=300)

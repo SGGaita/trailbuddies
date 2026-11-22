@@ -14,6 +14,7 @@ const nextConfig = {
   transpilePackages: [
     "@trailbuddies/api-client",
     "@trailbuddies/content",
+    "@trailbuddies/content-schema",
     "@trailbuddies/domain",
     "@trailbuddies/i18n",
     "@trailbuddies/sync",
