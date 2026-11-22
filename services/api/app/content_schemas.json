@@ -16,6 +16,11 @@
      "trailblazer"
     ]
    },
+   "mediaId": {
+    "type": "string",
+    "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+    "description": "An uploaded file's id (ULID)"
+   },
    "status": {
     "enum": [
      "draft",
@@ -336,6 +341,14 @@
       "island": {
        "$ref": "common.json#/$defs/id"
       },
+      "art": {
+       "$ref": "common.json#/$defs/mediaId",
+       "description": "Uploaded island illustration (CMS-05), shown instead of the built-in island once approved"
+      },
+      "archived": {
+       "type": "boolean",
+       "description": "Hidden from the map for everyone; children keep their stars, badges and treasure (CMS-05)"
+      },
       "units": {
        "type": "array",
        "minItems": 1,
@@ -431,6 +444,14 @@
     "type": "string",
     "maxLength": 16,
     "description": "Placeholder art until badge illustrations arrive"
+   },
+   "art": {
+    "$ref": "common.json#/$defs/mediaId",
+    "description": "Uploaded badge art (CMS-08), shown instead of the icon once approved"
+   },
+   "retired": {
+    "type": "boolean",
+    "description": "Nobody new can earn it; children who earned it keep it (BDG-07, CMS-08)"
    },
    "upgrades": {
     "type": "object",

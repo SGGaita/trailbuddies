@@ -27,7 +27,8 @@ export function loadContent(root = SRC) {
       })
       .filter(Boolean),
   }));
-  return { catalogue, subjects };
+  const badgesFile = join(root, "badges", "built-in.json");
+  return { catalogue, subjects, badges: existsSync(badgesFile) ? read(badgesFile) : null };
 }
 
 /**
@@ -94,7 +95,24 @@ export function buildPacks(content, { channel, release }) {
       units: ships.map((s) => s.unit.id),
     });
   }
-  const manifest = { schema: "packs/1", release, channel, packs };
+  // CMS-05: the map (trail order, archived trails, island art, new trails) travels in the
+  // manifest so every device applies it, even for trails it hasn't downloaded.
+  const map = content.subjects
+    .filter(({ units }) => units.some(({ unit }) => shipsOn(channel, unit)))
+    .map(({ subject, units }) => ({
+      ...subject,
+      units: subject.units.filter((e) => units.some((s) => s.entry.id === e.id && shipsOn(channel, s.unit))),
+    }));
+  const manifest = { schema: "packs/1", release, channel, packs, map };
+  // CMS-08: built-in badges as their own small file, downloaded by every device.
+  if (content.badges) {
+    const body = { schema: "badges/1", badges: content.badges };
+    const hash = hashOf(body);
+    const text = JSON.stringify({ ...body, release, hash });
+    const name = `badges.${hash}.json`;
+    files.push({ name, body: text });
+    manifest.badges = { hash, bytes: Buffer.byteLength(text), file: name };
+  }
   files.push({ name: `manifest-${channel}.json`, body: JSON.stringify(manifest, null, 2) });
   return { manifest, files };
 }

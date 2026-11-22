@@ -49,9 +49,21 @@ def bundle(ids=("where-animals-live", "wild-animals")):
     return {"catalogue": cat, "units": units, "assets": assets}
 
 
+_jars: dict = {}
+
+
 def as_(client, outbox, email):
+    """Switch to a staff member, signing in once per test (magic links are rate limited)."""
+    jars = _jars.setdefault(id(client), {})
+    if getattr(client, "_who", None):
+        jars[client._who] = dict(client.cookies)
     client.cookies.clear()
-    sign_in(client, outbox, email)
+    if email in jars:
+        for k, v in jars[email].items():
+            client.cookies.set(k, v)
+    else:
+        sign_in(client, outbox, email)
+    client._who = email
 
 
 def imported(client, outbox):
@@ -59,6 +71,17 @@ def imported(client, outbox):
     r = client.post("/admin/content/import", json=bundle())
     assert r.status_code == 201, r.text
     return r.json()
+
+
+def through_review(client, outbox, editor=EDITOR, reviewer=REVIEWER, note="Changes"):
+    """CMS-06: the editor submits, a reviewer approves; an admin publishes next."""
+    as_(client, outbox, editor)
+    r = client.post("/admin/content/submit", json={"note": note})
+    assert r.status_code == 200, r.text
+    as_(client, outbox, reviewer)
+    r = client.post("/admin/content/review", json={"approve": True})
+    assert r.status_code == 200, r.text
+    as_(client, outbox, ADMIN)
 
 
 def staff_team(client, outbox):
@@ -156,10 +179,12 @@ def test_an_editor_saves_a_draft_children_keep_the_published_unit(client, outbox
     assert s["draft"]["version"] == 2 and s["draft"]["changes"][0]["unit"] == "where-animals-live"
     entry = next(u for sub in s["subjects"] for u in sub["units"] if u["id"] == "where-animals-live")
     assert entry["title"] == "Farm friends" and entry["edited"]
-    # Editors never publish (CMS-04).
+    # Editors never publish (CMS-04); nothing publishes before a reviewer approves (CMS-06).
     assert client.post("/admin/content/publish", json={"note": "Farm facts"}).status_code == 403
-
     as_(client, outbox, ADMIN)
+    r = client.post("/admin/content/publish", json={"note": "Farm facts"})
+    assert r.status_code == 409 and r.json()["detail"]["code"] == "not_approved"
+    through_review(client, outbox, note="Farm facts")
     r = client.post("/admin/content/publish", json={"note": "Farm facts"})
     assert r.status_code == 200, r.text
     assert r.json()["live"]["version"] == 2 and r.json()["draft"] is None
@@ -172,20 +197,52 @@ def test_an_editor_saves_a_draft_children_keep_the_published_unit(client, outbox
     assert entry["title"] == "Farm friends"  # the catalogue entry follows the unit
     with Session(engine) as db:
         row = db.scalar(select(AdminLog).where(AdminLog.action == "content_publish"))
-        assert row.detail["self_published"] is False
+        assert row.detail["approved_by"] == REVIEWER
 
 
-def test_an_admin_publishing_their_own_change_must_confirm(client, outbox, storage):  # noqa: F811
+def test_nobody_approves_their_own_changes_and_editing_sends_it_back(client, outbox, storage):  # noqa: F811
+    staff_team(client, outbox)
     imported(client, outbox)
     unit = client.get("/admin/content/units/wild-animals").json()["unit"]
     unit["summary"] = "Big animals that live in the wild."
     assert client.put("/admin/content/units/wild-animals", json={"unit": unit}).status_code == 200
-    r = client.post("/admin/content/publish", json={"note": "Summary"})
-    assert r.status_code == 409 and r.json()["detail"]["code"] == "own"
-    r = client.post("/admin/content/publish", json={"note": "Summary", "confirm_own": True})
-    assert r.status_code == 200
-    log = client.get("/admin/staff").json()["log"]
-    assert log[0]["action"] == "content_publish" and log[0]["detail"]["self_published"] is True
+    assert (
+        client.post("/admin/content/submit", json={"note": "Summary"}).json()["draft"]["status"]
+        == "submitted"
+    )
+    # The admin made the change, so the admin can't approve it.
+    r = client.post("/admin/content/review", json={"approve": True})
+    assert r.status_code == 403 and r.json()["detail"]["code"] == "own"
+    as_(client, outbox, REVIEWER)
+    # Sending back needs a comment, and returns it to draft with the comment.
+    assert client.post("/admin/content/review", json={"approve": False}).status_code == 422
+    d = client.post("/admin/content/review", json={"approve": False, "comment": "Say which animals."}).json()[
+        "draft"
+    ]
+    assert d["status"] == "draft" and d["review_note"] == "Say which animals."
+    as_(client, outbox, ADMIN)
+    unit["summary"] = "Lions, zebras and other animals of the wild."
+    client.put("/admin/content/units/wild-animals", json={"unit": unit})
+    client.post("/admin/content/submit", json={"note": "Summary"})
+    as_(client, outbox, REVIEWER)
+    assert (
+        client.post("/admin/content/review", json={"approve": True}).json()["draft"]["status"] == "approved"
+    )
+    # An edit after approval sends it back to draft: it's reviewed again.
+    as_(client, outbox, ADMIN)
+    client.put("/admin/content/units/wild-animals", json={"unit": {**unit, "title": "Wild ones"}})
+    assert client.get("/admin/content").json()["draft"]["status"] == "draft"
+    client.put("/admin/content/units/wild-animals", json={"unit": unit})
+    through_review(client, outbox, editor=ADMIN, note="Summary")
+    assert client.post("/admin/content/publish", json={"note": "Summary"}).status_code == 200
+    review = [x for x in client.get("/admin/content/versions").json()["versions"] if x["version"] == 2][0]
+    assert review | {"authors": None} == review | {
+        "authors": None,
+        "submitted_by": ADMIN,
+        "approved_by": REVIEWER,
+        "published_by": ADMIN,
+        "live": True,
+    }
     out = client.get("/admin/content/export").json()
     assert out["version"] == 2 and {u["id"] for u in out["units"]} == {"where-animals-live", "wild-animals"}
     assert next(u for u in out["units"] if u["id"] == "wild-animals")["summary"] == unit["summary"]
@@ -233,7 +290,7 @@ def test_uploaded_pictures_need_a_reviewer_before_children_see_them(client, outb
     assert got["uploads"] == {} and r.json()["uploads"] == {M1: "waiting"}
 
     # Publishing is blocked until the picture is approved.
-    as_(client, outbox, ADMIN)
+    through_review(client, outbox, note="Cow photo")
     r = client.post("/admin/content/publish", json={"note": "Cow photo"})
     assert r.status_code == 409 and r.json()["detail"]["code"] == "assets"
 
@@ -309,7 +366,9 @@ def full_bundle():
         for e in s["units"]
         if (SRC / "units" / s["id"] / f"{e['id']}.json").exists()
     ]
-    return bundle(ids)
+    out = bundle(ids)
+    out["badges"] = json.loads((SRC / "badges" / "built-in.json").read_text())
+    return out
 
 
 @pytest.mark.skipif(

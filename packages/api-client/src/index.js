@@ -137,7 +137,21 @@ export function createClient({ baseUrl, fetch: f = (...a) => globalThis.fetch(..
     saveContentUnit: (id, unit, assets) =>
       request(`/admin/content/units/${encodeURIComponent(id)}`, { method: "PUT", json: assets ? { unit, assets } : { unit } }),
     discardDraft: () => request("/admin/content/draft", { method: "DELETE" }),
-    publishContent: (note, confirmOwn = false) => post("/admin/content/publish", { note, confirm_own: confirmOwn }),
+    publishContent: (note) => post("/admin/content/publish", { note }),
+    /** CMS-06 review, CMS-07 roll back. */
+    submitContent: (note) => post("/admin/content/submit", { note }),
+    reviewContent: (approve, comment) => post("/admin/content/review", { approve, ...(comment ? { comment } : {}) }),
+    contentReview: () => request("/admin/content/review"),
+    contentVersions: () => request("/admin/content/versions"),
+    rollbackContent: (version, note) => post("/admin/content/rollback", { version, note }),
+    /** CMS-05 map & trails. */
+    addTrail: (body) => post("/admin/content/trails", body),
+    changeTrail: (id, patch) => request(`/admin/content/trails/${encodeURIComponent(id)}`, { method: "PATCH", json: patch }),
+    reorderContent: (subjects, units = {}) => request("/admin/content/order", { method: "PUT", json: { subjects, units } }),
+    addUnit: (subject, body) => post(`/admin/content/trails/${encodeURIComponent(subject)}/units`, body),
+    /** CMS-08 badges. */
+    contentBadges: () => request("/admin/content/badges"),
+    saveBadge: (badge) => request(`/admin/content/badges/${encodeURIComponent(badge.id)}`, { method: "PUT", json: { badge } }),
     contentAssets: () => request("/admin/content/assets"),
     startContentAsset: (body) => post("/admin/content/assets", body),
     completeContentAsset: (id, scan) =>

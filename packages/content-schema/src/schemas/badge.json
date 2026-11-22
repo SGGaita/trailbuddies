@@ -56,6 +56,14 @@
       "maxLength": 16,
       "description": "Placeholder art until badge illustrations arrive"
     },
+    "art": {
+      "$ref": "common.json#/$defs/mediaId",
+      "description": "Uploaded badge art (CMS-08), shown instead of the icon once approved"
+    },
+    "retired": {
+      "type": "boolean",
+      "description": "Nobody new can earn it; children who earned it keep it (BDG-07, CMS-08)"
+    },
     "upgrades": {
       "type": "object",
       "required": ["silver", "gold"],

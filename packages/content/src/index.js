@@ -21,8 +21,14 @@ export { ALL_ASSETS };
 
 export { catalogue, builtInBadges };
 
-/** @returns {typeof catalogue.subjects} */
-export const getSubjects = () => catalogue.subjects;
+/**
+ * Trails on the map, in map order. Archived trails (CMS-05) are left out for everyone;
+ * children keep their stars, badges and treasure from them.
+ * @returns {typeof catalogue.subjects}
+ */
+export const getSubjects = () => catalogue.subjects.filter((s) => !s.archived);
+/** Every trail, archived ones too (for history and reports). */
+export const getAllSubjects = () => catalogue.subjects;
 
 /** @param {string} id */
 export const getSubject = (id) => catalogue.subjects.find((s) => s.id === id) || null;
@@ -87,7 +93,7 @@ export const clearPreviewUnit = (id) => delete PREVIEW[id];
  * CMS-02: the content files exactly as they are in the code, kept before pictures are
  * attached or packs installed. The content admin imports this as version 1.
  */
-const BUNDLED = JSON.stringify({ catalogue, units: ALL_UNITS, assets: ALL_ASSETS });
+const BUNDLED = JSON.stringify({ catalogue, units: ALL_UNITS, assets: ALL_ASSETS, badges: builtInBadges });
 export const bundledContent = () => JSON.parse(BUNDLED);
 ALL_UNITS.forEach((u) => attachImages(u, ALL_ASSETS[u.id]));
 
@@ -109,12 +115,19 @@ export const getUnit = (id) => {
  * and its catalogue entries are merged into the subject (new units are added at the end).
  * Called before the app first renders, so a new pack takes effect on the next launch.
  * @param {any} pack a "pack/1" document from the content API
- * @returns {boolean} false if it isn't a pack for a subject this app knows
+ * @returns {boolean} false if it isn't a content pack
  */
 export function installPack(pack) {
   if (pack?.schema !== "pack/1") return false;
-  const subject = catalogue.subjects.find((s) => s.id === pack.subject?.id);
-  if (!subject || !Array.isArray(pack.units)) return false;
+  if (!pack.subject?.id || !Array.isArray(pack.units)) return false;
+  let subject = catalogue.subjects.find((s) => s.id === pack.subject.id);
+  if (!subject) {
+    // A trail added in the content admin (CMS-05): it joins the map.
+    if (!pack.subject.name || !pack.subject.place || !pack.subject.island) return false;
+    const { units: _units, ...rest } = pack.subject;
+    subject = { ...rest, units: [] };
+    catalogue.subjects.push(subject);
+  }
   for (const u of pack.units)
     if (u?.schema === "unit/1" && u.subject === subject.id)
       UNITS[u.id] = attachImages(u, pack.assets?.[u.id] || ALL_ASSETS[u.id]);
@@ -225,3 +238,53 @@ export function searchLibrary(query) {
 }
 export { LEGAL } from "./legal/en.js";
 export { HELP_TOPICS, HELP_ARTICLES, searchHelp, helpFor } from "./help/en.js";
+
+/**
+ * The map from the content manifest (CMS-05): trail order, names, archived trails, uploaded
+ * island art, and trails added in the content admin. Applied before the app first renders,
+ * so a published change takes effect on the next launch, offline too.
+ * @param {any[] | undefined} map manifest.map
+ */
+export function installMap(map) {
+  if (!Array.isArray(map) || !map.length) return false;
+  const byId = new Map(catalogue.subjects.map((s) => [s.id, s]));
+  for (const m of map) {
+    if (!m?.id) continue;
+    const s = byId.get(m.id);
+    const { units, ...rest } = m;
+    if (s) {
+      for (const k of ["art", "archived"]) if (!(k in rest)) delete s[k];
+      Object.assign(s, rest);
+      // Unit order follows the published trail; units this build doesn't know are added.
+      const entries = new Map(s.units.map((e) => [e.id, e]));
+      const ordered = (units || []).map((e) => ({ ...(entries.get(e.id) || {}), ...e }));
+      s.units = [...ordered, ...s.units.filter((e) => !ordered.some((o) => o.id === e.id))];
+    } else {
+      const added = { ...rest, units: units || [] };
+      catalogue.subjects.push(added);
+      byId.set(m.id, added);
+    }
+  }
+  // Map order: published trails first in their order, then any the manifest doesn't mention.
+  const order = map.map((m) => m.id);
+  catalogue.subjects.sort((a, b) => {
+    const i = order.indexOf(a.id);
+    const j = order.indexOf(b.id);
+    return (i < 0 ? 1e6 : i) - (j < 0 ? 1e6 : j);
+  });
+  return true;
+}
+
+/**
+ * Built-in badges from the content admin (CMS-08), replacing the bundled list in place so every
+ * screen sees them. Badges children earned stay theirs even if a badge is retired.
+ * @param {any} doc a "badges/1" document from the content API
+ */
+export function installBadges(doc) {
+  if (doc?.schema !== "badges/1" || !Array.isArray(doc.badges) || !doc.badges.length) return false;
+  builtInBadges.splice(0, builtInBadges.length, ...doc.badges);
+  return true;
+}
+
+/** Where an uploaded island or badge picture is served from (CMS-05, CMS-08). */
+export const uploadSrc = (mediaId) => (mediaId ? `${UPLOADS_BASE}${mediaId}` : null);

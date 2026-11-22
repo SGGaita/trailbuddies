@@ -10,6 +10,7 @@ packages/content-schema.
 
 import hashlib
 import json
+import re
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -27,11 +28,13 @@ from .packs import manifest_key
 from .settings import get_settings
 
 ROLE_CAN = {
-    "admin": {"edit", "publish", "approve-asset", "roles", "moderate"},
+    "admin": {"edit", "review", "publish", "approve-asset", "roles", "moderate"},
     "editor": {"edit"},
-    "reviewer": {"approve-asset"},
+    "reviewer": {"review", "approve-asset"},
     "moderator": {"moderate"},
 }
+OPEN = ("draft", "submitted", "approved")  # a version not yet published (CMS-06)
+BADGES = ("badges", "built-in")  # the built-in badges document (CMS-08)
 ROLES = tuple(ROLE_CAN)
 UPLOAD_PREFIX = "uploads/"
 
@@ -54,7 +57,12 @@ def log(db: DbSession, who: str, action: str, target: str, detail: dict | None =
 
 # --- Validation: the same JSON Schemas as packages/content-schema ------------------------
 
-FILES = {"unit": "unit.json", "catalogue": "subject-catalogue.json", "assets": "asset-manifest.json"}
+FILES = {
+    "unit": "unit.json",
+    "catalogue": "subject-catalogue.json",
+    "assets": "asset-manifest.json",
+    "badge": "badge.json",
+}
 
 
 @lru_cache
@@ -109,6 +117,9 @@ def unit_checks(unit: dict) -> list[str]:
 
 
 def problems(kind: str, data) -> list[str]:
+    if kind == "badges":
+        out = [f"badge {b.get('id', i)}: {e}" for i, b in enumerate(data) for e in problems("badge", b)]
+        return out or [f'badge id "{d}" is used twice' for d in _dupes([b["id"] for b in data])]
     v = _validators()[kind]
     errors = [f"{_path(e)} {e.message}" for e in sorted(v.iter_errors(data), key=lambda e: list(e.path))]
     if not errors and kind == "unit":
@@ -118,6 +129,71 @@ def problems(kind: str, data) -> list[str]:
         errors = [f'subject id "{d}" is used twice' for d in _dupes([s["id"] for s in data["subjects"]])]
         errors += [f'unit id "{d}" is used twice' for d in _dupes(units)]
     return errors
+
+
+def slug(text: str) -> str:
+    """packages/domain slug: lower-case words joined by hyphens, at most 40 characters."""
+    import unicodedata
+
+    t = unicodedata.normalize("NFKD", str(text or "").lower())
+    t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+    return t[:40].rstrip("-") if len(t) > 40 else t
+
+
+def new_id(name: str, taken) -> str:
+    """packages/domain newId: unique among `taken`, with -2, -3… when needed."""
+    base = slug(name) or "item"
+    out, n = base, 2
+    while out in taken:
+        out, n = f"{base}-{n}", n + 1
+    return out
+
+
+def new_unit(p: dict, src: dict | None = None) -> dict:
+    """packages/domain newUnit: blank (four starter words) or a copy, always a draft."""
+    uid = p["id"]
+    if src:
+        copy = json.loads(json.dumps(src))
+        lessons = [{**lesson, "id": f"{uid}-{i + 1}"} for i, lesson in enumerate(copy["lessons"])]
+        return {
+            **copy,
+            "id": uid,
+            "subject": p["subject"],
+            "title": p["title"],
+            "band": p["band"],
+            "status": "draft",
+            "lessons": lessons,
+        }
+    words = [
+        ("word-one", "word one", "1️⃣"),
+        ("word-two", "word two", "2️⃣"),
+        ("word-three", "word three", "3️⃣"),
+        ("word-four", "word four", "4️⃣"),
+    ]
+    return {
+        "schema": "unit/1",
+        "id": uid,
+        "subject": p["subject"],
+        "title": p["title"],
+        "band": p["band"],
+        "status": "draft",
+        "summary": f"Words about {p['title'].lower()}.",
+        "items": [{"id": w, "label": label, "emoji": e} for w, label, e in words],
+        "lessons": [
+            {
+                "id": f"{uid}-1",
+                "title": "Meet the words",
+                "focus": [w for w, _, _ in words],
+                "exercises": [
+                    {"type": "listen-tap"},
+                    {"type": "listen-tap"},
+                    {"type": "match"},
+                    {"type": "name-it"},
+                ],
+            }
+        ],
+        "checkpoint": {"review": 4, "game": "jigsaw"},
+    }
 
 
 def sync_entry(entry: dict, unit: dict) -> dict:
@@ -137,7 +213,21 @@ def live_version(db: DbSession) -> ContentVersion | None:
 
 
 def draft_version(db: DbSession) -> ContentVersion | None:
-    return db.scalar(select(ContentVersion).where(ContentVersion.status == "draft"))
+    """The version being worked on: a draft, submitted for review, or approved (CMS-06)."""
+    return db.scalar(select(ContentVersion).where(ContentVersion.status.in_(OPEN)))
+
+
+def authors(db: DbSession, draft: ContentVersion) -> list[str]:
+    """Everyone who changed something in the draft: none of them may approve it (CMS-06)."""
+    return sorted(set(db.scalars(select(ContentDoc.updated_by).where(ContentDoc.version_id == draft.id))))
+
+
+def reopen(db: DbSession, draft: ContentVersion, who: str) -> None:
+    """An edit to a submitted or approved draft sends it back to draft: it's reviewed again."""
+    if draft.status != "draft":
+        log(db, who, "draft_reopened", f"v{draft.id}", {"was": draft.status})
+        draft.status = "draft"
+        draft.approved_by = draft.approved_at = None
 
 
 def docs(db: DbSession, upto: int | None, with_draft: bool = False) -> dict[tuple[str, str], ContentDoc]:
@@ -146,7 +236,7 @@ def docs(db: DbSession, upto: int | None, with_draft: bool = False) -> dict[tupl
     versions = db.scalars(select(ContentVersion)).all()
     allowed = {v.id for v in versions if v.status == "published" and (upto is None or v.id <= upto)}
     if with_draft:
-        allowed |= {v.id for v in versions if v.status == "draft"}
+        allowed |= {v.id for v in versions if v.status in OPEN}
     out: dict[tuple[str, str], ContentDoc] = {}
     for d in db.scalars(
         select(ContentDoc).where(ContentDoc.version_id.in_(allowed)).order_by(ContentDoc.version_id)
@@ -170,10 +260,12 @@ def put_doc(db: DbSession, version: ContentVersion, kind: str, key: str, data: d
 def ensure_draft(db: DbSession, who: str) -> ContentVersion:
     d = draft_version(db)
     if not d:
-        live = live_version(db)
-        d = ContentVersion(id=(live.id if live else 0) + 1, status="draft", created_by=who)
+        top = db.scalar(select(ContentVersion.id).order_by(ContentVersion.id.desc()).limit(1))
+        d = ContentVersion(id=(top or 0) + 1, status="draft", created_by=who)
         db.add(d)
         db.flush()
+    else:
+        reopen(db, d, who)
     return d
 
 
@@ -225,17 +317,76 @@ def diff_unit(before: dict | None, after: dict) -> list[str]:
     return out
 
 
+def diff_catalogue(before: dict | None, after: dict) -> list[str]:
+    """The map's changes in plain words: trails added, renamed, archived or moved; unit order."""
+    if not before:
+        return []
+    out = []
+    was = {x["id"]: x for x in before["subjects"]}
+    now = {x["id"]: x for x in after["subjects"]}
+    for x in after["subjects"]:
+        b = was.get(x["id"])
+        if not b:
+            out.append(f"new trail “{x['name']}”")
+            continue
+        if bool(b.get("archived")) != bool(x.get("archived")):
+            out.append(f"{'archived' if x.get('archived') else 'restored'} “{x['name']}”")
+        if (b["name"], b["place"]) != (x["name"], x["place"]):
+            out.append(f"renamed “{b['name']}” to “{x['name']}” ({x['place']})")
+        if b.get("art") != x.get("art"):
+            out.append(f"new island art for “{x['name']}”")
+        kept = [e["id"] for e in b["units"] if any(e["id"] == f["id"] for f in x["units"])]
+        if [e["id"] for e in x["units"] if e["id"] in kept] != kept:
+            out.append(f"units reordered in “{x['name']}”")
+        added = [e["title"] for e in x["units"] if e["id"] not in {f["id"] for f in b["units"]}]
+        if added:
+            out.append(f"added {', '.join(added)} to “{x['name']}”")
+    common = [i for i in was if i in now]
+    if [i for i in now if i in common] != common:
+        out.append("trails reordered on the map")
+    return out
+
+
+def diff_badges(before: list | None, after: list) -> list[str]:
+    was = {b["id"]: b for b in before or []}
+    out = []
+    for b in after:
+        old = was.get(b["id"])
+        if not old:
+            out.append(f"new badge “{b['name']}”")
+        elif bool(old.get("retired")) != bool(b.get("retired")):
+            out.append(f"{'retired' if b.get('retired') else 'brought back'} “{b['name']}”")
+        elif old != b:
+            out.append(f"edited “{b['name']}”")
+    return out
+
+
 def draft_changes(db: DbSession) -> list[dict]:
+    """What the draft changes, one entry per unit, the map and the badges (the draft banner and
+    the reviewer's list, CMS-06)."""
     d = draft_version(db)
     if not d:
         return []
     live = docs(db, None)
     out = []
-    for doc in db.scalars(select(ContentDoc).where(ContentDoc.version_id == d.id, ContentDoc.kind == "unit")):
-        before = live.get(("unit", doc.key))
-        lines = diff_unit(before.data if before else None, doc.data)
+    for doc in db.scalars(
+        select(ContentDoc).where(ContentDoc.version_id == d.id).order_by(ContentDoc.kind, ContentDoc.key)
+    ):
+        before = live.get((doc.kind, doc.key))
+        if doc.kind == "unit":
+            lines = diff_unit(before.data if before else None, doc.data)
+            title = doc.data["title"]
+        elif doc.kind == "catalogue":
+            lines, title = diff_catalogue(before.data if before else None, doc.data), "Map & trails"
+            # Unit titles and bands are mirrored here from the unit; those show on the unit.
+        elif doc.kind == "badges":
+            lines, title = diff_badges(before.data if before else None, doc.data), "Badges"
+        else:
+            continue
         if lines:
-            out.append({"unit": doc.key, "title": doc.data["title"], "changes": lines, "by": doc.updated_by})
+            out.append(
+                {"kind": doc.kind, "unit": doc.key, "title": title, "changes": lines, "by": doc.updated_by}
+            )
     return out
 
 
@@ -246,26 +397,39 @@ def ships_on(channel: str, unit: dict) -> bool:
     return unit["status"] == "ready" or (channel == "preview" and unit["status"] == "draft")
 
 
+def _upload_ok(db: DbSession, media_id: str) -> bool:
+    up = db.get(ContentAsset, media_id)
+    return bool(up and up.status == "ready" and up.approval == "approved")
+
+
 def asset_problems(db: DbSession, current: dict) -> list[str]:
-    """Production packs can't include unapproved assets (CNT-03), uploaded pictures included."""
+    """Production packs can't include unapproved assets (CNT-03): uploaded pictures, island
+    art for trails children see (CMS-05) and badge art (CMS-08) included."""
     out = []
     cat = current[("catalogue", "catalogue")].data
     for s in cat["subjects"]:
+        shipping = False
         for entry in s["units"]:
             u = current.get(("unit", entry["id"]))
             if not u or not ships_on("production", u.data):
                 continue
+            shipping = True
             used = {i.get("image") for i in u.data["items"] if i.get("image")}
             man = current.get(("assets", entry["id"]))
             for a in man.data["assets"] if man else []:
                 if a["id"] not in used:
                     continue
                 if a["path"].startswith(UPLOAD_PREFIX):
-                    up = db.get(ContentAsset, a["path"][len(UPLOAD_PREFIX) :])
-                    if not up or up.approval != "approved":
+                    if not _upload_ok(db, a["path"][len(UPLOAD_PREFIX) :]):
                         out.append(f'{entry["id"]}: uploaded picture "{a["id"]}" isn\'t approved yet')
                 elif a["review_status"] != "approved":
                     out.append(f'{entry["id"]}: asset "{a["id"]}" is {a["review_status"]}')
+        if shipping and s.get("art") and not s.get("archived") and not _upload_ok(db, s["art"]):
+            out.append(f"{s['id']}: the island art for “{s['name']}” isn't approved yet")
+    badges = current.get(BADGES)
+    for b in badges.data if badges else []:
+        if b.get("art") and not b.get("retired") and not _upload_ok(db, b["art"]):
+            out.append(f"badge {b['id']}: the art for “{b['name']}” isn't approved yet")
     return out
 
 
@@ -305,7 +469,22 @@ def build_packs(current: dict, channel: str, release: str) -> tuple[dict, list[t
         name = f"{s['id']}.{h}.json"
         files.append((name, text))
         packs.append({"subject": s["id"], "hash": h, "bytes": len(text.encode()), "file": name, "units": ids})
-    manifest = {"schema": "packs/1", "release": release, "channel": channel, "packs": packs}
+    # CMS-05: the map travels in the manifest (order, archived trails, art, new trails).
+    shipping = {p["subject"]: p["units"] for p in packs}
+    mapped = [
+        {**s, "units": [e for e in s["units"] if e["id"] in shipping[s["id"]]]}
+        for s in cat["subjects"]
+        if s["id"] in shipping
+    ]
+    manifest = {"schema": "packs/1", "release": release, "channel": channel, "packs": packs, "map": mapped}
+    badges = current.get(BADGES)
+    if badges:  # CMS-08: the built-in badges, one small file every device downloads
+        body = {"schema": "badges/1", "badges": badges.data}
+        h = hashlib.sha256(_js(body).encode()).hexdigest()[:16]
+        text = _js({**body, "release": release, "hash": h})
+        name = f"badges.{h}.json"
+        files.append((name, text))
+        manifest["badges"] = {"hash": h, "bytes": len(text.encode()), "file": name}
     return manifest, files
 
 

@@ -11,6 +11,7 @@
 - ``/admin/content/assets``: uploaded pictures; reviewers or admins approve them.
 """
 
+import json
 from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -24,12 +25,20 @@ from ..media_check import Rejected, check_photo
 from ..models import AdminLog, ContentAsset, ContentDoc, ContentVersion, StaffMember, User
 from ..schemas import (
     AssetDecisionIn,
+    BadgeSaveIn,
     ContentAssetIn,
     ContentImportIn,
     MediaCompleteIn,
+    NewUnitIn,
+    OrderIn,
     PublishIn,
+    ReviewIn,
+    RollbackIn,
     StaffIn,
     StaffPatch,
+    SubmitIn,
+    TrailIn,
+    TrailPatch,
     UnitSaveIn,
 )
 from ..security import aware, current_user
@@ -147,6 +156,22 @@ def remove_staff(email: str, s: Staff = Depends(staff), db: DbSession = Depends(
 # ---------- content (CMS-02) ----------
 
 
+def draft_out(db: DbSession, d: ContentVersion) -> dict:
+    return {
+        "version": d.id,
+        "status": d.status,
+        "note": d.note,
+        "changes": cms.draft_changes(db),
+        "created_by": d.created_by,
+        "authors": cms.authors(db, d),
+        "submitted_by": d.submitted_by,
+        "submitted_at": iso(d.submitted_at) if d.submitted_at else None,
+        "approved_by": d.approved_by,
+        "approved_at": iso(d.approved_at) if d.approved_at else None,
+        "review_note": d.review_note,
+    }
+
+
 def summary(db: DbSession) -> dict:
     live = cms.live_version(db)
     draft = cms.draft_version(db)
@@ -174,13 +199,16 @@ def summary(db: DbSession) -> dict:
         }
         if live
         else None,
-        "draft": {"version": draft.id, "changes": cms.draft_changes(db), "created_by": draft.created_by}
-        if draft
-        else None,
+        "draft": draft_out(db, draft) if draft else None,
+        "has_badges": cms.BADGES in current,
         "subjects": [
             {
                 "id": sub["id"],
                 "name": sub["name"],
+                "place": sub["place"],
+                "island": sub["island"],
+                "art": sub.get("art"),
+                "archived": bool(sub.get("archived")),
                 "units": [
                     {
                         "id": e["id"],
@@ -217,6 +245,22 @@ def import_content(
     the web app's own bundle). Nothing is published to devices: they already have it."""
     s.need("publish")
     if db.scalar(select(ContentVersion.id).limit(1)):
+        # Imported before Sprint 13: the badges join version 1, exactly as bundled (CMS-08).
+        if body.badges and not cms.docs(db, None).get(cms.BADGES):
+            errs = cms.problems("badges", body.badges)
+            if errs:
+                raise HTTPException(
+                    422,
+                    {
+                        "code": "invalid",
+                        "message": "The badges didn't pass the checks.",
+                        "problems": errs[:50],
+                    },
+                )
+            cms.put_doc(db, db.get(ContentVersion, 1), *cms.BADGES, body.badges, s.email)
+            cms.log(db, s.email, "badges_import", "v1", {"badges": len(body.badges)})
+            db.commit()
+            return summary(db)
         raise HTTPException(409, {"code": "imported", "message": "The content is already imported."})
     errs = [f"catalogue: {e}" for e in cms.problems("catalogue", body.catalogue)]
     listed = {e["id"]: e for sub in body.catalogue.get("subjects", []) for e in sub.get("units", [])}
@@ -226,6 +270,8 @@ def import_content(
             errs.append(f"{u.get('id', '?')}: not in the catalogue")
     for uid, man in body.assets.items():
         errs += [f"{uid} assets: {e}" for e in cms.problems("assets", man)]
+    if body.badges is not None:
+        errs += cms.problems("badges", body.badges)
     if errs:
         raise HTTPException(
             422, {"code": "invalid", "message": "The content didn't pass the checks.", "problems": errs[:50]}
@@ -246,6 +292,8 @@ def import_content(
         cms.put_doc(db, v, "unit", u["id"], u, s.email)
     for uid, man in body.assets.items():
         cms.put_doc(db, v, "assets", uid, man, s.email)
+    if body.badges:
+        cms.put_doc(db, v, *cms.BADGES, body.badges, s.email)
     cms.log(db, s.email, "content_import", "v1", {"units": len(body.units)})
     db.commit()
     return summary(db)
@@ -384,30 +432,8 @@ def discard_draft(s: Staff = Depends(staff), db: DbSession = Depends(get_session
         db.commit()
 
 
-@router.post("/admin/content/publish")
-def publish(
-    body: PublishIn,
-    s: Staff = Depends(staff),
-    db: DbSession = Depends(get_session),
-    storage=Depends(get_storage),
-) -> dict:
-    """An admin publishes the draft (reviewers' approve-and-publish comes in Sprint 13). An admin
-    publishing their own changes must confirm it, and it's flagged in the log."""
-    s.need("publish")
-    d = cms.draft_version(db)
-    if not d:
-        raise HTTPException(409, {"code": "no_draft", "message": "There's nothing to publish."})
-    authors = set(db.scalars(select(ContentDoc.updated_by).where(ContentDoc.version_id == d.id)))
-    own = authors <= {s.email}
-    if own and not body.confirm_own:
-        raise HTTPException(
-            409,
-            {
-                "code": "own",
-                "message": "These are your own changes. Confirm to publish them without a second person.",
-            },
-        )
-    current = cms.docs(db, None, with_draft=True)
+def ship(db: DbSession, storage, current: dict, version: int) -> str:
+    """Build and upload the packs for some content, or 409 if a picture isn't approved."""
     blocked = cms.asset_problems(db, current)
     if blocked:
         raise HTTPException(
@@ -427,25 +453,375 @@ def publish(
         else doc
         for k, doc in current.items()
     }
-    release = cms.release_name(d.id)
+    release = cms.release_name(version)
     cms.publish_packs(storage, packed, release)
-    d.status, d.published_by, d.published_at, d.note, d.self_published, d.release = (
-        "published",
+    return release
+
+
+def open_draft(db: DbSession) -> ContentVersion:
+    d = cms.draft_version(db)
+    if not d:
+        raise HTTPException(409, {"code": "no_draft", "message": "There's no draft."})
+    return d
+
+
+@router.post("/admin/content/submit")
+def submit(body: SubmitIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-06: an editor sends the draft to a reviewer."""
+    s.need("edit")
+    d = open_draft(db)
+    if d.status != "draft":
+        raise HTTPException(409, {"code": "state", "message": "It's already waiting for review."})
+    if not cms.draft_changes(db):
+        raise HTTPException(409, {"code": "empty", "message": "The draft doesn't change anything yet."})
+    d.status, d.note, d.submitted_by, d.submitted_at, d.review_note = (
+        "submitted",
+        body.note,
         s.email,
         utcnow(),
-        body.note,
-        own,
-        release,
+        None,
     )
+    cms.log(db, s.email, "draft_submit", f"v{d.id}", {"note": body.note})
+    db.commit()
+    return summary(db)
+
+
+@router.post("/admin/content/review")
+def review(body: ReviewIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-06: a reviewer or admin who didn't work on the draft approves it or sends it back
+    with a comment. Approving doesn't publish: an admin does that next."""
+    s.need("review")
+    d = open_draft(db)
+    if s.email in cms.authors(db, d) or s.email == d.submitted_by:
+        raise HTTPException(403, {"code": "own", "message": "Someone who didn't work on it must review it."})
+    if body.approve:
+        if d.status != "submitted":
+            raise HTTPException(409, {"code": "state", "message": "It isn't waiting for review."})
+        d.status, d.approved_by, d.approved_at = "approved", s.email, utcnow()
+        cms.log(db, s.email, "draft_approve", f"v{d.id}", {"comment": body.comment} if body.comment else None)
+    else:
+        if d.status not in ("submitted", "approved"):
+            raise HTTPException(409, {"code": "state", "message": "It isn't waiting for review."})
+        if not body.comment:
+            raise HTTPException(422, {"code": "comment", "message": "Say what needs changing."})
+        d.status, d.review_note, d.approved_by, d.approved_at = "draft", body.comment, None, None
+        cms.log(db, s.email, "draft_return", f"v{d.id}", {"comment": body.comment})
+    db.commit()
+    return summary(db)
+
+
+@router.get("/admin/content/review")
+def review_detail(s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-06: each changed document before (published) and after (draft), side by side."""
+    if not (cms.can(s.role, "edit") or cms.can(s.role, "review")):
+        s.need("review")
+    d = open_draft(db)
+    live = cms.docs(db, None)
+    docs = db.scalars(
+        select(ContentDoc).where(ContentDoc.version_id == d.id).order_by(ContentDoc.kind, ContentDoc.key)
+    )
+    return {
+        "draft": draft_out(db, d),
+        "docs": [
+            {
+                "kind": x.kind,
+                "key": x.key,
+                "before": live[(x.kind, x.key)].data if (x.kind, x.key) in live else None,
+                "after": x.data,
+                "by": x.updated_by,
+            }
+            for x in docs
+        ],
+    }
+
+
+@router.post("/admin/content/publish")
+def publish(
+    body: PublishIn,
+    s: Staff = Depends(staff),
+    db: DbSession = Depends(get_session),
+    storage=Depends(get_storage),
+) -> dict:
+    """CMS-06: an admin publishes an approved draft. Devices download the new packs on their
+    next sync; the change log keeps who changed, approved and published it."""
+    s.need("publish")
+    d = open_draft(db)
+    if d.status != "approved":
+        raise HTTPException(409, {"code": "not_approved", "message": "A reviewer must approve it first."})
+    release = ship(db, storage, cms.docs(db, None, with_draft=True), d.id)
+    d.status, d.published_by, d.published_at, d.release = "published", s.email, utcnow(), release
+    d.note = body.note or d.note
     cms.log(
         db,
         s.email,
         "content_publish",
         f"v{d.id}",
-        {"release": release, "self_published": own, "note": body.note},
+        {"release": release, "note": d.note, "approved_by": d.approved_by},
     )
     db.commit()
     return summary(db)
+
+
+@router.get("/admin/content/versions")
+def versions(s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-06/07: the change log: every version, who changed, approved and published it."""
+    if not (cms.can(s.role, "edit") or cms.can(s.role, "review")):
+        s.need("review")
+    live = cms.live_version(db)
+    out = []
+    for v in db.scalars(select(ContentVersion).order_by(ContentVersion.id.desc()).limit(100)):
+        out.append(
+            {
+                "version": v.id,
+                "status": v.status,
+                "live": bool(live and v.id == live.id),
+                "note": v.note,
+                "created_by": v.created_by,
+                "authors": cms.authors(db, v),
+                "submitted_by": v.submitted_by,
+                "approved_by": v.approved_by,
+                "published_by": v.published_by,
+                "published_at": iso(v.published_at) if v.published_at else None,
+                "rolled_back_from": v.rolled_back_from,
+                "release": v.release,
+            }
+        )
+    return {"versions": out}
+
+
+@router.post("/admin/content/rollback")
+def rollback(
+    body: RollbackIn,
+    s: Staff = Depends(staff),
+    db: DbSession = Depends(get_session),
+    storage=Depends(get_storage),
+) -> dict:
+    """CMS-07: publish an earlier version's content again, as a new version (history is never
+    rewritten). Item ids never change, so children keep their progress on items that stay."""
+    s.need("publish")
+    live = cms.live_version(db)
+    target = db.get(ContentVersion, body.version)
+    if not live or not target or target.status != "published" or target.id >= live.id:
+        raise HTTPException(404, "Pick an earlier published version")
+    if cms.draft_version(db):
+        raise HTTPException(409, {"code": "draft_open", "message": "Publish or discard the draft first."})
+    snapshot = cms.docs(db, target.id)
+    top = db.scalar(select(ContentVersion.id).order_by(ContentVersion.id.desc()).limit(1))
+    v = ContentVersion(
+        id=top + 1, status="draft", created_by=s.email, note=body.note, rolled_back_from=target.id
+    )
+    db.add(v)
+    db.flush()
+    current = cms.docs(db, None)
+    for key, doc in snapshot.items():
+        if key not in current or current[key].data != doc.data:
+            cms.put_doc(db, v, *key, doc.data, s.email)
+    # Documents added after the target (new units, badges) stay; the catalogue decides what shows.
+    db.flush()
+    release = ship(db, storage, cms.docs(db, None, with_draft=True), v.id)
+    v.status, v.published_by, v.published_at, v.release = "published", s.email, utcnow(), release
+    cms.log(
+        db, s.email, "content_rollback", f"v{v.id}", {"to": target.id, "note": body.note, "release": release}
+    )
+    db.commit()
+    return summary(db)
+
+
+# ---------- map & trails (CMS-05) ----------
+
+
+def save_catalogue(db: DbSession, s: Staff, cat: dict, action: str, target: str, detail: dict) -> dict:
+    errs = cms.problems("catalogue", cat)
+    if errs:
+        raise HTTPException(422, {"code": "invalid", "message": "Fix these first.", "problems": errs[:50]})
+    draft = cms.ensure_draft(db, s.email)
+    cms.put_doc(db, draft, "catalogue", "catalogue", cat, s.email)
+    cms.log(db, s.email, action, target, detail)
+    db.commit()
+    return summary(db)
+
+
+def editable(db: DbSession) -> tuple[dict, dict]:
+    current = cms.docs(db, None, with_draft=True)
+    if ("catalogue", "catalogue") not in current:
+        raise HTTPException(409, {"code": "not_imported", "message": "Import the content first."})
+    return current, json.loads(json.dumps(current[("catalogue", "catalogue")].data))
+
+
+def art_usable(db: DbSession, media_id: str) -> None:
+    a = db.get(ContentAsset, media_id)
+    if not a or a.status != "ready" or a.approval in ("flagged", "refused"):
+        raise HTTPException(422, {"code": "art", "message": "That picture can't be used."})
+
+
+def make_unit(db: DbSession, s: Staff, current: dict, cat: dict, subject: str, body: NewUnitIn) -> str:
+    """A new unit, blank or copied from another (packages/domain newUnit), as a draft unit."""
+    taken = [e["id"] for x in cat["subjects"] for e in x["units"]] + [
+        k for (kind, k) in current if kind == "unit"
+    ]
+    uid = cms.new_id(body.title, taken)
+    src = None
+    if body.copy_from:
+        doc = current.get(("unit", body.copy_from))
+        if not doc:
+            raise HTTPException(404, "No unit to copy")
+        src = doc.data
+    unit = cms.new_unit({"id": uid, "subject": subject, "title": body.title, "band": body.band}, src)
+    errs = cms.problems("unit", unit)
+    if errs:
+        raise HTTPException(422, {"code": "invalid", "message": "Fix these first.", "problems": errs[:50]})
+    draft = cms.ensure_draft(db, s.email)
+    cms.put_doc(db, draft, "unit", uid, unit, s.email)
+    if src and ("assets", body.copy_from) in current:
+        cms.put_doc(db, draft, "assets", uid, current[("assets", body.copy_from)].data, s.email)
+    entry = {
+        "id": uid,
+        "title": unit["title"],
+        "band": unit["band"],
+        "status": "draft",
+        "lessons": len(unit["lessons"]),
+    }
+    next(x for x in cat["subjects"] if x["id"] == subject)["units"].append(entry)
+    return uid
+
+
+@router.post("/admin/content/trails", status_code=201)
+def add_trail(body: TrailIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-05: a new trail with its island art and first unit. Like everything else it goes into
+    the draft; children see it once it has a ready unit, its art is approved and it's published."""
+    s.need("edit")
+    current, cat = editable(db)
+    art_usable(db, body.art)
+    sid = cms.new_id(body.place, [x["id"] for x in cat["subjects"]])
+    cat["subjects"].append(
+        {"id": sid, "name": body.name, "place": body.place, "island": sid, "art": body.art, "units": []}
+    )
+    uid = make_unit(db, s, current, cat, sid, body.unit)
+    return save_catalogue(db, s, cat, "trail_add", sid, {"name": body.name, "unit": uid})
+
+
+@router.patch("/admin/content/trails/{subject_id}")
+def change_trail(
+    subject_id: str, body: TrailPatch, s: Staff = Depends(staff), db: DbSession = Depends(get_session)
+) -> dict:
+    """Rename a trail, change its art, archive or restore it (children keep their progress)."""
+    s.need("edit")
+    _, cat = editable(db)
+    sub = next((x for x in cat["subjects"] if x["id"] == subject_id), None)
+    if not sub:
+        raise HTTPException(404, "No such trail")
+    if body.art:
+        art_usable(db, body.art)
+    for k in ("name", "place", "art"):
+        if getattr(body, k) is not None:
+            sub[k] = getattr(body, k)
+    if body.archived is not None:
+        if body.archived:
+            sub["archived"] = True
+        else:
+            sub.pop("archived", None)
+    return save_catalogue(db, s, cat, "trail_change", subject_id, body.model_dump(exclude_none=True))
+
+
+@router.put("/admin/content/order")
+def reorder(body: OrderIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    """CMS-05: trails in map order, and units in trail order. Children's trails follow it,
+    unless a grown-up reordered a child's trail (PAR-10)."""
+    s.need("edit")
+    _, cat = editable(db)
+    by = {x["id"]: x for x in cat["subjects"]}
+    if sorted(body.subjects) != sorted(by):
+        raise HTTPException(422, {"code": "order", "message": "Every trail must be in the order once."})
+    for sid, ids in body.units.items():
+        if sid not in by or sorted(ids) != sorted(e["id"] for e in by[sid]["units"]):
+            raise HTTPException(422, {"code": "order", "message": "Every unit must be in the order once."})
+        entries = {e["id"]: e for e in by[sid]["units"]}
+        by[sid]["units"] = [entries[i] for i in ids]
+    cat["subjects"] = [by[i] for i in body.subjects]
+    return save_catalogue(
+        db, s, cat, "map_order", "map", {"trails": body.subjects[:20], "units": list(body.units)}
+    )
+
+
+@router.post("/admin/content/trails/{subject_id}/units", status_code=201)
+def add_unit(
+    subject_id: str, body: NewUnitIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)
+) -> dict:
+    """A new unit at the end of a trail, blank or copied from another unit; it starts as draft."""
+    s.need("edit")
+    current, cat = editable(db)
+    if not any(x["id"] == subject_id for x in cat["subjects"]):
+        raise HTTPException(404, "No such trail")
+    uid = make_unit(db, s, current, cat, subject_id, body)
+    out = save_catalogue(db, s, cat, "unit_add", uid, {"trail": subject_id, "from": body.copy_from})
+    return {**out, "unit": uid}
+
+
+# ---------- badges (CMS-08) ----------
+
+
+def badge_list(db: DbSession) -> list:
+    doc = cms.docs(db, None, with_draft=True).get(cms.BADGES)
+    if not doc:
+        raise HTTPException(409, {"code": "no_badges", "message": "Bring in the built-in badges first."})
+    return json.loads(json.dumps(doc.data))
+
+
+@router.get("/admin/content/badges")
+def badges(s: Staff = Depends(staff), db: DbSession = Depends(get_session)) -> dict:
+    if not (cms.can(s.role, "edit") or cms.can(s.role, "review")):
+        s.need("edit")
+    current = cms.docs(db, None, with_draft=True)
+    doc = current.get(cms.BADGES)
+    live = cms.docs(db, None).get(cms.BADGES)
+    items = doc.data if doc else []
+    arts = [b["art"] for b in items if b.get("art")]
+    approvals = {a.id: a.approval for a in db.scalars(select(ContentAsset).where(ContentAsset.id.in_(arts)))}
+    live_by = {b["id"]: b for b in (live.data if live else [])}
+    edited = [b["id"] for b in items if live and live_by.get(b["id"]) != b]
+    units = {k: d.data["title"] for (kind, k), d in current.items() if kind == "unit"}
+    return {"badges": items, "approvals": approvals, "edited": edited, "units": units}
+
+
+@router.put("/admin/content/badges/{badge_id}")
+def save_badge(
+    badge_id: str, body: BadgeSaveIn, s: Staff = Depends(staff), db: DbSession = Depends(get_session)
+) -> dict:
+    """CMS-08: add or edit a built-in badge, or retire it (children who earned it keep it).
+    Badges reach devices in the content packs, so children earn new ones offline."""
+    s.need("edit")
+    items = badge_list(db)
+    badge = body.badge
+    if badge.get("id") != badge_id:
+        raise HTTPException(
+            422,
+            {"code": "invalid", "message": "A badge's id can't change.", "problems": ["/id can't change"]},
+        )
+    errs = cms.problems("badge", badge)
+    if badge.get("art"):
+        try:
+            art_usable(db, badge["art"])
+        except HTTPException:
+            errs.append("/art that picture can't be used")
+    units = {k for (kind, k) in cms.docs(db, None, with_draft=True) if kind == "unit"}
+    rule = badge.get("rule") or {}
+    for r in rule.get("all", [rule]):
+        errs += [f'/rule unit "{u}" doesn\'t exist' for u in r.get("units", []) if u not in units]
+    if errs:
+        raise HTTPException(
+            422, {"code": "invalid", "message": "Fix these before saving.", "problems": errs[:50]}
+        )
+    i = next((n for n, b in enumerate(items) if b["id"] == badge_id), None)
+    was = items[i] if i is not None else None
+    if i is None:
+        items.append(badge)
+    else:
+        items[i] = badge
+    draft = cms.ensure_draft(db, s.email)
+    cms.put_doc(db, draft, *cms.BADGES, items, s.email)
+    cms.log(db, s.email, "badge_save", badge_id, {"new": was is None, "retired": bool(badge.get("retired"))})
+    db.commit()
+    return badges(s, db)
 
 
 # ---------- uploaded pictures (CMS-03) ----------

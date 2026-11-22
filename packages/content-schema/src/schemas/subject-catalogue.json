@@ -18,6 +18,14 @@
           "name": { "$ref": "common.json#/$defs/text" },
           "place": { "$ref": "common.json#/$defs/text" },
           "island": { "$ref": "common.json#/$defs/id" },
+          "art": {
+            "$ref": "common.json#/$defs/mediaId",
+            "description": "Uploaded island illustration (CMS-05), shown instead of the built-in island once approved"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Hidden from the map for everyone; children keep their stars, badges and treasure (CMS-05)"
+          },
           "units": {
             "type": "array",
             "minItems": 1,

@@ -78,6 +78,8 @@ export function ruleMet(rule, stats, s) {
 export function newBadges(catalogue, s) {
   const stats = badgeStats(s);
   return catalogue.flatMap((badge) => {
+    // A retired badge (CMS-08) can't be earned or upgraded any more; children keep it.
+    if (badge.retired) return [];
     const earned = s.badges.includes(badge.id);
     if (!earned && !ruleMet(badge.rule, stats, s)) return [];
     const awards = earned ? [] : [badge];

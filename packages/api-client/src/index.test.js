@@ -67,7 +67,7 @@ test("staff and content admin paths (CMS-01…04)", async () => {
   await c.staffMe();
   await c.changeStaffRole("w@x.africa", "reviewer");
   await c.saveContentUnit("farm-animals", { id: "farm-animals" });
-  await c.publishContent("Facts", true);
+  await c.publishContent("Facts");
   await c.decideContentAsset("M1", true);
   expect(r.calls.map((x) => `${x.init.method || "GET"} ${x.url}`)).toEqual([
     "GET /api/admin/me",
@@ -77,11 +77,29 @@ test("staff and content admin paths (CMS-01…04)", async () => {
     "POST /api/admin/content/assets/M1/decision",
   ]);
   expect(JSON.parse(r.calls[2].init.body)).toEqual({ unit: { id: "farm-animals" } });
-  expect(JSON.parse(r.calls[3].init.body)).toEqual({ note: "Facts", confirm_own: true });
+  expect(JSON.parse(r.calls[3].init.body)).toEqual({ note: "Facts" });
 });
 
 test("the content checks' problems come back on the error", async () => {
   const body = { detail: { code: "invalid", message: "Fix these before saving.", problems: ["/items/0/label is empty"] } };
   const c = createClient({ baseUrl: "/api", fetch: recorder(422, body).fetch });
   await expect(c.saveContentUnit("u", {})).rejects.toMatchObject({ code: "invalid", problems: ["/items/0/label is empty"] });
+});
+
+test("review, roll back, trails and badges paths (CMS-05…08)", async () => {
+  const r = recorder(200, {});
+  const c = createClient({ baseUrl: "/api", fetch: r.fetch });
+  await c.reviewContent(false, "Fix it");
+  await c.rollbackContent(2, "Undo");
+  await c.reorderContent(["a", "b"], { a: ["u1"] });
+  await c.changeTrail("weather-hill", { archived: true });
+  await c.saveBadge({ id: "wild-explorer" });
+  expect(r.calls.map((x) => `${x.init.method || "GET"} ${x.url}`)).toEqual([
+    "POST /api/admin/content/review",
+    "POST /api/admin/content/rollback",
+    "PUT /api/admin/content/order",
+    "PATCH /api/admin/content/trails/weather-hill",
+    "PUT /api/admin/content/badges/wild-explorer",
+  ]);
+  expect(JSON.parse(r.calls[0].init.body)).toEqual({ approve: false, comment: "Fix it" });
 });

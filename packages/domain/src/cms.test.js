@@ -1,5 +1,23 @@
 import { validate } from "@trailbuddies/content-schema";
-import { can, diffUnit, fieldErrors, homeFor, keptItems, newItemId, removeItem, syncEntry, uploadAssetEntry, uploadedMediaId } from "./index.js";
+import counting from "../../content/src/units/numbers/counting-1-5.json" with { type: "json" };
+import {
+  can,
+  diffUnit,
+  fieldErrors,
+  homeFor,
+  keptItems,
+  mapSubjects,
+  moveId,
+  newBadges,
+  newItemId,
+  newUnit,
+  removeItem,
+  reviewActions,
+  ruleText,
+  syncEntry,
+  uploadAssetEntry,
+  uploadedMediaId,
+} from "./index.js";
 
 const unit = {
   schema: "unit/1",
@@ -72,5 +90,51 @@ describe("what changed", () => {
     expect(r.valid).toBe(false);
     expect(fieldErrors(r.errors)[0]).toMatchObject({ field: "items.0.label" });
     expect(fieldErrors(['lesson "farm-animals-1": needs new (focus) or review items'])[0].field).toBe("lesson:farm-animals-1");
+  });
+});
+
+describe("Sprint 13: review, trails and badges (CMS-05…08)", () => {
+  const ed = { email: "w@tb.africa", role: "editor" };
+  const rev = { email: "o@tb.africa", role: "reviewer" };
+  const adm = { email: "s@tb.africa", role: "admin" };
+
+  test("an editor submits; a reviewer who didn't work on it approves; only an admin publishes", () => {
+    const draft = { status: "draft", authors: [ed.email] };
+    expect(reviewActions(draft, ed)).toMatchObject({ submit: true, approve: false, publish: false });
+    expect(reviewActions(draft, rev).submit).toBe(false);
+    const sub = { status: "submitted", authors: [ed.email], submitted_by: ed.email };
+    expect(reviewActions(sub, ed)).toMatchObject({ approve: false, sendBack: false });
+    expect(reviewActions(sub, rev)).toMatchObject({ approve: true, sendBack: true, publish: false });
+    expect(reviewActions({ ...sub, authors: [adm.email] }, adm)).toMatchObject({ approve: false, why: "own" });
+    const ok = { ...sub, status: "approved" };
+    expect(reviewActions(ok, rev)).toMatchObject({ publish: false, sendBack: true });
+    expect(reviewActions(ok, adm)).toMatchObject({ publish: true });
+    expect(reviewActions(null, adm).publish).toBe(false);
+  });
+
+  test("reordering moves one place and stops at the ends", () => {
+    expect(moveId(["a", "b", "c"], "c", -1)).toEqual(["a", "c", "b"]);
+    expect(moveId(["a", "b", "c"], "a", -1)).toEqual(["a", "b", "c"]);
+  });
+
+  test("a new unit, blank or copied, passes the content checks and starts as draft", () => {
+    const blank = newUnit({ id: "clouds", subject: "weather", title: "Clouds", band: "sprout" });
+    expect(validate("unit", blank).errors).toEqual([]);
+    expect(blank.status).toBe("draft");
+    const farm = counting;
+    const copy = newUnit({ id: "rain", subject: "weather", title: "Rain", band: "sprout" }, farm);
+    expect(validate("unit", copy).errors).toEqual([]);
+    expect(copy.lessons.every((l) => l.id.startsWith("rain-"))).toBe(true);
+    expect(copy.items).toEqual(farm.items);
+  });
+
+  test("retired badges can't be earned; rules read in plain words; archived trails leave the map", () => {
+    const badge = { id: "b", name: "B", how: "x", rule: { type: "count", metric: "lessons", n: 1 } };
+    const s = { badges: [], results: [{ kind: "lesson", stars: 3 }], progress: {}, answers: [], games: [], byDay: {}, mastery: {}, stars: 3, now: new Date() };
+    expect(newBadges([{ ...badge, retired: true }], s)).toEqual([]);
+    expect(newBadges([badge], s).map((b) => b.id)).toEqual(["b"]);
+    expect(ruleText({ type: "complete", units: ["clouds"] }, () => "Clouds")).toBe("Finish Clouds");
+    expect(ruleText({ type: "streak", days: 5 })).toBe("5-day streak");
+    expect(mapSubjects([{ id: "a" }, { id: "b", archived: true }]).map((x) => x.id)).toEqual(["a"]);
   });
 });
