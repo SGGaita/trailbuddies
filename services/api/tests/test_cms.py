@@ -312,7 +312,10 @@ def full_bundle():
     return bundle(ids)
 
 
-@pytest.mark.skipif(not shutil.which("node"), reason="needs node for the JS pack builder")
+@pytest.mark.skipif(
+    not shutil.which("node") or not (ROOT / "node_modules").exists(),
+    reason="needs node and pnpm install for the JS pack builder",
+)
 def test_the_imported_version_gives_exactly_todays_packs(client, outbox, engine):
     """CMS-02: the database copy builds the same packs, byte for byte, as `pnpm content packs:build`."""
     as_(client, outbox, ADMIN)
