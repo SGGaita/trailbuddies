@@ -122,6 +122,12 @@ class Learner(Timestamped, Base):
     levels: Mapped[dict] = mapped_column(
         JSON, default=dict, doc="per-subject level lock (ADP-02), e.g. {'numbers': '1'}"
     )
+    lesson_plan: Mapped[dict] = mapped_column(
+        JSON,
+        default=dict,
+        server_default="{}",
+        doc="PAR-09/10: hidden trails and units, skipped lessons, unit order for this child",
+    )
     wish: Mapped[str | None] = mapped_column(
         String(32), nullable=True, doc="shop item the learner is saving for"
     )

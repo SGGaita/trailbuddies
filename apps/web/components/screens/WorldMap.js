@@ -10,7 +10,7 @@ import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubjects, getUnit, buddyLine } from "@trailbuddies/content";
+import { getUnit, buddyLine } from "@trailbuddies/content";
 import {
   subjectProgress,
   currentUnit,
@@ -22,7 +22,7 @@ import {
   dayKey,
 } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
-import { trailUnits } from "@/lib/trail";
+import { childSubjects, childTrail } from "@/lib/trail";
 import LearnerShell from "@/components/shell/LearnerShell";
 import AwardCelebrations from "@/components/rewards/AwardCelebrations";
 import Buddy from "@/components/art/Buddy";
@@ -307,11 +307,13 @@ function MoreTrails({ map, sectionCount }) {
   );
 }
 
-function subjectsWithProgress(progress, placement = {}, interests = []) {
-  return orderSubjects(getSubjects(), interests).map((s) => {
-    const units = trailUnits(s.id);
+/** The trails this child sees (PAR-09: a grown-up may hide some), with their progress. */
+function subjectsWithProgress(learner) {
+  if (!learner) return [];
+  return orderSubjects(childSubjects(learner), learner.interests || []).map((s) => {
+    const { units, progress, start } = childTrail(s.id, learner);
     const p = subjectProgress(units, progress);
-    return { ...s, p, next: currentUnit(units, progress, placement[s.id]) };
+    return { ...s, p, next: currentUnit(units, progress, start) };
   });
 }
 
@@ -330,9 +332,8 @@ function greetingOf(learner, greetedOn) {
       last.kind === "trophy"
         ? `the ${unit?.title || ""} trophy`
         : unit?.lessons.find((l) => l.id === last.lessonId)?.title || null;
-    const { next } = layoutTrail(trailUnits(last.subjectId), learner.progress, {
-      start: learner.placement?.[last.subjectId],
-    });
+    const { units, progress, start } = childTrail(last.subjectId, learner);
+    const { next } = layoutTrail(units, progress, { start });
     if (next)
       nextTitle =
         next.kind === "trophy" ? "the trophy" : getUnit(next.unitId)?.lessons[next.n - 1]?.title || null;
@@ -355,7 +356,7 @@ export default function WorldMap() {
   const voice = useFamily((s) => s.settings.voice);
   const lessons = useFamily((s) => s.lessons);
   const [memory] = useState(() => (typeof window === "undefined" ? null : readMemory()));
-  const subjects = subjectsWithProgress(learner?.progress || {}, learner?.placement, learner?.interests);
+  const subjects = subjectsWithProgress(learner);
   const rest = useRest(learner);
   const first = !!learner && Object.keys(learner.progress).length === 0;
   const greet = learner ? greetingOf(learner, memory?.greeted[learner.id] ?? null) : null;
@@ -422,7 +423,7 @@ export default function WorldMap() {
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
       : t("map.notStarted");
   // Spots follow the published map order (CMS-05), not a child's favourites.
-  const inMapOrder = getSubjects()
+  const inMapOrder = childSubjects(learner)
     .map((c) => subjects.find((s) => s.id === c.id))
     .filter(Boolean);
   const { main, path, sections } = mapSections(inMapOrder);

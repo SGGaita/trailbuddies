@@ -167,6 +167,7 @@ def family_record(db: DbSession, fam: Family) -> dict:
                     "placement",
                     "difficulty",
                     "levels",
+                    "lesson_plan",
                     "wish",
                     "removing_at",
                     "picture_lock",

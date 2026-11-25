@@ -9,7 +9,13 @@ import {
   rng,
 } from "@trailbuddies/domain";
 import { createEvent } from "@trailbuddies/sync";
-import { trailUnits } from "./trail";
+import { childTrail } from "./trail";
+
+/** PAR-09: a skipped lesson opens the next one; a hidden unit doesn't play. */
+const canPlayFor = (learner, unit, step) => {
+  const { units, progress, start } = childTrail(unit.subject, learner);
+  return canPlay(units, unit.id, step, progress, start);
+};
 
 /**
  * Plan what the player should run. Returns `{ lesson }` or `{ blocked }` with the trail to go back to.
@@ -58,7 +64,7 @@ export function planLesson(where, learner, seed, lessons = [], { assigned = fals
   if (
     !reviewing &&
     !(assigned && step !== "trophy") &&
-    !canPlay(trailUnits(unit.subject), unit.id, step, learner.progress, learner.placement?.[unit.subject])
+    !canPlayFor(learner, unit, step)
   )
     return { blocked: back };
   const opts = { level: learner.levelFor(unit.subject), band: learner.band, r };

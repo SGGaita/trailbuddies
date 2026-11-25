@@ -108,3 +108,29 @@ def test_saving_goal_and_cap_setting(client, outbox):
         f"/families/{fam['id']}", json={"settings": {"treasure_cap": False}, "updated_at": LATER}
     )
     assert r.json()["settings"]["treasure_cap"] is False
+
+
+def test_a_lesson_plan_for_one_child_is_ids_only(client, outbox):
+    """PAR-09/10: hidden trails and units, skipped lessons and unit order sync like other choices."""
+    fam = family_with_consent(client, outbox)
+    url = f"/families/{fam['id']}/learners/{LEARNER}"
+    assert client.put(url, json=learner_body()).json()["lesson_plan"] == {
+        "hidden": [],
+        "skipped": [],
+        "order": {},
+    }
+    plan = {
+        "hidden": ["letters", "counting-6-10"],
+        "skipped": ["counting-1-5-2"],
+        "order": {"shapes": ["shapes-around-us", "circles-and-squares"]},
+    }
+    r = client.put(url, json=learner_body(lesson_plan=plan, updated_at=LATER))
+    assert r.status_code == 200 and r.json()["lesson_plan"] == plan
+    # Only content ids: no free text, no notes about the child.
+    assert (
+        client.put(
+            url, json=learner_body(lesson_plan={"hidden": ["Amani is slow"]}, updated_at=LATER)
+        ).status_code
+        == 422
+    )
+    assert client.put(url, json=learner_body(lesson_plan={"note": "x"}, updated_at=LATER)).status_code == 422

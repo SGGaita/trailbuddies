@@ -274,16 +274,23 @@ export default function ChildProgress() {
           </Box>
         </Card>
       </Box>
-      <Button
-        variant="outlined"
-        sx={{ alignSelf: "flex-start", borderWidth: 2 }}
-        onClick={() => {
-          useFamily.getState().setActive(l.id);
-          router.push("/play/map");
-        }}
-      >
-        {t("progress.openAs", { name: l.name })}
-      </Button>
+      <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+        {!l.adult && (
+          <Button component={Link} href={`/family/progress/lessons?learner=${l.id}`} variant="contained">
+            {t("plan.open", { name: l.name })}
+          </Button>
+        )}
+        <Button
+          variant="outlined"
+          sx={{ borderWidth: 2 }}
+          onClick={() => {
+            useFamily.getState().setActive(l.id);
+            router.push("/play/map");
+          }}
+        >
+          {t("progress.openAs", { name: l.name })}
+        </Button>
+      </Box>
     </FamilyShell>
   );
 }

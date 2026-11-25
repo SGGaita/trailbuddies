@@ -9,7 +9,7 @@ import { colors } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
 import { buddyLine, getUnit } from "@trailbuddies/content";
 import { layoutTrail, breakDue, minutesSinceBreak } from "@trailbuddies/domain";
-import { trailUnits, lessonHref } from "@/lib/trail";
+import { childTrail, lessonHref } from "@/lib/trail";
 import { speak } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import { useFamily } from "@/lib/store";
@@ -22,8 +22,9 @@ import StretchBreak from "@/components/rewards/StretchBreak";
 import { readMemory, writeMemory } from "@/lib/memory";
 
 /** Where "Next" goes: the next stone on the trail after this result was recorded. */
-function nextStop(subjectId, progress, start) {
-  const { next } = layoutTrail(trailUnits(subjectId), progress, { start });
+function nextStop(subjectId, learner) {
+  const { units, progress, start } = childTrail(subjectId, learner);
+  const { next } = layoutTrail(units, progress, { start });
   if (!next) return null;
   if (next.kind === "trophy") return { href: lessonHref(next.unitId, "trophy"), label: t("done.trophyNext") };
   if (next.n === 1) {
@@ -76,11 +77,8 @@ export default function LessonComplete({ lesson, outcome, learner, goal, back, p
   const review = lesson.kind === "review";
   const custom = lesson.kind === "custom";
   const next = useMemo(
-    () =>
-      review || custom
-        ? null
-        : nextStop(lesson.subjectId, learner.progress, learner.placement?.[lesson.subjectId]),
-    [review, custom, lesson.subjectId, learner.progress, learner.placement],
+    () => (review || custom ? null : nextStop(lesson.subjectId, learner)),
+    [review, custom, lesson.subjectId, learner],
   );
   const today = learner.today;
   // From the script table, in this learner's buddy's words (BUD-08).
