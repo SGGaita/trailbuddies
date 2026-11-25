@@ -5,7 +5,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Dialog from "@mui/material/Dialog";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -17,6 +16,7 @@ import { Field, Pill, inputSx } from "@/components/builder/parts";
 import { api } from "@/lib/account";
 import { uploadContentPicture } from "@/lib/contentUpload";
 import DraftBanner from "./DraftBanner";
+import StaffDialog, { DialogSection } from "./StaffDialog";
 import { StaffHead, useStaff } from "./StaffShell";
 
 const CATEGORIES = ["learning", "mastery", "effort", "consistency", "exploration"];
@@ -60,7 +60,7 @@ const defaultRule = (type, units) =>
 function RuleFields({ rule, onRule, units }) {
   return (
     <>
-      <Field label={t("cms.bd.rule")} id="bd-type">
+      <Field label={t("cms.bd.ruleType")} id="bd-type">
         <TextField id="bd-type" select value={rule.type} onChange={(e) => onRule(defaultRule(e.target.value, units))} sx={inputSx}>
           {BADGE_RULES.map((r) => (
             <MenuItem key={r} value={r}>
@@ -76,6 +76,7 @@ function RuleFields({ rule, onRule, units }) {
             select
             value={rule.units}
             onChange={(e) => onRule({ ...rule, units: typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value })}
+            helperText={t("cms.bd.unitsHint")}
             slotProps={{ select: { multiple: true, renderValue: (v) => v.map((id) => units.find((u) => u.id === id)?.title || id).join(", ") } }}
             sx={inputSx}
           >
@@ -88,9 +89,9 @@ function RuleFields({ rule, onRule, units }) {
         </Field>
       )}
       {rule.type === "count" && (
-        <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "minmax(0, 1fr) 140px" } }}>
           <Field label={t("cms.bd.metric")} id="bd-metric">
-            <TextField id="bd-metric" select value={rule.metric} onChange={(e) => onRule({ ...rule, metric: e.target.value })} sx={{ ...inputSx, minWidth: 200 }}>
+            <TextField id="bd-metric" select value={rule.metric} onChange={(e) => onRule({ ...rule, metric: e.target.value })} sx={inputSx}>
               {BADGE_METRICS.map((m) => (
                 <MenuItem key={m} value={m}>
                   {m.replace(/-/g, " ")}
@@ -99,7 +100,7 @@ function RuleFields({ rule, onRule, units }) {
             </TextField>
           </Field>
           <Field label={t("cms.bd.n")} id="bd-n">
-            <TextField id="bd-n" type="number" value={rule.n} onChange={(e) => onRule({ ...rule, n: Math.max(1, Number(e.target.value) || 1) })} sx={{ ...inputSx, width: 110 }} />
+            <TextField id="bd-n" type="number" value={rule.n} onChange={(e) => onRule({ ...rule, n: Math.max(1, Number(e.target.value) || 1) })} sx={inputSx} />
           </Field>
         </Box>
       )}
@@ -116,10 +117,26 @@ function RuleFields({ rule, onRule, units }) {
             onChange={(e) => onRule({ ...rule, items: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })}
             sx={inputSx}
             placeholder="cow, goat, pig"
+            helperText={t("cms.bd.itemsHint")}
           />
         </Field>
       )}
     </>
+  );
+}
+
+/** How the badge looks to a child: art (or emoji), name, how to earn it, tier. */
+function BadgePreview({ b }) {
+  return (
+    <Box
+      data-testid="badge-preview"
+      sx={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 0.75, p: 2, borderRadius: 4.5, bgcolor: colors.cream, border: `2px solid ${colors.line}`, minWidth: 0 }}
+    >
+      <BadgeArt b={b} size={84} />
+      <Typography sx={{ fontWeight: 800, fontSize: 17, overflowWrap: "anywhere" }}>{b.name || t("cms.bd.previewName")}</Typography>
+      <Typography sx={{ fontSize: 13, color: "text.secondary", overflowWrap: "anywhere" }}>{b.how || t("cms.bd.previewHow")}</Typography>
+      <Pill tone={b.tier === "gold" ? "sun" : b.tier === "silver" ? "sky" : undefined}>{t(`cms.bd.tierName.${b.tier || "bronze"}`)}</Pill>
+    </Box>
   );
 }
 
@@ -130,47 +147,95 @@ function BadgeDialog({ start, units, taken, onSave, onClose }) {
   const isNew = !start;
   const badge = isNew ? { ...b, id: newId(b.name || "badge", taken) } : b;
   const { errors } = validate("badge", badge);
+  const missing = !b.name.trim() ? t("cms.bd.needName") : !b.how.trim() ? t("cms.bd.needHow") : errors.length ? t("cms.bd.needRule") : "";
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 5.5, p: 2.5 } }}>
-      <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 1.25 }} onSubmit={(e) => (e.preventDefault(), !errors.length && onSave(badge))}>
-        <Typography component="h2" sx={{ fontWeight: 800, fontSize: 22 }}>
-          {t(isNew ? "cms.bd.addTitle" : "cms.bd.editTitle", { name: b.name })}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-          <BadgeArt b={badge} size={64} />
-          <Button component="label" variant="outlined" size="small">
-            {t(b.art ? "cms.bd.changeArt" : "cms.bd.uploadArt")}
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              data-testid="badge-file"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                setBusy(t("cms.pic.checking"));
-                try {
-                  const art = await uploadContentPicture(file, b.name || "Badge");
-                  setB({ ...b, art });
-                  setBusy(t("cms.pic.waitingLong"));
-                } catch (err) {
-                  setBusy(err.message);
-                }
-              }}
-            />
+    <StaffDialog
+      title={isNew ? t("cms.bd.addTitle") : t("cms.bd.editTitle", { name: start.name })}
+      sub={t("cms.bd.dialogSub")}
+      onClose={onClose}
+      onSubmit={(e) => (e.preventDefault(), !missing && onSave(badge))}
+      actions={
+        <>
+          {missing && (
+            <Typography sx={{ mr: "auto", fontSize: 13, color: "text.secondary" }} role="status">
+              {missing}
+            </Typography>
+          )}
+          <Button color="inherit" onClick={onClose}>
+            {t("cms.cancel")}
           </Button>
-          <TextField size="small" label={t("cms.bd.icon")} value={b.icon || ""} onChange={(e) => setB({ ...b, icon: e.target.value.slice(0, 4) })} sx={{ width: 120 }} />
-        </Box>
-        {busy && <Typography sx={{ fontSize: 13, color: "text.secondary" }} role="status">{busy}</Typography>}
+          <Button type="submit" variant="contained" disabled={!!missing}>
+            {t("cms.save")}
+          </Button>
+        </>
+      }
+    >
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "200px minmax(0, 1fr)" }, alignItems: "start" }}>
+        <BadgePreview b={badge} />
+        <DialogSection title={t("cms.bd.look")} hint={t("cms.bd.lookHint")}>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+            <Button component="label" variant="outlined">
+              {t(b.art ? "cms.bd.changeArt" : "cms.bd.uploadArt")}
+              <input
+                hidden
+                type="file"
+                accept="image/*"
+                data-testid="badge-file"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setBusy(t("cms.pic.checking"));
+                  try {
+                    const art = await uploadContentPicture(file, b.name || "Badge");
+                    setB({ ...b, art });
+                    setBusy(t("cms.pic.waitingLong"));
+                  } catch (err) {
+                    setBusy(err.message);
+                  }
+                }}
+              />
+            </Button>
+            {b.art && (
+              <Button color="inherit" onClick={() => (setB(({ art: _a, ...rest }) => rest), setBusy(""))}>
+                {t("cms.bd.removeArt")}
+              </Button>
+            )}
+          </Box>
+          {busy && (
+            <Typography sx={{ fontSize: 13, color: "text.secondary" }} role="status">
+              {busy}
+            </Typography>
+          )}
+          <Field label={t("cms.bd.icon")} id="bd-icon">
+            <TextField
+              id="bd-icon"
+              value={b.icon || ""}
+              onChange={(e) => setB({ ...b, icon: e.target.value.slice(0, 4) })}
+              helperText={t("cms.bd.iconHint")}
+              sx={{ ...inputSx, maxWidth: 220, "& input": { fontSize: 24 } }}
+            />
+          </Field>
+        </DialogSection>
+      </Box>
+
+      <DialogSection title={t("cms.bd.details")}>
         <Field label={t("cms.bd.name")} id="bd-name">
-          <TextField id="bd-name" value={b.name} onChange={(e) => setB({ ...b, name: e.target.value })} sx={inputSx} placeholder="Weather Watcher" />
+          <TextField id="bd-name" value={b.name} onChange={(e) => setB({ ...b, name: e.target.value })} sx={inputSx} placeholder="Weather Watcher" slotProps={{ htmlInput: { maxLength: 40 } }} />
         </Field>
         <Field label={t("cms.bd.how")} id="bd-how">
-          <TextField id="bd-how" value={b.how} onChange={(e) => setB({ ...b, how: e.target.value })} sx={inputSx} placeholder={t("cms.bd.howPh")} />
+          <TextField
+            id="bd-how"
+            value={b.how}
+            onChange={(e) => setB({ ...b, how: e.target.value })}
+            sx={inputSx}
+            placeholder={t("cms.bd.howPh")}
+            helperText={t("cms.bd.howHint")}
+            slotProps={{ htmlInput: { maxLength: 80 } }}
+          />
         </Field>
-        <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
           <Field label={t("cms.bd.category")} id="bd-cat">
-            <TextField id="bd-cat" select value={b.category || "learning"} onChange={(e) => setB({ ...b, category: e.target.value })} sx={{ ...inputSx, minWidth: 170 }}>
+            <TextField id="bd-cat" select value={b.category || "learning"} onChange={(e) => setB({ ...b, category: e.target.value })} sx={inputSx}>
               {CATEGORIES.map((c) => (
                 <MenuItem key={c} value={c}>
                   {t(`cms.bd.cat.${c}`)}
@@ -179,7 +244,7 @@ function BadgeDialog({ start, units, taken, onSave, onClose }) {
             </TextField>
           </Field>
           <Field label={t("cms.bd.tier")} id="bd-tier">
-            <TextField id="bd-tier" select value={b.tier || "bronze"} disabled={!!b.upgrades} onChange={(e) => setB({ ...b, tier: e.target.value })} sx={{ ...inputSx, minWidth: 140 }}>
+            <TextField id="bd-tier" select value={b.tier || "bronze"} disabled={!!b.upgrades} onChange={(e) => setB({ ...b, tier: e.target.value })} sx={inputSx} helperText={b.upgrades ? t("cms.bd.tierUpgrades") : undefined}>
               {TIERS.map((x) => (
                 <MenuItem key={x} value={x}>
                   {t(`cms.bd.tierName.${x}`)}
@@ -188,22 +253,12 @@ function BadgeDialog({ start, units, taken, onSave, onClose }) {
             </TextField>
           </Field>
         </Box>
+      </DialogSection>
+
+      <DialogSection title={t("cms.bd.rule")} hint={t("cms.bd.ruleHint")}>
         <RuleFields rule={b.rule} onRule={(rule) => setB({ ...b, rule })} units={units} />
-        {errors.length > 0 && (b.name || !isNew) && (
-          <Box role="alert" sx={{ color: colors.bad.main, fontSize: 13, fontWeight: 700 }}>
-            {errors.slice(0, 3).join(" · ")}
-          </Box>
-        )}
-        <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-          <Button color="inherit" onClick={onClose}>
-            {t("cms.close")}
-          </Button>
-          <Button type="submit" variant="contained" disabled={errors.length > 0}>
-            {t("cms.save")}
-          </Button>
-        </Box>
-      </Box>
-    </Dialog>
+      </DialogSection>
+    </StaffDialog>
   );
 }
 

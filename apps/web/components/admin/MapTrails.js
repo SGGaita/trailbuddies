@@ -5,8 +5,8 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
+import ListSubheader from "@mui/material/ListSubheader";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -18,6 +18,7 @@ import { Field, Pill, inputSx } from "@/components/builder/parts";
 import { api } from "@/lib/account";
 import { uploadContentPicture } from "@/lib/contentUpload";
 import DraftBanner from "./DraftBanner";
+import StaffDialog from "./StaffDialog";
 import { StaffHead, useStaff } from "./StaffShell";
 
 const BANDS = ["seedling", "sprout", "explorer", "voyager", "trailblazer"];
@@ -71,34 +72,96 @@ function ArtField({ art, label, onArt }) {
   );
 }
 
+/** A choice card: big, tappable, with a line saying what it does. */
+function StartCard({ on, title, hint, onClick, testid }) {
+  return (
+    <Box
+      component="button"
+      type="button"
+      role="radio"
+      aria-checked={on}
+      data-testid={testid}
+      onClick={onClick}
+      sx={{
+        textAlign: "left",
+        font: "inherit",
+        cursor: "pointer",
+        p: 1.5,
+        borderRadius: 4.5,
+        border: `2px solid ${on ? colors.leaf.deep : colors.line}`,
+        bgcolor: on ? colors.leaf.soft : "background.paper",
+        color: "text.primary",
+        display: "flex",
+        gap: 1.25,
+        alignItems: "flex-start",
+      }}
+    >
+      <Box aria-hidden sx={{ mt: 0.25, width: 20, height: 20, flex: "none", borderRadius: "50%", border: `2px solid ${on ? colors.leaf.deep : colors.line}`, display: "grid", placeItems: "center" }}>
+        {on && <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: colors.leaf.deep }} />}
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Box component="b" sx={{ display: "block", fontSize: 15 }}>
+          {title}
+        </Box>
+        <Box component="span" sx={{ fontSize: 13, color: "text.secondary" }}>
+          {hint}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 /** A new unit: blank (four starter words) or a copy of another unit's lessons (CMS-05). */
-function UnitFields({ value, onChange, units }) {
+function UnitFields({ value, onChange, subjects, idPrefix = "nu" }) {
+  const copying = value.copy_from !== null && value.copy_from !== undefined;
+  const trails = subjects.filter((s) => s.units.some((u) => u.has_content));
+  const first = trails[0]?.units.find((u) => u.has_content)?.id || "";
   return (
     <>
-      <Field label={t("cms.map.unitTitle")} id="nu-title">
-        <TextField id="nu-title" value={value.title} onChange={(e) => onChange({ ...value, title: e.target.value })} sx={inputSx} placeholder={t("cms.map.unitPh")} />
+      <Field label={t("cms.map.unitTitle")} id={`${idPrefix}-title`}>
+        <TextField
+          id={`${idPrefix}-title`}
+          value={value.title}
+          onChange={(e) => onChange({ ...value, title: e.target.value })}
+          sx={inputSx}
+          placeholder={t("cms.map.unitPh")}
+          slotProps={{ htmlInput: { maxLength: 60 } }}
+        />
       </Field>
-      <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-        <Field label={t("cms.f.band")} id="nu-band">
-          <TextField id="nu-band" select value={value.band} onChange={(e) => onChange({ ...value, band: e.target.value })} sx={{ ...inputSx, minWidth: 170 }}>
-            {BANDS.map((b) => (
-              <MenuItem key={b} value={b}>
-                {t(`band.${b}`)}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Field>
-        <Field label={t("cms.map.startFrom")} id="nu-from">
-          <TextField id="nu-from" select value={value.copy_from || ""} onChange={(e) => onChange({ ...value, copy_from: e.target.value || null })} sx={{ ...inputSx, minWidth: 220 }}>
-            <MenuItem value="">{t("cms.map.blank")}</MenuItem>
-            {units.map((u) => (
-              <MenuItem key={u.id} value={u.id}>
-                {t("cms.map.copyOf", { title: u.title })}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Field>
+      <Field label={t("cms.f.band")} id={`${idPrefix}-band`}>
+        <TextField id={`${idPrefix}-band`} select value={value.band} onChange={(e) => onChange({ ...value, band: e.target.value })} sx={inputSx}>
+          {BANDS.map((b) => (
+            <MenuItem key={b} value={b}>
+              {t(`band.${b}`)}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Field>
+      <Box role="radiogroup" aria-label={t("cms.map.startFrom")} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 700, color: "text.secondary" }}>{t("cms.map.startFrom")}</Typography>
+        <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+          <StartCard testid={`${idPrefix}-blank`} on={!copying} title={t("cms.map.blankTitle")} hint={t("cms.map.blankHint")} onClick={() => onChange({ ...value, copy_from: null })} />
+          <StartCard testid={`${idPrefix}-copy`} on={copying} title={t("cms.map.copyTitle")} hint={t("cms.map.copyHint")} onClick={() => onChange({ ...value, copy_from: value.copy_from || first })} />
+        </Box>
       </Box>
+      {copying && (
+        <Field label={t("cms.map.copyWhich")} id={`${idPrefix}-from`}>
+          <TextField id={`${idPrefix}-from`} select value={value.copy_from} onChange={(e) => onChange({ ...value, copy_from: e.target.value })} sx={inputSx}>
+            {trails.flatMap((s) => [
+              <ListSubheader key={`h-${s.id}`} sx={{ fontWeight: 800, lineHeight: "36px" }}>
+                {s.name}
+              </ListSubheader>,
+              ...s.units
+                .filter((u) => u.has_content)
+                .map((u) => (
+                  <MenuItem key={u.id} value={u.id} sx={{ pl: 3 }}>
+                    {u.title}
+                  </MenuItem>
+                )),
+            ])}
+          </TextField>
+        </Field>
+      )}
     </>
   );
 }
@@ -149,7 +212,6 @@ export default function MapTrails() {
 
   const subjects = data?.subjects || [];
   const order = subjects.map((s) => s.id);
-  const allUnits = subjects.flatMap((s) => s.units.filter((u) => u.has_content));
   const moveTrail = (id, d) => run(() => api.reorderContent(moveId(order, id, d)), t("cms.map.moved"));
   const moveUnit = (s, uid, d) =>
     run(() => api.reorderContent(order, { [s.id]: moveId(s.units.map((u) => u.id), uid, d) }), t("cms.map.moved"));
@@ -258,7 +320,7 @@ export default function MapTrails() {
                   <ArtField art={trail.art} label={trail.place} onArt={(art) => setTrail({ ...trail, art })} />
                 </Field>
                 <Typography sx={{ fontWeight: 700, mt: 0.5 }}>{t("cms.map.firstUnit")}</Typography>
-                {adding == null && <UnitFields value={unit} onChange={setUnit} units={allUnits} />}
+                {adding == null && <UnitFields value={unit} onChange={setUnit} subjects={subjects} />}
                 <Button type="submit" variant="contained" disabled={busy}>
                   {t("cms.map.addTrailGo")}
                 </Button>
@@ -273,58 +335,78 @@ export default function MapTrails() {
       )}
 
       {archiving && (
-        <Dialog open onClose={() => setArchiving(null)} PaperProps={{ sx: { borderRadius: 5.5, p: 2.5, maxWidth: 460 } }}>
-          <Typography component="h2" sx={{ fontWeight: 800, fontSize: 22, mb: 1 }}>
-            {t("cms.map.archiveTitle", { name: archiving.name })}
-          </Typography>
-          <Typography sx={{ color: "text.secondary", mb: 2 }}>{t("cms.map.archiveBody")}</Typography>
-          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-            <Button color="inherit" onClick={() => setArchiving(null)}>
-              {t("cms.close")}
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                const s = archiving;
-                setArchiving(null);
-                run(() => api.changeTrail(s.id, { archived: true }), t("cms.map.archivedMsg", { name: s.name }));
-              }}
-            >
-              {t("cms.map.archiveGo")}
-            </Button>
-          </Box>
-        </Dialog>
-      )}
-      {adding && (
-        <Dialog open onClose={() => setAdding(null)} PaperProps={{ sx: { borderRadius: 5.5, p: 2.5, width: "100%", maxWidth: 520 } }}>
-          <Box
-            component="form"
-            sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (!unit.title.trim()) return;
-              const sid = adding;
-              const ok = await run(() => api.addUnit(sid, { ...unit, title: unit.title.trim() }), t("cms.map.unitAdded", { title: unit.title.trim() }));
-              if (ok) setAdding(null);
-            }}
-          >
-            <Typography component="h2" sx={{ fontWeight: 800, fontSize: 22 }}>
-              {t("cms.map.addUnitTo", { name: subjects.find((s) => s.id === adding)?.name || "" })}
-            </Typography>
-            <UnitFields value={unit} onChange={setUnit} units={allUnits} />
-            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-              <Button color="inherit" onClick={() => setAdding(null)}>
-                {t("cms.close")}
+        <StaffDialog
+          size="xs"
+          tone="danger"
+          title={t("cms.map.archiveTitle", { name: archiving.name })}
+          onClose={() => setArchiving(null)}
+          actions={
+            <>
+              <Button color="inherit" onClick={() => setArchiving(null)}>
+                {t("cms.cancel")}
               </Button>
-              <Button type="submit" variant="contained" disabled={busy}>
-                {t("cms.map.addUnitGo")}
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  const s = archiving;
+                  setArchiving(null);
+                  run(() => api.changeTrail(s.id, { archived: true }), t("cms.map.archivedMsg", { name: s.name }));
+                }}
+              >
+                {t("cms.map.archiveGo")}
               </Button>
+            </>
+          }
+        >
+          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+            <IslandThumb s={archiving} width={88} />
+            <Box>
+              <b>{archiving.name}</b>
+              <br />
+              <Box component="span" sx={{ color: "text.secondary", fontSize: 14 }}>
+                {t("cms.map.unitsCount", { n: archiving.units.length })}
+              </Box>
             </Box>
           </Box>
-        </Dialog>
+          <Box component="ul" sx={{ m: 0, pl: 2.5, display: "flex", flexDirection: "column", gap: 0.5, fontSize: 15 }}>
+            <li>{t("cms.map.archiveLeaves")}</li>
+            <li>{t("cms.map.archiveKeeps")}</li>
+            <li>{t("cms.map.archiveBack")}</li>
+          </Box>
+        </StaffDialog>
+      )}
+      {adding && (
+        <StaffDialog
+          title={t("cms.map.addUnitTo", { name: subjects.find((s) => s.id === adding)?.name || "" })}
+          sub={t("cms.map.addUnitSub")}
+          onClose={() => setAdding(null)}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!unit.title.trim()) return;
+            const sid = adding;
+            const ok = await run(() => api.addUnit(sid, { ...unit, title: unit.title.trim() }), t("cms.map.unitAdded", { title: unit.title.trim() }));
+            if (ok) setAdding(null);
+          }}
+          actions={
+            <>
+              {!unit.title.trim() && (
+                <Typography sx={{ mr: "auto", fontSize: 13, color: "text.secondary" }} role="status">
+                  {t("cms.map.needUnitName")}
+                </Typography>
+              )}
+              <Button color="inherit" onClick={() => setAdding(null)}>
+                {t("cms.cancel")}
+              </Button>
+              <Button type="submit" variant="contained" disabled={busy || !unit.title.trim()}>
+                {t("cms.map.addUnitGo")}
+              </Button>
+            </>
+          }
+        >
+          <UnitFields value={unit} onChange={setUnit} subjects={subjects} idPrefix="dlg" />
+        </StaffDialog>
       )}
     </>
   );
 }
-

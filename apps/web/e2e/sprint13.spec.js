@@ -65,11 +65,18 @@ test("a new trail and badge go through review, reach children's maps, and can be
   // A second unit, blank.
   await rain.getByRole("button", { name: "+ Add a unit" }).click();
   await w.getByRole("dialog").getByLabel("Unit name").fill("Rainbows");
+  await w.getByRole("dialog").getByTestId("dlg-copy").click();
+  await expect(w.getByRole("dialog").getByText("Unit to copy")).toBeVisible();
+  await settled(w);
+  await shot(w, testInfo, "s13-dialog-unit");
+  await w.getByRole("dialog").getByTestId("dlg-blank").click();
   await w.getByRole("dialog").getByRole("button", { name: "Add unit" }).click();
   await expect(rain).toContainText("Rainbows");
   // Archive Feelings: it leaves the map; children keep their stars.
   await w.locator('[data-trail="feelings"]').getByRole("button", { name: "Archive" }).click();
-  await w.getByRole("button", { name: "Archive in the draft" }).click();
+  await expect(w.getByRole("dialog")).toContainText("Children keep their stars, badges and treasure");
+  await shot(w, testInfo, "s13-dialog-archive");
+  await w.getByRole("dialog").getByRole("button", { name: "Archive trail" }).click();
   await expect(w.locator('[data-trail="feelings"]')).toContainText("Archived");
   await settled(w);
   await noSideScroll(w);
@@ -83,6 +90,9 @@ test("a new trail and badge go through review, reach children's maps, and can be
   await dlg.getByLabel("How to earn it (children hear this)").fill("Finish your first unit");
   await dlg.getByTestId("badge-file").setInputFiles(PHOTO);
   await expect(dlg.getByText("Uploaded. It shows once a reviewer or admin approves it.")).toBeVisible();
+  await expect(dlg.getByTestId("badge-preview")).toContainText("Rain Explorer");
+  await settled(w);
+  await shot(w, testInfo, "s13-dialog-badge");
   await dlg.getByRole("button", { name: "Save" }).click();
   await expect(w.getByText("“Rain Explorer” added to the draft.")).toBeVisible();
   await w.locator('[data-badge="puzzle-pro"]').getByRole("button", { name: "Retire" }).click();
