@@ -4,15 +4,15 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { can, reviewActions, ruleText } from "@trailbuddies/domain";
 import { t } from "@trailbuddies/i18n";
 import { colors } from "@trailbuddies/tokens";
-import { Pill, inputSx } from "@/components/builder/parts";
+import { Field, Pill, inputSx } from "@/components/builder/parts";
 import { api } from "@/lib/account";
 import { STATUS_TONE } from "./DraftBanner";
+import StaffDialog from "./StaffDialog";
 import { StaffHead, useStaff } from "./StaffShell";
 
 const when = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "");
@@ -295,35 +295,49 @@ export default function ReviewPublish() {
       </Box>
 
       {rollTo && (
-        <Dialog open onClose={() => setRollTo(null)} PaperProps={{ sx: { borderRadius: 5.5, p: 2.5, maxWidth: 480 } }}>
-          <Typography component="h2" sx={{ fontWeight: 800, fontSize: 22, mb: 1 }}>
-            {t("cms.rv.rollTitle", { v: rollTo.version })}
-          </Typography>
-          <Typography sx={{ color: "text.secondary", mb: 1.5 }}>{t("cms.rv.rollBody")}</Typography>
-          <TextField
-            value={rollNote}
-            onChange={(e) => setRollNote(e.target.value)}
-            placeholder={t("cms.rv.rollPh")}
-            slotProps={{ htmlInput: { "aria-label": t("cms.rv.why"), maxLength: 300 } }}
-            sx={{ ...inputSx, mb: 2 }}
-          />
-          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-            <Button color="inherit" onClick={() => setRollTo(null)}>
-              {t("cms.close")}
-            </Button>
-            <Button
-              variant="contained"
-              disabled={busy || rollNote.trim().length < 3}
-              onClick={() => {
-                const v = rollTo.version;
-                setRollTo(null);
-                run(() => api.rollbackContent(v, rollNote.trim()), t("cms.rv.rolled", { v }));
-              }}
-            >
-              {t("cms.rv.rollGo", { v: rollTo.version })}
-            </Button>
+        <StaffDialog
+          size="xs"
+          title={t("cms.rv.rollTitle", { v: rollTo.version })}
+          onClose={() => setRollTo(null)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (rollNote.trim().length < 3) return;
+            const v = rollTo.version;
+            setRollTo(null);
+            run(() => api.rollbackContent(v, rollNote.trim()), t("cms.rv.rolled", { v }));
+          }}
+          actions={
+            <>
+              <Button color="inherit" onClick={() => setRollTo(null)}>
+                {t("cms.cancel")}
+              </Button>
+              <Button type="submit" variant="contained" disabled={busy || rollNote.trim().length < 3}>
+                {t("cms.rv.rollGo", { v: rollTo.version })}
+              </Button>
+            </>
+          }
+        >
+          <Box sx={{ p: 1.5, borderRadius: 4.5, bgcolor: colors.cream, border: `2px solid ${colors.line}`, fontSize: 14 }}>
+            <b>v{rollTo.version}</b> · {rollTo.note || ""}
+            <br />
+            <Box component="span" sx={{ color: "text.secondary" }}>
+              {when(rollTo.published_at)} · {t("cms.rv.publishedBy", { who: rollTo.published_by })}
+            </Box>
           </Box>
-        </Dialog>
+          <Typography sx={{ color: "text.secondary" }}>{t("cms.rv.rollBody", { v: rollTo.version })}</Typography>
+          <Field label={t("cms.rv.why")} id="roll-why">
+            <TextField
+              id="roll-why"
+              autoFocus
+              value={rollNote}
+              onChange={(e) => setRollNote(e.target.value)}
+              placeholder={t("cms.rv.rollPh")}
+              helperText={t("cms.rv.rollHint")}
+              slotProps={{ htmlInput: { maxLength: 300 } }}
+              sx={inputSx}
+            />
+          </Field>
+        </StaffDialog>
       )}
     </>
   );

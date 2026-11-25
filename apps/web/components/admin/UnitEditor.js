@@ -6,7 +6,6 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
@@ -29,6 +28,7 @@ import { ChoiceChip, Field, Pill, inputSx } from "@/components/builder/parts";
 import { api } from "@/lib/account";
 import { previewHref } from "@/lib/cmsPreview";
 import { uploadContentPicture } from "@/lib/contentUpload";
+import StaffDialog from "./StaffDialog";
 import { StaffHead, useStaff } from "./StaffShell";
 
 const BANDS = ["seedling", "sprout", "explorer", "voyager", "trailblazer"];
@@ -116,30 +116,41 @@ function PicturePicker({ item, manifest, onPick, onClose }) {
     setBusy("");
   };
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 5.5, p: 2.25 } }}>
-      <Typography component="h2" sx={{ fontWeight: 800, fontSize: 20, mb: 1 }}>
-        {t("cms.pic.title", { word: item.label })}
-      </Typography>
-      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1.5 }} role="group">
+    <StaffDialog
+      title={t("cms.pic.title", { word: item.label })}
+      sub={t("cms.pic.sub")}
+      onClose={onClose}
+      actions={
+        <>
+          <Button color="inherit" onClick={() => onPick({ clear: true })} sx={{ mr: "auto" }}>
+            {t("cms.pic.clear")}
+          </Button>
+          <Button variant="contained" onClick={onClose}>
+            {t("cms.done")}
+          </Button>
+        </>
+      }
+    >
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }} role="group">
         {["unit", "library", "emoji"].map((k) => (
           <ChoiceChip key={k} on={tab === k} onClick={() => setTab(k)}>
             {t(`cms.pic.tab.${k}`)}
           </ChoiceChip>
         ))}
-        <Button component="label" variant="outlined" size="small" sx={{ ml: "auto" }}>
+        <Button component="label" variant="outlined" sx={{ ml: "auto" }}>
           {t("cms.pic.upload")}
           <input hidden type="file" accept="image/*" data-testid="picture-file" onChange={(e) => upload(e.target.files?.[0])} />
         </Button>
       </Box>
       {busy && (
-        <Alert severity="info" sx={{ borderRadius: 4, mb: 1.5 }} role="status">
+        <Alert severity="info" sx={{ borderRadius: 4 }} role="status">
           {busy}
         </Alert>
       )}
       {tab === "emoji" ? (
         <>
-          <TextField size="small" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("cms.pic.search")} sx={{ ...inputSx, mb: 1.5 }} slotProps={{ htmlInput: { "aria-label": t("cms.pic.search") } }} />
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, maxHeight: 320, overflowY: "auto" }}>
+          <TextField size="small" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("cms.pic.search")} sx={inputSx} slotProps={{ htmlInput: { "aria-label": t("cms.pic.search") } }} />
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(52px, 1fr))", gap: 0.75 }}>
             {searchLibrary(q)
               .slice(0, 120)
               .map((p) => (
@@ -158,7 +169,7 @@ function PicturePicker({ item, manifest, onPick, onClose }) {
           </Box>
         </>
       ) : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))", gap: 1, maxHeight: 360, overflowY: "auto" }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))", gap: 1 }}>
           {art.length === 0 && <Typography sx={{ color: "text.secondary", gridColumn: "1 / -1" }}>{t("cms.pic.none")}</Typography>}
           {art.map((a) => (
             <Box
@@ -171,7 +182,7 @@ function PicturePicker({ item, manifest, onPick, onClose }) {
               sx={{
                 aspectRatio: "1",
                 borderRadius: 3.5,
-                border: `2px solid ${item.image === a.id ? colors.leaf.deep : colors.line}`,
+                border: `3px solid ${item.image === a.id ? colors.leaf.deep : colors.line}`,
                 bgcolor: colors.sand,
                 backgroundImage: `url("${uploadedMediaId(a) ? api.contentAssetUrl(uploadedMediaId(a)) : assetSrc(a)}")`,
                 backgroundSize: "cover",
@@ -181,13 +192,7 @@ function PicturePicker({ item, manifest, onPick, onClose }) {
           ))}
         </Box>
       )}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-        <Button color="inherit" onClick={() => onPick({ clear: true })}>
-          {t("cms.pic.clear")}
-        </Button>
-        <Button onClick={onClose}>{t("cms.close")}</Button>
-      </Box>
-    </Dialog>
+    </StaffDialog>
   );
 }
 
