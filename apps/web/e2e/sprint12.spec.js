@@ -21,6 +21,7 @@ async function staffDevice(browser, srv, email) {
   await page.goto("/start/account");
   await page.getByLabel("Email address").fill(email);
   await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   await page.goto(`/auth/verify?token=${encodeURIComponent(srv.sent.at(-1).token)}`);
   await expect(page).not.toHaveURL(/\/auth\/verify/);
   return page;
@@ -97,24 +98,36 @@ test("staff roles, import, edit a unit with a new picture, preview as a child, a
   await shot(w, testInfo, "s12-preview");
   expect(srv.events.length).toBe(events);
 
-  // CMS-02/03: Steve sees the draft, approves the picture, then publishes.
+  // CMS-06: Wanjiru submits it for review.
+  await w.goto("/admin/content/review");
+  await w.getByRole("textbox", { name: "What changed" }).fill("Puppy fact, and a camel");
+  await w.getByRole("button", { name: "Submit for review" }).click();
+  await expect(w.getByText("Submitted. A reviewer will look at it.")).toBeVisible();
+
+  // Steve (who didn't work on it) approves it, then publishes once the picture is approved.
   await s.goto("/admin/content");
   const banner = s.getByTestId("version-banner");
   await expect(banner).toContainText("Version 2");
   await expect(banner).toContainText("added camel");
-  await s.getByRole("textbox", { name: "What changed" }).fill("Puppy fact, and a camel");
-  await s.getByRole("button", { name: "Publish" }).click();
-  await expect(banner).toContainText("aren't approved yet");
+  await expect(banner).toContainText("Waiting for review");
   const pic = s.getByTestId("approvals");
   await expect(pic).toContainText(`Uploaded by ${WANJIRU}`);
   await settled(s);
   await noSideScroll(s);
   await shot(s, testInfo, "s12-content");
-  await pic.getByRole("button", { name: "Approve" }).click();
+  await s.getByRole("link", { name: "Review & publish" }).first().click();
+  await s.getByRole("button", { name: "Approve" }).click();
+  await expect(s.getByText("Approved. An admin can publish it now.")).toBeVisible();
+  await s.getByRole("button", { name: "Publish" }).click();
+  await expect(s.getByText("aren't approved yet", { exact: false })).toBeVisible();
+  await s.goto("/admin/content");
+  await s.getByTestId("approvals").getByRole("button", { name: "Approve" }).click();
   await expect(s.getByText("Picture approved", { exact: false })).toBeVisible();
+  await s.goto("/admin/content/review");
   await s.getByRole("button", { name: "Publish" }).click();
   await expect(s.getByText("Version 2 is published", { exact: false })).toBeVisible();
-  await expect(banner).toContainText("Children have version 2");
+  await s.goto("/admin/content");
+  await expect(s.getByTestId("version-banner")).toContainText("Children have version 2");
   expect(srv.cms.live.units["where-animals-live"].items[0]).toMatchObject({ id: "dog", label: "puppy" });
 
   // The Export file refreshes the bundled copy (pnpm content export:apply).
@@ -123,7 +136,7 @@ test("staff roles, import, edit a unit with a new picture, preview as a child, a
   expect((await download).suggestedFilename()).toBe("trailbuddies-content-v2.json");
 });
 
-test("an admin publishing their own change must confirm it; moderation moved under the role", async ({ browser }) => {
+test("nobody approves their own changes; moderation moved under the role", async ({ browser }) => {
   const srv = newServer();
   srv.staff["safety@trailbuddies.africa"] = { role: "moderator" };
   const s = await staffDevice(browser, srv, STEVE);
@@ -133,13 +146,12 @@ test("an admin publishing their own change must confirm it; moderation moved und
   await s.getByLabel("Summary").fill("Big animals that live in the wild.");
   await s.getByRole("button", { name: "Save to draft" }).click();
   await expect(s.getByText("Saved to the draft", { exact: false })).toBeVisible();
-  await s.getByRole("link", { name: "Back to library" }).click();
+  await s.getByRole("link", { name: "Review & publish" }).first().click();
   await s.getByRole("textbox", { name: "What changed" }).fill("Summary");
-  await s.getByRole("button", { name: "Publish", exact: true }).click();
-  await expect(s.getByText("You made these changes yourself", { exact: false })).toBeVisible();
-  await s.getByRole("button", { name: "Publish anyway" }).click();
-  await expect(s.getByText("Version 2 is published", { exact: false })).toBeVisible();
-  expect(srv.cms.log[0]).toMatchObject({ action: "content_publish", detail: { self_published: true } });
+  await s.getByRole("button", { name: "Submit for review" }).click();
+  await expect(s.getByText("You worked on these changes, so someone else must review them.")).toBeVisible();
+  await expect(s.getByRole("button", { name: "Approve" })).toHaveCount(0);
+  await expect(s.getByRole("button", { name: "Publish" })).toHaveCount(0);
 
   const m = await staffDevice(browser, srv, "safety@trailbuddies.africa");
   await m.goto("/admin");

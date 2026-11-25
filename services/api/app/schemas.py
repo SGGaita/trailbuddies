@@ -636,6 +636,7 @@ class ContentImportIn(Strict):
     catalogue: dict
     units: list[dict] = Field(max_length=1000)
     assets: dict[str, dict] = Field(default_factory=dict)
+    badges: list[dict] | None = Field(default=None, max_length=500)
 
 
 class UnitSaveIn(Strict):
@@ -645,9 +646,72 @@ class UnitSaveIn(Strict):
 
 class PublishIn(Strict):
     note: str = Field(min_length=3, max_length=300)
-    confirm_own: bool = Field(default=False, description="an admin publishing changes they made themselves")
 
     _clean = field_validator("note")(lambda v: _one_line(v))
+
+
+class SubmitIn(Strict):
+    """CMS-06: an editor sends the draft for review, saying what changed."""
+
+    note: str = Field(min_length=3, max_length=300)
+
+    _clean = field_validator("note")(lambda v: _one_line(v))
+
+
+class ReviewIn(Strict):
+    approve: bool
+    comment: str | None = Field(default=None, max_length=500)
+
+    _clean = field_validator("comment")(lambda v: _one_line(v) if v else v)
+
+
+class RollbackIn(Strict):
+    """CMS-07: publish an earlier version's content again."""
+
+    version: int = Field(ge=1)
+    note: str = Field(min_length=3, max_length=300)
+
+    _clean = field_validator("note")(lambda v: _one_line(v))
+
+
+MEDIA_ID = r"^[0-9A-HJKMNP-TV-Z]{26}$"
+
+
+class NewUnitIn(Strict):
+    title: str = Field(min_length=1, max_length=60)
+    band: Literal["seedling", "sprout", "explorer", "voyager", "trailblazer"]
+    copy_from: str | None = Field(default=None, max_length=60, description="an existing unit to start from")
+
+    _clean = field_validator("title")(lambda v: _one_line(v))
+
+
+class TrailIn(Strict):
+    """CMS-05: a new trail with its uploaded island art and its first unit."""
+
+    name: str = Field(min_length=1, max_length=40)
+    place: str = Field(min_length=1, max_length=40)
+    art: str = Field(pattern=MEDIA_ID)
+    unit: NewUnitIn
+
+    _clean = field_validator("name", "place")(lambda v: _one_line(v))
+
+
+class TrailPatch(Strict):
+    name: str | None = Field(default=None, min_length=1, max_length=40)
+    place: str | None = Field(default=None, min_length=1, max_length=40)
+    art: str | None = Field(default=None, pattern=MEDIA_ID)
+    archived: bool | None = None
+
+
+class OrderIn(Strict):
+    """CMS-05: the map's trail order, and optionally one trail's unit order."""
+
+    subjects: list[str] = Field(min_length=1, max_length=100)
+    units: dict[str, list[str]] = Field(default_factory=dict)
+
+
+class BadgeSaveIn(Strict):
+    badge: dict
 
 
 class ContentAssetIn(Strict):

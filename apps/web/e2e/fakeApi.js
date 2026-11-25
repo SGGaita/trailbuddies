@@ -3,10 +3,13 @@
 // web app's sign-in, onboarding and sync can be tested at every screen size.
 
 import { validate } from "@trailbuddies/content-schema";
+import { buildPacks } from "../../../packages/content/scripts/packs.js";
 import {
   REPORT_THRESHOLD,
   ROLE_CAN,
   diffUnit,
+  newId,
+  newUnit,
   syncEntry,
   uploadedMediaId,
   countryRules,
@@ -60,7 +63,7 @@ export function newServer() {
     modLog: [], // S11b: the audit log
     admins: ["steve@trailbuddies.africa"], // TB_ADMIN_EMAILS
     staff: {}, // S12 CMS-01: email -> { role, invited_by, seen_at }
-    cms: { live: null, draft: null, log: [] }, // S12 CMS-02: { version, catalogue, units, assets, by }
+    cms: { live: null, draft: null, log: [], versions: [] }, // S12 CMS-02: { version, catalogue, units, assets, by }
     contentAssets: {}, // S12 CMS-03: id -> { status, approval, uploaded_by, label }
     seq: 0,
   };
@@ -70,24 +73,72 @@ const staffRole = (srv, email) => (srv.admins.includes(email) ? "admin" : srv.st
 const cmsCan = (srv, email, action) => Boolean(ROLE_CAN[staffRole(srv, email)]?.includes(action));
 const cmsCurrent = (srv) => {
   const { live, draft } = srv.cms;
-  return draft ? { ...live, catalogue: draft.catalogue || live.catalogue, units: { ...live.units, ...draft.units }, assets: { ...live.assets, ...draft.assets } } : live;
+  return draft
+    ? { ...live, catalogue: draft.catalogue || live.catalogue, units: { ...live.units, ...draft.units }, assets: { ...live.assets, ...draft.assets }, badges: draft.badges || live.badges }
+    : live;
 };
+const clone = (x) => JSON.parse(JSON.stringify(x));
+/** The draft to change (S13: an edit after review sends it back to draft). */
+function draftFor(srv, email) {
+  const d = (srv.cms.draft ||= { version: Math.max(...srv.cms.versions.map((v) => v.version)) + 1, units: {}, assets: {}, by: {}, authors: [], created_by: email, catalogue: null, badges: null, status: "draft" });
+  if (d.status !== "draft") {
+    cmsLog(srv, email, "draft_reopened", `v${d.version}`, { was: d.status });
+    Object.assign(d, { status: "draft", approved_by: null });
+  }
+  if (!d.authors.includes(email)) d.authors.push(email);
+  return d;
+}
+function cmsChanges(srv) {
+  const { live, draft } = srv.cms;
+  if (!draft) return [];
+  const units = Object.entries(draft.units)
+    .map(([id, u]) => ({ kind: "unit", unit: id, title: u.title, changes: diffUnit(live.units[id] || null, u), by: draft.by[id] }))
+    .filter((c) => c.changes.length);
+  const map = [];
+  if (draft.catalogue) {
+    const was = Object.fromEntries(live.catalogue.subjects.map((x) => [x.id, x]));
+    for (const x of draft.catalogue.subjects) {
+      const b = was[x.id];
+      if (!b) map.push(`new trail “${x.name}”`);
+      else if (!!b.archived !== !!x.archived) map.push(`${x.archived ? "archived" : "restored"} “${x.name}”`);
+    }
+    const common = live.catalogue.subjects.map((x) => x.id).filter((i) => draft.catalogue.subjects.some((y) => y.id === i));
+    if (draft.catalogue.subjects.map((x) => x.id).filter((i) => common.includes(i)).join() !== common.join()) map.push("trails reordered on the map");
+  }
+  const badges = [];
+  if (draft.badges) {
+    const was = Object.fromEntries((live.badges || []).map((b) => [b.id, b]));
+    for (const b of draft.badges) {
+      if (!was[b.id]) badges.push(`new badge “${b.name}”`);
+      else if (!!was[b.id].retired !== !!b.retired) badges.push(`${b.retired ? "retired" : "brought back"} “${b.name}”`);
+      else if (JSON.stringify(was[b.id]) !== JSON.stringify(b)) badges.push(`edited “${b.name}”`);
+    }
+  }
+  return [
+    ...(badges.length ? [{ kind: "badges", unit: "built-in", title: "Badges", changes: badges, by: draft.created_by }] : []),
+    ...(map.length ? [{ kind: "catalogue", unit: "catalogue", title: "Map & trails", changes: map, by: draft.created_by }] : []),
+    ...units,
+  ];
+}
 function cmsSummary(srv) {
   const { live, draft } = srv.cms;
   if (!live) return { imported: false, live: null, draft: null, subjects: [], assets_waiting: 0 };
   const cur = cmsCurrent(srv);
-  const changes = draft
-    ? Object.entries(draft.units)
-        .map(([id, u]) => ({ unit: id, title: u.title, changes: diffUnit(live.units[id] || null, u), by: draft.by[id] }))
-        .filter((c) => c.changes.length)
-    : [];
+  const changes = cmsChanges(srv);
   return {
     imported: true,
+    has_badges: !!cur.badges,
     live: { version: live.version, published_at: live.at, by: live.by, note: live.note },
-    draft: draft ? { version: draft.version, changes, created_by: draft.created_by } : null,
+    draft: draft
+      ? { version: draft.version, status: draft.status, note: draft.note || null, changes, created_by: draft.created_by, authors: draft.authors, submitted_by: draft.submitted_by || null, approved_by: draft.approved_by || null, review_note: draft.review_note || null }
+      : null,
     subjects: cur.catalogue.subjects.map((sub) => ({
       id: sub.id,
       name: sub.name,
+      place: sub.place,
+      island: sub.island,
+      art: sub.art || null,
+      archived: !!sub.archived,
       units: sub.units.map((e) => ({ id: e.id, title: e.title, band: e.band, status: e.status, has_content: !!cur.units[e.id], items: cur.units[e.id]?.items.length || 0, edited: !!draft?.units[e.id] })),
     })),
     assets_waiting: Object.values(srv.contentAssets).filter((a) => a.approval === "waiting").length,
@@ -140,10 +191,19 @@ function staffRoutes(srv, route, { path, method, body, user }) {
   if (path === "/admin/content/import" && method === "POST") {
     const no = need("publish");
     if (no) return no;
-    if (srv.cms.live) return json(route, 409, { detail: { code: "imported", message: "The content is already imported." } });
+    if (srv.cms.live) {
+      if (body.badges && !srv.cms.live.badges) {
+        srv.cms.live.badges = body.badges;
+        srv.cms.versions[srv.cms.versions.length - 1].snapshot.badges = body.badges;
+        cmsLog(srv, email, "badges_import", "v1");
+        return json(route, 201, cmsSummary(srv));
+      }
+      return json(route, 409, { detail: { code: "imported", message: "The content is already imported." } });
+    }
     const problems = body.units.flatMap((u) => validate("unit", u).errors.map((e) => `${u.id}: ${e}`));
     if (problems.length) return json(route, 422, { detail: { code: "invalid", message: "The content didn't pass the checks.", problems } });
-    srv.cms.live = { version: 1, catalogue: body.catalogue, units: Object.fromEntries(body.units.map((u) => [u.id, u])), assets: body.assets, by: email, at: new Date().toISOString(), note: "Imported" };
+    srv.cms.live = { version: 1, catalogue: body.catalogue, units: Object.fromEntries(body.units.map((u) => [u.id, u])), assets: body.assets, badges: body.badges || null, by: email, at: new Date().toISOString(), note: "Imported" };
+    srv.cms.versions = [{ version: 1, status: "published", note: "Imported from the content files in the code", created_by: email, authors: [email], published_by: email, published_at: srv.cms.live.at, snapshot: clone(srv.cms.live) }];
     cmsLog(srv, email, "content_import", "v1", { units: body.units.length });
     return json(route, 201, cmsSummary(srv));
   }
@@ -182,7 +242,7 @@ function staffRoutes(srv, route, { path, method, body, user }) {
       if (up && ["flagged", "refused"].includes(srv.contentAssets[up]?.approval)) problems.push(`assets picture "${a.id}" can't be used`);
     }
     if (problems.length) return json(route, 422, { detail: { code: "invalid", message: "Fix these before saving.", problems } });
-    const d = (srv.cms.draft ||= { version: srv.cms.live.version + 1, units: {}, assets: {}, by: {}, created_by: email, catalogue: null });
+    const d = draftFor(srv, email);
     d.units[id] = unit;
     d.by[id] = email;
     if (body.assets) d.assets[id] = body.assets;
@@ -198,28 +258,191 @@ function staffRoutes(srv, route, { path, method, body, user }) {
     cmsLog(srv, email, "draft_discard", "draft");
     return json(route, 204);
   }
-  if (path === "/admin/content/publish" && method === "POST") {
-    const no = need("publish");
-    if (no) return no;
-    const d = srv.cms.draft;
-    if (!d) return json(route, 409, { detail: { code: "no_draft", message: "There's nothing to publish." } });
-    const own = Object.values(d.by).every((w) => w === email);
-    if (own && !body.confirm_own) return json(route, 409, { detail: { code: "own", message: "These are your own changes. Confirm to publish them without a second person." } });
-    const cur = cmsCurrent(srv);
+  const assetsBlocked = (cur) => {
     const blocked = [];
+    const ok = (id) => srv.contentAssets[id]?.approval === "approved";
     for (const [uid, u] of Object.entries(cur.units)) {
       if (u.status !== "ready") continue;
       const used = new Set(u.items.map((i) => i.image).filter(Boolean));
       for (const a of cur.assets[uid]?.assets || []) {
         const up = uploadedMediaId(a);
-        if (up && used.has(a.id) && srv.contentAssets[up]?.approval !== "approved") blocked.push(`${uid}: uploaded picture "${a.id}" isn't approved yet`);
+        if (up && used.has(a.id) && !ok(up)) blocked.push(`${uid}: uploaded picture "${a.id}" isn't approved yet`);
       }
     }
-    if (blocked.length) return json(route, 409, { detail: { code: "assets", message: "Some pictures aren't approved yet.", problems: blocked } });
-    srv.cms.live = { ...cur, version: d.version, by: email, at: new Date().toISOString(), note: body.note };
-    srv.cms.draft = null;
-    cmsLog(srv, email, "content_publish", `v${d.version}`, { self_published: own, note: body.note });
+    for (const sub of cur.catalogue.subjects)
+      if (sub.art && !sub.archived && sub.units.some((e) => cur.units[e.id]?.status === "ready") && !ok(sub.art)) blocked.push(`${sub.id}: the island art for “${sub.name}” isn't approved yet`);
+    for (const b of cur.badges || []) if (b.art && !b.retired && !ok(b.art)) blocked.push(`badge ${b.id}: the art for “${b.name}” isn't approved yet`);
+    return blocked;
+  };
+  const goLive = (cur, version, note, extra = {}) => {
+    srv.cms.live = { ...clone(cur), version, by: email, at: new Date().toISOString(), note };
+    srv.cms.versions.unshift({ version, status: "published", note, published_by: email, published_at: srv.cms.live.at, snapshot: clone(srv.cms.live), ...extra });
+    // Like app/cms.py publish_packs: the preview packs devices in these tests download.
+    const live = srv.cms.live;
+    const content = {
+      catalogue: live.catalogue,
+      badges: live.badges,
+      subjects: live.catalogue.subjects.map((subject) => ({
+        subject,
+        units: subject.units.filter((e) => live.units[e.id]).map((entry) => ({ entry, unit: live.units[entry.id], assets: live.assets[entry.id] || { schema: "assets/1", assets: [] } })),
+      })),
+    };
+    const { manifest, files } = buildPacks(content, { channel: "preview", release: `2026.11.cms${version}` });
+    for (const f of files) if (!f.name.startsWith("manifest-")) srv.packs[f.name] = JSON.parse(f.body);
+    srv.manifest.preview = manifest;
+  };
+  if (path === "/admin/content/submit" && method === "POST") {
+    const no = need("edit");
+    if (no) return no;
+    const d = srv.cms.draft;
+    if (!d || d.status !== "draft") return json(route, 409, { detail: { code: "state", message: "It's already waiting for review." } });
+    Object.assign(d, { status: "submitted", note: body.note, submitted_by: email, review_note: null });
+    cmsLog(srv, email, "draft_submit", `v${d.version}`, { note: body.note });
     return json(route, 200, cmsSummary(srv));
+  }
+  if (path === "/admin/content/review" && method === "POST") {
+    const no = need("review");
+    if (no) return no;
+    const d = srv.cms.draft;
+    if (!d) return json(route, 409, { detail: { code: "no_draft", message: "There's no draft." } });
+    if (d.authors.includes(email) || d.submitted_by === email) return json(route, 403, { detail: { code: "own", message: "Someone who didn't work on it must review it." } });
+    if (body.approve) {
+      if (d.status !== "submitted") return json(route, 409, { detail: { code: "state", message: "It isn't waiting for review." } });
+      Object.assign(d, { status: "approved", approved_by: email });
+      cmsLog(srv, email, "draft_approve", `v${d.version}`);
+    } else {
+      if (!body.comment) return json(route, 422, { detail: { code: "comment", message: "Say what needs changing." } });
+      Object.assign(d, { status: "draft", review_note: body.comment, approved_by: null });
+      cmsLog(srv, email, "draft_return", `v${d.version}`, { comment: body.comment });
+    }
+    return json(route, 200, cmsSummary(srv));
+  }
+  if (path === "/admin/content/review" && method === "GET") {
+    const d = srv.cms.draft;
+    if (!d) return json(route, 409, { detail: { code: "no_draft", message: "There's no draft." } });
+    const live = srv.cms.live;
+    const docs = [
+      ...(d.badges ? [{ kind: "badges", key: "built-in", before: live.badges, after: d.badges, by: d.created_by }] : []),
+      ...(d.catalogue ? [{ kind: "catalogue", key: "catalogue", before: live.catalogue, after: d.catalogue, by: d.created_by }] : []),
+      ...Object.entries(d.units).map(([id, u]) => ({ kind: "unit", key: id, before: live.units[id] || null, after: u, by: d.by[id] })),
+    ];
+    return json(route, 200, { draft: cmsSummary(srv).draft, docs });
+  }
+  if (path === "/admin/content/publish" && method === "POST") {
+    const no = need("publish");
+    if (no) return no;
+    const d = srv.cms.draft;
+    if (!d) return json(route, 409, { detail: { code: "no_draft", message: "There's nothing to publish." } });
+    if (d.status !== "approved") return json(route, 409, { detail: { code: "not_approved", message: "A reviewer must approve it first." } });
+    const cur = cmsCurrent(srv);
+    const blocked = assetsBlocked(cur);
+    if (blocked.length) return json(route, 409, { detail: { code: "assets", message: "Some pictures aren't approved yet.", problems: blocked } });
+    goLive(cur, d.version, body.note || d.note, { created_by: d.created_by, authors: d.authors, submitted_by: d.submitted_by, approved_by: d.approved_by });
+    srv.cms.draft = null;
+    cmsLog(srv, email, "content_publish", `v${d.version}`, { note: body.note || d.note, approved_by: d.approved_by });
+    return json(route, 200, cmsSummary(srv));
+  }
+  if (path === "/admin/content/versions") {
+    const live = srv.cms.live?.version;
+    return json(route, 200, {
+      versions: srv.cms.versions.map(({ snapshot: _s, ...v }) => ({ authors: [], submitted_by: null, approved_by: null, rolled_back_from: null, created_by: v.published_by, ...v, live: v.version === live })),
+    });
+  }
+  if (path === "/admin/content/rollback" && method === "POST") {
+    const no = need("publish");
+    if (no) return no;
+    const target = srv.cms.versions.find((v) => v.version === body.version);
+    if (!target || target.version >= srv.cms.live.version) return json(route, 404, { detail: "Pick an earlier published version" });
+    if (srv.cms.draft) return json(route, 409, { detail: { code: "draft_open", message: "Publish or discard the draft first." } });
+    const version = Math.max(...srv.cms.versions.map((v) => v.version)) + 1;
+    goLive(target.snapshot, version, body.note, { rolled_back_from: target.version, created_by: email });
+    cmsLog(srv, email, "content_rollback", `v${version}`, { to: target.version });
+    return json(route, 200, cmsSummary(srv));
+  }
+  // S13: map & trails (CMS-05)
+  const catDraft = () => {
+    const d = draftFor(srv, email);
+    d.catalogue = clone(cmsCurrent(srv).catalogue);
+    return d;
+  };
+  const makeUnit = (d, subject, u) => {
+    const taken = [...Object.keys(cmsCurrent(srv).units), ...d.catalogue.subjects.flatMap((x) => x.units.map((e) => e.id))];
+    const id = newId(u.title, taken);
+    const unit = newUnit({ id, subject, title: u.title, band: u.band }, u.copy_from ? cmsCurrent(srv).units[u.copy_from] : undefined);
+    d.units[id] = unit;
+    d.by[id] = email;
+    if (u.copy_from && cmsCurrent(srv).assets[u.copy_from]) d.assets[id] = clone(cmsCurrent(srv).assets[u.copy_from]);
+    d.catalogue.subjects.find((x) => x.id === subject).units.push({ id, title: unit.title, band: unit.band, status: "draft", lessons: unit.lessons.length });
+    return id;
+  };
+  if (path === "/admin/content/trails" && method === "POST") {
+    const no = need("edit");
+    if (no) return no;
+    const d = catDraft();
+    const sid = newId(body.place, d.catalogue.subjects.map((x) => x.id));
+    d.catalogue.subjects.push({ id: sid, name: body.name, place: body.place, island: sid, art: body.art, units: [] });
+    makeUnit(d, sid, body.unit);
+    cmsLog(srv, email, "trail_add", sid, { name: body.name });
+    return json(route, 201, cmsSummary(srv));
+  }
+  m = path.match(/^\/admin\/content\/trails\/([^/]+)\/units$/);
+  if (m && method === "POST") {
+    const no = need("edit");
+    if (no) return no;
+    const d = catDraft();
+    const id = makeUnit(d, m[1], body);
+    cmsLog(srv, email, "unit_add", id, { trail: m[1] });
+    return json(route, 201, { ...cmsSummary(srv), unit: id });
+  }
+  m = path.match(/^\/admin\/content\/trails\/([^/]+)$/);
+  if (m && method === "PATCH") {
+    const no = need("edit");
+    if (no) return no;
+    const d = catDraft();
+    const sub = d.catalogue.subjects.find((x) => x.id === m[1]);
+    for (const k of ["name", "place", "art"]) if (body[k]) sub[k] = body[k];
+    if (body.archived === true) sub.archived = true;
+    if (body.archived === false) delete sub.archived;
+    cmsLog(srv, email, "trail_change", m[1], body);
+    return json(route, 200, cmsSummary(srv));
+  }
+  if (path === "/admin/content/order" && method === "PUT") {
+    const no = need("edit");
+    if (no) return no;
+    const d = catDraft();
+    const by = Object.fromEntries(d.catalogue.subjects.map((x) => [x.id, x]));
+    if ([...body.subjects].sort().join() !== Object.keys(by).sort().join()) return json(route, 422, { detail: { code: "order", message: "Every trail must be in the order once." } });
+    for (const [sid, ids] of Object.entries(body.units || {})) by[sid].units = ids.map((id) => by[sid].units.find((e) => e.id === id));
+    d.catalogue.subjects = body.subjects.map((id) => by[id]);
+    cmsLog(srv, email, "map_order", "map");
+    return json(route, 200, cmsSummary(srv));
+  }
+  // S13: badges (CMS-08)
+  if (path === "/admin/content/badges" && method === "GET") {
+    const cur = cmsCurrent(srv);
+    const items = cur.badges || [];
+    const live = Object.fromEntries((srv.cms.live.badges || []).map((b) => [b.id, JSON.stringify(b)]));
+    return json(route, 200, {
+      badges: items,
+      approvals: Object.fromEntries(items.filter((b) => b.art).map((b) => [b.art, srv.contentAssets[b.art]?.approval])),
+      edited: items.filter((b) => live[b.id] !== JSON.stringify(b)).map((b) => b.id),
+      units: Object.fromEntries(Object.entries(cur.units).map(([id, u]) => [id, u.title])),
+    });
+  }
+  m = path.match(/^\/admin\/content\/badges\/([^/]+)$/);
+  if (m && method === "PUT") {
+    const no = need("edit");
+    if (no) return no;
+    const problems = validate("badge", body.badge).errors;
+    if (problems.length) return json(route, 422, { detail: { code: "invalid", message: "Fix these before saving.", problems } });
+    const d = draftFor(srv, email);
+    const list = clone(cmsCurrent(srv).badges || []);
+    const i = list.findIndex((b) => b.id === m[1]);
+    if (i < 0) list.push(body.badge);
+    else list[i] = body.badge;
+    d.badges = list;
+    cmsLog(srv, email, "badge_save", m[1], { retired: !!body.badge.retired });
+    return staffRoutes(srv, route, { path: "/admin/content/badges", method: "GET", body: null, user });
   }
   const assetOut = (id) => ({ id, ...srv.contentAssets[id] });
   if (path === "/admin/content/assets" && method === "GET") return canSee ? json(route, 200, { assets: Object.keys(srv.contentAssets).filter((id) => srv.contentAssets[id].status === "ready").map(assetOut) }) : need("approve-asset");

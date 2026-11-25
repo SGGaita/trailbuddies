@@ -717,7 +717,9 @@ class ContentVersion(Base):
 
     __tablename__ = "content_versions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    status: Mapped[str] = mapped_column(String(10), index=True, doc="draft or published")
+    status: Mapped[str] = mapped_column(
+        String(10), index=True, doc="draft, submitted, approved (CMS-06) or published"
+    )
     note: Mapped[str | None] = mapped_column(String(300), nullable=True)
     created_by: Mapped[str] = mapped_column(String(320))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -727,11 +729,23 @@ class ContentVersion(Base):
         Boolean, default=False, server_default="false", doc="an admin published their own changes"
     )
     release: Mapped[str | None] = mapped_column(String(32), nullable=True, doc="the packs' release name")
+    # CMS-06: the review. An editor submits; a reviewer or admin who didn't work on it approves
+    # it or sends it back with a comment; an admin publishes.
+    submitted_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_note: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, doc="the last send-back comment"
+    )
+    # CMS-07: a roll back publishes an earlier version's content again as a new version.
+    rolled_back_from: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class ContentDoc(Base):
     """CMS-02: one document in a version: the subject catalogue, a unit, or a unit's asset
-    manifest. A version holds only the documents it changed; the rest come from earlier ones."""
+    manifest, or the built-in badges (CMS-08). A version holds only the documents it changed;
+    the rest come from earlier ones."""
 
     __tablename__ = "content_docs"
     __table_args__ = (UniqueConstraint("version_id", "kind", "key", name="uq_content_docs_key"),)

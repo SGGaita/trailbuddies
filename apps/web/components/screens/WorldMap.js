@@ -91,11 +91,11 @@ function MapPath({ path, sectionCount }) {
   );
 }
 
-function MapStop({ x, y, id, island, title, subtitle, href, onClick, children }) {
+function MapStop({ x, y, id, island, art, title, subtitle, href, onClick, children }) {
   return (
     <Box component={Link} href={href} onClick={onClick} sx={{ ...PLACE_SX, left: `${x}%`, top: `${y}%` }}>
       <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 0.5 }}>{children}</Box>
-      {SUBJECT_ART[id] ? (
+      {SUBJECT_ART[id] && !art ? (
         <SubjectArt
           id={id}
           small
@@ -104,7 +104,7 @@ function MapStop({ x, y, id, island, title, subtitle, href, onClick, children })
           sx={{ filter: "drop-shadow(0 4px 4px #4d47194d)" }}
         />
       ) : (
-        <Island kind={island} width="min(70%, 144px)" height={88} />
+        <Island kind={island} art={art} width="min(70%, 144px)" height={88} />
       )}
       <Box
         className="map-stop-label"
@@ -421,12 +421,17 @@ export default function WorldMap() {
     s.p.done
       ? t("map.progress", { done: s.p.done, total: s.p.total, next: s.next?.title || "" })
       : t("map.notStarted");
-  const { path, sections } = mapSections(subjects);
+  // Spots follow the published map order (CMS-05), not a child's favourites.
+  const inMapOrder = getSubjects()
+    .map((c) => subjects.find((s) => s.id === c.id))
+    .filter(Boolean);
+  const { main, path, sections } = mapSections(inMapOrder);
   const subjectStop = (subject, x, y) => (
     <MapStop
       key={subject.id}
       id={subject.id}
       island={subject.island}
+      art={subject.art}
       x={x}
       y={y}
       title={subject.place}
@@ -488,9 +493,9 @@ export default function WorldMap() {
                 </MapStop>
               );
             }
-            const subject = subjects.find((place) => place.id === id);
-            return subject ? subjectStop(subject, x, y) : null;
+            return null;
           })}
+          {main.map(({ subject, x, y }) => subjectStop(subject, x, y))}
           <Box
             sx={{
               position: "absolute",
@@ -555,10 +560,10 @@ export default function WorldMap() {
                 opacity: first && s.id !== "numbers" ? 0.55 : 1,
               }}
             >
-              {SUBJECT_ART[s.id] ? (
+              {SUBJECT_ART[s.id] && !s.art ? (
                 <SubjectArt id={s.id} small width={110} height={72} />
               ) : (
-                <Island kind={s.island} width={88} height={62} />
+                <Island kind={s.island} art={s.art} width={88} height={62} />
               )}
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography

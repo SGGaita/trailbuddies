@@ -26,11 +26,21 @@ a developer. Devices already download content packs (CNT-02, ADR 0006) and play 
 - **Uploaded pictures** are prepared and checked on the device (ADR 0007), stored like other
   media, and need a reviewer's or admin's approval; only approved ones are public and only they
   can ship in a ready unit.
-- **Sprint 12 publishing is admin-only**, with a confirmation and a log flag when an admin
-  publishes their own changes. The reviewer's approve-and-publish flow and rollback are Sprint 13.
+- **Review before publishing (Sprint 13).** An editor submits; a reviewer or admin who didn't
+  work on the draft approves it or sends it back with a comment; then an admin publishes.
+  Approving and publishing are separate steps (Steve's choice). Any edit after review sends
+  the draft back. (Sprint 12 had admin-only publishing with a confirmation for own changes.)
+- **Roll back** publishes an earlier version's content as a new version; history is never
+  rewritten.
+- **The map and badges travel in the manifest.** `manifest.map` carries trail order, archived
+  trails, uploaded island art and new trails; `manifest.badges` points at a `badges/1` file.
+  Devices keep both and apply them at launch, before the first render. The JS and Python pack
+  builders stay byte-for-byte identical (a test checks this).
 
 ## Consequences
 - Content changes reach children without an app release, and still work offline.
 - The database is the source of truth after the import; a PR that edits unit files only changes
   new installs until it is imported again (it isn't: import runs once). Exports keep them close.
-- New units and trails, badges and reordering the map come in Sprint 13 (E04–E06).
+- Trails, units, map order and badges are edited in the same draft (Sprint 13, E04–E06).
+- The first five trails in map order take the world map's valley spots; with the built-in order
+  every trail keeps the spot its art was drawn for.

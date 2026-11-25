@@ -65,9 +65,9 @@ From Sprint 12 the built-in content can be edited on the web, without a code cha
 
 | Role | Can |
 |---|---|
-| Admin | everything: roles, publishing, exporting, approving pictures, moderation |
-| Editor | edit units and save them to the draft |
-| Reviewer | approve or refuse uploaded pictures (approving and publishing a draft comes in Sprint 13) |
+| Admin | everything: roles, publishing, rolling back, exporting, approving pictures, moderation |
+| Editor | edit units, the map and badges, and submit the draft for review |
+| Reviewer | review drafts (approve or send back with a comment) and approve uploaded pictures |
 | Moderator | the moderation queue only |
 
 Every role change, save, upload, approval and publish is in the audit log on `/admin/staff`.
@@ -80,7 +80,28 @@ Every role change, save, upload, approval and publish is in the audit log on `/a
 
 **Preview** (CMS-04). **Preview as a child** opens the draft in the real learner screens (`/play/go?…&preview=1&admin=1`) with a stand-in child of the unit's age band. Nothing is recorded.
 
-**Publishing**. In Sprint 12 only an admin publishes, from the draft banner on `/admin/content`, with a short note. An admin publishing changes only they made must confirm it, and it's flagged in the log. Publishing rebuilds the production and preview packs and manifests in the media store (the same keys as `python -m app.packs publish`), so devices get the new version on their next launch.
+**Review and publishing** (CMS-06, Sprint 13). Publishing has three steps, on `/admin/content/review`:
+1. An editor presses **Submit for review** with a note saying what changed.
+2. A reviewer or admin **who didn't work on the draft** sees each changed unit, the map and the badges side by side (published on the left, the draft on the right), then presses **Approve** or **Send back** with a comment. A sent-back draft shows the comment to the editor.
+3. An admin presses **Publish**. This rebuilds the production and preview packs and manifests in the media store (the same keys as `python -m app.packs publish`), so devices get the new version on their next launch.
+
+Editing a submitted or approved draft sends it back to draft, so it's reviewed again. A ready unit, trail or badge can't publish while it uses an upload that isn't approved. The change log beside the draft shows who changed, approved and published each version.
+
+**Roll back** (CMS-07). Any earlier version can be published again from the change log. It becomes a new version (history is never rewritten), and devices pick it up on their next sync. Roll back is admin only and waits until the draft is published or discarded.
+
+**Map & trails** (CMS-05). `/admin/content/map` sets the order of trails on the world map (the first five take the valley's spots) and of units in each trail. You can also:
+- Archive a trail. It leaves every child's map; children keep their stars, badges and treasure, and the trail can be brought back.
+- Add a trail with a name, a place, uploaded island art (approved like pictures) and a first unit.
+- Add units, blank (four starter words to replace) or as a copy of another unit's lessons.
+
+New units start as draft; an admin marks them ready in the unit editor. The map travels in the manifest (`map`), so every device applies it, and trails that aren't built into the app are always downloaded.
+
+**Badges** (CMS-08). `/admin/content/badges` lists the built-in badges. You can:
+- Add a badge with a rule: finish units, reach a number, keep a streak, or master items.
+- Edit a badge, or give it uploaded art (approved like pictures; the emoji shows until then).
+- Retire a badge. Nobody new can earn it, and children who earned it keep it.
+
+Badges ship as their own file in the packs (`manifest.badges`), so children earn new badges on their device, offline too. If the content was imported before Sprint 13, an admin presses **Bring in the badges** once on `/admin/content`.
 
 **Refreshing the bundled copy**. Now and then, press **Export** on `/admin/content` and commit the result so new installs start from the latest content:
 ```

@@ -18,10 +18,18 @@ const EXTRA_STOPS = [
   [21, 70],
 ];
 
-/** Lay out the stops in rows and route one path through the whole valley. */
+/** Valley spots for trails, in path order (the family island keeps its own spot). */
+export const TRAIL_SPOTS = MAP_STOPS.filter(([id]) => id !== "family").map(([, x, y]) => [x, y]);
+
+/**
+ * Lay out the stops in map order (CMS-05): the first trails take the valley's spots, the rest
+ * go in rows below, and one path runs through the whole valley. With the built-in order every
+ * trail keeps the spot its art was drawn for.
+ * @param {any[]} subjects trails in map order
+ */
 export function mapSections(subjects) {
-  const known = new Set(MAP_STOPS.map(([id]) => id));
-  const extra = subjects.filter(({ id }) => !known.has(id));
+  const main = subjects.slice(0, TRAIL_SPOTS.length).map((subject, i) => ({ subject, x: TRAIL_SPOTS[i][0], y: TRAIL_SPOTS[i][1] }));
+  const extra = subjects.slice(TRAIL_SPOTS.length);
   const sections = [];
   let path = extra.length ? `${MAIN_PATH} C 15 77 19 91 19 100` : MAIN_PATH;
   let previous = { x: 19, y: 100 };
@@ -40,5 +48,5 @@ export function mapSections(subjects) {
     });
     sections.push(stops);
   }
-  return { path, sections };
+  return { main, path, sections };
 }

@@ -37,6 +37,8 @@ export default function BadgeBook() {
   }, [ready, learner, router]);
   if (!ready || !learner) return <Loading />;
   const earned = new Set(learner.badges);
+  // CMS-08: a retired badge stays in the book only for children who earned it.
+  const shown = builtInBadges.filter((b) => !b.retired || earned.has(b.id));
   // BDG-07: badges grown-ups made, from the design they were earned with; hidden ones stay out.
   const mine = earnedCustom(learner);
   const hear = (b) =>
@@ -46,7 +48,7 @@ export default function BadgeBook() {
     <LearnerShell learner={learner} title={t("badges.title")} back="/play/map" active="/play/more/badges" goal={goal}>
       <Box sx={{ px: { xs: 1.5, sm: 3.25 }, py: { xs: 1.5, sm: 2.25 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
         <Typography sx={{ fontWeight: 800, color: "text.secondary" }}>
-          {t("badges.earned", { n: earned.size, total: builtInBadges.length })}
+          {t("badges.earned", { n: earned.size, total: shown.length })}
         </Typography>
         {mine.length > 0 && (
           <Box component="section" aria-label={t("badges.fromGrownUps")}>
@@ -84,7 +86,7 @@ export default function BadgeBook() {
                 gap: { xs: 1.25, sm: 1.75 },
               }}
             >
-              {builtInBadges
+              {shown
                 .filter((b) => b.category === cat)
                 .map((b) => {
                   const has = earned.has(b.id);

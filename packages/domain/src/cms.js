@@ -10,9 +10,9 @@
 /** CMS-01: what each staff role may do. The first admin comes from TB_ADMIN_EMAILS. */
 export const STAFF_ROLES = ["admin", "editor", "reviewer", "moderator"];
 export const ROLE_CAN = {
-  admin: ["edit", "publish", "approve-asset", "roles", "moderate"],
+  admin: ["edit", "review", "publish", "approve-asset", "roles", "moderate"],
   editor: ["edit"],
-  reviewer: ["approve-asset"],
+  reviewer: ["review", "approve-asset"],
   moderator: ["moderate"],
 };
 /** @param {string | null | undefined} role @param {string} action */
@@ -25,7 +25,7 @@ export const homeFor = (role) => (can(role, "edit") || can(role, "approve-asset"
 export const EXERCISE_TYPES = ["listen-tap", "clue-tap", "match", "count", "name-it", "compare", "sequence", "sort", "odd-one-out", "case-match", "build-word", "trace", "clock", "true-false"];
 export const TAKES_CHOICES = new Set(["listen-tap", "clue-tap", "name-it", "odd-one-out", "count", "compare"]);
 
-const slug = (s) =>
+export const slug = (s) =>
   String(s || "")
     .toLowerCase()
     .normalize("NFKD")
@@ -141,3 +141,119 @@ export function fieldErrors(errors) {
     return { field: "unit", message: e };
   });
 }
+
+/**
+ * CMS-06: the review steps of a draft version. An editor submits it; a reviewer or admin who
+ * didn't work on it approves it or sends it back with a comment; then an admin publishes it
+ * (approving and publishing are separate steps, Steve's choice). Editing a submitted or
+ * approved draft sends it back to draft, so nothing reaches children unchecked.
+ * @param {{ status: string, submitted_by?: string | null, authors?: string[] } | null} draft
+ * @param {{ email: string, role: string }} me
+ * @returns {{ submit: boolean, approve: boolean, sendBack: boolean, publish: boolean, why: string | null }}
+ */
+export function reviewActions(draft, me) {
+  const none = { submit: false, approve: false, sendBack: false, publish: false, why: null };
+  if (!draft) return none;
+  const worked = (draft.authors || []).includes(me.email) || draft.submitted_by === me.email;
+  const out = { ...none };
+  if (draft.status === "draft") out.submit = can(me.role, "edit");
+  if (draft.status === "submitted" && can(me.role, "review")) {
+    out.approve = out.sendBack = !worked;
+    if (worked) out.why = "own";
+  }
+  if (draft.status === "approved") {
+    out.publish = can(me.role, "publish");
+    out.sendBack = can(me.role, "review") && !worked;
+  }
+  return out;
+}
+
+/** CMS-05: move an id one place up (-1) or down (+1) in a list; unchanged at the ends. */
+export function moveId(list, id, delta) {
+  const i = list.indexOf(id);
+  const j = i + delta;
+  if (i < 0 || j < 0 || j >= list.length) return list.slice();
+  const out = list.slice();
+  [out[i], out[j]] = [out[j], out[i]];
+  return out;
+}
+
+/** A new id from a name, unique among `taken` (trails and units). */
+export const newId = (name, taken) => newItemId(name, taken);
+
+/**
+ * CMS-05: a new unit. Blank starts with four starter words to replace (a unit needs items and a
+ * lesson to pass the checks); a copy keeps the source's items, lessons and exercise mix under
+ * the new id. Both start as draft, so children never see them until an admin marks them ready.
+ * @param {{ id: string, subject: string, title: string, band: string }} p
+ * @param {any} [from] unit to copy
+ */
+export function newUnit({ id, subject, title, band }, from) {
+  const lessonId = (i) => `${id}-${i + 1}`;
+  if (from) {
+    const copy = JSON.parse(JSON.stringify(from));
+    return { ...copy, id, subject, title, band, status: "draft", lessons: copy.lessons.map((l, i) => ({ ...l, id: lessonId(i) })) };
+  }
+  const words = [
+    ["word-one", "word one", "1️⃣"],
+    ["word-two", "word two", "2️⃣"],
+    ["word-three", "word three", "3️⃣"],
+    ["word-four", "word four", "4️⃣"],
+  ];
+  return {
+    schema: "unit/1",
+    id,
+    subject,
+    title,
+    band,
+    status: "draft",
+    summary: `Words about ${title.toLowerCase()}.`,
+    items: words.map(([wid, label, emoji]) => ({ id: wid, label, emoji })),
+    lessons: [
+      {
+        id: lessonId(0),
+        title: "Meet the words",
+        focus: words.map(([wid]) => wid),
+        exercises: [{ type: "listen-tap" }, { type: "listen-tap" }, { type: "match" }, { type: "name-it" }],
+      },
+    ],
+    checkpoint: { review: 4, game: "jigsaw" },
+  };
+}
+
+/** Rule types the badge editor offers (CMS-08), with the count metrics children can earn. */
+export const BADGE_RULES = ["complete", "count", "streak", "mastery"];
+export const BADGE_METRICS = [
+  "stars",
+  "lessons",
+  "perfect-lessons",
+  "badges",
+  "games",
+  "no-hint-lessons",
+  "kept-going-lessons",
+  "comebacks",
+  "goal-days",
+  "subjects",
+  "game-kinds",
+  "jigsaws",
+  "memory-games",
+  "mastered-items",
+];
+
+/**
+ * A badge rule in plain words, for the badge catalogue (CMS-08).
+ * @param {any} rule @param {(id: string) => string} [unitName]
+ */
+export function ruleText(rule, unitName = (id) => id) {
+  if (!rule) return "";
+  if (rule.type === "complete") return `Finish ${rule.units.map(unitName).join(", ")}`;
+  if (rule.type === "count") return `${rule.n} ${rule.metric.replace(/-/g, " ")}${rule.subject ? ` in ${rule.subject}` : ""}`;
+  if (rule.type === "streak") return `${rule.days}-day streak`;
+  if (rule.type === "mastery") return `Master ${rule.items.length} item${rule.items.length === 1 ? "" : "s"}`;
+  if (rule.type === "manual") return "Given by a grown-up";
+  if (rule.type === "combo") return rule.all.map((r) => ruleText(r, unitName)).join(rule.op === "and" ? " and " : " or ");
+  return rule.type;
+}
+
+/** The trails children see on the map: archived ones are hidden (progress is kept). */
+export const mapSubjects = (subjects) => subjects.filter((s) => !s.archived);
