@@ -5,12 +5,13 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { getSubjects } from "@trailbuddies/content";
-import { isStandard, normalPlan, togglePlan } from "@trailbuddies/domain";
+import { isStandard, moveId, normalPlan, planUnits, togglePlan } from "@trailbuddies/domain";
 import { t } from "@trailbuddies/i18n";
 import { colors } from "@trailbuddies/tokens";
 import { ChoiceChip, Pill } from "@/components/builder/parts";
@@ -21,8 +22,8 @@ import { useFamily, useHydrated, useLearners } from "@/lib/store";
 import { trailUnits } from "@/lib/trail";
 
 /**
- * P31 Lessons for a child (PAR-09): hide a trail or a unit for one child, or skip a lesson
- * they already know. Changes apply to this child only; other children keep the standard trail
+ * P31 Lessons for a child (PAR-09, PAR-10): hide a trail or a unit for one child, skip a lesson
+ * they already know, or change the order of the units in a trail. Changes apply to this child only; other children keep the standard trail
  * and the content team's updates still arrive. Everything can be undone.
  */
 export default function ChildLessons() {
@@ -67,11 +68,35 @@ export default function ChildLessons() {
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, alignItems: "start" }}>
         {getSubjects().map((s) => {
           const off = hidden.has(s.id);
-          const units = trailUnits(s.id).filter((u) => u.status !== "planned");
+          // PAR-10: in this child's order (new units from the content team come at the end).
+          const units = planUnits(
+            trailUnits(s.id).filter((u) => u.status !== "planned"),
+            { order: plan.order },
+            s.id,
+          );
+          const ids = units.map((u) => u.id);
+          const move = (id, d) => {
+            const next = moveId(ids, id, d);
+            const title = units.find((u) => u.id === id)?.title;
+            save({ ...plan, order: { ...plan.order, [s.id]: next } }, t("plan.moved", { unit: title, n: next.indexOf(id) + 1, name: l.name }));
+          };
+          const reordered = !!plan.order[s.id];
           return (
             <Card key={s.id} data-plan-trail={s.id} sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1, opacity: off ? 0.65 : 1 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography sx={{ fontWeight: 800, fontSize: 17, flex: 1 }}>{s.place || s.name}</Typography>
+                {reordered && !off && (
+                  <Button
+                    size="small"
+                    color="inherit"
+                    onClick={() => {
+                      const { [s.id]: _gone, ...rest } = plan.order;
+                      save({ ...plan, order: rest }, t("plan.orderReset", { trail: s.place || s.name }));
+                    }}
+                  >
+                    {t("plan.standardOrder")}
+                  </Button>
+                )}
                 <Typography sx={{ color: "text.secondary", fontSize: 14 }}>{t(off ? "plan.hidden" : "plan.shown")}</Typography>
                 <Switch
                   checked={!off}
@@ -91,6 +116,12 @@ export default function ChildLessons() {
                           {ui + 1}. {u.title}
                         </Typography>
                         {uOff && <Pill>{t("plan.hidden")}</Pill>}
+                        <IconButton size="small" aria-label={t("plan.earlier", { unit: u.title })} disabled={ui === 0} onClick={() => move(u.id, -1)} sx={{ width: 40, height: 40, borderRadius: 4 }}>
+                          ↑
+                        </IconButton>
+                        <IconButton size="small" aria-label={t("plan.later", { unit: u.title })} disabled={ui === units.length - 1} onClick={() => move(u.id, 1)} sx={{ width: 40, height: 40, borderRadius: 4 }}>
+                          ↓
+                        </IconButton>
                         <Button
                           size="small"
                           variant="outlined"

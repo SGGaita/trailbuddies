@@ -344,6 +344,7 @@ export default function Trail({ subjectId }) {
                 return (
                   <Box
                     key={node.id}
+                    data-banner={node.unitId}
                     className={fresh.includes(node.unitId) ? "unlock-in" : undefined}
                     sx={{
                       position: "absolute",
