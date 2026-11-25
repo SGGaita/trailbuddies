@@ -1698,4 +1698,9 @@ export default {
   "plan.resetDone": "{name} has the standard trail again.",
   "trail.skipped": "skipped by a grown-up",
   "trail.skippedShort": "Skipped",
+  "plan.earlier": "Move {unit} earlier",
+  "plan.later": "Move {unit} later",
+  "plan.moved": "{unit} is now number {n} for {name}.",
+  "plan.standardOrder": "Standard order",
+  "plan.orderReset": "{trail} is back in the standard order.",
 };
