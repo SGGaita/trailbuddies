@@ -156,6 +156,24 @@ class PictureLock(Strict):
     hint: Picture
 
 
+ID = r"^[a-z0-9]+(-[a-z0-9]+)*$"
+
+
+class LessonPlan(Strict):
+    """PAR-09/10: ids only (trails, units, lessons); nothing about the child."""
+
+    hidden: list[Annotated[str, Field(max_length=80, pattern=ID)]] = Field(
+        default_factory=list, max_length=300
+    )
+    skipped: list[Annotated[str, Field(max_length=80, pattern=ID)]] = Field(
+        default_factory=list, max_length=500
+    )
+    order: dict[
+        Annotated[str, Field(max_length=60, pattern=ID)],
+        list[Annotated[str, Field(max_length=60, pattern=ID)]],
+    ] = Field(default_factory=dict, max_length=60)
+
+
 class LearnerIn(Strict):
     name: str = Field(min_length=1, max_length=40)
     birth_year: int = Field(ge=1900)
@@ -174,6 +192,7 @@ class LearnerIn(Strict):
         default=None, description="removal asked for (FAM-03); null undoes it"
     )
     picture_lock: PictureLock | None = None
+    lesson_plan: LessonPlan = Field(default_factory=LessonPlan)
     updated_at: datetime
 
     @field_validator("name")

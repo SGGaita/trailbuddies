@@ -1,6 +1,7 @@
 export * from "./bands.js";
 export * from "./progress.js";
 export * from "./trail.js";
+export * from "./lessonPlan.js";
 export * from "./random.js";
 export * from "./difficulty.js";
 export * from "./scoring.js";

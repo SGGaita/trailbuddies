@@ -19,6 +19,7 @@ import { unitOpen, unitProgress, trophyId } from "./progress.js";
  * @property {number} [stars]
  * @property {string} [title]
  * @property {boolean} [bronze] skipped by placement: shown done with a bronze star
+ * @property {boolean} [skipped] skipped by a grown-up (PAR-09): done, without stars
  */
 
 const COLUMNS = [0.28, 0.55, 0.78, 0.55]; // zig-zag positions as fractions of width
@@ -28,10 +29,11 @@ const COLUMNS = [0.28, 0.55, 0.78, 0.55]; // zig-zag positions as fractions of w
  * @param {Record<string, number>} progress
  * @param {{ width?: number, top?: number, bannerGap?: number, stoneGap?: number, trophyGap?: number, review?: boolean }} [opts]
  *   review: add a review stone (items due for practice) just before the next stone
+ *   skipped: lesson ids a grown-up skipped (PAR-09); pass planProgress() as the progress
  * @returns {{ width: number, height: number, nodes: TrailNode[], path: Array<[number, number]>, next: TrailNode | null }}
  */
 export function layoutTrail(units, progress, opts = {}) {
-  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120, review = false, start = null } = opts;
+  const { width = 600, top = 60, bannerGap = 80, stoneGap = 100, trophyGap = 120, review = false, start = null, skipped = null } = opts;
   const nodes = [];
   const path = [];
   let y = top;
@@ -63,7 +65,8 @@ export function layoutTrail(units, progress, opts = {}) {
       // ADP-05 / ONB-09: units before the placement start show as done with a bronze star.
       const bronze = !planned && ui < startIndex && stars === 0;
       if (bronze) state = "done";
-      const node = { kind: /** @type {const} */ ("lesson"), id, unitId: u.id, n: li + 1, x, y, state, stars: bronze ? 1 : stars, ...(bronze ? { bronze } : {}) };
+      const skip = !!skipped?.has(id);
+      const node = { kind: /** @type {const} */ ("lesson"), id, unitId: u.id, n: li + 1, x, y, state, stars: bronze ? 1 : skip ? 0 : stars, ...(bronze ? { bronze } : {}), ...(skip ? { skipped: true } : {}) };
       if (state === "open" && !next && ui >= startIndex) {
         node.state = "next";
         next = node;

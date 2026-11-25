@@ -10,10 +10,10 @@ import Dialog from "@mui/material/Dialog";
 import Snackbar from "@mui/material/Snackbar";
 import { colors, subjectFills } from "@trailbuddies/tokens";
 import { t } from "@trailbuddies/i18n";
-import { getSubject, getSubjects, getUnit, getReadyUnits, buddyLine, buddySays } from "@trailbuddies/content";
+import { getSubject, getUnit, getReadyUnits, buddyLine, buddySays } from "@trailbuddies/content";
 import { layoutTrail, pathData, subjectProgress, currentUnit, newlyOpened, nodesNear } from "@trailbuddies/domain";
 import { useFamily, useHydrated, useLearner } from "@/lib/store";
-import { trailUnits, lessonHref } from "@/lib/trail";
+import { childSubjects, childTrail, lessonHref } from "@/lib/trail";
 import { speak } from "@/lib/speech";
 import { playSound } from "@/lib/sounds";
 import { readMemory, writeMemory } from "@/lib/memory";
@@ -95,18 +95,20 @@ export default function Trail({ subjectId }) {
   const [memory] = useState(() => (typeof window === "undefined" ? null : readMemory()));
 
   const subject = getSubject(subjectId);
-  const units = useMemo(() => trailUnits(subjectId), [subjectId]);
-  const progress = learner?.progress;
+  // PAR-09/10: this child's plan (hidden units, skipped lessons, the grown-up's order).
+  const { units, progress, skipped, start } = useMemo(() => childTrail(subjectId, learner), [subjectId, learner]);
   const review = !!learner && learner.reviewDue(subjectId).length > 0;
-  const start = learner?.placement?.[subjectId] || null;
   const trail = useMemo(
-    () => layoutTrail(units, progress || {}, { width: W, review, start }),
-    [units, progress, review, start],
+    () => layoutTrail(units, progress, { width: W, review, start, skipped }),
+    [units, progress, review, start, skipped],
   );
 
+  // PAR-09: a trail a grown-up hid for this child isn't reachable from an old link either.
+  const hiddenHere = !!learner?.lessonPlan?.hidden?.includes(subjectId);
   useEffect(() => {
     if (ready && !learner) router.replace("/play");
-  }, [ready, learner, router]);
+    else if (hiddenHere) router.replace("/play/map");
+  }, [ready, learner, router, hiddenHere]);
   useEffect(() => {
     if (ready && nextRef.current) nextRef.current.scrollIntoView({ block: "center" });
   }, [ready]);
@@ -179,7 +181,7 @@ export default function Trail({ subjectId }) {
   if (rest) return <RestScreen reason={rest} learner={learner} />;
   // OFF-07: a subject with nothing on this device yet needs the internet: offer the others.
   if (!online && !getReadyUnits(subjectId).length) {
-    const here = getSubjects().filter((s) => s.id !== subjectId && getReadyUnits(s.id).length);
+    const here = childSubjects(learner).filter((s) => s.id !== subjectId && getReadyUnits(s.id).length);
     return (
       <CalmError line="calm.offline">
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center", maxWidth: 560 }}>
@@ -385,7 +387,7 @@ export default function Trail({ subjectId }) {
                     ) || undefined
                   }
                   data-unit={node.unitId}
-                  aria-label={`${label}${node.bronze ? ", skipped, bronze star" : node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
+                  aria-label={`${label}${node.skipped ? `, ${t("trail.skipped")}` : node.bronze ? ", skipped, bronze star" : node.stars ? `, ${node.stars} stars` : ""}${node.state === "locked" ? ", locked" : node.state === "planned" ? ", coming soon" : ""}`}
                   sx={{
                     ...stoneSx(node),
                     ...pos,
@@ -399,6 +401,10 @@ export default function Trail({ subjectId }) {
                       sx={{ fontSize: 11, color: node.bronze ? BRONZE : colors.sun.deep }}
                     >
                       {"★".repeat(node.stars)}
+                    </Box>
+                  ) : node.skipped ? (
+                    <Box component="small" data-skipped sx={{ fontSize: 11, color: "text.secondary", fontWeight: 700 }}>
+                      {t("trail.skippedShort")}
                     </Box>
                   ) : node.state === "next" ? (
                     <Box component="small" sx={{ fontSize: 11, color: colors.sun.main }}>

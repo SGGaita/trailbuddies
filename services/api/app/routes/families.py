@@ -100,6 +100,7 @@ def learner_out(lr: Learner) -> dict:
         "placement": lr.placement or {},
         "difficulty": lr.difficulty,
         "levels": lr.levels or {},
+        "lesson_plan": {"hidden": [], "skipped": [], "order": {}, **(lr.lesson_plan or {})},
         "wish": lr.wish,
         "removing_at": aware(lr.removing_at).isoformat() if lr.removing_at else None,
         "picture_lock": lr.picture_lock,
