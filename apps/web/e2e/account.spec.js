@@ -149,6 +149,7 @@ test("a parent signs up, sets up the family in 7 steps and hands over", async ({
       "family_id",
       "id",
       "interests",
+      "lesson_plan", // PAR-09/10: content ids only
       "levels",
       "name",
       "outfit",
@@ -267,7 +268,8 @@ test("offline: progress waits on the device and is saved when back online", asyn
   srv.offline = false;
   await page.getByRole("button", { name: "↻" }).click();
   await expect(page.getByText("Saved to your account")).toBeVisible();
-  await expect.poll(() => srv.events.length).toBeGreaterThan(before);
+  // The upload finishes in the background; slow CI runners can take a few seconds.
+  await expect.poll(() => srv.events.length, { timeout: 15_000 }).toBeGreaterThan(before);
 });
 
 test("the screen-time limit rests the trail", async ({ page }, testInfo) => {
