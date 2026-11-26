@@ -109,9 +109,12 @@ export default function Trail({ subjectId }) {
     if (ready && !learner) router.replace("/play");
     else if (hiddenHere) router.replace("/play/map");
   }, [ready, learner, router, hiddenHere]);
+  // Scroll to the next stone, and again when it changes: coming back from a trophy, the
+  // result can land just after the trail first renders, and the newly opened unit must be in view.
+  const nextId = trail.next?.id || "";
   useEffect(() => {
     if (ready && nextRef.current) nextRef.current.scrollIntoView({ block: "center" });
-  }, [ready]);
+  }, [ready, nextId]);
 
   // MAP-05: only stones near the screen are mounted, so long trails stay smooth on budget
   // tablets. `win` is the visible part of the trail in layout units (null until measured).
